@@ -14,10 +14,10 @@ import litellm
 
 from knowledge_engine.core.exceptions import ProviderUnavailable
 from knowledge_engine.core.pricing import compute_cost_usd
+from knowledge_engine.infrastructure.router import BaseProviderAdapter
 from knowledge_engine.observability.telemetry import operation_duration, token_usage
 from knowledge_engine.schemas.extraction import ExtractionRequest
 from knowledge_engine.schemas.provider import Affinity, ChatRequest, ChatResult, UsageSummary
-from knowledge_engine.infrastructure.router import BaseProviderAdapter
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +63,9 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
                 input_tokens=usage.prompt_tokens or 0,
                 output_tokens=usage.completion_tokens or 0,
                 total_tokens=(usage.prompt_tokens or 0) + (usage.completion_tokens or 0),
-                cost_usd=compute_cost_usd(self.name, self.model_id, usage.prompt_tokens or 0, usage.completion_tokens or 0),
+                cost_usd=compute_cost_usd(
+                    self.name, self.model_id, usage.prompt_tokens or 0, usage.completion_tokens or 0
+                ),
             ),
         )
         _emit_success(self.name, result.usage, started)

@@ -5,7 +5,11 @@ from __future__ import annotations
 import pytest
 
 from knowledge_engine.core.exceptions import RateLimitTimeout
-from knowledge_engine.infrastructure.rate_limit import AsyncTokenBucket, TokenBucketConfig, TokenBucketLimiter
+from knowledge_engine.infrastructure.rate_limit import (
+    AsyncTokenBucket,
+    TokenBucketConfig,
+    TokenBucketLimiter,
+)
 
 
 async def test_bucket_consumes_tokens() -> None:

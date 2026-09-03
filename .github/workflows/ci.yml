@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    env:
+      # No external telemetry/collector in CI; keep instrumentation a no-op.
+      OTEL_TRACES_EXPORTER: ""
+      OTEL_METRICS_EXPORTER: "none"
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install test-critical deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pydantic redis tenacity httpx opentelemetry-sdk \
+            opentelemetry-exporter-otlp-proto-http pytest pytest-asyncio
+
+      - name: Run unit tests
+        run: python -m pytest -p no:cacheprovider
+
+  lint:
+    name: Lint (ruff)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check src tests

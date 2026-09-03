@@ -19,11 +19,11 @@ from knowledge_engine.core.exceptions import (
     RateLimitTimeout,
 )
 from knowledge_engine.core.ports import ProviderPort
-from knowledge_engine.schemas.extraction import ExtractionRequest
-from knowledge_engine.schemas.provider import Affinity, ChatRequest, ChatResult, UsageSummary
 from knowledge_engine.infrastructure.circuit import CircuitBreaker
 from knowledge_engine.infrastructure.rate_limit import TokenBucketLimiter
 from knowledge_engine.observability.telemetry import tracer
+from knowledge_engine.schemas.extraction import ExtractionRequest
+from knowledge_engine.schemas.provider import Affinity, ChatRequest, ChatResult, UsageSummary
 
 if TYPE_CHECKING:
     from redis.asyncio import Redis
@@ -64,7 +64,7 @@ class FallbackRouter(ProviderPort):
         self,
         adapters: list[BaseProviderAdapter],
         *,
-        rc: "Redis | None" = None,
+        rc: Redis | None = None,
         limiter: TokenBucketLimiter | None = None,
         breaker_threshold: int = 3,
         breaker_cooldown: float = 60.0,
@@ -99,7 +99,9 @@ class FallbackRouter(ProviderPort):
                     logger.warning("provider %s transient failure: %s", adapter.name, exc)
                     await self._breakers[adapter.name].record_failure()
                     continue
-            raise ProviderExhausted(f"all providers failed for affinity={req.affinity!s}; last={last.name if last else None}")
+            raise ProviderExhausted(
+                f"all providers failed for affinity={req.affinity!s}; last={last.name if last else None}"
+            )
 
     @retry(
         wait=wait_exponential(multiplier=1, max=10),
@@ -111,7 +113,6 @@ class FallbackRouter(ProviderPort):
         return await adapter.complete(req)
 
     async def extract(self, req: ExtractionRequest) -> object:
-        import instructor  # heavy, only needed for structured extraction (lazy)
 
         response_model = _import_model(req.schema_ref)
         # Use the affinity-appropriate adapter; extraction is structured + retried.

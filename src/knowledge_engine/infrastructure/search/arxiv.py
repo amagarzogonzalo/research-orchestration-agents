@@ -3,8 +3,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timezone
-from email.utils import parsedate_to_datetime
+from datetime import UTC, datetime
 from xml.etree import ElementTree as ET
 
 import httpx
@@ -43,7 +42,6 @@ class ArxivAdapter(SearchPort):
         for link in entry.findall("atom:link", _NS):
             if link.get("rel") == "related" and link.get("title") == "pdf":
                 pdf_url = link.get("href")
-        primary = entry.find("arx:primary_category", _NS)
         return SourceRecord(
             id=f"arxiv:{arxiv_id}",
             doi=None,
@@ -54,7 +52,7 @@ class ArxivAdapter(SearchPort):
             abstract=summary,
             pdf_url=pdf_url,
             citation_count=0,
-            fetched_at=datetime.now(timezone.utc).isoformat(),
+            fetched_at=datetime.now(UTC).isoformat(),
         )
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
