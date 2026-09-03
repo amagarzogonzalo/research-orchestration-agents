@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import pytest
-
 from knowledge_engine.infrastructure.broker import Envelope
 from knowledge_engine.orchestration.event_pipeline import EventPipeline, decode_state
 from knowledge_engine.orchestration.stations import default_stations

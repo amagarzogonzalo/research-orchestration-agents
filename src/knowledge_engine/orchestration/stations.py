@@ -17,7 +17,6 @@ from knowledge_engine.core.events import (
     EVT_SOURCES_FILTERED,
     EVT_SOURCES_RESOLVED,
     EVT_SYNTHESIS_DONE,
-    EventOut,
     STREAM_BODIES_READY,
     STREAM_COMPLETED,
     STREAM_JUDGED,
@@ -25,16 +24,22 @@ from knowledge_engine.core.events import (
     STREAM_REVIEW,
     STREAM_SOURCES_FILTERED,
     STREAM_SOURCES_RESOLVED,
+    EventOut,
 )
 from knowledge_engine.infrastructure.broker import Envelope
+from knowledge_engine.orchestration.event_pipeline import EventPipeline, decode_state
 from knowledge_engine.schemas.extraction import GraphState, GraphStatus
 from knowledge_engine.schemas.provider import Affinity, ChatRequest, ChatResult
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
-from knowledge_engine.orchestration.event_pipeline import EventPipeline, decode_state
 
 logger = logging.getLogger(__name__)
 
 MAX_EVAL_ITERATIONS = 2
+
+
+def _next(state: GraphState, stream: str, type_: str) -> EventOut:
+    """Build a successor event carrying the saga state snapshot + thread id."""
+    return EventOut(stream, type_, {"state": state.model_dump(), "thread_id": state.thread_id})
 
 
 class IngestStation:
@@ -47,7 +52,7 @@ class IngestStation:
         ns = state.model_copy(update={"sources": sources})
         ns.status = GraphStatus.RUNNING
         await pipeline.checkpoint(ns)
-        return [EventOut(STREAM_SOURCES_RESOLVED, EVT_SOURCES_RESOLVED, {"state": ns.model_dump(), "thread_id": ns.thread_id})]
+        return [_next(ns, STREAM_SOURCES_RESOLVED, EVT_SOURCES_RESOLVED)]
 
 
 class RelevanceStation:
@@ -73,7 +78,7 @@ class RelevanceStation:
                 logger.warning("relevance filter failed for %s: %s", src.id, exc)
         ns = state.model_copy(update={"filtered": filtered})
         await pipeline.checkpoint(ns)
-        return [EventOut(STREAM_SOURCES_FILTERED, EVT_SOURCES_FILTERED, {"state": ns.model_dump(), "thread_id": ns.thread_id})]
+        return [_next(ns, STREAM_SOURCES_FILTERED, EVT_SOURCES_FILTERED)]
 
 
 class BodiesStation:
@@ -138,10 +143,13 @@ class JudgeStation:
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
         state = decode_state(envelope)
         if not state.synthetic_notes:
-            return [EventOut(STREAM_RENDER, "judged.skip", {"state": state.model_dump(), "thread_id": state.thread_id})]
+            return [_next(state, STREAM_RENDER, "judged.skip")]
         body = state.synthetic_notes[-1]
         req = ChatRequest.of(
-            system='Score groundedness and citation integrity 0-1. Reply JSON {"score": float, "pass": bool, "critique": str}.',
+            system=(
+                "Score groundedness and citation integrity 0-1. "
+                'Reply JSON {"score": float, "pass": bool, "critique": str}.'
+            ),
             user=body,
             affinity=Affinity.MACRO,
             max_tokens=300,
@@ -154,13 +162,13 @@ class JudgeStation:
         await pipeline.checkpoint(ns)
 
         if passed:
-            return [EventOut(STREAM_REVIEW, "review.requested", {"state": ns.model_dump(), "thread_id": ns.thread_id})]
+            return [_next(ns, STREAM_REVIEW, "review.requested")]
         if len(ns.synthetic_notes) < MAX_EVAL_ITERATIONS:
             # evaluator-optimizer: re-synthesize addressing the critique
             retry = ns.model_copy(update={"judge_critique": raw})
-            return [EventOut(STREAM_BODIES_READY, "synthesize.retry", {"state": retry.model_dump(), "thread_id": ns.thread_id})]
+            return [_next(retry, STREAM_BODIES_READY, "synthesize.retry")]
         # hit iteration cap -> best-effort to review
-        return [EventOut(STREAM_REVIEW, "review.requested", {"state": ns.model_dump(), "thread_id": ns.thread_id})]
+        return [_next(ns, STREAM_REVIEW, "review.requested")]
 
 
 class ReviewStation:
@@ -173,16 +181,15 @@ class ReviewStation:
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
         state = decode_state(envelope)
-        kind = (envelope.payload or {}).get("decision") or (envelope.type or "")
         if envelope.type == "review.approved":
-            return [EventOut(STREAM_RENDER, EVT_RENDER_REQUESTED, {"state": state.model_dump(), "thread_id": state.thread_id})]
+            return [_next(state, STREAM_RENDER, EVT_RENDER_REQUESTED)]
         if envelope.type == "review.rejected":
             ns = state.model_copy(update={"status": GraphStatus.FAILED})
             await pipeline.checkpoint(ns)
             return []  # saga terminated
         # review.requested
         if pipeline.auto_approve_review:
-            return [EventOut(STREAM_RENDER, EVT_RENDER_REQUESTED, {"state": state.model_dump(), "thread_id": state.thread_id})]
+            return [_next(state, STREAM_RENDER, EVT_RENDER_REQUESTED)]
         # Human approval required: do nothing; reviewer publishes review.approved.
         ns = state.model_copy(update={"status": GraphStatus.AWAITING_REVIEW})
         await pipeline.checkpoint(ns)
@@ -197,12 +204,20 @@ class RenderStation:
         state = decode_state(envelope)
         ns = state.model_copy(update={"judge_critique": "", "status": GraphStatus.DONE})
         await pipeline.checkpoint(ns)
-        return [EventOut(STREAM_COMPLETED, EVT_COMPLETED, {"state": ns.model_dump(), "thread_id": ns.thread_id})]
+        return [_next(ns, STREAM_COMPLETED, EVT_COMPLETED)]
 
 
 def default_stations() -> list:
     """Constructor-free station list bound to the pipeline at dispatch time."""
-    return [IngestStation(), RelevanceStation(), BodiesStation(), SynthesizeStation(), JudgeStation(), ReviewStation(), RenderStation()]
+    return [
+        IngestStation(),
+        RelevanceStation(),
+        BodiesStation(),
+        SynthesizeStation(),
+        JudgeStation(),
+        ReviewStation(),
+        RenderStation(),
+    ]
 
 
 def _derive_url(src: SourceRecord) -> str | None:

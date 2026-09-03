@@ -7,7 +7,7 @@ Callers must route through the token bucket (ADR 0003) and circuit breaker
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
@@ -44,7 +44,7 @@ class SemanticScholarAdapter(SearchPort, FetchPort):
             abstract=item.get("abstract"),
             pdf_url=item.get("openAccessPdf", {}).get("url"),
             citation_count=item.get("citationCount", 0),
-            fetched_at=datetime.now(timezone.utc).isoformat(),
+            fetched_at=datetime.now(UTC).isoformat(),
         )
 
     async def fetch(self, doi: str) -> SourceRecord | None:

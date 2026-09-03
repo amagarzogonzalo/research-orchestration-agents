@@ -8,9 +8,9 @@ import logging
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
-from knowledge_engine.schemas.source import DocumentBody
 from knowledge_engine.infrastructure.scrape.crawl4ai_adapter import Crawl4aiAdapter
 from knowledge_engine.infrastructure.scrape.trafilatura_adapter import TrafilaturaAdapter
+from knowledge_engine.schemas.source import DocumentBody
 
 logger = logging.getLogger(__name__)
 

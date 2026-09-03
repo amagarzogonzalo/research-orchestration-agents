@@ -15,20 +15,19 @@ saga log (checkpointer) can persist state at each hop for human-in-the-loop resu
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timezone
-from typing import Awaitable, Callable, Protocol, runtime_checkable
+from collections.abc import Awaitable, Callable
+from datetime import UTC, datetime
+from typing import Protocol, runtime_checkable
 
 from knowledge_engine.core.events import (
     DEFAULT_GROUP,
-    EVT_SCRAPE_REQUESTED,
     EVT_TERMINAL_ERROR,
-    EventOut,
     STREAM_INBOX,
     STREAM_REQUIRED_ERRORS,
+    EventOut,
 )
 from knowledge_engine.infrastructure.broker import Envelope, RedisStreamBroker
 from knowledge_engine.schemas.extraction import GraphState
-from knowledge_engine.schemas.source import SourceRecord
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +41,7 @@ class Station(Protocol):
     name: str
     in_stream: str
 
-    async def handle(self, pipeline: "EventPipeline", envelope: Envelope) -> list[EventOut]: ...
+    async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]: ...
 
 
 Handler = Callable[[Envelope], Awaitable[None]]
@@ -143,4 +142,4 @@ def decode_state(envelope: Envelope) -> GraphState:
 
 
 def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
