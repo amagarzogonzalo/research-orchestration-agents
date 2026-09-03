@@ -1,0 +1,1 @@
+"""Web-scraping ports/adapters (crawl4ai + trafilatura)."""

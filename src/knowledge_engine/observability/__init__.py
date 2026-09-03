@@ -1,0 +1,1 @@
+"""Zero-cost OpenTelemetry GenAI observability (ADR 0006)."""

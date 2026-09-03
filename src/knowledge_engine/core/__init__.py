@@ -1,0 +1,1 @@
+"""Hexagonal core: domain. Imported by ports/adapters. Isolated from vendor SDKs."""
