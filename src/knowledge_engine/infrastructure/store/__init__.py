@@ -1,0 +1,1 @@
+"""Persistence & auxiliary adapters (store, vector, memory)."""

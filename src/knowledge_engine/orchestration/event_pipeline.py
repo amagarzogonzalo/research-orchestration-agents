@@ -1,0 +1,146 @@
+"""Event-driven pipeline: Station choreography over the shell (ADR 0007).
+
+Each :class:`Station` consumes one inbox stream, performs a bounded unit of work
+against injected ports, and returns successor :class:`EventOut` messages (its
+outbox). The :class:`EventPipeline` wires stations to streams and exposes:
+
+* ``submit``  — ingest a new research request as an event onto the inbox.
+* ``consume_forever`` — blocking loop delegating to ``RedisStreamBroker.poll_forever``.
+
+State is carried in the event payload (``GraphState``) so stations are pure and
+replayable: same envelope -> same outbox, making requeue/dedupe safe. A durable
+saga log (checkpointer) can persist state at each hop for human-in-the-loop resume.
+"""
+
+from __future__ import annotations
+
+import logging
+from datetime import datetime, timezone
+from typing import Awaitable, Callable, Protocol, runtime_checkable
+
+from knowledge_engine.core.events import (
+    DEFAULT_GROUP,
+    EVT_SCRAPE_REQUESTED,
+    EVT_TERMINAL_ERROR,
+    EventOut,
+    STREAM_INBOX,
+    STREAM_REQUIRED_ERRORS,
+)
+from knowledge_engine.infrastructure.broker import Envelope, RedisStreamBroker
+from knowledge_engine.schemas.extraction import GraphState
+from knowledge_engine.schemas.source import SourceRecord
+
+logger = logging.getLogger(__name__)
+
+MAX_EVAL_ITERATIONS = 2
+
+
+@runtime_checkable
+class Station(Protocol):
+    """A unit of event processing. Implement `handle` returning successor events."""
+
+    name: str
+    in_stream: str
+
+    async def handle(self, pipeline: "EventPipeline", envelope: Envelope) -> list[EventOut]: ...
+
+
+Handler = Callable[[Envelope], Awaitable[None]]
+
+
+class EventPipeline:
+    """Choreography engine: station registry + event emit + dispatch map."""
+
+    def __init__(
+        self,
+        *,
+        broker: RedisStreamBroker,
+        stations: list[Station],
+        search=None,
+        scrape=None,
+        provider=None,
+        checkpointer=None,
+        auto_approve_review: bool = True,
+    ) -> None:
+        self.broker = broker
+        self.search = search
+        self.scrape = scrape
+        self.provider = provider
+        self.checkpointer = checkpointer
+        self.auto_approve_review = auto_approve_review
+        self._stations = {s.name: s for s in stations}
+        self._extra_handlers: dict[str, Handler] = {}
+
+    # ---- outbox ----
+    async def emit(self, source: Envelope, out: EventOut) -> str:
+        successor = source.with_payload(out.payload, type_=out.type)
+        if not successor.correlation_id:
+            successor.correlation_id = (source.payload or {}).get("thread_id", "")
+        return await self.broker.publish(out.stream, successor)
+
+    async def emit_new(self, stream: str, type_: str, payload: dict, *, correlation_id: str = "") -> str:
+        return await self.broker.publish_simple(stream, type_, payload, correlation_id=correlation_id)
+
+    # ---- dispatch ----
+    async def _dispatch(self, station: Station, envelope: Envelope) -> None:
+        try:
+            outs = await station.handle(self, envelope)
+        except Exception as exc:  # noqa: BLE001 - terminal-error discipline
+            logger.exception("station %s failed for event %s", station.name, envelope.event_id)
+            await self.emit_new(
+                STREAM_REQUIRED_ERRORS,
+                EVT_TERMINAL_ERROR,
+                {"error": str(exc), "station": station.name, "thread_id": envelope.correlation_id},
+                correlation_id=envelope.correlation_id,
+            )
+            return
+        for out in outs or []:
+            await self.emit(envelope, out)
+
+    def handler_map(self) -> dict[str, Handler]:
+        """stream -> dispatch callable, consumed by the broker poll loop."""
+        out: dict[str, Handler] = {s.in_stream: self._make_dispatcher(s) for s in self._stations.values()}
+        out.update(self._extra_handlers)
+        return out
+
+    def _make_dispatcher(self, station: Station) -> Handler:
+        async def _run(envelope: Envelope) -> None:
+            await self._dispatch(station, envelope)
+
+        return _run
+
+    def add_handler(self, stream: str, handler: Handler) -> None:
+        self._extra_handlers[stream] = handler
+
+    # ---- entrypoints ----
+    async def submit(self, thread_id: str, query: str) -> str:
+        state = GraphState(thread_id=thread_id, query=query)
+        return await self.emit_new(
+            STREAM_INBOX,
+            "research.requested",
+            {"state": state.model_dump(), "thread_id": thread_id},
+            correlation_id=thread_id,
+        )
+
+    async def checkpoint(self, state: GraphState) -> None:
+        """Persist a durable saga snapshot per thread (recover/HITL resume)."""
+        try:
+            key = f"saga:{state.thread_id}"
+            await self.broker.rc.hset(key, mapping={"state": state.model_dump_json(), "updated_at": str(_utc_now())})
+        except Exception as exc:  # noqa: BLE001 - snapshot is best-effort
+            logger.warning("saga checkpoint failed: %s", exc)
+
+    async def consume_forever(self, *, group: str = DEFAULT_GROUP, consumer: str = "worker") -> None:
+        await self.broker.poll_forever(self.handler_map(), group=group, consumer=consumer)
+
+    async def close(self) -> None:
+        await self.broker.close()
+
+
+def decode_state(envelope: Envelope) -> GraphState:
+    state = (envelope.payload or {}).get("state") or {}
+    return GraphState(**state)
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
