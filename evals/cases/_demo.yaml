@@ -1,0 +1,14 @@
+id: _demo
+description: Self-test of the harness itself. Delete once your entrypoint is wired.
+entrypoint: "evals._demo:run"
+input: { query: "What changed in the 2026 rules?" }
+samples: 3
+pass_at_k: 3
+invariants:
+  frontmatter_keys: [title, date, sources, query]
+  min_sections: 3
+  must_cite: [example.org, example.net]
+  no_uncited_claims: true
+  valid_links: true
+  forbidden_patterns: ["as an ai", "\\bTODO\\b"]
+budget: { max_total_tokens: 60000, max_model_calls: 12 }
