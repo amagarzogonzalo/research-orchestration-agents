@@ -57,7 +57,7 @@
       "git blame*": "allow",
       "git commit*": "ask",
       "git checkout -- *": "ask",
-      "git push*": "deny",
+      "git push*": "allow",
       "git reset --hard*": "deny",
       "git clean*": "deny",
       "git remote *": "deny",
