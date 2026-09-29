@@ -1,0 +1,30 @@
+# Copy to <id>.yaml. One case = one canonical input + everything that must stay
+# true about its output. Keep cases few and load-bearing, not exhaustive.
+id: my_case
+description: >
+  What this case guards, in behavior terms.
+
+entrypoint: "mypkg.graph:run"   # (**input, cassette=) -> {artifact, sources, events}
+input:
+  query: "..."
+
+samples: 3        # k runs; catches nondeterminism a single run hides
+pass_at_k: 3      # all must be clean. Lower ONLY with a written reason.
+
+invariants:                     # layer 1: deterministic, free, blocking
+  frontmatter_keys: [title, date]
+  min_sections: 3
+  must_cite: []
+  no_uncited_claims: true
+  valid_links: true
+  forbidden_patterns: ["as an ai", "\\bTODO\\b", "as of my (last )?(knowledge|training)"]
+
+budget:                         # a cost regression is a regression
+  max_total_tokens: 60000
+  max_model_calls: 12
+  max_wall_s: 180
+
+judge:                          # layer 3: only what regex cannot express
+  rubric: rubrics/default.md
+  min_score: 7
+  samples: 3

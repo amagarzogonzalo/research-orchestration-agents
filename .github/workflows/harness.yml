@@ -1,0 +1,47 @@
+name: harness
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Complements ci.yml (tests/lint/typecheck) with the harness-specific gates:
+# AGENTS.md structural lint, the always-on context budget, offline eval replay,
+# and a check that opencode.json has not drifted from harness.toml.
+jobs:
+  harness:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+
+      - name: Install deps (base + dev; no browser/scrape extras)
+        run: make install
+
+      - name: AGENTS.md lint
+        run: make agents
+
+      # Context bloat is invisible in review unless something surfaces it.
+      - name: Context budget
+        run: make context
+
+      # Offline replay. No API key is exposed to PR builds on purpose: a fork
+      # PR must never be able to spend your tokens or read your secrets.
+      - name: Evals (replay, offline)
+        run: make evals
+
+      - name: Profile is applied
+        run: |
+          uv run python bin/apply_profile.py --offline
+          git diff --exit-code opencode.json || {
+            echo "::error::opencode.json is out of sync with harness.toml. Run 'make profile'."
+            exit 1; }
+
+      - name: Snapshot guard
+        run: |
+          if git diff --name-only origin/${{ github.base_ref || 'main' }}...HEAD \
+             | grep -q '^evals/snapshots/'; then
+            echo "::warning::Snapshots changed — a reviewer must confirm this is an"
+            echo "::warning::intended behavior change, not a test edited to pass."
+            git diff origin/${{ github.base_ref || 'main' }}...HEAD -- evals/snapshots/
+          fi

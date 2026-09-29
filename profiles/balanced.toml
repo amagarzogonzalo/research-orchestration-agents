@@ -1,0 +1,8 @@
+# Heavier reasoning for planning/review while keeping the loop on flash.
+name = "balanced"
+description = "Flash loop, v4-pro for planning and review only."
+
+[models]
+reasoning = "deepseek/deepseek-flash"
+coding    = "deepseek/deepseek-flash"
+cheap     = "deepseek/deepseek-flash"

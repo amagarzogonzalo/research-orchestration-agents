@@ -1,0 +1,8 @@
+# Default. Zero-cost: deepseek-flash for everything that loops.
+name = "budget"
+description = "Free-tier. deepseek-flash for the loop. Start here."
+
+[models]
+reasoning = "deepseek/deepseek-flash"
+coding    = "deepseek/deepseek-flash"
+cheap     = "deepseek/deepseek-flash"
