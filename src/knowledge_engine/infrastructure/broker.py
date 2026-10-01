@@ -16,7 +16,11 @@ import uuid
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
 
-import redis.asyncio as aioredis
+try:
+    import redis.asyncio as aioredis
+except ImportError:  # pragma: no cover - redis is an optional extra
+    aioredis = None  # type: ignore[assignment]
+
 
 from knowledge_engine.core.exceptions import KnowledgeEngineError
 
@@ -112,6 +116,14 @@ class Envelope:
 class RedisStreamBroker:
     """Broker over Redis Streams with consumer-group + idempotent-dispatch semantics.
 
+    Args:
+        redis_url: Redis connection URL.
+        max_attempts: Maximum attempts.
+        dedupe_enabled: Whether dedupe is enabled.
+
+    Raises:
+        KnowledgeEngineError: If the optional ``redis`` package is missing.
+
     Attributes:
         DEDUPE_TTL_SECONDS: Attribute description.
     """
@@ -119,14 +131,8 @@ class RedisStreamBroker:
     DEDUPE_TTL_SECONDS = 3600  # processed-event marker TTL
 
     def __init__(self, redis_url: str, *, max_attempts: int = 3, dedupe_enabled: bool = True) -> None:
-        """Create a RedisStreamBroker.
-
-        Args:
-            redis_url: Redis connection URL.
-            max_attempts: Maximum attempts.
-            dedupe_enabled: Whether dedupe is enabled.
-
-        """
+        if aioredis is None:
+            raise KnowledgeEngineError("RedisStreamBroker requires the 'redis' package (pip install redis)")
         self.rc = aioredis.from_url(redis_url, decode_responses=True)
         self.max_attempts = max_attempts
         self.dedupe_enabled = dedupe_enabled

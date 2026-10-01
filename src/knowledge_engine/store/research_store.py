@@ -33,14 +33,13 @@ logger = logging.getLogger(__name__)
 
 
 class ResearchStore:
-    """Create, append to, and read run folders under a root directory."""
+    """Create, append to, and read run folders under a root directory.
+
+    Args:
+        root: Store root directory.
+    """
 
     def __init__(self, root: str | Path) -> None:
-        """Create a ResearchStore.
-
-        Args:
-            root: Store root directory.
-        """
         self.root = Path(root)
 
     # -- paths ----------------------------------------------------------------

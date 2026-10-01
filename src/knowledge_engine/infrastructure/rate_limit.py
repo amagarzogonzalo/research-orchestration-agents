@@ -10,8 +10,10 @@ from __future__ import annotations
 import asyncio
 import time
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-import redis.asyncio as aioredis
+if TYPE_CHECKING:
+    import redis.asyncio as aioredis
 
 from knowledge_engine.core.exceptions import RateLimitTimeout
 

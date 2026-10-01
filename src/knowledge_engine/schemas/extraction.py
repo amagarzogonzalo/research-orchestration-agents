@@ -45,18 +45,16 @@ class ExtractionRequest(BaseModel):
 
 
 class GraphStatus(StrEnum):
-    """GraphStatus.
-
-    Attributes:
-        RUNNING: Attribute description.
-        AWAITING_REVIEW: Attribute description.
-        DONE: Attribute description.
-        FAILED: Attribute description."""
+    """Lifecycle status of a research run."""
 
     RUNNING = "running"
     AWAITING_REVIEW = "awaiting_review"
     DONE = "done"
     FAILED = "failed"
+
+
+MAX_SYNTHESIS_ITERATIONS = 2
+"""Bound on judge→synthesize optimizer loops (evaluator-optimizer discipline)."""
 
 
 class GraphState(BaseModel):
@@ -74,6 +72,7 @@ class GraphState(BaseModel):
         judge_critique: Attribute description.
         output_path: Attribute description.
         status: Attribute description.
+        iterations: Attribute description.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -88,3 +87,4 @@ class GraphState(BaseModel):
     judge_critique: str | None = None
     output_path: str | None = None
     status: GraphStatus = GraphStatus.RUNNING
+    iterations: int = Field(default=0, ge=0)

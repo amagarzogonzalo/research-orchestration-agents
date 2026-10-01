@@ -95,14 +95,12 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
     Locking is per-thread (one lock per ``thread_id``) so parallel runs on
     different threads never serialize on each other; only operations on the
     same thread contend. Lock entries are dropped by :meth:`adelete_thread`.
+
+    Args:
+        root: Store root directory.
     """
 
     def __init__(self, root: str = "research_store/checkpoints") -> None:
-        """Create a FileCheckpointer.
-
-        Args:
-            root: Store root directory.
-        """
         super().__init__()
         self.root = Path(root)
         self._locks: dict[str, asyncio.Lock] = {}
