@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
@@ -44,7 +44,7 @@ class CrossrefAdapter(SearchPort, FetchPort):
             year=year,
             abstract=item.get("abstract"),
             citation_count=item.get("is-referenced-by-count", 0),
-            fetched_at=datetime.now(timezone.utc).isoformat(),
+            fetched_at=datetime.now(UTC).isoformat(),
         )
 
     async def fetch(self, doi: str) -> SourceRecord | None:

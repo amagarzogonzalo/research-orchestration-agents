@@ -42,7 +42,9 @@ async def _run(query: str | None, consume: bool) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Event-driven knowledge engine worker.")
     parser.add_argument("--query", help="research query to submit")
-    parser.add_argument("--consume", action="store_true", help="run the event loop (default off unless --query also passed)")
+    parser.add_argument(
+        "--consume", action="store_true", help="run the event loop (default off unless --query also passed)"
+    )
     args = parser.parse_args()
     consume = args.consume or bool(args.query)
     asyncio.run(_run(args.query, consume))

@@ -10,7 +10,12 @@ from __future__ import annotations
 import os
 
 from knowledge_engine.infrastructure.broker import RedisStreamBroker
-from knowledge_engine.infrastructure.providers import GeminiAdapter, GroqAdapter, MistralAdapter, OpenRouterAdapter
+from knowledge_engine.infrastructure.providers import (
+    GeminiAdapter,
+    GroqAdapter,
+    MistralAdapter,
+    OpenRouterAdapter,
+)
 from knowledge_engine.infrastructure.rate_limit import TokenBucketLimiter
 from knowledge_engine.infrastructure.router import FallbackRouter
 from knowledge_engine.infrastructure.scrape.scrape_router import ScrapeRouter
@@ -31,7 +36,7 @@ class Settings:
         self.s2_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
 
     @classmethod
-    def load(cls) -> "Settings":
+    def load(cls) -> Settings:
         return cls()
 
 

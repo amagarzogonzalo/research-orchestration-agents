@@ -6,8 +6,6 @@ adapter is a thin, dependency-guarded client; enable via the `memory` extra.
 
 from __future__ import annotations
 
-from knowledge_engine.core.ports import ProviderPort
-
 try:  # pragma: no cover - optional dependency
     from letta_client import Client  # type: ignore
 
