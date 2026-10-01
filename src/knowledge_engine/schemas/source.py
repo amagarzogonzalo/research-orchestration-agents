@@ -12,6 +12,7 @@ class SearchSource(StrEnum):
     SEMANTIC_SCHOLAR = "semantic_scholar"
     CROSSREF = "crossref"
     ARXIV = "arxiv"
+    HUGGINGFACE_PAPERS = "huggingface_papers"
 
 
 class SourceRecord(BaseModel):
