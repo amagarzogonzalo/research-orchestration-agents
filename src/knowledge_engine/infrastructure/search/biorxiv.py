@@ -99,6 +99,7 @@ class BiorxivAdapter(SearchPort, FetchPort):
         end = datetime.now(UTC).date()
         start = end - timedelta(days=90)
         hits: list[SourceRecord] = []
+        seen: set[str] = set()
         try:
             async with self._client() as client:
                 cursor = 0
@@ -110,10 +111,15 @@ class BiorxivAdapter(SearchPort, FetchPort):
                     if not items:
                         break
                     for item in items:
-                        if self._matches(item, tokens):
-                            hits.append(self._to_record(item, self._source))
-                            if len(hits) >= limit:
-                                return hits
+                        if not self._matches(item, tokens):
+                            continue
+                        rec = self._to_record(item, self._source)
+                        if rec.id in seen:
+                            continue
+                        seen.add(rec.id)
+                        hits.append(rec)
+                        if len(hits) >= limit:
+                            return hits
                     cursor += _PAGE_SIZE
         except httpx.HTTPError as exc:
             raise SearchError(f"bioRxiv/medRxiv search failed for {query!r}: {exc}") from exc
@@ -126,7 +132,7 @@ class BiorxivAdapter(SearchPort, FetchPort):
             doi: DOI to resolve (bare, without URL prefix).
 
         Returns:
-            The resolved record, or None when this server does not host it.
+            SourceRecord | None: The resolved record, or None when this server does not host it.
 
         Raises:
             SearchError: If the API call fails.

@@ -93,7 +93,7 @@ class UnpaywallAdapter(SearchPort, FetchPort):
             doi: DOI to resolve (bare, without URL prefix).
 
         Returns:
-            The record (``pdf_url`` set when OA), or None when not OA/indexed.
+            SourceRecord | None: The record (``pdf_url`` set when OA), or None when not OA/indexed.
 
         Raises:
             ConfigurationError: If no usable contact email was configured.

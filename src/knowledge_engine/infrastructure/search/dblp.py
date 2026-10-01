@@ -53,6 +53,8 @@ class DblpAdapter(SearchPort):
         except ValueError:
             year = None
         ee = str(info.get("ee") or "")
+        ee_lower = ee.lower()
+        is_pdf = ee_lower.endswith(".pdf") or ("arxiv.org" in ee_lower and "/pdf/" in ee_lower)
         return SourceRecord(
             id=f"dblp:{hit.get('@key', '') or info.get('doi') or info.get('title', '')[:40]}",
             doi=info.get("doi") or None,
@@ -61,7 +63,7 @@ class DblpAdapter(SearchPort):
             authors=DblpAdapter._authors(info),
             year=year,
             abstract=None,
-            pdf_url=ee if ee.lower().endswith(".pdf") else None,
+            pdf_url=ee if is_pdf else None,
             citation_count=0,
             fetched_at=datetime.now(UTC).isoformat(),
         )

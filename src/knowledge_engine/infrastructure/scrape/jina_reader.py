@@ -39,6 +39,12 @@ class JinaReaderAdapter(ScrapePort):
         self.api_key = api_key or os.environ.get("JINA_API_KEY")
         self.timeout = timeout
 
+    def _client(self) -> httpx.AsyncClient:
+        headers = {"User-Agent": "knowledge-engine"}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+        return httpx.AsyncClient(timeout=self.timeout, follow_redirects=True, headers=headers)
+
     async def to_markdown(self, url: str) -> DocumentBody:
         """Fetch a URL through Jina Reader and return clean Markdown.
 
@@ -51,11 +57,8 @@ class JinaReaderAdapter(ScrapePort):
         Raises:
             ScrapeError: If the Reader call fails or returns no content.
         """
-        headers = {"User-Agent": "knowledge-engine"}
-        if self.api_key:
-            headers["Authorization"] = f"Bearer {self.api_key}"
         try:
-            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True, headers=headers) as client:
+            async with self._client() as client:
                 resp = await client.get(f"{_BASE}/{url}")
                 resp.raise_for_status()
                 title, markdown = _parse(resp.text)

@@ -103,7 +103,7 @@ class EuropePmcAdapter(SearchPort, FetchPort):
             doi: DOI to resolve (bare, without URL prefix).
 
         Returns:
-            The resolved record, or None when Europe PMC does not index it.
+            SourceRecord | None: The resolved record, or None when Europe PMC does not index it.
 
         Raises:
             SearchError: If the API call fails.

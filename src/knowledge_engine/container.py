@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import os
 
+from knowledge_engine.core.ports import SearchPort
 from knowledge_engine.infrastructure.broker import RedisStreamBroker
 from knowledge_engine.infrastructure.providers import (
     GeminiAdapter,
@@ -47,9 +48,9 @@ class Settings:
         return cls()
 
 
-def _federated_sources(settings: Settings) -> list:
+def _federated_sources(settings: Settings) -> list[SearchPort]:
     """Shared source list: DOI backbone, biomedical depth, community/CS, preprints, OA."""
-    sources: list = [
+    sources: list[SearchPort] = [
         OpenAlexAdapter(settings.openalex_mailto),
         PubMedAdapter(),
         EuropePmcAdapter(),

@@ -68,6 +68,18 @@ async def test_router_exhausts_chain_and_raises() -> None:
         await router.to_markdown("https://c.org")
 
 
+class FakeJinaScraper(ScrapePort):
+    async def to_markdown(self, url: str) -> DocumentBody:
+        return DocumentBody(url=url, title="remote", markdown=_GOOD, crawl_method=FetchMethod.JINA)
+
+
+async def test_router_falls_through_to_last_resort() -> None:
+    router = ScrapeRouter(chain=[FakeBadScraper(), FakeEmptyScraper(), FakeJinaScraper()])
+    body = await router.to_markdown("https://blocked.org")
+    assert body.markdown == _GOOD
+    assert body.crawl_method is FetchMethod.JINA
+
+
 def test_router_requires_nonempty_chain() -> None:
     with pytest.raises(ValueError):
         ScrapeRouter(chain=[])
