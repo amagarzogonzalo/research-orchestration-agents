@@ -21,6 +21,18 @@ repos:
         entry: ./.venv/Scripts/pydoclint.exe --style google --arg-type-hints-in-docstring 0 --skip-checking-raises 1
         language: system
         files: ^src/knowledge_engine/.*\.py$
+      - id: tach
+        name: tach (module boundaries)
+        entry: ./.venv/Scripts/tach.exe check
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: semgrep
+        name: semgrep (custom rules)
+        entry: uvx --quiet semgrep --config .semgrep/rules/ --metrics=off --error src tests
+        language: system
+        pass_filenames: false
+        always_run: true
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0

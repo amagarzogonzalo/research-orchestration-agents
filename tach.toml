@@ -1,0 +1,65 @@
+# tach — module boundary enforcement for the hexagonal architecture.
+#
+# Intended layering (AGENTS.md layout):
+#   schemas   : leaf types, depends on nothing internal
+#   core      : ports, depends on schemas only
+#   store     : files-only persistence, depends on schemas (+ core where needed)
+#   observability: leaf instrumentation
+#   infrastructure: adapters, depends on core + schemas + observability
+#   orchestration : LangGraph core, depends on core + schemas + store
+#   top-level (engine/container/worker/config/scripts): composition, may use all
+#
+# Legacy files slated for deletion (ADR 0008/0009) are excluded with reason;
+# they carry the old event-shell import patterns and must not set precedent.
+#
+# LIMITATION (verified 2026-10-01): tach's `exclude` makes these files
+# invisible to the graph, so imports *from* them do not trip `tach check`
+# (proven: core -> infrastructure.broker passes, core -> infrastructure.router
+# correctly FAILs). Exclusion keeps the gate green; deletion is the real fix.
+
+source_roots = ["src"]
+
+exclude = [
+    # Legacy event-driven shell — deleted by ADR 0008, pending removal.
+    "src/knowledge_engine/orchestration/event_pipeline.py",
+    "src/knowledge_engine/orchestration/pipeline.py",
+    "src/knowledge_engine/orchestration/stations.py",
+    "src/knowledge_engine/core/events.py",
+    "src/knowledge_engine/infrastructure/broker.py",
+    # Legacy server-bound adapters — deleted by ADR 0009, pending removal.
+    "src/knowledge_engine/infrastructure/store/neon.py",
+    "src/knowledge_engine/infrastructure/vector/qdrant.py",
+    "src/knowledge_engine/infrastructure/memory/letta.py",
+]
+
+[[modules]]
+path = "knowledge_engine.schemas"
+depends_on = []
+
+[[modules]]
+path = "knowledge_engine.core"
+depends_on = [{ path = "knowledge_engine.schemas" }]
+
+[[modules]]
+path = "knowledge_engine.observability"
+depends_on = []
+
+[[modules]]
+path = "knowledge_engine.store"
+depends_on = [{ path = "knowledge_engine.schemas" }, { path = "knowledge_engine.core" }]
+
+[[modules]]
+path = "knowledge_engine.infrastructure"
+depends_on = [
+    { path = "knowledge_engine.core" },
+    { path = "knowledge_engine.schemas" },
+    { path = "knowledge_engine.observability" },
+]
+
+[[modules]]
+path = "knowledge_engine.orchestration"
+depends_on = [
+    { path = "knowledge_engine.core" },
+    { path = "knowledge_engine.schemas" },
+    { path = "knowledge_engine.store" },
+]

@@ -36,6 +36,10 @@ dev = [
     "mypy>=1.11",
     "pre-commit>=3.7",
     "pydoclint>=0.3,<1",
+    "tach>=0.30",
+    # NOTE: semgrep is intentionally NOT a venv dependency (it pins
+    # conflicting opentelemetry/mcp versions). It runs isolated via
+    # `uvx semgrep`, the pre-commit hook, and CI (pipx). See Makefile `semgrep`.
 ]
 
 [project.hatch.build.targets.wheel]
