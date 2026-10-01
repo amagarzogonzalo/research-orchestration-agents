@@ -110,3 +110,40 @@ rules:
     pattern-either:
       - pattern: eval(...)
       - pattern: exec(...)
+
+  - id: no-adapter-instantiation-in-nodes
+    languages: [python]
+    severity: ERROR
+    message: >
+      Nodes must receive adapters via constructor injection, never instantiate
+      them (SOLID/DIP). Pass ports through NodeSet from the composition root.
+    patterns:
+      - pattern: $ADAPTER(...)
+      - metavariable-regex:
+          metavariable: $ADAPTER
+          regex: .*(Adapter|Router|Browser|Crawler)$
+    paths:
+      include:
+        - /src/knowledge_engine/orchestration/nodes/
+
+  - id: require-httpx-timeout
+    languages: [python]
+    severity: ERROR
+    message: >
+      Every httpx.AsyncClient needs an explicit timeout — unbounded network
+      calls hang workers and defeat the rate-limit discipline (ADR 0003).
+    patterns:
+      - pattern: httpx.AsyncClient(...)
+      - pattern-not: httpx.AsyncClient(..., timeout=..., ...)
+
+  - id: no-sync-httpx
+    languages: [python]
+    severity: ERROR
+    message: >
+      Module-level httpx.get/post is blocking — use an httpx.AsyncClient
+      (the repo standard) so timeouts and rate limiting apply.
+    pattern-either:
+      - pattern: httpx.get(...)
+      - pattern: httpx.post(...)
+      - pattern: httpx.put(...)
+      - pattern: httpx.delete(...)

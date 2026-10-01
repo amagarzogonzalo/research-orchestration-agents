@@ -9,6 +9,7 @@ import httpx
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
+from knowledge_engine.infrastructure.scrape.common import fallback_title
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 
@@ -55,21 +56,9 @@ class TrafilaturaAdapter(ScrapePort):
             raise ScrapeError(f"Trafilatura extraction failed for {url}: {exc}") from exc
         return DocumentBody(
             url=url,
-            title=_fallback_title(url),
+            title=fallback_title(url),
             markdown=markdown,
             char_count=len(markdown),
             crawl_method=FetchMethod.TRAFILATURA,
             captured_at=datetime.now(UTC).isoformat(),
         )
-
-
-def _fallback_title(url: str) -> str:
-    """Fallback title.
-
-    Args:
-        url: Target URL.
-
-    Returns:
-        str: Result text.
-    """
-    return url.rstrip("/").rsplit("/", 1)[-1] or url

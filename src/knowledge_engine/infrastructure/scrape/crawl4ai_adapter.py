@@ -12,6 +12,7 @@ from typing import Any
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
+from knowledge_engine.infrastructure.scrape.common import fallback_title
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 
@@ -57,7 +58,7 @@ class Crawl4aiAdapter(ScrapePort):
         except Exception as exc:  # noqa: BLE001 - wrap crawl4ai/Playwright failures
             raise ScrapeError(f"Crawl4AI failed for {url}: {exc}") from exc
         markdown = (result.markdown or "") if result else ""
-        title = (result.metadata.get("title") if result and result.metadata else "") or _fallback_title(url)
+        title = (result.metadata.get("title") if result and result.metadata else "") or fallback_title(url)
         return DocumentBody(
             url=url,
             title=title,
@@ -66,15 +67,3 @@ class Crawl4aiAdapter(ScrapePort):
             crawl_method=FetchMethod.CRAWL4AI,
             captured_at=datetime.now(UTC).isoformat(),
         )
-
-
-def _fallback_title(url: str) -> str:
-    """Fallback title.
-
-    Args:
-        url: Target URL.
-
-    Returns:
-        str: Result text.
-    """
-    return url.rstrip("/").rsplit("/", 1)[-1] or url
