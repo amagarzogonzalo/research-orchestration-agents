@@ -12,6 +12,7 @@ from datetime import UTC, datetime
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
+from knowledge_engine.infrastructure.scrape.common import fallback_title
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 
@@ -61,24 +62,12 @@ class PlaywrightAdapter(ScrapePort):
         text = (content or "").strip()
         return DocumentBody(
             url=url,
-            title=_fallback_title(url),
+            title=fallback_title(url),
             markdown=text,
             char_count=len(text),
             crawl_method=FetchMethod.PLAYWRIGHT,
             captured_at=datetime.now(UTC).isoformat(),
         )
-
-
-def _fallback_title(url: str) -> str:
-    """Fallback title.
-
-    Args:
-        url: Target URL.
-
-    Returns:
-        str: Result text.
-    """
-    return url.rstrip("/").rsplit("/", 1)[-1] or url
 
 
 __all__ = ["PlaywrightAdapter"]
