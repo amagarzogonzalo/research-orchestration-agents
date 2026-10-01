@@ -1,11 +1,12 @@
 name: CI
 
-# Fast gate: runs on EVERY push (all branches). Unit tests + lint + static
-# checks only — no network, no heavy deps. The long suite (integration, e2e,
-# types, evals) runs on main + merge requests via ci-full.yml.
+# Fast gate: runs on EVERY push and every merge request. Unit tests + lint +
+# static checks only — no network, no heavy deps. The long suite
+# (integration, e2e, types, evals) additionally runs on main + merge requests
+# via ci-full.yml.
 on:
   push:
-    branches-ignore: [main]
+  pull_request:
 
 jobs:
   unit:
