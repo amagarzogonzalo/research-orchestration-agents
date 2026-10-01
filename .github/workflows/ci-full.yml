@@ -1,0 +1,68 @@
+name: CI-full
+
+# Long gate: runs ONLY on main pushes and merge requests (pull_request).
+# Integration + e2e + types + evals are slower/heavier; the fast gate
+# (ci.yml: unit + lint + arch) already ran on every push.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  integration:
+    name: Integration tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12"]
+    env:
+      OTEL_TRACES_EXPORTER: ""
+      OTEL_METRICS_EXPORTER: "none"
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Integration tests (fakes + file checkpointer, no network)
+        run: python -m pytest tests/integration -q -p no:cacheprovider
+
+      - name: E2E tests (full LangGraph runtime, fakes; live opt-in)
+        run: python -m pytest tests/e2e -q -p no:cacheprovider
+
+  typecheck:
+    name: Typecheck (mypy strict)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: mypy (strict on new architecture; adapter glue exempt)
+        run: mypy src --no-error-summary
+      - name: pydoclint (Google docstrings required)
+        run: pydoclint --style google --arg-type-hints-in-docstring 0 --skip-checking-raises 1 src/knowledge_engine
+
+  evals:
+    name: Behavioral evals (offline replay)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Offline eval replay (free, deterministic)
+        run: python evals/runner.py
