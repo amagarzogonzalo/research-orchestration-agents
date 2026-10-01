@@ -12,3 +12,8 @@ htmlcov/
 .env
 *.jsonl
 knowledge_base/
+research_store/
+**/__pycache__/
+*.pyc
+# harness: recorded model outputs (ground truth is regenerated per project)
+evals/cassettes/

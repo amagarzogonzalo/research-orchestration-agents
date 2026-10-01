@@ -1,0 +1,8 @@
+# Offline / air-gapped. Point baseURL at your own server; see rules/models.md.
+name = "local"
+description = "Local weights. No data leaves the machine."
+
+[models]
+reasoning = "deepseek/deepseek-flash"
+coding    = "deepseek/deepseek-flash"
+cheap     = "deepseek/deepseek-flash"

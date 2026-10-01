@@ -1,0 +1,26 @@
+{
+  "citations": [
+    "example.net",
+    "example.org"
+  ],
+  "code_langs": [],
+  "counts": {
+    "list_items": 0,
+    "paragraphs": 4,
+    "tables": 0,
+    "words_bucket": "<250"
+  },
+  "frontmatter": {
+    "date": "str",
+    "query": "str",
+    "sources": "list",
+    "title": "str"
+  },
+  "hash": "ebef2b28619f11e2",
+  "headings": [
+    "1:what-changed-in-the-2026-rules",
+    "2:background",
+    "2:what-changed",
+    "2:open-questions"
+  ]
+}
