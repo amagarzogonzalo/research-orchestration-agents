@@ -7,7 +7,7 @@ from knowledge_engine.orchestration.event_pipeline import EventPipeline, decode_
 from knowledge_engine.orchestration.stations import default_stations
 from knowledge_engine.schemas.provider import Affinity, ChatRequest, ChatResult, UsageSummary
 from knowledge_engine.schemas.source import DocumentBody, SearchSource, SourceRecord
-from tests.fake_broker import FakeBroker
+from tests.fixtures.fake_broker import FakeBroker
 
 
 class FakeSearch:
