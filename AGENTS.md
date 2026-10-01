@@ -26,7 +26,7 @@ make check       # lint + types + context + test + evals   <- the gate
 ```
 
 ## Hard rules
-1. **Never commit** `.env`, keys, or credentials. **Never `git push`.** Stage and stop.
+1. **Never commit** `.env`, keys, or credentials. Commit on topic branches and push for review; never push directly to `main`.
 2. **Do not "fix" intentional ignores.** `# type: ignore[...]` / `# noqa:` with a
    trailing reason are deliberate. Leave them.
 3. **Zero-cost discipline holds.** Free tiers only (Groq/Gemini/Mistral/OpenRouter
