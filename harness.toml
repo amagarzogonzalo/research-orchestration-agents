@@ -1,0 +1,48 @@
+# The control file. Everything model-related resolves from here, so switching
+# models is one command and never a hunt through agent definitions.
+#
+#   make profile P=budget     # apply a profile to opencode.json
+#   make context              # what your always-on context actually costs
+#   make check                # the gate
+#
+# This project is zero-cost / free-tier only: profiles below default to
+# deepseek-flash. Edit profiles/*.toml if you want to change models.
+
+[profile]
+active = "budget"
+
+# Agents ask for a CAPABILITY, never a model name. Profiles bind capability ->
+# concrete OpenRouter model id.
+[roles]
+plan    = "reasoning"
+build   = "coding"
+review  = "reasoning"
+scribe  = "cheap"
+judge   = "reasoning"
+small   = "cheap"
+
+# Applied to every OpenRouter request. Zero-cost => sort by price first.
+[routing]
+sort              = "price"
+allow_fallbacks   = true
+require_parameters = true   # only route to providers that honor params you send
+data_collection   = "deny"  # exclude providers that train on your traffic
+zdr               = false
+ignore            = []
+transforms        = []      # EMPTY ON PURPOSE: fail loudly on over-long prompts
+
+[context]
+# Context you pay for on every request. Enforced by bin/context_budget.py.
+agents_md_max_lines      = 100
+always_on_token_budget   = 6000
+mcp_tool_budget          = 40
+skill_description_max    = 400
+
+[compression]
+# Optional local proxy that compresses tool output before it reaches the model.
+enabled = false
+port    = 8787
+
+[evals]
+# Pinned on purpose: the judge must NOT follow the active profile. Free tier.
+judge_model = "deepseek/deepseek-flash"

@@ -1,0 +1,16 @@
+{
+  "name": "agent-sandbox",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/devcontainers/features/python:1": { "version": "3.12" },
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "curl -LsSf https://astral.sh/uv/install.sh | sh && npm i -g opencode-ai",
+  "remoteEnv": {
+    "OPENROUTER_API_KEY": "${localEnv:OPENROUTER_API_KEY}"
+  },
+  "mounts": [],
+  "runArgs": ["--cap-drop=ALL", "--security-opt=no-new-privileges"],
+  "_why": "Permissions in opencode.json are a policy boundary. This is the isolation boundary. Run any unattended or --auto session in here, never on the host. Note the API key is still visible to processes inside the container: use a scoped, low-limit key for agent work."
+}
