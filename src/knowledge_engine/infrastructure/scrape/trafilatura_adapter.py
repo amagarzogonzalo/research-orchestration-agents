@@ -14,9 +14,26 @@ from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 class TrafilaturaAdapter(ScrapePort):
     def __init__(self, *, timeout: float = 15.0) -> None:
+        """Create a TrafilaturaAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self.timeout = timeout
 
     async def to_markdown(self, url: str) -> DocumentBody:
+        """Convert a URL to Markdown.
+
+        Args:
+            url: Target URL.
+
+        Returns:
+            DocumentBody: Fetched Markdown body.
+
+        Raises:
+            ScrapeError: When the operation fails.
+
+        """
         try:
             import trafilatura  # lazy import keeps heavy dep optional
 
@@ -31,9 +48,7 @@ class TrafilaturaAdapter(ScrapePort):
 
         try:
             markdown = (
-                trafilatura.extract(
-                    html, url=url, include_links=False, include_images=False, output_format="markdown"
-                )
+                trafilatura.extract(html, url=url, include_links=False, include_images=False, output_format="markdown")
                 or ""
             )
         except Exception as exc:  # noqa: BLE001
@@ -49,4 +64,12 @@ class TrafilaturaAdapter(ScrapePort):
 
 
 def _fallback_title(url: str) -> str:
+    """Fallback title.
+
+    Args:
+        url: Target URL.
+
+    Returns:
+        str: Result text.
+    """
     return url.rstrip("/").rsplit("/", 1)[-1] or url

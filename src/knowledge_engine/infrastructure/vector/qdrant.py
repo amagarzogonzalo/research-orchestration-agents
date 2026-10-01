@@ -19,6 +19,17 @@ class QdrantAdapter:
     def __init__(
         self, url: str, collection: str = "sources", *, embedding_provider: ProviderPort | None = None
     ) -> None:
+        """Create a QdrantAdapter.
+
+        Args:
+            url: Target URL.
+            collection: Collection name.
+            embedding_provider: Embedding provider.
+
+        Raises:
+            ImportError: When the operation fails.
+
+        """
         if AsyncQdrantClient is None:
             raise ImportError("qdrant-client not installed; add the 'vector' extra")
         self.client = AsyncQdrantClient(url=url)
@@ -27,11 +38,26 @@ class QdrantAdapter:
 
     async def upsert(self, records: list) -> None:
         # placeholder: would embed + upsert DocumentBody vectors
+        """Upsert.
+
+        Args:
+            records: Records.
+        """
         await self.client.upsert(self.collection, points=[])
 
     async def query(self, text: str, *, top_k: int = 5) -> list:
         # placeholder: embed text and search
+        """Query.
+
+        Args:
+            text: Encoded text.
+            top_k: Maximum results.
+
+        Returns:
+            list: Result list.
+        """
         return []
 
     async def close(self) -> None:
+        """Release resources."""
         await self.client.close()

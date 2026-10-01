@@ -28,18 +28,43 @@ _BASE = "https://dblp.org/search/publ/api"
 
 
 class DblpAdapter(SearchPort):
-    """Computer-science bibliography search (free, keyless)."""
+    """Computer-science bibliography search (free, keyless).
+
+    Attributes:
+        name: Attribute description.
+    """
 
     name = "dblp"
 
     def __init__(self, *, timeout: float = 15.0) -> None:
+        """Create a DblpAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self._timeout = timeout
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"})
 
     @staticmethod
     def _authors(info: dict) -> list[str]:
+        """Authors.
+
+        Args:
+            info: Info mapping.
+
+        Returns:
+            list[str]: String list.
+
+        """
         raw = (info.get("authors") or {}).get("author", [])
         if isinstance(raw, str):
             return [raw]
@@ -47,6 +72,16 @@ class DblpAdapter(SearchPort):
 
     @staticmethod
     def _to_record(hit: dict) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            hit: Cache hit.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         info = hit.get("info", {})
         try:
             year = int(str(info.get("year") or "")[:4])

@@ -86,5 +86,4 @@ Zero-Cost Filtering: Generate a 50-word tldr_llm summary stored directly in the 
 
 
 
-You can learn more about implementing these advanced orchestration patterns in Building Effective Agents with LangGraph, which provides an excellent breakdown of turning Anthropic's architectural concepts into scalable code. 
-
+You can learn more about implementing these advanced orchestration patterns in Building Effective Agents with LangGraph, which provides an excellent breakdown of turning Anthropic's architectural concepts into scalable code.

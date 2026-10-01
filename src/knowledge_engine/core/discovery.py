@@ -25,7 +25,17 @@ ModelId = str
 
 @dataclass(frozen=True)
 class FreeModel:
-    """A zero-cost model instance exposed by a provider."""
+    """A zero-cost model instance exposed by a provider.
+
+    Attributes:
+        model_id: Attribute description.
+        provider: Attribute description.
+        context_length: Attribute description.
+        pricing_prompt: Attribute description.
+        pricing_completion: Attribute description.
+        modality: Attribute description.
+        extra: Attribute description.
+    """
 
     model_id: ModelId
     provider: str
@@ -36,7 +46,15 @@ class FreeModel:
     extra: dict[str, Any] = field(default_factory=dict)
 
     def __lt__(self, other: object) -> bool:
-        """Sort best-first: larger context first."""
+        """Sort best-first: larger context first.
+
+        Args:
+            other: Other object to compare against.
+
+        Returns:
+            bool: True on success.
+
+        """
         if not isinstance(other, FreeModel):
             return NotImplemented
         return self.context_length > other.context_length
@@ -44,7 +62,13 @@ class FreeModel:
 
 @dataclass(frozen=True)
 class TestResult:
-    """Result of a cheap health check for one model."""
+    """Result of a cheap health check for one model.
+
+    Attributes:
+        model_id: Attribute description.
+        passed: Attribute description.
+        reason: Attribute description.
+    """
 
     model_id: ModelId
     passed: bool
@@ -64,19 +88,40 @@ class LLMDiscoveryPort(abc.ABC):
     async def list_free_models(self) -> list[FreeModel]:
         """Return currently-free models, best (largest context) first.
 
-        Must never include paid models. Network calls are allowed but should be
-        cached (e.g. 30 min) to conserve free-tier quota.
+                Must never include paid models. Network calls are allowed but should be
+                cached (e.g. 30 min) to conserve free-tier quota.
+
+        Returns:
+            list[FreeModel]: Available free models.
+
         """
         ...
 
     @abc.abstractmethod
     async def test(self, model_id: ModelId) -> TestResult:
-        """Cheap health check; a lightweight prompt, minimal output tokens."""
+        """Cheap health check; a lightweight prompt, minimal output tokens.
+
+        Args:
+            model_id: Model identifier.
+
+        Returns:
+            TestResult: Health-check outcome.
+
+        """
         ...
 
     @abc.abstractmethod
     async def complete(self, model_id: ModelId, prompt: str) -> str:
-        """Complete ``prompt`` with ``model_id``; raise :class:`CompletionError`."""
+        """Complete ``prompt`` with ``model_id``; raise :class:`CompletionError`.
+
+        Args:
+            model_id: Model identifier.
+            prompt: Prompt text.
+
+        Returns:
+            str: Result text.
+
+        """
         ...
 
 

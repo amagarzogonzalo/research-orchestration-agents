@@ -36,10 +36,23 @@ class JinaReaderAdapter(ScrapePort):
     """Remote reader fallback for pages local fetch cannot retrieve."""
 
     def __init__(self, api_key: str | None = None, *, timeout: float = 30.0) -> None:
+        """Create a JinaReaderAdapter.
+
+        Args:
+            api_key: API key.
+            timeout: Request timeout in seconds.
+        """
         self.api_key = api_key or os.environ.get("JINA_API_KEY")
         self.timeout = timeout
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         headers = {"User-Agent": "knowledge-engine"}
         if self.api_key:
             headers["Authorization"] = f"Bearer {self.api_key}"
@@ -77,7 +90,15 @@ class JinaReaderAdapter(ScrapePort):
 
 
 def _parse(text: str) -> tuple[str, str]:
-    """Split a Reader envelope into (title, markdown body)."""
+    """Split a Reader envelope into (title, markdown body).
+
+    Args:
+        text: Encoded text.
+
+    Returns:
+        tuple[str, str]: String pair.
+
+    """
     title = ""
     for line in text.splitlines():
         if line.startswith("Title:"):

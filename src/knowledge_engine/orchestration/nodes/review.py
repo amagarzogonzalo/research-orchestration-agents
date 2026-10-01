@@ -27,7 +27,12 @@ END = "__end__"
 
 
 class ReviewDecision(TypedDict, total=True):
-    """Structured resume payload for the HITL gate."""
+    """Structured resume payload for the HITL gate.
+
+    Attributes:
+        approved: Attribute description.
+        feedback: Attribute description.
+    """
 
     approved: bool
     feedback: str | None
@@ -38,9 +43,24 @@ ReviewGate = Callable[[str, str], Awaitable[ReviewDecision]]
 
 
 def _auto_approve(_query: str, _draft: str) -> Awaitable[ReviewDecision]:
-    """Headless default: always approve for automated/dev runs."""
+    """Headless default: always approve for automated/dev runs.
+
+    Args:
+        _query: Internal query.
+        _draft: Internal draft.
+
+    Returns:
+        Awaitable[ReviewDecision]: Pending review decision.
+
+    """
 
     async def _decide() -> ReviewDecision:
+        """Decide.
+
+        Returns:
+            ReviewDecision: Review decision.
+
+        """
         return ReviewDecision(approved=True, feedback=None)
 
     return _decide()
@@ -52,10 +72,25 @@ class ReviewNode(WorkflowNode):
     __slots__ = ("_gate", "interactive")
 
     def __init__(self, gate: ReviewGate | None = None, *, interactive: bool = False) -> None:
+        """Create a ReviewNode.
+
+        Args:
+            gate: Review gate.
+            interactive: Whether review is interactive.
+        """
         self._gate = gate or _auto_approve
         self.interactive = interactive
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         draft = (state.get("notes") or [""])[-1]
         if self.interactive:
             # Pause until a human resumes with Command(resume={..}); interrupt is
@@ -82,7 +117,15 @@ class ReviewNode(WorkflowNode):
 
 
 def review_route(state: WorkflowState) -> str:
-    """Route: render on approval, terminate on rejection (Saga compensation)."""
+    """Route: render on approval, terminate on rejection (Saga compensation).
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        str: Result text.
+
+    """
     return RENDER_NODE if state.get("review_dir") == "approved" else END
 
 

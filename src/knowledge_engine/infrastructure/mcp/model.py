@@ -24,7 +24,13 @@ from knowledge_engine.schemas.provider import Affinity, ChatMessage, ChatRequest
 
 
 class ProviderChatModel(BaseChatModel):
-    """Bridge our zero-cost provider router into LangChain's ChatModel API."""
+    """Bridge our zero-cost provider router into LangChain's ChatModel API.
+
+    Attributes:
+        provider: Attribute description.
+        affinity: Attribute description.
+        max_tokens: Attribute description.
+    """
 
     provider: ProviderPort
     affinity: str = "macro"
@@ -33,9 +39,24 @@ class ProviderChatModel(BaseChatModel):
 
     @property
     def _llm_type(self) -> str:
+        """Return the LLM type.
+
+        Returns:
+            str: Result text.
+
+        """
         return "knowledge-engine-provider"
 
-    def bind_tools(self, tools, **kwargs):  # noqa: ANN001
+    def bind_tools(self, tools: Any, **kwargs: Any) -> ProviderChatModel:
+        """Cache tool schemas for later generations.
+
+        Args:
+            tools: Tools to bind.
+            **kwargs: Ignored extra arguments.
+
+        Returns:
+            ProviderChatModel: This model.
+        """
         self._bound_tools = [_tool_schema(t) for t in tools]
         return self
 
@@ -46,6 +67,18 @@ class ProviderChatModel(BaseChatModel):
         run_manager: CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
     ) -> ChatResult:
+        """Generate a response.
+
+        Args:
+            messages: Conversation messages.
+            stop: Stop sequences.
+            run_manager: Callback manager.
+            **kwargs: Action-specific arguments.
+
+        Returns:
+            ChatResult: Model result.
+
+        """
         return asyncio.run(self._agenerate_impl(messages))
 
     async def _agenerate(
@@ -55,9 +88,30 @@ class ProviderChatModel(BaseChatModel):
         run_manager: CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
     ) -> ChatResult:
+        """Generate a response asynchronously.
+
+        Args:
+            messages: Conversation messages.
+            stop: Stop sequences.
+            run_manager: Callback manager.
+            **kwargs: Action-specific arguments.
+
+        Returns:
+            ChatResult: Model result.
+
+        """
         return await self._agenerate_impl(messages)
 
     async def _agenerate_impl(self, messages: list[BaseMessage]) -> ChatResult:
+        """Generate a response implementation.
+
+        Args:
+            messages: Conversation messages.
+
+        Returns:
+            ChatResult: Model result.
+
+        """
         affinity = Affinity[self.affinity.upper()] if self.affinity.upper() in Affinity.__members__ else Affinity.MACRO
         req = ChatRequest(
             messages=[_to_chat_message(m) for m in messages],
@@ -69,7 +123,15 @@ class ProviderChatModel(BaseChatModel):
         return ChatResult(generations=[ChatGeneration(message=AIMessage(content=res.message.content))])
 
 
-def _to_chat_message(m) -> ChatMessage:  # noqa: ANN001 - BaseMessage or dict (test doubles)
+def _to_chat_message(m: Any) -> ChatMessage:
+    """Map a LangChain message or dict to a ChatMessage.
+
+    Args:
+        m: BaseMessage or dict (test doubles).
+
+    Returns:
+        ChatMessage: Mapped message.
+    """
     if isinstance(m, dict):
         role = Role[m.get("role", "user").upper()] if m.get("role", "user").upper() in Role.__members__ else Role.user
         return ChatMessage(role=role, content=m.get("content", "") or "")
@@ -82,6 +144,16 @@ def _to_chat_message(m) -> ChatMessage:  # noqa: ANN001 - BaseMessage or dict (t
 
 
 def _tool_schema(tool: Any) -> dict[str, Any]:
+    """Convert a tool to a schema.
+
+    Args:
+        tool: Tool specification.
+
+    Returns:
+        dict[str, Any]: Result mapping.
+
+
+    """
     try:
         args = tool.args_schema.model_json_schema() if getattr(tool, "args_schema", None) else {"type": "object"}
     except Exception:  # noqa: BLE001 - schemaless tools degrade to free-form args

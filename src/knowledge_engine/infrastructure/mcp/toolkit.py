@@ -104,6 +104,12 @@ def make_agent_builder(
     """
 
     async def _build() -> Any:
+        """Build the object.
+
+        Returns:
+            Any: Result.
+
+        """
         tools = await load_tools(search=search, scrape=scrape, browser=browser)
         return build_agent(ProviderChatModel(provider=provider), tools, system_prompt=system_prompt)
 

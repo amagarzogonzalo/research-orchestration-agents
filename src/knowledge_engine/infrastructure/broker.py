@@ -28,7 +28,18 @@ DISPATCH_DELAY_SECONDS = 0.05
 
 @dataclass
 class Envelope:
-    """Typed message envelope carrying a versioned, validated payload."""
+    """Typed message envelope carrying a versioned, validated payload.
+
+    Attributes:
+        event_id: Attribute description.
+        schema_version: Attribute description.
+        type: Attribute description.
+        payload: Attribute description.
+        attempt: Attribute description.
+        error: Attribute description.
+        correlation_id: Attribute description.
+        created_at: Attribute description.
+    """
 
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
     schema_version: int = 1
@@ -40,6 +51,11 @@ class Envelope:
     created_at: float = field(default_factory=time.time)
 
     def to_dict(self) -> dict:
+        """To dict.
+
+        Returns:
+            dict: Result mapping.
+        """
         return {
             "event_id": self.event_id,
             "schema_version": self.schema_version,
@@ -53,6 +69,14 @@ class Envelope:
 
     @classmethod
     def from_dict(cls, data: dict) -> Envelope:
+        """From dict.
+
+        Args:
+            data: Binary payload.
+
+        Returns:
+            Envelope: Event envelope.
+        """
         return cls(
             event_id=data.get("event_id", str(uuid.uuid4())),
             schema_version=data.get("schema_version", 1),
@@ -65,7 +89,17 @@ class Envelope:
         )
 
     def with_payload(self, payload: dict, *, type_: str | None = None, event_id: str | None = None) -> Envelope:
-        """Return a successor envelope (new id, same correlation)."""
+        """Return a successor envelope (new id, same correlation).
+
+        Args:
+            payload: Event or resume payload.
+            type_: Event type name.
+            event_id: Event identifier.
+
+        Returns:
+            Envelope: Event envelope.
+
+        """
         return Envelope(
             schema_version=self.schema_version,
             type=type_ or self.type,
@@ -76,11 +110,23 @@ class Envelope:
 
 
 class RedisStreamBroker:
-    """Broker over Redis Streams with consumer-group + idempotent-dispatch semantics."""
+    """Broker over Redis Streams with consumer-group + idempotent-dispatch semantics.
+
+    Attributes:
+        DEDUPE_TTL_SECONDS: Attribute description.
+    """
 
     DEDUPE_TTL_SECONDS = 3600  # processed-event marker TTL
 
     def __init__(self, redis_url: str, *, max_attempts: int = 3, dedupe_enabled: bool = True) -> None:
+        """Create a RedisStreamBroker.
+
+        Args:
+            redis_url: Redis connection URL.
+            max_attempts: Maximum attempts.
+            dedupe_enabled: Whether dedupe is enabled.
+
+        """
         self.rc = aioredis.from_url(redis_url, decode_responses=True)
         self.max_attempts = max_attempts
         self.dedupe_enabled = dedupe_enabled
@@ -90,6 +136,16 @@ class RedisStreamBroker:
     def from_redis(
         cls, rc: aioredis.Redis, *, max_attempts: int = 3, dedupe_enabled: bool = True
     ) -> RedisStreamBroker:
+        """From redis.
+
+        Args:
+            rc: Redis client.
+            max_attempts: Maximum attempts.
+            dedupe_enabled: Whether dedupe is enabled.
+
+        Returns:
+            RedisStreamBroker: Event broker.
+        """
         broker = cls.__new__(cls)
         broker.rc = rc
         broker.max_attempts = max_attempts
@@ -99,9 +155,29 @@ class RedisStreamBroker:
 
     # ---- Producer ----
     async def publish(self, stream: str, envelope: Envelope) -> str:
+        """Publish.
+
+        Args:
+            stream: Stream name.
+            envelope: Incoming event envelope.
+
+        Returns:
+            str: Result text.
+        """
         return await self.rc.xadd(stream, envelope.to_dict())
 
     async def publish_simple(self, stream: str, type_: str, payload: dict, *, correlation_id: str = "") -> str:
+        """Publish simple.
+
+        Args:
+            stream: Stream name.
+            type_: Event type name.
+            payload: Event or resume payload.
+            correlation_id: Correlation identifier.
+
+        Returns:
+            str: Result text.
+        """
         return await self.publish(
             stream,
             Envelope(
@@ -113,6 +189,12 @@ class RedisStreamBroker:
 
     # ---- Consumer group ----
     async def _ensure_group(self, stream: str, group: str) -> None:
+        """Ensure group.
+
+        Args:
+            stream: Stream name.
+            group: Consumer group name.
+        """
         if group in self._group_ok:
             return
         try:
@@ -122,6 +204,15 @@ class RedisStreamBroker:
         self._group_ok.add(group)
 
     async def _already_processed(self, event_id: str) -> bool:
+        """Already processed.
+
+        Args:
+            event_id: Event identifier.
+
+        Returns:
+            bool: True on success.
+
+        """
         if not self.dedupe_enabled:
             return False
         key = f"processed:{event_id}"
@@ -131,9 +222,19 @@ class RedisStreamBroker:
     async def consume_group(self, stream: str, group: str, consumer: str, handler: Handler, *, batch: int = 10) -> int:
         """Process up to `batch` pending messages once; returns count handled.
 
-        Ordering: dedupe -> run handler (which publishes outbox successors) ->
-        XACK. Outbox-before-XACK means a crash after publish but before ack
-        re-runs the handler, but the dedupe guard makes it idempotent.
+                Ordering: dedupe -> run handler (which publishes outbox successors) ->
+                XACK. Outbox-before-XACK means a crash after publish but before ack
+                re-runs the handler, but the dedupe guard makes it idempotent.
+
+        Args:
+            stream: Stream name.
+            group: Consumer group name.
+            consumer: Consumer name.
+            handler: Event handler callable.
+            batch: Batch size.
+
+        Returns:
+            int: Number of handled messages.
         """
         await self._ensure_group(stream, group)
         entries = await self.rc.xreadgroup(group, consumer, {stream: ">"}, count=batch)
@@ -162,6 +263,16 @@ class RedisStreamBroker:
         return handled
 
     async def _requeue_or_dead(self, stream: str, group: str, msg_id: str, fields: dict, exc: Exception) -> None:
+        """Requeue or dead.
+
+        Args:
+            stream: Stream name.
+            group: Consumer group name.
+            msg_id: Message identifier.
+            fields: Field mapping.
+            exc: Caught exception.
+
+        """
         env = Envelope.from_dict(fields)
         env.attempt += 1
         env.error = str(exc)
@@ -174,7 +285,14 @@ class RedisStreamBroker:
         await self.rc.xack(stream, group, msg_id)
 
     async def poll_forever(self, streams: dict[str, Handler], *, group: str, consumer: str, batch: int = 10) -> None:
-        """Blocking dispatch loop: map each stream to a handler, process continuously."""
+        """Blocking dispatch loop: map each stream to a handler, process continuously.
+
+        Args:
+            streams: Stream to handler mapping.
+            group: Consumer group name.
+            consumer: Consumer name.
+            batch: Batch size.
+        """
         for stream in streams:
             await self._ensure_group(stream, group)
         while True:
@@ -186,4 +304,5 @@ class RedisStreamBroker:
             await asyncio.sleep(DISPATCH_DELAY_SECONDS)
 
     async def close(self) -> None:
+        """Release resources."""
         await self.rc.aclose()

@@ -29,19 +29,43 @@ _BASE = "https://www.ebi.ac.uk/europepmc/webservices/rest/search"
 
 
 class EuropePmcAdapter(SearchPort, FetchPort):
-    """Biomedical search over Europe PMC (free, keyless)."""
+    """Biomedical search over Europe PMC (free, keyless).
+
+    Attributes:
+        name: Attribute description.
+    """
 
     name = "europe_pmc"
 
     def __init__(self, *, timeout: float = 15.0) -> None:
+        """Create a EuropePmcAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self._timeout = timeout
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"})
 
     @staticmethod
     def _pdf_url(item: dict) -> str | None:
-        """First full-text URL explicitly marked as PDF, else None."""
+        """First full-text URL explicitly marked as PDF, else None.
+
+        Args:
+            item: Item.
+
+        Returns:
+            str | None: Text or None.
+
+        """
         ft = item.get("fullTextUrlList") or {}
         for entry in ft.get("fullTextUrl", []):
             if entry.get("documentStyle") == "pdf" and entry.get("url"):
@@ -50,6 +74,16 @@ class EuropePmcAdapter(SearchPort, FetchPort):
 
     @staticmethod
     def _to_record(item: dict) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            item: Item.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         ext_id = str(item.get("id") or "")
         src = str(item.get("source") or "MED")
         authors = [a.strip() for a in str(item.get("authorString") or "").split(",") if a.strip()]
@@ -100,13 +134,11 @@ class EuropePmcAdapter(SearchPort, FetchPort):
         """Resolve a DOI via a DOI-tagged query.
 
         Args:
-            doi: DOI to resolve (bare, without URL prefix).
+                    doi: DOI to resolve (bare, without URL prefix).
+
 
         Returns:
-            SourceRecord | None: The resolved record, or None when Europe PMC does not index it.
-
-        Raises:
-            SearchError: If the API call fails.
+                    SourceRecord | None: The resolved record, or None when Europe PMC does not index it.
         """
         records = await self.search(f'DOI:"{doi}"', limit=1)
         return records[0] if records else None

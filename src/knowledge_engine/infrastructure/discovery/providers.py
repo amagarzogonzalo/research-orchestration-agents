@@ -7,7 +7,12 @@ from knowledge_engine.infrastructure.discovery.openai_compat import OpenAICompat
 
 
 class GroqDiscovery(OpenAICompatDiscovery):
-    """Groq free models (api.groq.com)."""
+    """Groq free models (api.groq.com).
+
+    Attributes:
+        endpoint: Attribute description.
+        candidates: Attribute description.
+    """
 
     endpoint = "https://api.groq.com/openai/v1"
     candidates: list[FreeModel] = [
@@ -18,7 +23,12 @@ class GroqDiscovery(OpenAICompatDiscovery):
 
 
 class MistralDiscovery(OpenAICompatDiscovery):
-    """Mistral free models (api.mistral.ai)."""
+    """Mistral free models (api.mistral.ai).
+
+    Attributes:
+        endpoint: Attribute description.
+        candidates: Attribute description.
+    """
 
     endpoint = "https://api.mistral.ai/v1"
     candidates: list[FreeModel] = [

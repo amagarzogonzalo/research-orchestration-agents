@@ -43,6 +43,15 @@ def load_dotenv(*, path: str | Path | None = None) -> bool:
 
 
 def _read_dotenv(path: Path) -> int:
+    """Read dotenv.
+
+    Args:
+        path: File path.
+
+    Returns:
+        int: Result count.
+
+    """
     imported = 0
     for raw in path.read_text(encoding="utf-8").splitlines():
         line = raw.strip()

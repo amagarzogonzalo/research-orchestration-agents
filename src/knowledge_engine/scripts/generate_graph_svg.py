@@ -58,11 +58,24 @@ BH = 36
 
 
 def _esc(text: str) -> str:
+    """Esc.
+
+    Args:
+        text: Encoded text.
+
+    Returns:
+        str: Result text.
+    """
     return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 
 def render_svg() -> str:
-    """Return the full SVG document as a string."""
+    """Return the full SVG document as a string.
+
+    Returns:
+        str: Result text.
+
+    """
     pos = {n[0]: (n[2], n[3]) for n in NODES}
     W, H = 660, 310
     out = [f"<svg xmlns='http://www.w3.org/2000/svg' width='{W}' height='{H}' viewBox='0 0 {W} {H}'>"]
@@ -117,7 +130,11 @@ def render_svg() -> str:
 
 
 def main() -> int:
-    """Write ``graph.svg`` to the repo root and return exit code 0."""
+    """Write ``graph.svg`` to the repo root and return exit code 0.
+
+    Returns:
+        int: Exit code.
+    """
     path = REPO_ROOT / "graph.svg"
     path.write_text(render_svg(), encoding="utf-8")
     print(f"wrote {path}")

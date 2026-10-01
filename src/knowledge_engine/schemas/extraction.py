@@ -10,6 +10,14 @@ from knowledge_engine.schemas.source import DocumentBody, SourceRecord
 
 
 class ExtractionKind(StrEnum):
+    """ExtractionKind.
+
+    Attributes:
+        BOOL_FILTER: Attribute description.
+        ENTITY_EXTRACT: Attribute description.
+        SUMMARY_50: Attribute description.
+        SYNTHETIC_MULTI_DOC: Attribute description."""
+
     BOOL_FILTER = "bool_filter"
     ENTITY_EXTRACT = "entity_extract"
     SUMMARY_50 = "summary_50"
@@ -17,6 +25,16 @@ class ExtractionKind(StrEnum):
 
 
 class ExtractionRequest(BaseModel):
+    """ExtractionRequest.
+
+    Attributes:
+        model_config: Attribute description.
+        task_id: Attribute description.
+        kind: Attribute description.
+        source: Attribute description.
+        schema_ref: Attribute description.
+        retries: Attribute description."""
+
     model_config = ConfigDict(extra="forbid")
 
     task_id: str
@@ -27,6 +45,14 @@ class ExtractionRequest(BaseModel):
 
 
 class GraphStatus(StrEnum):
+    """GraphStatus.
+
+    Attributes:
+        RUNNING: Attribute description.
+        AWAITING_REVIEW: Attribute description.
+        DONE: Attribute description.
+        FAILED: Attribute description."""
+
     RUNNING = "running"
     AWAITING_REVIEW = "awaiting_review"
     DONE = "done"
@@ -34,7 +60,21 @@ class GraphStatus(StrEnum):
 
 
 class GraphState(BaseModel):
-    """Durable state threaded through the LangGraph machine (ADR 0005)."""
+    """Durable state threaded through the LangGraph machine (ADR 0005).
+
+    Attributes:
+        model_config: Attribute description.
+        thread_id: Attribute description.
+        query: Attribute description.
+        sources: Attribute description.
+        bodies: Attribute description.
+        filtered: Attribute description.
+        synthetic_notes: Attribute description.
+        judge_score: Attribute description.
+        judge_critique: Attribute description.
+        output_path: Attribute description.
+        status: Attribute description.
+    """
 
     model_config = ConfigDict(extra="forbid")
 

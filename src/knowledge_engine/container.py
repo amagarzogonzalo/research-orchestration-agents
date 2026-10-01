@@ -36,6 +36,7 @@ from knowledge_engine.orchestration.stations import default_stations
 
 class Settings:
     def __init__(self) -> None:
+        """Create a Settings."""
         self.redis_url = os.environ.get("REDIS_URL", "redis://localhost:6379")
         self.database_url = os.environ.get("DATABASE_URL")
         self.openalex_mailto = os.environ.get("OPENALEX_MAILTO", "")
@@ -45,11 +46,24 @@ class Settings:
 
     @classmethod
     def load(cls) -> Settings:
+        """Load.
+
+        Returns:
+            Settings: Engine settings.
+        """
         return cls()
 
 
 def _federated_sources(settings: Settings) -> list[SearchPort]:
-    """Shared source list: DOI backbone, biomedical depth, community/CS, preprints, OA."""
+    """Shared source list: DOI backbone, biomedical depth, community/CS, preprints, OA.
+
+    Args:
+        settings: Engine settings.
+
+    Returns:
+        list[SearchPort]: Search adapters.
+
+    """
     sources: list[SearchPort] = [
         OpenAlexAdapter(settings.openalex_mailto),
         PubMedAdapter(),
@@ -66,6 +80,14 @@ def _federated_sources(settings: Settings) -> list[SearchPort]:
 
 
 def build_container(settings: Settings | None = None) -> tuple[Pipeline, RedisStreamBroker]:
+    """Build container.
+
+    Args:
+        settings: Engine settings.
+
+    Returns:
+        tuple[Pipeline, RedisStreamBroker]: Pipeline and broker.
+    """
     settings = settings or Settings.load()
 
     search = DemuxSearchAdapter(_federated_sources(settings))
@@ -94,7 +116,16 @@ def build_container(settings: Settings | None = None) -> tuple[Pipeline, RedisSt
 
 
 def build_event_pipeline(settings: Settings | None = None, *, auto_approve_review: bool = True) -> EventPipeline:
-    """Composition root for the event-driven choreography (ADR 0007)."""
+    """Composition root for the event-driven choreography (ADR 0007).
+
+    Args:
+        settings: Engine settings.
+        auto_approve_review: Whether review auto-approves.
+
+    Returns:
+        EventPipeline: Configured pipeline.
+
+    """
     settings = settings or Settings.load()
 
     search = DemuxSearchAdapter(_federated_sources(settings))

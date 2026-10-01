@@ -33,11 +33,23 @@ _ESUMMARY = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
 
 
 class PubMedAdapter(SearchPort, FetchPort):
-    """Biomedical search over PubMed E-utilities (free, keyless, 3 req/s)."""
+    """Biomedical search over PubMed E-utilities (free, keyless, 3 req/s).
+
+    Attributes:
+        name: Attribute description.
+    """
 
     name = "pubmed"
 
     def __init__(self, *, timeout: float = 15.0, min_interval: float = 0.35, tool: str = "knowledge-engine") -> None:
+        """Create a PubMedAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+            min_interval: Minimum interval in seconds.
+            tool: Tool specification.
+
+        """
         self._timeout = timeout
         self._min_interval = min_interval
         self._tool = tool
@@ -45,10 +57,27 @@ class PubMedAdapter(SearchPort, FetchPort):
         self._last_call = 0.0
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": f"{self._tool}/pubmed"})
 
     async def _throttled_get(self, client: httpx.AsyncClient, url: str, params: dict) -> httpx.Response:
-        """Space keyless E-utility calls at least ``min_interval`` apart."""
+        """Space keyless E-utility calls at least ``min_interval`` apart.
+
+        Args:
+            client: Async HTTP client.
+            url: Target URL.
+            params: Query parameters.
+
+        Returns:
+            httpx.Response: HTTP response.
+
+        """
         async with self._lock:
             wait = self._min_interval - (time.monotonic() - self._last_call)
             if wait > 0:
@@ -59,6 +88,17 @@ class PubMedAdapter(SearchPort, FetchPort):
 
     @staticmethod
     def _to_record(pmid: str, item: dict) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            pmid: PubMed identifier.
+            item: Item.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         authors = [a.get("name", "") for a in item.get("authors", []) if a.get("name")]
         doi: str | None = None
         for ident in item.get("articleids", []):
@@ -81,7 +121,16 @@ class PubMedAdapter(SearchPort, FetchPort):
         )
 
     async def _summaries(self, client: httpx.AsyncClient, pmids: list[str]) -> list[SourceRecord]:
-        """One batched esummary call for up to ~200 PMIDs."""
+        """One batched esummary call for up to ~200 PMIDs.
+
+        Args:
+            client: Async HTTP client.
+            pmids: PubMed identifiers.
+
+        Returns:
+            list[SourceRecord]: Resolved sources.
+
+        """
         if not pmids:
             return []
         resp = await self._throttled_get(client, _ESUMMARY, {"db": "pubmed", "id": ",".join(pmids), "retmode": "json"})

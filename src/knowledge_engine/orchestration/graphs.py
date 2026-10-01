@@ -48,7 +48,18 @@ _TIMEOUT = TimeoutPolicy(run_timeout=300, idle_timeout=120)
 
 @dataclass(frozen=True)
 class NodeSet:
-    """Immutable bundle of dependency-injected node instances (composition root)."""
+    """Immutable bundle of dependency-injected node instances (composition root).
+
+    Attributes:
+        ingest: Ingest node.
+        relevance: Relevance node.
+        bodies: Bodies node.
+        fetch_body: Fetch-body node.
+        synthesize: Synthesize node.
+        judge: Judge node.
+        review: Review node.
+        render: Render node.
+    """
 
     ingest: IngestNode
     relevance: RelevanceNode
@@ -61,13 +72,33 @@ class NodeSet:
 
 
 async def _error_handler(state: WorkflowState, error: NodeError) -> dict[str, Any]:
-    """Compensation: mark the run failed instead of aborting the thread."""
+    """Compensation: mark the run failed instead of aborting the thread.
+
+    Args:
+        state: Current workflow state.
+        error: Node error.
+
+    Returns:
+        dict[str, Any]: Partial state marking the run failed.
+    """
     logger.error("node %s failed: %s", error.node, error.error)
     return {"status": "failed", "judge_critique": f"failed at {error.node}: {error.error}"}
 
 
 def build_workflow(name: str, nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
-    """Build and compile the requested workflow graph."""
+    """Build and compile the requested workflow graph.
+
+    Args:
+        name: Workflow name.
+        nodes: Node set.
+        checkpointer: Durability checkpointer.
+
+    Returns:
+        Any: Compiled graph.
+
+    Raises:
+        ValueError: When the workflow name is unknown.
+    """
     builder = {"research": _build_research, "qa": _build_qa, "summary": _build_summary}.get(name)
     if builder is None:
         raise ValueError(f"unknown workflow: {name!r}")
@@ -75,6 +106,11 @@ def build_workflow(name: str, nodes: NodeSet, *, checkpointer: BaseCheckpointSav
 
 
 def _base() -> StateGraph[Any, Any, Any, Any]:
+    """Create a state graph with fault-tolerance defaults.
+
+    Returns:
+        StateGraph[Any, Any, Any, Any]: Configured graph builder.
+    """
     g = StateGraph(WorkflowState)
     # error_handler must be an async node (timeouts are async-only in langgraph).
     g.set_node_defaults(retry_policy=_RETRY, timeout=_TIMEOUT, error_handler=_error_handler)  # type: ignore[arg-type]
@@ -82,6 +118,12 @@ def _base() -> StateGraph[Any, Any, Any, Any]:
 
 
 def _register(g: StateGraph[Any, Any, Any, Any], nodes: NodeSet) -> None:
+    """Register nodes on a graph builder.
+
+    Args:
+        g: Graph builder.
+        nodes: Node set.
+    """
     g.add_node("ingest", nodes.ingest)
     g.add_node("relevance", nodes.relevance)
     g.add_node("bodies", nodes.bodies)
@@ -93,6 +135,15 @@ def _register(g: StateGraph[Any, Any, Any, Any], nodes: NodeSet) -> None:
 
 
 def _build_research(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
+    """Build the research workflow graph.
+
+    Args:
+        nodes: Node set.
+        checkpointer: Durability checkpointer.
+
+    Returns:
+        Any: Compiled research graph.
+    """
     g = _base()
     _register(g, nodes)
     g.add_edge(START, "ingest")
@@ -107,7 +158,15 @@ def _build_research(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | 
 
 
 def _build_qa(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
-    """Q&A: no body fan-out, no judge loop — answer from abstracts directly."""
+    """Q&A: no body fan-out, no judge loop — answer from abstracts directly.
+
+    Args:
+        nodes: Node set.
+        checkpointer: Durability checkpointer.
+
+    Returns:
+        Any: Compiled QA graph.
+    """
     g = _base()
     _register(g, nodes)
     g.add_edge(START, "ingest")
@@ -119,7 +178,15 @@ def _build_qa(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None =
 
 
 def _build_summary(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
-    """Summary: ingest + bodies + synthesize (no relevance gate, no judge)."""
+    """Summary: ingest + bodies + synthesize (no relevance gate, no judge).
+
+    Args:
+        nodes: Node set.
+        checkpointer: Durability checkpointer.
+
+    Returns:
+        Any: Compiled summary graph.
+    """
     g = _base()
     _register(g, nodes)
     g.add_edge(START, "ingest")

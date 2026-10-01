@@ -14,12 +14,29 @@ from knowledge_engine.core.ports import ScrapePort
 
 
 def build_scrape_server(scrape: ScrapePort, *, name: str = "web-scraper") -> FastMCP:
-    """Construct an in-process FastMCP server exposing ``fetch_markdown``."""
+    """Construct an in-process FastMCP server exposing ``fetch_markdown``.
+
+    Args:
+        scrape: Scrape-to-markdown port.
+        name: Object name.
+
+    Returns:
+        FastMCP: Configured server.
+
+    """
     server = FastMCP(name)
 
     @server.tool
     async def fetch_markdown(url: str) -> dict[str, Any]:
-        """Fetch a URL and return LLM-ready Markdown."""
+        """Fetch a URL and return LLM-ready Markdown.
+
+        Args:
+            url: Target URL.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         body = await scrape.to_markdown(url)
         return body.model_dump(mode="json")
 

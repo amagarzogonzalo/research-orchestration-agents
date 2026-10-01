@@ -8,7 +8,20 @@ from knowledge_engine.schemas.source import SourceRecord
 
 
 class KnowledgeArtifact(BaseModel):
-    """Schema.org-aligned Markdown artifact with rigorous YAML frontmatter."""
+    """Schema.org-aligned Markdown artifact with rigorous YAML frontmatter.
+
+    Attributes:
+        model_config: Attribute description.
+        id: Attribute description.
+        type: Attribute description.
+        title: Attribute description.
+        provenance: Attribute description.
+        body_markdown: Attribute description.
+        frontmatter_yaml: Attribute description.
+        citations: Attribute description.
+        tldr_llm: Attribute description.
+        generated_at: Attribute description.
+    """
 
     model_config = ConfigDict(extra="forbid")
 

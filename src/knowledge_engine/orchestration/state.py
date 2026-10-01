@@ -25,9 +25,24 @@ from knowledge_engine.schemas.source import DocumentBody, SourceRecord
 class WorkflowState(TypedDict, total=False):
     """Raw typed channel state shared by all nodes/graphs.
 
-    Accumulated channels use an ``add`` reducer so LangGraph appends rather
-    than overwrites — required for the judge→synthesize optimizer loop and the
-    ``Send`` fan-out back into ``bodies``.
+        Accumulated channels use an ``add`` reducer so LangGraph appends rather
+        than overwrites — required for the judge→synthesize optimizer loop and the
+        ``Send`` fan-out back into ``bodies``.
+
+    Attributes:
+        thread_id: Attribute description.
+        workflow: Attribute description.
+        query: Attribute description.
+        sources: Attribute description.
+        filtered: Attribute description.
+        bodies: Attribute description.
+        notes: Attribute description.
+        judge_score: Attribute description.
+        judge_critique: Attribute description.
+        iterations: Attribute description.
+        review_dir: Attribute description.
+        output_path: Attribute description.
+        status: Attribute description.
     """
 
     thread_id: str
@@ -46,7 +61,15 @@ class WorkflowState(TypedDict, total=False):
 
 
 def to_graph_state(state: WorkflowState) -> GraphState:
-    """Materialize a durable :class:`GraphState` snapshot from channel state."""
+    """Materialize a durable :class:`GraphState` snapshot from channel state.
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        GraphState: Durable state snapshot.
+
+    """
     return GraphState(
         thread_id=state.get("thread_id", ""),
         query=state.get("query", ""),
@@ -74,14 +97,43 @@ class WorkflowNode:
     __slots__ = ()
 
     async def run(self, state: WorkflowState) -> dict[str, Any] | Command[Any]:  # pragma: no cover - interface
-        """Execute the node, returning the partial state writes or a Command."""
+        """Execute the node, returning the partial state writes or a Command.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any] | Command[Any]: State update or routing command.
+
+        Raises:
+            NotImplementedError: When the operation fails.
+
+        """
         raise NotImplementedError
 
     async def __call__(self, state: WorkflowState) -> dict[str, Any] | Command[Any]:
+        """Run the node.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any] | Command[Any]: State update or routing command.
+
+        """
         return await self.run(state)
 
     def command(self, *, update: dict[str, Any] | None = None, goto: str | Sequence[Send] | Send) -> Command[Any]:
-        """SOTA routing: combine a state update with an explicit next node."""
+        """SOTA routing: combine a state update with an explicit next node.
+
+        Args:
+            update: State update mapping.
+            goto: Next node routing.
+
+        Returns:
+            Command[Any]: Routing command.
+
+        """
         return Command(update=update or {}, goto=goto)
 
 

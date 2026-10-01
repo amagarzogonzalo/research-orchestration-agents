@@ -14,17 +14,46 @@ _BASE = "https://api.crossref.org"
 
 
 class CrossrefAdapter(SearchPort, FetchPort):
+    """CrossrefAdapter.
+
+    Attributes:
+        name: Attribute description."""
+
     name = "crossref"
 
     def __init__(self, mailto: str, *, timeout: float = 15.0) -> None:
+        """Create a CrossrefAdapter.
+
+        Args:
+            mailto: Contact email for API etiquette.
+            timeout: Request timeout in seconds.
+
+        """
         self.mailto = mailto
         self._timeout = timeout
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": f"knowledge-engine/{self.mailto}"})
 
     @staticmethod
     def _to_record(item: dict) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            item: Item.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         title = (item.get("title") or [""])[0]
         authors = []
         for a in item.get("author", []):
@@ -48,6 +77,18 @@ class CrossrefAdapter(SearchPort, FetchPort):
         )
 
     async def fetch(self, doi: str) -> SourceRecord | None:
+        """Fetch a record.
+
+        Args:
+            doi: Digital object identifier.
+
+        Returns:
+            SourceRecord | None: Record or None when unknown.
+
+        Raises:
+            SearchError: When the operation fails.
+
+        """
         url = f"{_BASE}/works/{doi}"
         try:
             async with self._client() as client:
@@ -60,6 +101,19 @@ class CrossrefAdapter(SearchPort, FetchPort):
             raise SearchError(f"Crossref fetch failed for {doi}: {exc}") from exc
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
+        """Search scholarly sources.
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            list[SourceRecord]: Resolved sources.
+
+        Raises:
+            SearchError: When the operation fails.
+
+        """
         url = f"{_BASE}/works"
         params = {"query": query, "rows": limit, "mailto": self.mailto}
         try:

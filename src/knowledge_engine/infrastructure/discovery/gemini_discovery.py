@@ -37,6 +37,13 @@ class GeminiDiscovery(LLMDiscoveryPort):
         *,
         timeout: float = 120.0,
     ) -> None:
+        """Create a GeminiDiscovery.
+
+        Args:
+            api_key: API key.
+            candidate_models: Candidate model identifiers.
+            timeout: Request timeout in seconds.
+        """
         self.api_key = api_key
         self.timeout = timeout
         self.candidates = candidate_models or ["gemini-flash-lite-latest", "gemini-2.0-flash"]
@@ -44,6 +51,22 @@ class GeminiDiscovery(LLMDiscoveryPort):
         self._cache_time = 0.0
 
     async def _generate(self, model_id: ModelId, prompt: str, max_tokens: int, temperature: float = 0.4) -> str:
+        """Generate a response.
+
+        Args:
+            model_id: Model identifier.
+            prompt: Prompt text.
+            max_tokens: Maximum tokens.
+            temperature: Sampling temperature.
+
+        Returns:
+            str: Result text.
+
+        Raises:
+            CompletionError: When the operation fails.
+
+
+        """
         if not self.api_key:
             raise CompletionError("GEMINI_API_KEY is not set")
         async with httpx.AsyncClient(timeout=self.timeout) as client:
@@ -68,12 +91,26 @@ class GeminiDiscovery(LLMDiscoveryPort):
         return text
 
     async def list_free_models(self) -> list[FreeModel]:
+        """List free models.
+
+        Returns:
+            list[FreeModel]: Available free models.
+        """
         if self._cache is None or time.monotonic() - self._cache_time > _CACHE_TTL_SECONDS:
             self._cache = [FreeModel(model_id=m, provider="Gemini", context_length=128_000) for m in self.candidates]
             self._cache_time = time.monotonic()
         return list(self._cache)
 
     async def test(self, model_id: ModelId) -> TestResult:
+        """Test a model.
+
+        Args:
+            model_id: Model identifier.
+
+        Returns:
+            TestResult: Health-check outcome.
+
+        """
         try:
             content = strip_reasoning_prefix(
                 await self._generate(model_id, "Reply with a short, well-formed sentence (at least 5 words).", 40, 0.0)
@@ -91,6 +128,20 @@ class GeminiDiscovery(LLMDiscoveryPort):
             return TestResult(model_id, False, "error")
 
     async def complete(self, model_id: ModelId, prompt: str) -> str:
+        """Complete a request.
+
+        Args:
+            model_id: Model identifier.
+            prompt: Prompt text.
+
+        Returns:
+            str: Result text.
+
+        Raises:
+            CompletionError: When generation fails.
+
+
+        """
         try:
             return strip_reasoning_prefix(await self._generate(model_id, prompt, 3000, 0.4))
         except CompletionError:

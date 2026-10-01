@@ -13,7 +13,18 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class BrowserActionResult(BaseModel):
-    """Outcome of a single browser action."""
+    """Outcome of a single browser action.
+
+    Attributes:
+        model_config: Attribute description.
+        ok: Attribute description.
+        action: Attribute description.
+        url: Attribute description.
+        text: Attribute description.
+        markdown: Attribute description.
+        screenshot_path: Attribute description.
+        meta: Attribute description.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -36,7 +47,20 @@ class BrowserActionResult(BaseModel):
         screenshot_path: str | None = None,
         **meta: Any,
     ) -> BrowserActionResult:
-        """Build a success result with the shared fields populated."""
+        """Build a success result with the shared fields populated.
+
+        Args:
+            action: Browser action name.
+            url: Target URL.
+            text: Encoded text.
+            markdown: Markdown content.
+            screenshot_path: Screenshot path.
+            **meta: Extra metadata.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+
+        """
         return cls(
             ok=True,
             action=action,
@@ -49,7 +73,17 @@ class BrowserActionResult(BaseModel):
 
     @classmethod
     def failure(cls, action: str, reason: str, *, url: str = "") -> BrowserActionResult:
-        """Build a failure result carrying the reason in meta."""
+        """Build a failure result carrying the reason in meta.
+
+        Args:
+            action: Browser action name.
+            reason: Failure reason.
+            url: Target URL.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+
+        """
         return cls(ok=False, action=action, url=url, meta={"reason": reason})
 
 

@@ -20,7 +20,15 @@ ACTION_BUDGET = "fail_budget"
 
 @dataclass
 class SelectionState:
-    """Mutable progress of the selection loop (pure; no I/O)."""
+    """Mutable progress of the selection loop (pure; no I/O).
+
+    Attributes:
+        candidates: Attribute description.
+        max_attempts: Attribute description.
+        tried: Attribute description.
+        attempts: Attribute description.
+        selected: Attribute description.
+    """
 
     candidates: list[ModelId]
     max_attempts: int = 5
@@ -30,23 +38,44 @@ class SelectionState:
 
     @property
     def untried(self) -> list[ModelId]:
-        """Ordered candidates not yet tested."""
+        """Ordered candidates not yet tested.
+
+        Returns:
+            list[ModelId]: Candidate model identifiers.
+
+        """
         return [m for m in self.candidates if m not in self.tried]
 
     @property
     def exhausted(self) -> bool:
-        """True when every candidate has been tested."""
+        """True when every candidate has been tested.
+
+        Returns:
+            bool: True on success.
+
+        """
         return not self.untried
 
     @property
     def budget_exceeded(self) -> bool:
-        """True when the attempt budget has been spent."""
+        """True when the attempt budget has been spent.
+
+        Returns:
+            bool: True on success.
+
+        """
         return self.attempts >= self.max_attempts
 
 
 @dataclass(frozen=True)
 class SelectionDecision:
-    """Outcome of processing one test result."""
+    """Outcome of processing one test result.
+
+    Attributes:
+        action: Attribute description.
+        selected: Attribute description.
+        reason: Attribute description.
+    """
 
     action: str
     selected: ModelId | None = None
@@ -58,7 +87,15 @@ class ModelSelectionPolicy:
 
     @staticmethod
     def initial(state: SelectionState) -> SelectionDecision:
-        """Return the action before any test is run."""
+        """Return the action before any test is run.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            SelectionDecision: Selection decision.
+
+        """
         if not state.candidates:
             return SelectionDecision(ACTION_EXHAUSTED, reason="no free models available")
         return SelectionDecision(ACTION_CONTINUE, reason="starting model selection")

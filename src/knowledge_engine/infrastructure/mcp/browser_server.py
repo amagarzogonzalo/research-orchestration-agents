@@ -19,11 +19,12 @@ def build_browser_server(browser: BrowserPort | BrowserActionPort, *, name: str 
     """Construct an in-process FastMCP server exposing ``browser_act``.
 
     Args:
-        browser: Any object implementing ``act(action, **kwargs)``.
-        name: Server name used for tool namespace.
+            browser: Any object implementing ``act(action, **kwargs)``.
+            name: Server name used for tool namespace.
+
 
     Returns:
-        FastMCP: A configured server whose ``browser_act`` tool calls the browser.
+            FastMCP: A configured server whose ``browser_act`` tool calls the browser.
     """
     server = FastMCP(name)
 
@@ -33,7 +34,7 @@ def build_browser_server(browser: BrowserPort | BrowserActionPort, *, name: str 
         extract_markdown, screenshot, or assert_visible. Returns a JSON-safe result.
 
         Args:
-            action: The browser action to perform.
+            action: Browser action name.
             **kwargs: Action-specific arguments (url, selector, value, path...).
 
         Returns:
@@ -41,6 +42,7 @@ def build_browser_server(browser: BrowserPort | BrowserActionPort, *, name: str 
 
         Raises:
             RuntimeError: If the browser has no ``act`` method.
+
         """
         method = getattr(browser, "act", None)
         if method is None:

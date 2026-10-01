@@ -47,7 +47,18 @@ from knowledge_engine.store.research_store import ResearchStore
 
 @dataclass
 class ResearchEngine:
-    """High-level research library surface (files-only persistence)."""
+    """High-level research library surface (files-only persistence).
+
+    Attributes:
+        store_root: Attribute description.
+        search_limit: Attribute description.
+        auto_approve_review: Attribute description.
+        search: Attribute description.
+        scrape: Attribute description.
+        provider: Attribute description.
+        browser: Attribute description.
+        discoverer: Attribute description.
+    """
 
     store_root: str = "research_store"
     search_limit: int = 10
@@ -66,6 +77,7 @@ class ResearchEngine:
     _discoverer: ModelDiscoverer = field(init=False)
 
     def __post_init__(self) -> None:
+        """Initialize derived components."""
         load_dotenv()
         self._store = ResearchStore(self.store_root)
         self._checkpointer = FileCheckpointer(f"{self.store_root}/checkpoints")
@@ -76,15 +88,36 @@ class ResearchEngine:
 
     @property
     def store(self) -> ResearchStore:
-        """The files-only persistence store backing this engine."""
+        """The files-only persistence store backing this engine.
+
+        Returns:
+            ResearchStore: Persistence store.
+
+        """
         return self._store
 
     @property
     def checkpointer(self) -> FileCheckpointer:
-        """File-based LangGraph checkpointer (durability + HITL)."""
+        """File-based LangGraph checkpointer (durability + HITL).
+
+        Returns:
+            FileCheckpointer: Checkpoint store.
+
+        """
         return self._checkpointer
 
     def _nodeset(self, *, interactive_review: bool | None = None) -> NodeSet:
+        """Build the node set.
+
+        Args:
+            interactive_review: Whether review is interactive.
+
+        Returns:
+            NodeSet: Node bundle.
+
+
+
+        """
         review = ReviewNode(
             interactive=bool(interactive_review if interactive_review is not None else not self.auto_approve_review)
         )
@@ -100,6 +133,16 @@ class ResearchEngine:
         )
 
     def _runtime_for(self, workflow: str) -> GraphRuntime:
+        """Build the runtime for a workflow.
+
+        Args:
+            workflow: Workflow name to run.
+
+        Returns:
+            GraphRuntime: Graph runtime.
+
+
+        """
         runtime = GraphRuntime(nodes=self._nodeset(), checkpointer=self._checkpointer)
         runtime.graph(workflow)  # pre-compile
         return runtime
@@ -195,13 +238,11 @@ class ResearchEngine:
         """Discover a currently-working free LLM (health-checked).
 
         Args:
-            preferred: A model id to try first (e.g. a previously selected one).
+                    preferred: A model id to try first (e.g. a previously selected one).
+
 
         Returns:
-            str: The model id of the first free model that passed a cheap health check.
-
-        Raises:
-            ModelSelectionError: if no free model works.
+                    str: The model id of the first free model that passed a cheap health check.
         """
         return await self._discoverer.select(preferred=preferred)
 
@@ -209,15 +250,29 @@ class ResearchEngine:
 def _derived_thread_id(query: str) -> str:
     """Derive a stable thread id from a query (deterministic across processes).
 
-    ``hash()`` is seeded per-process (PYTHONHASHSEED), so it yields a *different*
-    id on every invocation — useless for restoring a thread. A content hash is
-    stable so re-submitting the same query resumes the same run.
+        ``hash()`` is seeded per-process (PYTHONHASHSEED), so it yields a *different*
+        id on every invocation — useless for restoring a thread. A content hash is
+        stable so re-submitting the same query resumes the same run.
+
+    Args:
+        query: Scholarly query string.
+
+    Returns:
+        str: Result text.
+
     """
     digest = hashlib.sha1(query.strip().encode("utf-8")).hexdigest()[:12]
     return f"t-{digest}"
 
 
 def _default_search() -> SearchPort:
+    """Build the default federated search.
+
+    Returns:
+        SearchPort: Search adapter.
+
+
+    """
     from knowledge_engine.infrastructure.search.biorxiv import BiorxivAdapter
     from knowledge_engine.infrastructure.search.dblp import DblpAdapter
     from knowledge_engine.infrastructure.search.doaj import DoajAdapter
@@ -248,6 +303,12 @@ def _default_search() -> SearchPort:
 
 
 def _default_provider() -> Any:
+    """Build the default provider router.
+
+    Returns:
+        Any: Result.
+
+    """
     from knowledge_engine.infrastructure.providers import (
         GeminiAdapter,
         GroqAdapter,
@@ -264,6 +325,13 @@ def _default_provider() -> Any:
 
 
 def _default_discoverer() -> ModelDiscoverer:
+    """Build the default model discoverer.
+
+    Returns:
+        ModelDiscoverer: Configured discoverer.
+
+
+    """
     return ModelDiscoverer.from_settings(
         groq_key=os.environ.get("GROQ_API_KEY"),
         mistral_key=os.environ.get("MISTRAL_API_KEY"),
