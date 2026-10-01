@@ -41,7 +41,7 @@ class ChatRequest(BaseModel):
     response_model: str | None = None  # dotted path to a Pydantic model for Instructor
 
     @classmethod
-    def of(cls, system: str, user: str, **kwargs) -> "ChatRequest":
+    def of(cls, system: str, user: str, **kwargs) -> ChatRequest:
         return cls(
             messages=[
                 ChatMessage(role=Role.system, content=system),
@@ -70,7 +70,7 @@ class ChatResult(BaseModel):
     meta: dict = Field(default_factory=dict)
 
     @classmethod
-    def from_response(cls, text: str, *, provider: str, model: str, usage: UsageSummary) -> "ChatResult":
+    def from_response(cls, text: str, *, provider: str, model: str, usage: UsageSummary) -> ChatResult:
         return cls(
             message=ChatMessage(role=Role.assistant, content=text),
             usage=usage,

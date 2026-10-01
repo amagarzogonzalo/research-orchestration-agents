@@ -7,7 +7,7 @@ back to search, and always pass `mailto` for polite-pool quota.
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import httpx
 
@@ -48,7 +48,7 @@ class OpenAlexAdapter(SearchPort, FetchPort):
             abstract=abstract_text,
             pdf_url=best_oa.get("pdf_url"),
             citation_count=item.get("cited_by_count", 0),
-            fetched_at=datetime.now(timezone.utc).isoformat(),
+            fetched_at=datetime.now(UTC).isoformat(),
         )
 
     async def fetch(self, doi: str) -> SourceRecord | None:

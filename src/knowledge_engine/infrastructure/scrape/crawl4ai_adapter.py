@@ -7,7 +7,7 @@ ever sees the content (which is the whole point on rate-limited free tiers).
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
@@ -41,7 +41,7 @@ class Crawl4aiAdapter(ScrapePort):
             markdown=markdown,
             char_count=len(markdown),
             crawl_method=FetchMethod.CRAWL4AI,
-            captured_at=datetime.now(timezone.utc).isoformat(),
+            captured_at=datetime.now(UTC).isoformat(),
         )
 
 

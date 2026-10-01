@@ -10,14 +10,16 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any
 
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Send
 
 from knowledge_engine.core.ports import BrokerPort, ProviderPort, ScrapePort, SearchPort
-from knowledge_engine.schemas.extraction import ExtractionKind, ExtractionRequest, GraphState, GraphStatus
+from knowledge_engine.schemas.extraction import (
+    GraphState,
+    GraphStatus,
+)
 from knowledge_engine.schemas.provider import Affinity, ChatRequest, ChatResult
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
 
@@ -106,7 +108,10 @@ class Pipeline:
 
     async def judge(self, state: GraphState) -> dict:
         req = ChatRequest.of(
-            system="Score groundedness and citation integrity 0-1 on the synthesis. Reply as JSON {\"score\": float, \"pass\": bool, \"critique\": str}.",
+            system=(
+                "Score groundedness and citation integrity 0-1 on the synthesis. "
+                'Reply as JSON {"score": float, "pass": bool, "critique": str}.'
+            ),
             user="\n\n".join(state.synthetic_notes),
             affinity=Affinity.MACRO,
             max_tokens=300,

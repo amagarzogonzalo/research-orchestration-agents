@@ -13,8 +13,8 @@ import asyncio
 import logging
 import time
 import uuid
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
-from typing import Awaitable, Callable
 
 import redis.asyncio as aioredis
 
@@ -24,39 +24,6 @@ logger = logging.getLogger(__name__)
 
 Handler = Callable[["Envelope"], Awaitable[None]]
 DISPATCH_DELAY_SECONDS = 0.05
-
-
-@dataclass
-class Envelope:
-    """Typed message envelope carrying a versioned, validated payload."""
-
-    event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    schema_version: int = 1
-    type: str = ""
-    payload: dict = field(default_factory=dict)
-    attempt: int = 0
-    error: str | None = None
-
-    def to_dict(self) -> dict:
-        return {
-            "event_id": self.event_id,
-            "schema_version": self.schema_version,
-            "type": self.type,
-            "payload": self.payload,
-            "attempt": self.attempt,
-            "error": self.error,
-        }
-
-    @classmethod
-    def from_dict(cls, data: dict) -> "Envelope":
-        return cls(
-            event_id=data.get("event_id", str(uuid.uuid4())),
-            schema_version=data.get("schema_version", 1),
-            type=data.get("type", ""),
-            payload=data.get("payload", {}),
-            attempt=data.get("attempt", 0),
-            error=data.get("error"),
-        )
 
 
 @dataclass
@@ -85,7 +52,7 @@ class Envelope:
         }
 
     @classmethod
-    def from_dict(cls, data: dict) -> "Envelope":
+    def from_dict(cls, data: dict) -> Envelope:
         return cls(
             event_id=data.get("event_id", str(uuid.uuid4())),
             schema_version=data.get("schema_version", 1),
@@ -97,7 +64,7 @@ class Envelope:
             created_at=data.get("created_at", time.time()),
         )
 
-    def with_payload(self, payload: dict, *, type_: str | None = None, event_id: str | None = None) -> "Envelope":
+    def with_payload(self, payload: dict, *, type_: str | None = None, event_id: str | None = None) -> Envelope:
         """Return a successor envelope (new id, same correlation)."""
         return Envelope(
             schema_version=self.schema_version,
@@ -120,7 +87,9 @@ class RedisStreamBroker:
         self._group_ok: set[str] = set()
 
     @classmethod
-    def from_redis(cls, rc: aioredis.Redis, *, max_attempts: int = 3, dedupe_enabled: bool = True) -> "RedisStreamBroker":
+    def from_redis(
+        cls, rc: aioredis.Redis, *, max_attempts: int = 3, dedupe_enabled: bool = True
+    ) -> RedisStreamBroker:
         broker = cls.__new__(cls)
         broker.rc = rc
         broker.max_attempts = max_attempts
@@ -173,7 +142,9 @@ class RedisStreamBroker:
             for msg_id, fields in messages:
                 envelope = Envelope.from_dict(fields)
                 if envelope.schema_version != 1:
-                    await self._requeue_or_dead(stream, group, msg_id, fields, KnowledgeEngineError("unsupported schema_version"))
+                    await self._requeue_or_dead(
+                        stream, group, msg_id, fields, KnowledgeEngineError("unsupported schema_version")
+                    )
                     continue
                 if await self._already_processed(envelope.event_id):
                     logger.debug("dedupe: skip already-processed event %s", envelope.event_id)

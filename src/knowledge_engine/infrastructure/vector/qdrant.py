@@ -16,7 +16,9 @@ except ImportError:  # pragma: no cover
 
 
 class QdrantAdapter:
-    def __init__(self, url: str, collection: str = "sources", *, embedding_provider: ProviderPort | None = None) -> None:
+    def __init__(
+        self, url: str, collection: str = "sources", *, embedding_provider: ProviderPort | None = None
+    ) -> None:
         if AsyncQdrantClient is None:
             raise ImportError("qdrant-client not installed; add the 'vector' extra")
         self.client = AsyncQdrantClient(url=url)
