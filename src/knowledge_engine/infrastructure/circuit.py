@@ -8,21 +8,23 @@ Redis outage.
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING
 
-import redis.asyncio as aioredis
+if TYPE_CHECKING:
+    import redis.asyncio as aioredis
 
 
 class CircuitBreaker:
+    """Per-provider circuit breaker with Redis-backed and in-process state.
+
+    Args:
+        rc: Redis client (None selects the in-process fallback).
+        name: Provider name used to namespace breaker keys.
+        threshold: Consecutive failures before tripping.
+        cooldown: Trip cooldown in seconds.
+    """
+
     def __init__(self, rc: aioredis.Redis | None, name: str, *, threshold: int = 3, cooldown: float = 60.0) -> None:
-        """Create a CircuitBreaker.
-
-        Args:
-            rc: Redis client.
-            name: Object name.
-            threshold: Failure threshold.
-            cooldown: Cooldown in seconds.
-
-        """
         self.rc = rc
         self.name = name
         self.threshold = threshold

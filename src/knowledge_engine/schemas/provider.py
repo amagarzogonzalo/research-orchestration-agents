@@ -65,7 +65,8 @@ class ChatRequest(BaseModel):
         temperature: Attribute description.
         max_tokens: Attribute description.
         affinity: Attribute description.
-        response_model: Attribute description."""
+        response_model: Attribute description.
+        tools: Attribute description."""
 
     model_config = ConfigDict(extra="forbid")
 
@@ -74,6 +75,7 @@ class ChatRequest(BaseModel):
     max_tokens: int = Field(default=1024, ge=1)
     affinity: Affinity = Affinity.MACRO
     response_model: str | None = None  # dotted path to a Pydantic model for Instructor
+    tools: list[dict[str, Any]] | None = None  # OpenAI-style JSON tool schemas (agent nodes)
 
     @classmethod
     def of(cls, system: str, user: str, **kwargs: Any) -> ChatRequest:
@@ -131,7 +133,7 @@ class ChatResult(BaseModel):
     usage: UsageSummary
     provider: str  # adapter that served the request
     model: str  # actual model id returned
-    meta: dict = Field(default_factory=dict)
+    meta: dict[str, Any] = Field(default_factory=dict)
 
     @classmethod
     def from_response(cls, text: str, *, provider: str, model: str, usage: UsageSummary) -> ChatResult:

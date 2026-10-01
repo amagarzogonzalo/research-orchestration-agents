@@ -7,7 +7,9 @@ exchanges only Pydantic types defined under :mod:`knowledge_engine.schemas`.
 from __future__ import annotations
 
 import abc
+from typing import Any
 
+from knowledge_engine.schemas.browser import BrowserActionResult
 from knowledge_engine.schemas.extraction import ExtractionRequest
 from knowledge_engine.schemas.provider import ChatRequest, ChatResult
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
@@ -114,5 +116,128 @@ class BrokerPort(abc.ABC):
             group: Consumer group name.
             consumer: Consumer name.
             handler: Event handler callable.
+        """
+        ...
+
+
+class BrowserPort(abc.ABC):
+    """Full browser automation: render + interact with live pages."""
+
+    @abc.abstractmethod
+    async def navigate(self, url: str, *, wait_selector: str = "body") -> BrowserActionResult:
+        """Navigate to a URL.
+
+        Args:
+            url: Target URL.
+            wait_selector: Selector to wait for.
+
+        Returns:
+            BrowserActionResult: Navigation outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def click(self, selector: str, *, timeout_ms: int = 10_000) -> BrowserActionResult:
+        """Click an element.
+
+        Args:
+            selector: CSS selector.
+            timeout_ms: Wait timeout in milliseconds.
+
+        Returns:
+            BrowserActionResult: Click outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def fill(self, selector: str, value: str) -> BrowserActionResult:
+        """Fill an input field.
+
+        Args:
+            selector: CSS selector.
+            value: Value to fill.
+
+        Returns:
+            BrowserActionResult: Fill outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def submit(self, selector: str | None = None) -> BrowserActionResult:
+        """Submit a form.
+
+        Args:
+            selector: Optional submit-button selector.
+
+        Returns:
+            BrowserActionResult: Submit outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def extract_text(self, selector: str = "body") -> BrowserActionResult:
+        """Extract visible text.
+
+        Args:
+            selector: CSS selector scope.
+
+        Returns:
+            BrowserActionResult: Extraction outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def extract_markdown(self) -> BrowserActionResult:
+        """Extract the page as Markdown.
+
+        Returns:
+            BrowserActionResult: Extraction outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def screenshot(self, path: str | None = None) -> BrowserActionResult:
+        """Capture a screenshot.
+
+        Args:
+            path: Optional output path.
+
+        Returns:
+            BrowserActionResult: Screenshot outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def assert_visible(self, selector: str, *, timeout_ms: int = 10_000) -> BrowserActionResult:
+        """Assert an element is visible.
+
+        Args:
+            selector: CSS selector.
+            timeout_ms: Wait timeout in milliseconds.
+
+        Returns:
+            BrowserActionResult: Assertion outcome.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def close(self) -> None:
+        """Release browser resources."""
+        ...
+
+
+class BrowserActionPort(abc.ABC):
+    """Serializable action surface for agent tools (MCP ``browser_act``)."""
+
+    @abc.abstractmethod
+    async def act(self, action: str, **kwargs: Any) -> BrowserActionResult:
+        """Dispatch a named browser action.
+
+        Args:
+            action: Action name (navigate/click/fill/submit/...).
+            **kwargs: Action-specific arguments.
+
+        Returns:
+            BrowserActionResult: Action outcome.
         """
         ...

@@ -29,7 +29,15 @@ MAX_EVAL_ITERATIONS = 2
 
 
 class Pipeline:
-    """Assembles + runs the LangGraph state machine over injected ports."""
+    """Assembles + runs the LangGraph state machine over injected ports.
+
+    Args:
+        search: Scholarly search port.
+        scrape: Scrape-to-markdown port.
+        provider: Provider key for rate limiting.
+        broker: Event broker transport.
+        checkpointer: Durability checkpointer.
+    """
 
     def __init__(
         self,
@@ -40,15 +48,6 @@ class Pipeline:
         broker: BrokerPort,
         checkpointer: PostgresSaver | None = None,
     ) -> None:
-        """Create a Pipeline.
-
-        Args:
-            search: Scholarly search port.
-            scrape: Scrape-to-markdown port.
-            provider: Provider key for rate limiting.
-            broker: Event broker transport.
-            checkpointer: Durability checkpointer.
-        """
         self.search = search
         self.scrape = scrape
         self.provider = provider
