@@ -29,10 +29,25 @@ class RenderNode(WorkflowNode):
     __slots__ = ("_root", "_save")
 
     def __init__(self, root: str = "knowledge_base", save: Any | None = None) -> None:
+        """Create a RenderNode.
+
+        Args:
+            root: Store root directory.
+            save: Optional save callable.
+        """
         self._root = root
         self._save = save  # async (KnowledgeArtifact) -> str (output_path)
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         notes = "\n\n".join(state.get("notes", []))
         provenance = state.get("filtered") or state.get("sources", [])
         title = _title_from(state.get("query", ""))
@@ -54,6 +69,17 @@ class RenderNode(WorkflowNode):
 
 
 def _frontmatter(state: WorkflowState, title: str, provenance: list[SourceRecord]) -> str:
+    """Frontmatter.
+
+    Args:
+        state: Current workflow state.
+        title: Title text.
+        provenance: Provenance records.
+
+    Returns:
+        str: Result text.
+
+    """
     meta = {
         "@id": state.get("thread_id"),
         "type": "KnowledgeBaseArticle",
@@ -67,14 +93,40 @@ def _frontmatter(state: WorkflowState, title: str, provenance: list[SourceRecord
 
 
 def _tldr(notes: str) -> str:
+    """Tldr.
+
+    Args:
+        notes: Review notes.
+
+    Returns:
+        str: Result text.
+
+    """
     return (notes.replace("\n", " ").strip() or "")[:200]
 
 
 def _title_from(query: str) -> str:
+    """Title from.
+
+    Args:
+        query: Scholarly query string.
+
+    Returns:
+        str: Result text.
+    """
     return query.strip().strip("?")[:80] or "Research Notes"
 
 
 async def _default_save(root: str, artifact: KnowledgeArtifact) -> str:
+    """Default save.
+
+    Args:
+        root: Store root directory.
+        artifact: Final knowledge artifact.
+
+    Returns:
+        str: Result text.
+    """
     path = Path(root) / artifact.id / "article.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(f"---\n{artifact.frontmatter_yaml}---\n\n{artifact.body_markdown}\n", encoding="utf-8")

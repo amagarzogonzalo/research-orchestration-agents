@@ -17,6 +17,17 @@ except ImportError:  # pragma: no cover
 
 class LettaMemoryAdapter:
     def __init__(self, base_url: str, token: str, *, agent_id: str | None = None) -> None:
+        """Create a LettaMemoryAdapter.
+
+        Args:
+            base_url: Base URL.
+            token: Auth token.
+            agent_id: Agent identifier.
+
+        Raises:
+            ImportError: When the operation fails.
+
+        """
         if Client is None:
             raise ImportError("letta_client not installed; add the 'memory' extra")
         self.client = Client(base_url=base_url, token=token)
@@ -24,15 +35,37 @@ class LettaMemoryAdapter:
 
     async def write(self, block: dict) -> None:
         # placeholder: agent.memory.create_block(name=..., value=...)
+        """Write.
+
+        Args:
+            block: Memory block.
+        """
         self._ensure_agent()
 
     async def read(self, name: str) -> str:
+        """Read.
+
+        Args:
+            name: Object name.
+
+        Returns:
+            str: Result text.
+        """
         self._ensure_agent()
         return ""
 
     async def forget(self, name: str) -> None:
+        """Forget.
+
+        Args:
+            name: Object name."""
         self._ensure_agent()
 
     def _ensure_agent(self) -> None:
+        """Ensure agent.
+
+        Raises:
+            RuntimeError: When the operation fails.
+        """
         if not self.agent_id:
             raise RuntimeError("LettaMemoryAdapter requires agent_id to page memory")

@@ -38,15 +38,40 @@ MAX_EVAL_ITERATIONS = 2
 
 
 def _next(state: GraphState, stream: str, type_: str) -> EventOut:
-    """Build a successor event carrying the saga state snapshot + thread id."""
+    """Build a successor event carrying the saga state snapshot + thread id.
+
+    Args:
+        state: Current workflow state.
+        stream: Stream name.
+        type_: Event type name.
+
+    Returns:
+        EventOut: Outgoing event.
+
+    """
     return EventOut(stream, type_, {"state": state.model_dump(), "thread_id": state.thread_id})
 
 
 class IngestStation:
+    """IngestStation.
+
+    Attributes:
+        name: Attribute description.
+        in_stream: Attribute description."""
+
     name = "ingest"
     in_stream = "research.inbox"
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
+        """Handle.
+
+        Args:
+            pipeline: Owning event pipeline.
+            envelope: Incoming event envelope.
+
+        Returns:
+            list[EventOut]: Successor events.
+        """
         state = decode_state(envelope)
         sources = await pipeline.search.search(state.query, limit=10)
         ns = state.model_copy(update={"sources": sources})
@@ -56,10 +81,25 @@ class IngestStation:
 
 
 class RelevanceStation:
+    """RelevanceStation.
+
+    Attributes:
+        name: Attribute description.
+        in_stream: Attribute description."""
+
     name = "relevance"
     in_stream = STREAM_SOURCES_RESOLVED
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
+        """Handle.
+
+        Args:
+            pipeline: Owning event pipeline.
+            envelope: Incoming event envelope.
+
+        Returns:
+            list[EventOut]: Successor events.
+        """
         state = decode_state(envelope)
         filtered: list[SourceRecord] = []
         for src in state.sources:
@@ -82,16 +122,38 @@ class RelevanceStation:
 
 
 class BodiesStation:
-    """Fetch LLM-ready Markdown for each filtered source (bounded fan-out)."""
+    """Fetch LLM-ready Markdown for each filtered source (bounded fan-out).
+
+    Attributes:
+        name: Attribute description.
+        in_stream: Attribute description.
+    """
 
     name = "bodies"
     in_stream = STREAM_SOURCES_FILTERED
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
+        """Handle.
+
+        Args:
+            pipeline: Owning event pipeline.
+            envelope: Incoming event envelope.
+
+        Returns:
+            list[EventOut]: Successor events.
+        """
         state = decode_state(envelope)
         sem = asyncio.Semaphore(4)
 
         async def one(src: SourceRecord) -> DocumentBody | None:
+            """One.
+
+            Args:
+                src: Source record.
+
+            Returns:
+                DocumentBody | None: Body or None.
+            """
             url = _derive_url(src)
             if not url:
                 return None
@@ -109,12 +171,26 @@ class BodiesStation:
 
 
 class SynthesizeStation:
-    """Abstractive synthesis; honors a judge critique on retry passes."""
+    """Abstractive synthesis; honors a judge critique on retry passes.
+
+    Attributes:
+        name: Attribute description.
+        in_stream: Attribute description.
+    """
 
     name = "synthesize"
     in_stream = STREAM_BODIES_READY
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
+        """Handle.
+
+        Args:
+            pipeline: Owning event pipeline.
+            envelope: Incoming event envelope.
+
+        Returns:
+            list[EventOut]: Successor events.
+        """
         state = decode_state(envelope)
         body_texts = "\n---\n".join((b.title or b.url) + "\n" + b.markdown[:4000] for b in state.bodies)
         prompt = f"Synthesize research findings into authoritative notes for:\n{state.query}\n\nSources:\n{body_texts}"
@@ -135,12 +211,26 @@ class SynthesizeStation:
 
 
 class JudgeStation:
-    """LLM-as-a-judge; gate to render or loop back to synthesize (max N)."""
+    """LLM-as-a-judge; gate to render or loop back to synthesize (max N).
+
+    Attributes:
+        name: Attribute description.
+        in_stream: Attribute description.
+    """
 
     name = "judge"
     in_stream = STREAM_JUDGED
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
+        """Handle.
+
+        Args:
+            pipeline: Owning event pipeline.
+            envelope: Incoming event envelope.
+
+        Returns:
+            list[EventOut]: Successor events.
+        """
         state = decode_state(envelope)
         if not state.synthetic_notes:
             return [_next(state, STREAM_RENDER, "judged.skip")]
@@ -173,13 +263,26 @@ class JudgeStation:
 
 class ReviewStation:
     """Human-in-the-loop gate. Auto-approves when configured, else waits for
-    an external `review.approved` / `review.rejected` event on the review stream.
+        an external `review.approved` / `review.rejected` event on the review stream.
+
+    Attributes:
+        name: Attribute description.
+        in_stream: Attribute description.
     """
 
     name = "review"
     in_stream = STREAM_REVIEW
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
+        """Handle.
+
+        Args:
+            pipeline: Owning event pipeline.
+            envelope: Incoming event envelope.
+
+        Returns:
+            list[EventOut]: Successor events.
+        """
         state = decode_state(envelope)
         if envelope.type == "review.approved":
             return [_next(state, STREAM_RENDER, EVT_RENDER_REQUESTED)]
@@ -197,10 +300,25 @@ class ReviewStation:
 
 
 class RenderStation:
+    """RenderStation.
+
+    Attributes:
+        name: Attribute description.
+        in_stream: Attribute description."""
+
     name = "render"
     in_stream = STREAM_RENDER
 
     async def handle(self, pipeline: EventPipeline, envelope: Envelope) -> list[EventOut]:
+        """Handle.
+
+        Args:
+            pipeline: Owning event pipeline.
+            envelope: Incoming event envelope.
+
+        Returns:
+            list[EventOut]: Successor events.
+        """
         state = decode_state(envelope)
         ns = state.model_copy(update={"judge_critique": "", "status": GraphStatus.DONE})
         await pipeline.checkpoint(ns)
@@ -208,7 +326,12 @@ class RenderStation:
 
 
 def default_stations() -> list:
-    """Constructor-free station list bound to the pipeline at dispatch time."""
+    """Constructor-free station list bound to the pipeline at dispatch time.
+
+    Returns:
+        list: Result list.
+
+    """
     return [
         IngestStation(),
         RelevanceStation(),
@@ -221,6 +344,16 @@ def default_stations() -> list:
 
 
 def _derive_url(src: SourceRecord) -> str | None:
+    """Derive a URL from a source.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str | None: Text or None.
+
+
+    """
     if src.pdf_url:
         return src.pdf_url
     if src.doi:
@@ -231,6 +364,14 @@ def _derive_url(src: SourceRecord) -> str | None:
 
 
 def _parse_score(raw: str) -> float:
+    """Parse score.
+
+    Args:
+        raw: Raw payload.
+
+    Returns:
+        float: Computed value.
+    """
     import re
 
     m = re.search(r"\d+\.?\d*", raw)

@@ -37,7 +37,15 @@ def strip_reasoning_prefix(text: str) -> str:
 
 
 def _is_reasoning_line(line: str) -> bool:
-    """Return True if a line looks like part of a thinking block."""
+    """Return True if a line looks like part of a thinking block.
+
+    Args:
+        line: Text line.
+
+    Returns:
+        bool: True on success.
+
+    """
     lowered = line.lower()
     starters = ("thinking", "<", "here's", "to answer", "to start", "i'll", "let me", "the user", "we need")
     if lowered.startswith(starters):

@@ -43,14 +43,24 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
     """
 
     def __init__(self, *, headless: bool = True, driver: Any | None = None) -> None:
+        """Create a SeleniumBrowser.
+
+        Args:
+            headless: Whether to run headless.
+            driver: WebDriver instance.
+        """
         self._headless = headless
         self._driver = driver
         self._owns_driver = driver is None
         self._driver_lock = asyncio.Lock()
 
     # -- lifecycle -----------------------------------------------------------
-    def _ensure_driver(self):
-        """Return a configured WebDriver, creating one if not injected."""
+    def _ensure_driver(self) -> Any:
+        """Return a configured WebDriver, creating one if not injected.
+
+        Returns:
+            Any: Configured WebDriver.
+        """
         if self._driver is not None:
             return self._driver
         from selenium import webdriver
@@ -70,7 +80,15 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
 
     # -- helpers -------------------------------------------------------------
     @staticmethod
-    def _visible(driver) -> bool:
+    def _visible(driver: Any) -> bool:
+        """Check page visibility via the driver.
+
+        Args:
+            driver: WebDriver instance.
+
+        Returns:
+            bool: True when visible or when the probe fails.
+        """
         try:
             return bool(driver.execute_script("return document.visibilityState == 'visible'"))
         except Exception:  # noqa: BLE001 - best-effort
@@ -78,6 +96,15 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
 
     # -- BrowserPort ---------------------------------------------------------
     async def navigate(self, url: str, *, wait_selector: str = "body") -> BrowserActionResult:
+        """Navigate.
+
+        Args:
+            url: Target URL.
+            wait_selector: Selector to wait for.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         driver = self._ensure_driver()
         driver.get(url)
         for _ in range(30):  # poll ~10s for the selector
@@ -87,6 +114,15 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
         return BrowserActionResult.success("navigate", url=driver.current_url)
 
     async def click(self, selector: str, *, timeout_ms: int = 10_000) -> BrowserActionResult:
+        """Click.
+
+        Args:
+            selector: CSS selector.
+            timeout_ms: Timeout in milliseconds.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         from selenium.webdriver.common.by import By
 
         driver = self._ensure_driver()
@@ -94,6 +130,15 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
         return BrowserActionResult.success("click", url=driver.current_url, meta={"selector": selector})
 
     async def fill(self, selector: str, value: str) -> BrowserActionResult:
+        """Fill.
+
+        Args:
+            selector: CSS selector.
+            value: Channel value.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         from selenium.webdriver.common.by import By
 
         driver = self._ensure_driver()
@@ -103,6 +148,15 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
         return BrowserActionResult.success("fill", url=driver.current_url, meta={"selector": selector})
 
     async def submit(self, selector: str | None = None) -> BrowserActionResult:
+        """Submit a request.
+
+        Args:
+            selector: CSS selector.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+
+        """
         from selenium.webdriver.common.by import By
         from selenium.webdriver.common.keys import Keys
 
@@ -114,6 +168,14 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
         return BrowserActionResult.success("submit", url=driver.current_url, meta={"selector": selector})
 
     async def extract_text(self, selector: str = "body") -> BrowserActionResult:
+        """Extract text.
+
+        Args:
+            selector: CSS selector.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         from selenium.webdriver.common.by import By
 
         driver = self._ensure_driver()
@@ -123,6 +185,11 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
         )
 
     async def extract_markdown(self) -> BrowserActionResult:
+        """Extract markdown.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         from selenium.webdriver.common.by import By
 
         driver = self._ensure_driver()
@@ -130,12 +197,29 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
         return BrowserActionResult.success("extract_markdown", url=driver.current_url, markdown=text.strip())
 
     async def screenshot(self, path: str | None = None) -> BrowserActionResult:
+        """Screenshot.
+
+        Args:
+            path: File path.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         driver = self._ensure_driver()
         file_path = path or "screenshot.png"
         driver.save_screenshot(file_path)
         return BrowserActionResult.success("screenshot", url=driver.current_url, screenshot_path=file_path)
 
     async def assert_visible(self, selector: str, *, timeout_ms: int = 10_000) -> BrowserActionResult:
+        """Assert visible.
+
+        Args:
+            selector: CSS selector.
+            timeout_ms: Timeout in milliseconds.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         from selenium.webdriver.common.by import By
         from selenium.webdriver.support import expected_conditions as ec
         from selenium.webdriver.support.ui import WebDriverWait
@@ -146,7 +230,16 @@ class SeleniumBrowser(BrowserPort, BrowserActionPort):
 
     # -- BrowserActionPort ---------------------------------------------------
     async def act(self, action: str, **kwargs: Any) -> BrowserActionResult:
-        """Dispatch a named browser action to Selenium (serialized per instance)."""
+        """Dispatch a named browser action to Selenium (serialized per instance).
+
+        Args:
+            action: Browser action name.
+            **kwargs: Action-specific arguments.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+
+        """
         if action not in _ACTIONS:
             return BrowserActionResult.failure(action, f"unknown action {action!r}")
         method = getattr(self, action)

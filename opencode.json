@@ -9,23 +9,25 @@
     "AGENTS.md",
     ".opencode/rules/*.md"
   ],
-  "permission": "allow",
+  "permission": {
+    "*": "allow",
+    "bash": "allow",
+    "edit": "allow",
+    "read": "allow",
+    "glob": "allow",
+    "grep": "allow",
+    "task": "allow",
+    "skill": "allow",
+    "lsp": "allow",
+    "question": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "external_directory": "allow",
+    "doom_loop": "allow"
+  },
   "agent": {
     "plan": {
       "mode": "primary",
-      "permission": {
-        "edit": "deny",
-        "bash": {
-          "*": "deny",
-          "ls *": "allow",
-          "cat *": "allow",
-          "rg *": "allow",
-          "grep *": "allow",
-          "find *": "allow",
-          "git log*": "allow",
-          "git diff*": "allow"
-        }
-      },
       "model": "openrouter/deepseek/deepseek-flash"
     },
     "build": {
@@ -35,31 +37,11 @@
     "critic": {
       "mode": "subagent",
       "description": "Adversarial reviewer. Hunts silent regressions in a diff. Never edits, never proposes fixes.",
-      "permission": {
-        "edit": "deny",
-        "bash": {
-          "*": "deny",
-          "git diff*": "allow",
-          "git log*": "allow",
-          "cat *": "allow",
-          "rg *": "allow",
-          "make test": "allow",
-          "make evals": "allow"
-        }
-      },
       "model": "openrouter/deepseek/deepseek-flash"
     },
     "scribe": {
       "mode": "subagent",
       "description": "Mechanical documentation: changelogs, docstrings, README tables. No logic changes.",
-      "permission": {
-        "edit": "allow",
-        "bash": {
-          "*": "deny",
-          "make lint": "allow",
-          "git diff*": "allow"
-        }
-      },
       "model": "openrouter/deepseek/deepseek-flash"
     }
   },

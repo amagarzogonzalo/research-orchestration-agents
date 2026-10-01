@@ -44,19 +44,47 @@ def is_usable_email(email: str | None) -> bool:
 
 
 class UnpaywallAdapter(SearchPort, FetchPort):
-    """OA resolution by DOI (free tier, email required, no key)."""
+    """OA resolution by DOI (free tier, email required, no key).
+
+    Attributes:
+        name: Attribute description.
+    """
 
     name = "unpaywall"
 
     def __init__(self, email: str = "", *, timeout: float = 15.0) -> None:
+        """Create a UnpaywallAdapter.
+
+        Args:
+            email: Contact email for API etiquette.
+            timeout: Request timeout in seconds.
+        """
         self.email = email.strip()
         self._timeout = timeout
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"})
 
     @staticmethod
     def _to_record(item: dict, doi: str) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            item: Item.
+            doi: Digital object identifier.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         best = item.get("best_oa_location") or {}
         authors = [
             f"{a.get('family', '')}, {a.get('given', '')}".strip(", ")
@@ -81,8 +109,16 @@ class UnpaywallAdapter(SearchPort, FetchPort):
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
         """Unpaywall offers no keyword search; always returns ``[]``.
 
-        Present only so federated fan-out stays quiet (Demux isolates per-source
-        failures, but silence beats a logged warning every run).
+                Present only so federated fan-out stays quiet (Demux isolates per-source
+                failures, but silence beats a logged warning every run).
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            list[SourceRecord]: Resolved sources.
+
         """
         return []
 

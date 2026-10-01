@@ -31,6 +31,12 @@ class PlaywrightBrowser(BrowserPort, BrowserActionPort):
     """
 
     def __init__(self, *, headless: bool = True, navigation_timeout_ms: int = 30_000) -> None:
+        """Create a PlaywrightBrowser.
+
+        Args:
+            headless: Whether to run headless.
+            navigation_timeout_ms: Navigation timeout in milliseconds.
+        """
         self._headless = headless
         self._navigation_timeout_ms = navigation_timeout_ms
         self._pw = None
@@ -39,7 +45,12 @@ class PlaywrightBrowser(BrowserPort, BrowserActionPort):
         self._page_lock = asyncio.Lock()
 
     # -- lifecycle -----------------------------------------------------------
-    async def _ensure_page(self):
+    async def _ensure_page(self) -> Any:
+        """Return the shared page, launching Chromium on first use.
+
+        Returns:
+            Any: Shared Playwright page handle.
+        """
         if self._page is not None:
             return self._page
         from playwright.async_api import async_playwright
@@ -59,22 +70,58 @@ class PlaywrightBrowser(BrowserPort, BrowserActionPort):
 
     # -- BrowserPort ---------------------------------------------------------
     async def navigate(self, url: str, *, wait_selector: str = "body") -> BrowserActionResult:
+        """Navigate.
+
+        Args:
+            url: Target URL.
+            wait_selector: Selector to wait for.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         page = await self._ensure_page()
         await page.goto(url, timeout=self._navigation_timeout_ms, wait_until="domcontentloaded")
         await page.wait_for_selector(wait_selector, state="visible")
         return BrowserActionResult.success("navigate", url=page.url)
 
     async def click(self, selector: str, *, timeout_ms: int = 10_000) -> BrowserActionResult:
+        """Click.
+
+        Args:
+            selector: CSS selector.
+            timeout_ms: Timeout in milliseconds.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         page = await self._ensure_page()
         await page.click(selector, timeout=timeout_ms)
         return BrowserActionResult.success("click", url=page.url, meta={"selector": selector})
 
     async def fill(self, selector: str, value: str) -> BrowserActionResult:
+        """Fill.
+
+        Args:
+            selector: CSS selector.
+            value: Channel value.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         page = await self._ensure_page()
         await page.fill(selector, value)
         return BrowserActionResult.success("fill", url=page.url, meta={"selector": selector})
 
     async def submit(self, selector: str | None = None) -> BrowserActionResult:
+        """Submit a request.
+
+        Args:
+            selector: CSS selector.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+
+        """
         page = await self._ensure_page()
         if selector:
             await page.click(selector)
@@ -83,11 +130,24 @@ class PlaywrightBrowser(BrowserPort, BrowserActionPort):
         return BrowserActionResult.success("submit", url=page.url, meta={"selector": selector})
 
     async def extract_text(self, selector: str = "body") -> BrowserActionResult:
+        """Extract text.
+
+        Args:
+            selector: CSS selector.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         page = await self._ensure_page()
         text = await page.locator(selector).inner_text()
         return BrowserActionResult.success("extract_text", url=page.url, text=text, meta={"selector": selector})
 
     async def extract_markdown(self) -> BrowserActionResult:
+        """Extract markdown.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         page = await self._ensure_page()
         html = await page.content()
         text = await page.locator("body").inner_text()
@@ -95,12 +155,29 @@ class PlaywrightBrowser(BrowserPort, BrowserActionPort):
         return BrowserActionResult.success("extract_markdown", url=page.url, markdown=markdown)
 
     async def screenshot(self, path: str | None = None) -> BrowserActionResult:
+        """Screenshot.
+
+        Args:
+            path: File path.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         page = await self._ensure_page()
         file_path = path or f"screenshot_{page.url.replace('://', '_').replace('/', '_').rstrip('_')}.png"
         await page.screenshot(path=file_path, full_page=True)
         return BrowserActionResult.success("screenshot", url=page.url, screenshot_path=file_path)
 
     async def assert_visible(self, selector: str, *, timeout_ms: int = 10_000) -> BrowserActionResult:
+        """Assert visible.
+
+        Args:
+            selector: CSS selector.
+            timeout_ms: Timeout in milliseconds.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+        """
         page = await self._ensure_page()
         await page.locator(selector).wait_for(state="visible", timeout=timeout_ms)
         return BrowserActionResult.success("assert_visible", url=page.url, meta={"selector": selector})
@@ -120,9 +197,17 @@ class PlaywrightBrowser(BrowserPort, BrowserActionPort):
     async def act(self, action: str, **kwargs: Any) -> BrowserActionResult:
         """Dispatch a named browser action to its handler method.
 
-        The page lock is held for the whole action, so concurrent ``act()``
-        calls from parallel tasks serialize instead of interleaving clicks,
-        fills, and navigations on the shared page.
+                The page lock is held for the whole action, so concurrent ``act()``
+                calls from parallel tasks serialize instead of interleaving clicks,
+                fills, and navigations on the shared page.
+
+        Args:
+            action: Browser action name.
+            **kwargs: Action-specific arguments.
+
+        Returns:
+            BrowserActionResult: Action outcome.
+
         """
         if action not in self._ACTIONS:
             return BrowserActionResult.failure(action, f"unknown action {action!r}")
@@ -136,6 +221,16 @@ class PlaywrightBrowser(BrowserPort, BrowserActionPort):
 
 
 def _html_to_markdown(html: str, text: str) -> str:
+    """Html to markdown.
+
+    Args:
+        html: HTML content.
+        text: Encoded text.
+
+    Returns:
+        str: Result text.
+
+    """
     del html  # pure-text fallback (crawl4ai renders real markdown upstream)
     return text.strip()
 

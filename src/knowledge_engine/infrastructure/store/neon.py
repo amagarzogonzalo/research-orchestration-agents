@@ -6,6 +6,8 @@ RAG can query metadata without loading bodies.
 
 from __future__ import annotations
 
+from typing import Any
+
 import psycopg
 from psycopg.rows import dict_row
 
@@ -27,14 +29,26 @@ CREATE TABLE IF NOT EXISTS knowledge_artifacts (
 
 class NeonStoreAdapter:
     def __init__(self, dsn: str) -> None:
+        """Create a NeonStoreAdapter.
+
+        Args:
+            dsn: Connection string.
+
+        """
         self.dsn = dsn
 
     async def ensure_schema(self) -> None:
+        """Ensure schema."""
         async with await psycopg.AsyncConnection.connect(self.dsn) as conn:
             await conn.execute(_SCHEMA)
             await conn.commit()
 
     async def put(self, artifact: KnowledgeArtifact) -> None:
+        """Persist a checkpoint.
+
+        Args:
+            artifact: Final knowledge artifact.
+        """
         async with await psycopg.AsyncConnection.connect(self.dsn) as conn:
             await conn.execute(
                 """
@@ -60,13 +74,30 @@ class NeonStoreAdapter:
             await conn.commit()
 
     async def get(self, artifact_id: str) -> dict | None:
+        """Get.
+
+        Args:
+            artifact_id: Artifact identifier.
+
+        Returns:
+            dict | None: Mapping or None.
+
+        """
         async with await psycopg.AsyncConnection.connect(self.dsn, row_factory=dict_row) as conn:
             cur = await conn.execute("SELECT * FROM knowledge_artifacts WHERE id = %s", (artifact_id,))
             row = await cur.fetchone()
             return row
 
 
-def _dumps(obj) -> str:
+def _dumps(obj: Any) -> str:
+    """Serialize artifacts to JSON.
+
+    Args:
+        obj: Artifacts to serialize.
+
+    Returns:
+        str: JSON string.
+    """
     import json
 
     return json.dumps([m.model_dump(mode="json") if hasattr(m, "model_dump") else m for m in obj])

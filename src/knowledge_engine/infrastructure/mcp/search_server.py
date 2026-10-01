@@ -15,12 +15,30 @@ from knowledge_engine.core.ports import SearchPort
 
 
 def build_search_server(search: SearchPort, *, name: str = "scholarly-search") -> FastMCP:
-    """Construct an in-process FastMCP server exposing ``search_papers``."""
+    """Construct an in-process FastMCP server exposing ``search_papers``.
+
+    Args:
+        search: Scholarly search port.
+        name: Object name.
+
+    Returns:
+        FastMCP: Configured server.
+
+    """
     server = FastMCP(name)
 
     @server.tool
     async def search_papers(query: str, limit: int = 10) -> list[dict[str, Any]]:
-        """Search scholarly literature across the federated demux (open metadata, biomedical, preprints, OA)."""
+        """Search scholarly literature across the federated demux (open metadata, biomedical, preprints, OA).
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            list[dict[str, Any]]: Result rows.
+
+        """
         records = await search.search(query, limit=limit)
         return [r.model_dump(mode="json") for r in records]
 

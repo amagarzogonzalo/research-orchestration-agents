@@ -40,6 +40,15 @@ class Pipeline:
         broker: BrokerPort,
         checkpointer: PostgresSaver | None = None,
     ) -> None:
+        """Create a Pipeline.
+
+        Args:
+            search: Scholarly search port.
+            scrape: Scrape-to-markdown port.
+            provider: Provider key for rate limiting.
+            broker: Event broker transport.
+            checkpointer: Durability checkpointer.
+        """
         self.search = search
         self.scrape = scrape
         self.provider = provider
@@ -49,11 +58,27 @@ class Pipeline:
 
     # ---- nodes ----
     async def ingest(self, state: GraphState) -> dict:
+        """Ingest.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict: Result mapping.
+        """
         sources = await self.search.search(state.query, limit=10)
         return {"sources": sources}
 
     async def relevance(self, state: GraphState) -> dict:
-        """Cheap Groq-driven boolean filter (affinity=MICRO)."""
+        """Cheap Groq-driven boolean filter (affinity=MICRO).
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict: Result mapping.
+
+        """
         passed: list[SourceRecord] = []
         for src in state.sources:
             req = ChatRequest.of(
@@ -71,7 +96,24 @@ class Pipeline:
         return {"filtered": passed}
 
     async def fetch_bodies(self, state: GraphState) -> dict:
+        """Fetch bodies.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict: Result mapping.
+        """
+
         async def one(src: SourceRecord) -> DocumentBody | None:
+            """One.
+
+            Args:
+                src: Source record.
+
+            Returns:
+                DocumentBody | None: Body or None.
+            """
             if not src.pdf_url and not src.id.startswith("arxiv:"):
                 return None
             url = src.pdf_url or f"https://arxiv.org/abs/{src.id.replace('arxiv:', '')}"
@@ -85,6 +127,14 @@ class Pipeline:
         return {"bodies": [b for b in bodies if b is not None]}
 
     async def synthesize(self, state: GraphState) -> dict:
+        """Synthesize.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict: Result mapping.
+        """
         critique = state.judge_critique
         prompt = (
             f"Synthesize the research findings into structured notes for query:\n{state.query}\n\\nSources:\n"
@@ -107,6 +157,14 @@ class Pipeline:
             return {"status": GraphStatus.FAILED}
 
     async def judge(self, state: GraphState) -> dict:
+        """Judge.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict: Result mapping.
+        """
         req = ChatRequest.of(
             system=(
                 "Score groundedness and citation integrity 0-1 on the synthesis. "
@@ -126,19 +184,51 @@ class Pipeline:
             return {"judge_score": 0.0, "judge_critique": "judge unavailable; accept on merit"}
 
     async def render(self, state: GraphState) -> dict:
+        """Render.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict: Result mapping.
+        """
         return {"output_path": _fake_output_path(state.thread_id), "status": "done"}
 
     # ---- routing edges ----
     def _should_iterate(self, state: GraphState) -> str:
+        """Should iterate.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            str: Result text.
+        """
         if state.judge_critique and len(state.synthetic_notes) < MAX_EVAL_ITERATIONS:
             return "synthesize"
         return "render"
 
     async def _fan(self, state: GraphState) -> list[Send]:
         # Eager parallel fan-out of body fetches (bounded by shell/token buckets).
+        """Fan.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            list[Send]: Send directives.
+
+        """
         return [Send("fetch_bodies_thunk", state) for _ in [0]]
 
     def _build(self) -> StateGraph:
+        """Build the object.
+
+        Returns:
+            StateGraph: Graph builder.
+
+
+        """
         g = StateGraph(GraphState)
         g.add_node("ingest", self.ingest)
         g.add_node("relevance", self.relevance)
@@ -156,6 +246,16 @@ class Pipeline:
         return g
 
     async def run(self, thread_id: str, query: str) -> GraphState:
+        """Run the unit of work.
+
+        Args:
+            thread_id: Run thread identifier.
+            query: Scholarly query string.
+
+        Returns:
+            GraphState: Durable state snapshot.
+
+        """
         config = {"configurable": {"thread_id": thread_id}}
         initial = GraphState(thread_id=thread_id, query=query)
         final = await self.graph.ainvoke(initial.model_dump(), config=config)
@@ -163,6 +263,14 @@ class Pipeline:
 
 
 def _parse_score(raw: str) -> float:
+    """Parse score.
+
+    Args:
+        raw: Raw payload.
+
+    Returns:
+        float: Computed value.
+    """
     import json
     import re
 
@@ -176,4 +284,12 @@ def _parse_score(raw: str) -> float:
 
 
 def _fake_output_path(thread_id: str) -> str:
+    """Fake output path.
+
+    Args:
+        thread_id: Run thread identifier.
+
+    Returns:
+        str: Result text.
+    """
     return f"knowledge_base/{thread_id}.md"

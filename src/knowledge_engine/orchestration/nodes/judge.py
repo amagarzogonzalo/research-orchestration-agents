@@ -38,9 +38,23 @@ class JudgeNode(WorkflowNode):
     __slots__ = ("provider",)
 
     def __init__(self, provider: ProviderPort) -> None:
+        """Create a JudgeNode.
+
+        Args:
+            provider: Provider key for rate limiting.
+        """
         self.provider = provider
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         notes = state.get("notes", [])
         if not notes:
             return {"judge_score": None, "judge_critique": ""}
@@ -65,13 +79,29 @@ class JudgeNode(WorkflowNode):
 
 
 def judge_route(state: WorkflowState) -> str:
-    """Route: iterate on synthesis while critique non-empty + budget left."""
+    """Route: iterate on synthesis while critique non-empty + budget left.
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        str: Result text.
+
+    """
     if state.get("judge_critique") and state.get("iterations", 0) < MAX_SYNTHESIS_ITERATIONS:
         return SYNTHESIZE_NODE
     return REVIEW_NODE
 
 
 def _parse_score(raw: str) -> float:
+    """Parse score.
+
+    Args:
+        raw: Raw payload.
+
+    Returns:
+        float: Computed value.
+    """
     m = re.search(r"\d+\.?\d*", raw)
     if m:
         return min(1.0, max(0.0, float(m.group())))

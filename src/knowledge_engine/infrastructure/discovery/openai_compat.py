@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 import time
+from typing import Any
 
 import httpx
 
@@ -35,12 +36,23 @@ _CACHE_TTL_SECONDS = 30 * 60  # 30 minutes
 
 
 class OpenAICompatDiscovery(LLMDiscoveryPort):
-    """OpenAI-compatible chat completions provider with cached candidate list."""
+    """OpenAI-compatible chat completions provider with cached candidate list.
+
+    Attributes:
+        endpoint: Attribute description.
+        candidates: Attribute description.
+    """
 
     endpoint: str = ""
     candidates: list[FreeModel] = []
 
     def __init__(self, api_key: str, *, timeout: float = 30.0) -> None:
+        """Create a OpenAICompatDiscovery.
+
+        Args:
+            api_key: API key.
+            timeout: Request timeout in seconds.
+        """
         self.api_key = api_key
         self.timeout = timeout
         self._cache: list[FreeModel] | None = None
@@ -50,6 +62,21 @@ class OpenAICompatDiscovery(LLMDiscoveryPort):
     async def _chat(
         self, client: httpx.AsyncClient, model_id: ModelId, messages: list[dict], *, timeout: float
     ) -> str:
+        """Chat with a model.
+
+        Args:
+            client: Async HTTP client.
+            model_id: Model identifier.
+            messages: Conversation messages.
+            timeout: Request timeout in seconds.
+
+        Returns:
+            str: Result text.
+
+        Raises:
+            CompletionError: When the operation fails.
+
+        """
         resp = await client.post(
             f"{self.endpoint}/chat/completions",
             headers={"Authorization": f"Bearer {self.api_key}"},
@@ -65,18 +92,40 @@ class OpenAICompatDiscovery(LLMDiscoveryPort):
             raise CompletionError("no_choices")
         return choices[0].get("message", {}).get("content", "")
 
-    async def _with_client(self, fn):
+    async def _with_client(self, fn: Any) -> Any:
+        """Run a callback with a fresh HTTP client.
+
+        Args:
+            fn: Callback receiving the client.
+
+        Returns:
+            Any: Callback result.
+        """
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             return await fn(client)
 
     # -- LLMDiscoveryPort ----------------------------------------------------
     async def list_free_models(self) -> list[FreeModel]:
+        """List free models.
+
+        Returns:
+            list[FreeModel]: Available free models.
+        """
         if self._cache is None or time.monotonic() - self._cache_time > _CACHE_TTL_SECONDS:
             self._cache = list(self.candidates)
             self._cache_time = time.monotonic()
         return list(self._cache)
 
     async def test(self, model_id: ModelId) -> TestResult:
+        """Test a model.
+
+        Args:
+            model_id: Model identifier.
+
+        Returns:
+            TestResult: Health-check outcome.
+
+        """
         try:
             content = await self._with_client(
                 lambda c: self._chat(c, model_id, [{"role": "user", "content": TEST_PROMPT}], timeout=30.0)
@@ -99,6 +148,19 @@ class OpenAICompatDiscovery(LLMDiscoveryPort):
             return TestResult(model_id, False, reason)
 
     async def complete(self, model_id: ModelId, prompt: str) -> str:
+        """Complete a request.
+
+        Args:
+            model_id: Model identifier.
+            prompt: Prompt text.
+
+        Returns:
+            str: Result text.
+
+        Raises:
+            CompletionError: When completion fails.
+
+        """
         try:
             content = await self._with_client(
                 lambda c: self._chat(c, model_id, [{"role": "user", "content": prompt}], timeout=60.0)

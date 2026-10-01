@@ -17,10 +17,29 @@ from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 class PlaywrightAdapter(ScrapePort):
     def __init__(self, *, timeout_ms: int = 30_000, wait_selector: str = "body") -> None:
+        """Create a PlaywrightAdapter.
+
+        Args:
+            timeout_ms: Timeout in milliseconds.
+            wait_selector: Selector to wait for.
+
+        """
         self.timeout_ms = timeout_ms
         self.wait_selector = wait_selector
 
     async def to_markdown(self, url: str) -> DocumentBody:
+        """Convert a URL to Markdown.
+
+        Args:
+            url: Target URL.
+
+        Returns:
+            DocumentBody: Fetched Markdown body.
+
+        Raises:
+            ScrapeError: When the operation fails.
+
+        """
         try:
             from playwright.async_api import async_playwright  # lazy: keeps dep optional
         except ImportError as exc:  # pragma: no cover - guarded in extras
@@ -51,6 +70,14 @@ class PlaywrightAdapter(ScrapePort):
 
 
 def _fallback_title(url: str) -> str:
+    """Fallback title.
+
+    Args:
+        url: Target URL.
+
+    Returns:
+        str: Result text.
+    """
     return url.rstrip("/").rsplit("/", 1)[-1] or url
 
 

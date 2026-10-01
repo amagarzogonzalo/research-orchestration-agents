@@ -17,14 +17,44 @@ _NS = {"atom": "http://www.w3.org/2005/Atom", "arx": "http://arxiv.org/schemas/a
 
 
 class ArxivAdapter(SearchPort):
+    """ArxivAdapter.
+
+    Attributes:
+        name: Attribute description."""
+
     name = "arxiv"
 
     def __init__(self, *, timeout: float = 20.0) -> None:
+        """Create a ArxivAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self._timeout = timeout
 
     @staticmethod
     def _to_record(entry: ET.Element) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            entry: Log entry.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
+
         def _tag(name: str) -> ET.Element | None:
+            """Tag.
+
+            Args:
+                name: Object name.
+
+            Returns:
+                ET.Element | None: Element or None.
+
+            """
             return entry.find(name, _NS)
 
         title = re.sub(r"\s+", " ", (_tag("atom:title").text or "").strip()) if _tag("atom:title") else ""
@@ -56,6 +86,19 @@ class ArxivAdapter(SearchPort):
         )
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
+        """Search scholarly sources.
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            list[SourceRecord]: Resolved sources.
+
+        Raises:
+            SearchError: When the operation fails.
+
+        """
         params = {"search_query": f"all:{query}", "max_results": limit}
         try:
             async with httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"}) as client:
@@ -68,4 +111,12 @@ class ArxivAdapter(SearchPort):
 
     # arXiv has no DOI fetch; FetchPort left unimplemented intentionally.
     async def fetch(self, doi: str):  # pragma: no cover - not applicable
+        """Fetch a record.
+
+        Args:
+            doi: Digital object identifier.
+
+        Raises:
+            NotImplementedError: When the operation fails.
+        """
         raise NotImplementedError("arXiv is not DOI-indexed; use the ID lookup variant")

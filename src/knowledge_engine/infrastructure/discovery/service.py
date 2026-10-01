@@ -54,6 +54,12 @@ class ModelDiscoverer:
     """Discover + validate + remember a working free model (lean + repeat-safe)."""
 
     def __init__(self, provider: LLMDiscoveryPort | None = None, *, max_attempts: int = 5) -> None:
+        """Create a ModelDiscoverer.
+
+        Args:
+            provider: Provider key for rate limiting.
+            max_attempts: Maximum attempts.
+        """
         self.provider = provider or FallbackDiscovery([])
         self.max_attempts = max_attempts
         self._pool: list[FreeModel] = []
@@ -71,7 +77,18 @@ class ModelDiscoverer:
         openrouter_key: str | None = None,
         gemini_key: str | None = None,
     ) -> ModelDiscoverer:
-        """Build a discoverer from a fixed provider chain (skips empty keys)."""
+        """Build a discoverer from a fixed provider chain (skips empty keys).
+
+        Args:
+            groq_key: Groq API key.
+            mistral_key: Mistral API key.
+            openrouter_key: OpenRouter API key.
+            gemini_key: Gemini API key.
+
+        Returns:
+            ModelDiscoverer: Configured discoverer.
+
+        """
         chain: list[LLMDiscoveryPort] = []
         if groq_key:
             chain.append(GroqDiscovery(groq_key))
@@ -84,7 +101,12 @@ class ModelDiscoverer:
         return cls(FallbackDiscovery(chain))
 
     async def free_models(self) -> list[FreeModel]:
-        """Return the deduped free-model pool, best (largest context) first."""
+        """Return the deduped free-model pool, best (largest context) first.
+
+        Returns:
+            list[FreeModel]: Available free models.
+
+        """
         if not self._pool or time.monotonic() - self._pool_at > CATALOG_TTL_SECONDS:
             self._pool = await self.provider.list_free_models()
             self._pool_at = time.monotonic()
@@ -135,13 +157,12 @@ class ModelDiscoverer:
         """Discover a working free model and complete ``prompt`` with it.
 
         Args:
-            prompt: The prompt to send.
+                    prompt: Prompt text to send.
+
 
         Returns:
-            str: The model's completion text.
+                    str: The model's completion text.
 
-        Raises:
-            ModelSelectionError: If no free model works.
         """
         model = await self.select()
         try:
@@ -155,23 +176,59 @@ class ModelDiscoverer:
 
     # -- internals ------------------------------------------------------------
     def _candidate_ids(self, pool: list[FreeModel]) -> list[ModelId]:
+        """Candidate ids.
+
+        Args:
+            pool: Connection pool.
+
+        Returns:
+            list[ModelId]: Candidate model identifiers.
+
+        """
         return [m.model_id for m in pool]
 
     def _in_cooldown(self, model: ModelId) -> bool:
+        """In cooldown.
+
+        Args:
+            model: Model name.
+
+        Returns:
+            bool: True on success.
+        """
         return time.monotonic() - self._failure_times.get(model, 0.0) < FAILURE_COOLDOWN_SECONDS
 
     def _mark_failure(self, model: ModelId) -> None:
+        """Mark failure.
+
+        Args:
+            model: Model name.
+        """
         self._failure_times[model] = time.monotonic()
 
     def _remember_good(self, model: ModelId) -> None:
+        """Remember good.
+
+        Args:
+            model: Model name.
+        """
         self._known_good = model
         self._known_good_at = time.monotonic()
 
     def _forget_good(self) -> None:
+        """Forget good."""
         self._known_good = None
         self._known_good_at = 0.0
 
     async def _safe_test(self, model: ModelId) -> TestResult:
+        """Safe test.
+
+        Args:
+            model: Model name.
+
+        Returns:
+            TestResult: Health-check outcome.
+        """
         try:
             return await self.provider.test(model)
         except Exception as exc:  # noqa: BLE001 - a broken provider never aborts selection

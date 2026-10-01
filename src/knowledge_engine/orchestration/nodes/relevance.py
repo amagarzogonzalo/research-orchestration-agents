@@ -33,11 +33,26 @@ class RelevanceNode(WorkflowNode):
     __slots__ = ("provider", "_system", "max_tokens")
 
     def __init__(self, provider: ProviderPort, *, max_tokens: int = 400) -> None:
+        """Create a RelevanceNode.
+
+        Args:
+            provider: Provider key for rate limiting.
+            max_tokens: Maximum tokens.
+        """
         self.provider = provider
         self._system = _RELEVANCE_SYSTEM
         self.max_tokens = max_tokens
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         sources = state.get("sources", [])
         if not sources:
             return {"filtered": []}
@@ -62,7 +77,14 @@ class RelevanceNode(WorkflowNode):
 def _parse_relevant_ids(content: str) -> list[str] | None:
     """Extract relevant source ids from the model's JSON reply.
 
-    Returns None when the reply cannot be parsed (caller keeps everything).
+        Returns None when the reply cannot be parsed (caller keeps everything).
+
+    Args:
+        content: Content text.
+
+    Returns:
+        list[str] | None: Strings or None.
+
     """
     if not content:
         return None

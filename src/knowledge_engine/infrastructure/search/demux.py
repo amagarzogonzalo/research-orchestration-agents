@@ -17,11 +17,38 @@ logger = logging.getLogger(__name__)
 
 class DemuxSearchAdapter(SearchPort, FetchPort):
     def __init__(self, sources: list, *, max_concurrency: int = 2) -> None:
+        """Create a DemuxSearchAdapter.
+
+        Args:
+            sources: Resolved source records.
+            max_concurrency: Maximum concurrency.
+
+        """
         self.sources = sources
         self._sem = asyncio.Semaphore(max_concurrency)
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
+        """Search scholarly sources.
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            list[SourceRecord]: Resolved sources.
+
+        """
+
         async def run(src: SearchPort) -> list[SourceRecord]:
+            """Run the unit of work.
+
+            Args:
+                src: Source record.
+
+            Returns:
+                list[SourceRecord]: Resolved sources.
+
+            """
             async with self._sem:
                 try:
                     return await src.search(query, limit=limit)
@@ -33,7 +60,25 @@ class DemuxSearchAdapter(SearchPort, FetchPort):
         return _merge(results)
 
     async def fetch(self, doi: str) -> SourceRecord | None:
-        async def run(src: FetchPort):
+        """Fetch a record.
+
+        Args:
+            doi: Digital object identifier.
+
+        Returns:
+            SourceRecord | None: Record or None when unknown.
+
+        """
+
+        async def run(src: FetchPort) -> SourceRecord | None:
+            """Fetch one source with isolation.
+
+            Args:
+                src: Fetch-capable source.
+
+            Returns:
+                SourceRecord | None: Fetched record or None on failure.
+            """
             async with self._sem:
                 try:
                     return await src.fetch(doi)
@@ -48,7 +93,15 @@ class DemuxSearchAdapter(SearchPort, FetchPort):
 
 
 def _merge(chunks: list[list[SourceRecord] | list[SourceRecord]]) -> list[SourceRecord]:
-    """Dedupe by DOI then id, preserving order."""
+    """Dedupe by DOI then id, preserving order.
+
+    Args:
+        chunks: Result chunks to merge.
+
+    Returns:
+        list[SourceRecord]: Resolved sources.
+
+    """
     seen: set[str] = set()
     merged: list[SourceRecord] = []
     for chunk in chunks:

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import inspect
 import logging
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
 
@@ -43,19 +43,56 @@ _TRANSIENT = (ProviderUnavailable, RateLimitTimeout)
 
 
 def _is_transient(exc: BaseException) -> bool:
+    """Is transient.
+
+    Args:
+        exc: Caught exception.
+
+    Returns:
+        bool: True on success.
+
+    """
     return isinstance(exc, _TRANSIENT)
 
 
 class BaseProviderAdapter:
-    """Minimal interface concrete providers implement."""
+    """Minimal interface concrete providers implement.
+
+    Attributes:
+        name: Attribute description.
+        affinity: Attribute description.
+    """
 
     name = "base"
     affinity: Affinity | None = None  # None = usable in every cascade
 
     async def complete(self, req: ChatRequest) -> ChatResult:  # pragma: no cover - interface
+        """Complete a request.
+
+        Args:
+            req: Request object.
+
+        Returns:
+            ChatResult: Model result.
+
+        Raises:
+            NotImplementedError: When the operation fails.
+
+        """
         raise NotImplementedError
 
-    async def extract(self, req: ExtractionRequest, response_model) -> object:  # pragma: no cover
+    async def extract(self, req: ExtractionRequest, response_model: Any) -> object:  # pragma: no cover
+        """Extract structured data.
+
+        Args:
+            req: Extraction request.
+            response_model: Target response model.
+
+        Returns:
+            object: Extracted instance.
+
+        Raises:
+            NotImplementedError: When the operation fails."""
         raise NotImplementedError
 
 
@@ -69,6 +106,16 @@ class FallbackRouter(ProviderPort):
         breaker_threshold: int = 3,
         breaker_cooldown: float = 60.0,
     ) -> None:
+        """Create a FallbackRouter.
+
+        Args:
+            adapters: Provider adapters.
+            rc: Redis client.
+            limiter: Rate limiter.
+            breaker_threshold: Breaker failure threshold.
+            breaker_cooldown: Breaker cooldown in seconds.
+
+        """
         self.adapters = {a.name: a for a in adapters}
         self._rc = rc
         self._limiter = limiter or TokenBucketLimiter(rc)
@@ -78,10 +125,31 @@ class FallbackRouter(ProviderPort):
         }
 
     def _cascade(self, affinity: Affinity) -> list[BaseProviderAdapter]:
+        """Cascade.
+
+        Args:
+            affinity: Routing affinity.
+
+        Returns:
+            list[BaseProviderAdapter]: Provider adapters.
+
+        """
         names = _CASCADE.get(affinity, _CASCADE[Affinity.FALLBACK])
         return [self.adapters[n] for n in names if n in self.adapters]
 
     async def complete(self, req: ChatRequest) -> ChatResult:
+        """Complete a request.
+
+        Args:
+            req: Request object.
+
+        Returns:
+            ChatResult: Model result.
+
+        Raises:
+            ProviderExhausted: When the operation fails.
+
+        """
         with tracer.start_as_current_span("router.complete") as span:
             span.set_attribute("gen_ai.request.model", req.affinity.value)
             last: BaseProviderAdapter | None = None
@@ -110,10 +178,30 @@ class FallbackRouter(ProviderPort):
         reraise=True,
     )
     async def _retried_call(self, adapter: BaseProviderAdapter, req: ChatRequest) -> ChatResult:
+        """Retried call.
+
+        Args:
+            adapter: Provider adapter.
+            req: Request object.
+
+        Returns:
+            ChatResult: Model result.
+        """
         return await adapter.complete(req)
 
     async def extract(self, req: ExtractionRequest) -> object:
+        """Extract structured data.
 
+        Args:
+            req: Request object.
+
+        Returns:
+            object: Extracted instance.
+
+        Raises:
+            ProviderExhausted: When the operation fails.
+
+        """
         response_model = _import_model(req.schema_ref)
         # Use the affinity-appropriate adapter; extraction is structured + retried.
         for adapter in self._cascade(req.affinity or Affinity.MACRO):
@@ -132,12 +220,34 @@ class FallbackRouter(ProviderPort):
         retry=retry_if_exception(_is_transient),
         reraise=True,
     )
-    async def _extract_retried(self, adapter: BaseProviderAdapter, req: ExtractionRequest, response_model) -> object:
+    async def _extract_retried(
+        self, adapter: BaseProviderAdapter, req: ExtractionRequest, response_model: Any
+    ) -> object:
+        """Extract with retry.
+
+        Args:
+            adapter: Provider adapter.
+            req: Extraction request.
+            response_model: Target response model.
+
+        Returns:
+            object: Extracted instance.
+        """
         return await adapter.extract(req, response_model)
 
 
 def _import_model(dotted: str) -> type:
-    """Import a Pydantic model by dotted path, e.g. 'knowledge_engine.schemas.source.SourceRecord'."""
+    """Import a Pydantic model by dotted path, e.g. 'knowledge_engine.schemas.source.SourceRecord'.
+
+    Args:
+        dotted: Dotted import path.
+
+    Returns:
+        type: Imported model class.
+
+    Raises:
+        TypeError: When the operation fails.
+    """
     module_path, _, attr = dotted.rpartition(".")
     module = inspect.import_module(module_path)
     model = getattr(module, attr)
@@ -148,6 +258,18 @@ def _import_model(dotted: str) -> type:
 
 # Re-export for tester convenience.
 def make_usage(input_tokens: int, output_tokens: int, *, provider: str = "test", model: str = "test") -> UsageSummary:
+    """Make usage.
+
+    Args:
+        input_tokens: Input token count.
+        output_tokens: Output token count.
+        provider: Provider key for rate limiting.
+        model: Model name.
+
+    Returns:
+        UsageSummary: Token usage.
+
+    """
     from knowledge_engine.core.pricing import compute_cost_usd
 
     return UsageSummary(

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import logging
 import time
+from typing import Any
 
 import litellm
 
@@ -25,17 +26,40 @@ _TRANSIENT_STATUS = {429, 500, 502, 503, 504}
 
 
 class LiteLLMProviderAdapter(BaseProviderAdapter):
-    """Generic adapter routing through litellm's unified endpoint."""
+    """Generic adapter routing through litellm's unified endpoint.
+
+    Attributes:
+        name: Attribute description.
+        model_id: Attribute description.
+        affinity: Attribute description.
+    """
 
     name = "litellm"
     model_id: str = "gpt-4o-mini"  # overridden by subclasses to a free model
     affinity: Affinity | None = None
 
     def __init__(self, api_key: str | None = None) -> None:
+        """Create a LiteLLMProviderAdapter.
+
+        Args:
+            api_key: API key.
+        """
         self.api_key = api_key
         self.raw_client = None  # placeholders for Instructor wrapping
 
     async def complete(self, req: ChatRequest) -> ChatResult:
+        """Complete a request.
+
+        Args:
+            req: Request object.
+
+        Returns:
+            ChatResult: Model result.
+
+        Raises:
+            ProviderUnavailable: When the operation fails.
+
+        """
         started = time.perf_counter()
         messages = [m.model_dump() for m in req.messages]
         try:
@@ -44,7 +68,7 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
                 messages=messages,
                 temperature=req.temperature,
                 max_tokens=req.max_tokens,
-                **( {"api_key": self.api_key} if self.api_key else {}),
+                **({"api_key": self.api_key} if self.api_key else {}),
             )
         except litellm.exceptions.RateLimitError as exc:
             _emit_transient(self.name, started)
@@ -71,14 +95,20 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
         _emit_success(self.name, result.usage, started)
         return result
 
-    async def extract(self, req: ExtractionRequest, response_model) -> object:
+    async def extract(self, req: ExtractionRequest, response_model: Any) -> object:
+        """Extract structured data.
+
+        Args:
+            req: Extraction request.
+            response_model: Target response model.
+
+        Returns:
+            object: Extracted instance.
+        """
         import instructor
 
         wrapped = instructor.from_litellm(self._client())
-        system = (
-            f"Extract from source: {getattr(req.source, 'title', '')}"
-            if req.source else "Extract as instructed."
-        )
+        system = f"Extract from source: {getattr(req.source, 'title', '')}" if req.source else "Extract as instructed."
         return await wrapped.chat.completions.create_with_completion(
             model=self.model_id,
             response_model=response_model,
@@ -89,23 +119,51 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
             ],
         )
 
-    def _client(self):
+    def _client(self) -> Any:
+        """Return the litellm client module.
+
+        Returns:
+            Any: Litellm client.
+        """
         if self.api_key:
             return litellm
         return litellm
 
 
 def _emit_success(provider: str, usage: UsageSummary, started: float) -> None:
+    """Record a success observation.
+
+    Args:
+        provider: Provider key for rate limiting.
+        usage: Token usage summary.
+        started: Start timestamp.
+
+    """
     token_usage.add(usage.input_tokens, {"gen_ai.system": provider, "component": "input"})
     token_usage.add(usage.output_tokens, {"gen_ai.system": provider, "component": "output"})
     operation_duration.record((time.perf_counter() - started) * 1000.0, {"gen_ai.system": provider})
 
 
 def _emit_transient(provider: str, started: float) -> None:
+    """Record a transient-failure observation.
+
+    Args:
+        provider: Provider key for rate limiting.
+        started: Start timestamp.
+
+    """
     operation_duration.record((time.perf_counter() - started) * 1000.0, {"gen_ai.system": provider})
 
 
-def _source_as_prompt(source) -> str:
+def _source_as_prompt(source: Any) -> str:
+    """Render a source as prompt text.
+
+    Args:
+        source: Source record or body.
+
+    Returns:
+        str: Prompt text.
+    """
     if source is None:
         return ""
     if hasattr(source, "markdown"):
@@ -116,24 +174,52 @@ def _source_as_prompt(source) -> str:
 
 
 class GroqAdapter(LiteLLMProviderAdapter):
+    """GroqAdapter.
+
+    Attributes:
+        name: Attribute description.
+        model_id: Attribute description.
+        affinity: Attribute description."""
+
     name = "Groq"
     model_id = "groq/llama-3.3-70b-versatile"
     affinity = Affinity.MICRO
 
 
 class OpenRouterAdapter(LiteLLMProviderAdapter):
+    """OpenRouterAdapter.
+
+    Attributes:
+        name: Attribute description.
+        model_id: Attribute description.
+        affinity: Attribute description."""
+
     name = "OpenRouter"
     model_id = "openrouter/openai/gpt-4o-mini"
     affinity = Affinity.FALLBACK
 
 
 class GeminiAdapter(LiteLLMProviderAdapter):
+    """GeminiAdapter.
+
+    Attributes:
+        name: Attribute description.
+        model_id: Attribute description.
+        affinity: Attribute description."""
+
     name = "Gemini"
     model_id = "gemini/gemini-2.0-flash"
     affinity = Affinity.MACRO
 
 
 class MistralAdapter(LiteLLMProviderAdapter):
+    """MistralAdapter.
+
+    Attributes:
+        name: Attribute description.
+        model_id: Attribute description.
+        affinity: Attribute description."""
+
     name = "Mistral"
     model_id = "mistral/mistral-large-latest"
     affinity = Affinity.MILLION

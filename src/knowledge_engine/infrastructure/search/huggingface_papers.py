@@ -28,15 +28,34 @@ _BASE = "https://huggingface.co/api/papers/search"
 
 
 class HuggingFacePapersAdapter(SearchPort):
-    """Community-ranked paper search over HuggingFace Papers (free, keyless)."""
+    """Community-ranked paper search over HuggingFace Papers (free, keyless).
+
+    Attributes:
+        name: Attribute description.
+    """
 
     name = "huggingface_papers"
 
     def __init__(self, *, timeout: float = 15.0) -> None:
+        """Create a HuggingFacePapersAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self._timeout = timeout
 
     @staticmethod
     def _to_record(item: dict) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            item: Item.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         paper = item.get("paper") or {}
         arxiv_id = str(paper.get("id") or "")
         authors = [a.get("name", "") for a in paper.get("authors", []) if a.get("name")]
@@ -83,4 +102,11 @@ class HuggingFacePapersAdapter(SearchPort):
         return [self._to_record(item) for item in ranked[:limit]]
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"})

@@ -37,6 +37,15 @@ class BodiesNode(WorkflowNode):
     async def run(self, state: WorkflowState | dict[str, Any]) -> dict[str, Any] | Command[Any]:
         # Fan out over the relevance-filtered set (research), or all sources
         # (summary — which skips the relevance gate).
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any] | Command[Any]: State update or routing command.
+
+        """
         pool = state.get("filtered") or state.get("sources", [])
         sends = [Send(FETCH_NODE, {"source": src}) for src in pool]
         if sends:
@@ -51,10 +60,25 @@ class FetchBodyNode(WorkflowNode):
     __slots__ = ("scrape", "_sem")
 
     def __init__(self, scrape: ScrapePort, *, concurrency: int = 4) -> None:
+        """Create a FetchBodyNode.
+
+        Args:
+            scrape: Scrape-to-markdown port.
+            concurrency: Fetch concurrency.
+        """
         self.scrape = scrape
         self._sem = asyncio.Semaphore(concurrency)
 
     async def run(self, state: WorkflowState | dict[str, Any]) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         src = _source_of(state)
         url = _derive_url(src)
         if not url:
@@ -72,9 +96,16 @@ class FetchBodyNode(WorkflowNode):
 def _derive_url(src: SourceRecord) -> str | None:
     """Choose the most scrape-friendly URL for a source.
 
-    HTML landing pages extract cleaner than raw PDFs (PDFs are binary and
-    rejected by the content-quality guard), so per-source HTML pages outrank
-    ``pdf_url``; the publisher PDF / DOI resolver is the fallback.
+        HTML landing pages extract cleaner than raw PDFs (PDFs are binary and
+        rejected by the content-quality guard), so per-source HTML pages outrank
+        ``pdf_url``; the publisher PDF / DOI resolver is the fallback.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str | None: Text or None.
+
     """
     if src.id.startswith("arxiv:"):
         return f"https://arxiv.org/abs/{src.id.replace('arxiv:', '')}"
@@ -95,7 +126,18 @@ def _derive_url(src: SourceRecord) -> str | None:
 
 
 def _source_of(state: WorkflowState | dict[str, Any]) -> SourceRecord:
-    """The per-Send payload carries a single ``source`` (not the full state)."""
+    """The per-Send payload carries a single ``source`` (not the full state).
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        SourceRecord: Resolved source record.
+
+    Raises:
+        ValueError: When the operation fails.
+
+    """
     raw = state.get("source") if isinstance(state, dict) else None
     if raw is None:
         raise ValueError("fetch_body got a state without a 'source' payload")

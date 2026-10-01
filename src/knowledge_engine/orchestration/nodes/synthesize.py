@@ -36,10 +36,25 @@ class SynthesizeNode(WorkflowNode):
     __slots__ = ("provider", "max_iterations")
 
     def __init__(self, provider: ProviderPort, *, max_iterations: int = MAX_SYNTHESIS_ITERATIONS) -> None:
+        """Create a SynthesizeNode.
+
+        Args:
+            provider: Provider key for rate limiting.
+            max_iterations: Maximum iterations.
+        """
         self.provider = provider
         self.max_iterations = max_iterations
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         critique = state.get("judge_critique")
         prompt = self._build_prompt(state, critique)
         req = ChatRequest.of(
@@ -55,6 +70,16 @@ class SynthesizeNode(WorkflowNode):
     def _build_prompt(state: WorkflowState, critique: str | None) -> str:
         # Ground the synthesis on scraped bodies when available; otherwise fall
         # back to source titles + abstracts so the LLM is never ungrounded.
+        """Build prompt.
+
+        Args:
+            state: Current workflow state.
+            critique: Critique text.
+
+        Returns:
+            str: Result text.
+
+        """
         if state.get("bodies"):
             evidence = "\n---\n".join(_body_text(b) for b in state["bodies"])
         else:
@@ -72,7 +97,15 @@ class SynthesizeNode(WorkflowNode):
 
 
 def _body_text(body: object) -> str:
-    """Coerce a DocumentBody (Pydantic) or its raw dict snapshot to a snippet."""
+    """Coerce a DocumentBody (Pydantic) or its raw dict snapshot to a snippet.
+
+    Args:
+        body: Document body.
+
+    Returns:
+        str: Result text.
+
+    """
     if isinstance(body, DocumentBody):
         title, markdown = body.title or body.url, body.markdown
     elif isinstance(body, dict):
@@ -84,14 +117,30 @@ def _body_text(body: object) -> str:
 
 
 def _src_title(src: object) -> str:
-    """Title from a SourceRecord (Pydantic) or its raw dict snapshot."""
+    """Title from a SourceRecord (Pydantic) or its raw dict snapshot.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str: Result text.
+
+    """
     if isinstance(src, dict):
         return src.get("title", "") or ""
     return getattr(src, "title", "") or ""
 
 
 def _src_abstract(src: object) -> str:
-    """Abstract from a SourceRecord (Pydantic) or its raw dict snapshot."""
+    """Abstract from a SourceRecord (Pydantic) or its raw dict snapshot.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str: Result text.
+
+    """
     if isinstance(src, dict):
         return src.get("abstract", "") or ""
     return getattr(src, "abstract", "") or ""

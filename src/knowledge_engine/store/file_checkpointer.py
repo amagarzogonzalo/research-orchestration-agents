@@ -36,18 +36,56 @@ _B64 = "base64"
 
 
 def _thread_id(config: RunnableConfig) -> str:
+    """Extract the thread identifier.
+
+    Args:
+        config: Runnable configuration.
+
+    Returns:
+        str: Result text.
+
+    """
     return str(config.get("configurable", {}).get("thread_id") or "default")
 
 
 def _checkpoint_id(config: RunnableConfig) -> str | None:
+    """Extract the checkpoint identifier.
+
+    Args:
+        config: Runnable configuration.
+
+    Returns:
+        str | None: Text or None.
+
+
+    """
     return config.get("configurable", {}).get("checkpoint_id")
 
 
 def _b64_encode(data: bytes) -> str:
+    """Base64-encode bytes.
+
+    Args:
+        data: Binary payload.
+
+    Returns:
+        str: Result text.
+
+    """
     return base64.b64encode(data).decode("ascii")
 
 
 def _b64_decode(text: str) -> bytes:
+    """Base64-decode text.
+
+    Args:
+        text: Encoded text.
+
+    Returns:
+        bytes: Raw bytes.
+
+
+    """
     return base64.b64decode(text)
 
 
@@ -60,13 +98,26 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
     """
 
     def __init__(self, root: str = "research_store/checkpoints") -> None:
+        """Create a FileCheckpointer.
+
+        Args:
+            root: Store root directory.
+        """
         super().__init__()
         self.root = Path(root)
         self._locks: dict[str, asyncio.Lock] = {}
         self._locks_guard = asyncio.Lock()
 
     async def _lock_for(self, thread_id: str) -> asyncio.Lock:
-        """Return the lock for a thread, creating it on first use."""
+        """Return the lock for a thread, creating it on first use.
+
+        Args:
+            thread_id: Run thread identifier.
+
+        Returns:
+            asyncio.Lock: Thread lock.
+
+        """
         async with self._locks_guard:
             lock = self._locks.get(thread_id)
             if lock is None:
@@ -75,14 +126,43 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
             return lock
 
     def _thread_dir(self, thread_id: str) -> Path:
+        """Return the thread directory.
+
+        Args:
+            thread_id: Run thread identifier.
+
+        Returns:
+            Path: Resolved path.
+
+        """
         path = self.root / thread_id
         path.mkdir(parents=True, exist_ok=True)
         return path
 
     def _checkpoint_file(self, thread_id: str, ckpt_id: str) -> Path:
+        """Return the checkpoint file path.
+
+        Args:
+            thread_id: Run thread identifier.
+            ckpt_id: Checkpoint identifier.
+
+        Returns:
+            Path: Resolved path.
+
+        """
         return self._thread_dir(thread_id) / f"{ckpt_id}.json"
 
     def _writes_file(self, thread_id: str, ckpt_id: str) -> Path:
+        """Return the writes file path.
+
+        Args:
+            thread_id: Run thread identifier.
+            ckpt_id: Checkpoint identifier.
+
+        Returns:
+            Path: Resolved path.
+
+        """
         return self._thread_dir(thread_id) / f"{ckpt_id}.writes.json"
 
     # -- async BaseCheckpointSaver ------------------------------------------
@@ -93,6 +173,17 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         metadata: CheckpointMetadata,
         new_versions: ChannelVersions,
     ) -> RunnableConfig:
+        """Aput.
+
+        Args:
+            config: Runnable configuration.
+            checkpoint: Checkpoint payload.
+            metadata: Run metadata mapping.
+            new_versions: New channel versions.
+
+        Returns:
+            RunnableConfig: Runnable configuration.
+        """
         thread = _thread_id(config)
         ckpt_id = checkpoint["id"]
         type_, blob = self.serde.dumps_typed(checkpoint)
@@ -124,6 +215,13 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         task_id: str,
         task_path: str = "",
     ) -> None:
+        """Aput writes.
+
+        Args:
+            config: Runnable configuration.
+            writes: Channel writes.
+            task_id: Task identifier.
+            task_path: Task path."""
         thread = _thread_id(config)
         ckpt_id = _checkpoint_id(config) or ""
         serialized = []
@@ -140,6 +238,14 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
             path.write_text(json.dumps(existing, ensure_ascii=False), encoding="utf-8")
 
     async def aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
+        """Aget tuple.
+
+        Args:
+            config: Runnable configuration.
+
+        Returns:
+            CheckpointTuple | None: Checkpoint tuple or None.
+        """
         thread = _thread_id(config)
         ckpt_id = _checkpoint_id(config)
         async with await self._lock_for(thread):
@@ -171,6 +277,16 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         return None
 
     def _load_writes(self, writes_file: Path) -> list[tuple[str, str, Any]]:
+        """Load pending writes.
+
+        Args:
+            writes_file: Writes file path.
+
+        Returns:
+            list[tuple[str, str, Any]]: Pending writes.
+
+
+        """
         if not writes_file.exists():
             return []
         raw = json.loads(writes_file.read_text(encoding="utf-8"))
@@ -189,6 +305,17 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         before: RunnableConfig | None = None,
         limit: int | None = None,
     ) -> AsyncIterator[CheckpointTuple]:
+        """List checkpoints newest-first.
+
+        Args:
+            config: Runnable configuration.
+            filter: Listing filter.
+            before: List-before cursor.
+            limit: Maximum records to return.
+
+        Yields:
+            CheckpointTuple: Checkpoint entries.
+        """
         thread = _thread_id(config or {})
         before_id = _checkpoint_id(before) if before else None
         files = sorted(self._thread_dir(thread).glob("*.json"), reverse=True)
@@ -213,7 +340,11 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
                 return
 
     async def adelete_thread(self, thread_id: str) -> None:
-        """Delete all checkpoints + writes for a thread (and drop its lock)."""
+        """Delete all checkpoints + writes for a thread (and drop its lock).
+
+        Args:
+            thread_id: Run thread identifier.
+        """
         import shutil
 
         async with await self._lock_for(thread_id):
@@ -225,6 +356,17 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
 
 
 def _parent_config(thread: str, payload: dict[str, Any]) -> RunnableConfig | None:
+    """Build the parent checkpoint config.
+
+    Args:
+        thread: Thread identifier.
+        payload: Event or resume payload.
+
+    Returns:
+        RunnableConfig | None: Runnable config or None.
+
+
+    """
     parent = payload.get("parent_checkpoint_id")
     if not parent:
         return None

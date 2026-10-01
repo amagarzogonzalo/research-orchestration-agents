@@ -19,9 +19,24 @@ class IngestNode(WorkflowNode):
     __slots__ = ("search", "limit")
 
     def __init__(self, search: SearchPort, *, limit: int = 10) -> None:
+        """Create a IngestNode.
+
+        Args:
+            search: Scholarly search port.
+            limit: Maximum records to return.
+        """
         self.search = search
         self.limit = limit
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         sources = await self.search.search(state["query"], limit=self.limit)
         return {"sources": sources, "status": "running"}

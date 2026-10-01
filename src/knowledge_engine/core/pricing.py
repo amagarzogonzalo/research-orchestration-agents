@@ -23,13 +23,33 @@ _PRICE_PER_1M: dict[str, dict[str, tuple[float, float]]] = {
 
 @lru_cache(maxsize=64)
 def price_for(provider: str, model: str) -> tuple[float, float]:
-    """Return (input, output) USD-per-1M-tokens for a provider/model."""
+    """Return (input, output) USD-per-1M-tokens for a provider/model.
+
+    Args:
+        provider: Provider key for rate limiting.
+        model: Model name.
+
+    Returns:
+        tuple[float, float]: Per-1M-token input/output rates.
+
+    """
     provider_table = _PRICE_PER_1M.get(provider, _PRICE_PER_1M["ollama"])
     return provider_table.get(model, provider_table["default"])
 
 
 def compute_cost_usd(provider: str, model: str, input_tokens: int, output_tokens: int) -> float:
-    """Recompute cost from local pricing, not vendor claims."""
+    """Recompute cost from local pricing, not vendor claims.
+
+    Args:
+        provider: Provider key for rate limiting.
+        model: Model name.
+        input_tokens: Input token count.
+        output_tokens: Output token count.
+
+    Returns:
+        float: Computed value.
+
+    """
     price_in, price_out = price_for(provider, model)
     return round(
         (input_tokens / 1_000_000) * price_in + (output_tokens / 1_000_000) * price_out,

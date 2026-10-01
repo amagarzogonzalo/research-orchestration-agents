@@ -28,17 +28,33 @@ _CHAT_ENDPOINT = "https://openrouter.ai/api/v1/chat/completions"
 
 
 class OpenRouterCatalog(OpenAICompatDiscovery):
-    """Dynamic zero-price catalog scan + OpenAI-compatible completion."""
+    """Dynamic zero-price catalog scan + OpenAI-compatible completion.
+
+    Attributes:
+        endpoint: Attribute description.
+        candidates: Attribute description.
+    """
 
     endpoint = "https://openrouter.ai/api/v1"
     candidates: list[FreeModel] = []  # overridden by the catalog scan
 
     def __init__(self, api_key: str, *, timeout: float = 15.0) -> None:
+        """Create a OpenRouterCatalog.
+
+        Args:
+            api_key: API key.
+            timeout: Request timeout in seconds.
+        """
         super().__init__(api_key, timeout=timeout)
         self._catalog_cache: list[FreeModel] | None = None
         self._catalog_cache_time = 0.0
 
     async def _fetch_free_models(self) -> list[FreeModel]:
+        """Fetch free models.
+
+        Returns:
+            list[FreeModel]: Available free models.
+        """
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             resp = await client.get(_MODELS_ENDPOINT)
             resp.raise_for_status()
@@ -75,6 +91,11 @@ class OpenRouterCatalog(OpenAICompatDiscovery):
         return free
 
     async def list_free_models(self) -> list[FreeModel]:
+        """List free models.
+
+        Returns:
+            list[FreeModel]: Available free models.
+        """
         if self._catalog_cache is None or time.monotonic() - self._catalog_cache_time > _CACHE_TTL_SECONDS:
             try:
                 self._catalog_cache = await self._fetch_free_models()
@@ -85,7 +106,16 @@ class OpenRouterCatalog(OpenAICompatDiscovery):
         return list(self._catalog_cache)
 
     async def complete(self, model_id: ModelId, prompt: str) -> str:
-        """Complete via the catalog's chat endpoint (inherited path works too)."""
+        """Complete via the catalog's chat endpoint (inherited path works too).
+
+        Args:
+            model_id: Model identifier.
+            prompt: Prompt text.
+
+        Returns:
+            str: Result text.
+
+        """
         return await OpenAICompatDiscovery.complete(self, model_id, prompt)
 
 

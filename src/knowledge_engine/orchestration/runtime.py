@@ -23,7 +23,13 @@ from knowledge_engine.schemas.extraction import GraphState
 
 @dataclass(frozen=True)
 class RunResult:
-    """Outcome of a graph run: the durable snapshot + any pending interrupt."""
+    """Outcome of a graph run: the durable snapshot + any pending interrupt.
+
+    Attributes:
+        state: Attribute description.
+        interrupted: Attribute description.
+        interrupt_payload: Attribute description.
+    """
 
     state: GraphState
     interrupted: bool = False
@@ -32,22 +38,54 @@ class RunResult:
 
 @dataclass
 class GraphRuntime:
-    """Composes + runs compiled graphs; owns resume semantics per thread."""
+    """Composes + runs compiled graphs; owns resume semantics per thread.
+
+    Attributes:
+        nodes: Attribute description.
+        checkpointer: Attribute description.
+    """
 
     nodes: NodeSet
     checkpointer: BaseCheckpointSaver[Any] | None = None
     _graphs: dict[str, CompiledStateGraph[Any, Any, Any, Any]] = field(default_factory=dict, init=False)
 
     def graph(self, workflow: str) -> CompiledStateGraph[Any, Any, Any, Any]:
+        """Graph.
+
+        Args:
+            workflow: Workflow name to run.
+
+        Returns:
+            CompiledStateGraph[Any, Any, Any, Any]: Compiled graph.
+        """
         if workflow not in self._graphs:
             self._graphs[workflow] = build_workflow(workflow, self.nodes, checkpointer=self.checkpointer)
         return self._graphs[workflow]
 
     def _config(self, thread_id: str) -> RunnableConfig:
+        """Config.
+
+        Args:
+            thread_id: Run thread identifier.
+
+        Returns:
+            RunnableConfig: Runnable configuration.
+
+        """
         return {"configurable": {"thread_id": thread_id}}
 
     async def run(self, workflow: str, thread_id: str, query: str) -> RunResult:
-        """Start (or resume-if-pending) one run; returns the graph outcome."""
+        """Start (or resume-if-pending) one run; returns the graph outcome.
+
+        Args:
+            workflow: Workflow name to run.
+            thread_id: Run thread identifier.
+            query: Scholarly query string.
+
+        Returns:
+            RunResult: Run result.
+
+        """
         graph = self.graph(workflow)
         initial: dict[str, Any] = {
             "thread_id": thread_id,
@@ -59,18 +97,45 @@ class GraphRuntime:
         return _to_result(result)
 
     async def resume(self, workflow: str, thread_id: str, payload: Any) -> RunResult:
-        """Resume a run paused at a durable ``interrupt()`` with a human reply."""
+        """Resume a run paused at a durable ``interrupt()`` with a human reply.
+
+        Args:
+            workflow: Workflow name to run.
+            thread_id: Run thread identifier.
+            payload: Event or resume payload.
+
+        Returns:
+            RunResult: Run result.
+
+        """
         graph = self.graph(workflow)
         result = await graph.ainvoke(Command(resume=payload), config=self._config(thread_id))
         return _to_result(result)
 
     async def get_state(self, workflow: str, thread_id: str) -> RunResult:
+        """Get state.
+
+        Args:
+            workflow: Workflow name to run.
+            thread_id: Run thread identifier.
+
+        Returns:
+            RunResult: Run result.
+        """
         snapshot = await self.graph(workflow).aget_state(self._config(thread_id))
         return _to_result(snapshot.values)
 
 
 def _to_result(values: Any) -> RunResult:
-    """Coerce a Pregel output dict (or snapshot) into a durable GraphState."""
+    """Coerce a Pregel output dict (or snapshot) into a durable GraphState.
+
+    Args:
+        values: State values mapping.
+
+    Returns:
+        RunResult: Run result.
+
+    """
     if values is None:
         return RunResult(state=to_graph_state({}))
     if isinstance(values, GraphState):

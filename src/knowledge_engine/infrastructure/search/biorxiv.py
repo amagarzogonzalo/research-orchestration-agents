@@ -35,27 +35,68 @@ _MAX_PAGES = 2
 
 
 class BiorxivAdapter(SearchPort, FetchPort):
-    """Preprint search over the bioRxiv/medRxiv API (free, keyless)."""
+    """Preprint search over the bioRxiv/medRxiv API (free, keyless).
+
+    Attributes:
+        name: Attribute description.
+    """
 
     name = "biorxiv"
 
     def __init__(self, server: PreprintServer = "biorxiv", *, timeout: float = 15.0) -> None:
+        """Create a BiorxivAdapter.
+
+        Args:
+            server: MCP server.
+            timeout: Request timeout in seconds.
+
+        """
         self.server: PreprintServer = server
         self._timeout = timeout
         self.name = server
 
     @property
     def _source(self) -> SearchSource:
+        """Source.
+
+        Returns:
+            SearchSource: Source identifier.
+
+        """
         return SearchSource.BIORXIV if self.server == "biorxiv" else SearchSource.MEDRXIV
 
     def _base(self) -> str:
+        """Create the base graph.
+
+        Returns:
+            str: Result text.
+
+        """
         return f"https://api.{self.server}.org/details/{self.server}"
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"})
 
     @staticmethod
     def _to_record(item: dict, source: SearchSource) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            item: Item.
+            source: Source envelope.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         authors = [a.strip() for a in str(item.get("authors") or "").split(";") if a.strip()]
         date = str(item.get("date") or "")
         year = int(date[:4]) if len(date) >= 4 and date[:4].isdigit() else None
@@ -75,7 +116,17 @@ class BiorxivAdapter(SearchPort, FetchPort):
 
     @staticmethod
     def _matches(item: dict, tokens: list[str]) -> bool:
-        """Every substantive query token must appear in title or abstract."""
+        """Every substantive query token must appear in title or abstract.
+
+        Args:
+            item: Item.
+            tokens: Token count.
+
+        Returns:
+            bool: True on success.
+
+
+        """
         haystack = f"{item.get('title') or ''}\n{item.get('abstract') or ''}".lower()
         return all(t in haystack for t in tokens)
 

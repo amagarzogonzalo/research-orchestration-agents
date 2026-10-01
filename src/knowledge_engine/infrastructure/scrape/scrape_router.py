@@ -51,6 +51,15 @@ class ScrapeRouter(ScrapePort):
     """Try each scraper in order; first clean extraction wins."""
 
     def __init__(self, chain: list[ScrapePort] | None = None) -> None:
+        """Create a ScrapeRouter.
+
+        Args:
+            chain: Exception chain.
+
+        Raises:
+            ValueError: When the operation fails.
+
+        """
         if chain is not None and not chain:
             raise ValueError("ScrapeRouter needs a non-empty chain")
         self.chain: list[ScrapePort] = chain if chain is not None else _default_chain()
@@ -80,5 +89,10 @@ class ScrapeRouter(ScrapePort):
 
 
 def _default_chain() -> list[ScrapePort]:
-    """Local-first default; remote reader last (metered, rate-limited)."""
+    """Local-first default; remote reader last (metered, rate-limited).
+
+    Returns:
+        list[ScrapePort]: Scrape adapters.
+
+    """
     return [Crawl4aiAdapter(), TrafilaturaAdapter(), JinaReaderAdapter()]

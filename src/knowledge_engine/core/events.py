@@ -49,10 +49,24 @@ class EventOut:
     __slots__ = ("stream", "type", "payload", "ref")
 
     def __init__(self, stream: str, type_: str, payload: dict, ref: str | None = None) -> None:
+        """Create a EventOut.
+
+        Args:
+            stream: Stream name.
+            type_: Event type name.
+            payload: Event or resume payload.
+            ref: Reference identifier.
+
+        """
         self.stream = stream
         self.type = type_
         self.payload = payload
         self.ref = ref  # e.g. per-source scrape fan-out key
 
     def __repr__(self) -> str:  # pragma: no cover - debugging aid
+        """Repr .
+
+        Returns:
+            str: Result text.
+        """
         return f"EventOut({self.stream}, {self.type})"

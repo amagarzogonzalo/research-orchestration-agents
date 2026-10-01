@@ -79,8 +79,15 @@ async def test_full_choreography_completes() -> None:
     assert state.judge_score is not None
     assert state.synthetic_notes
     # every station's inbox was consumed at least once on the happy path
-    for stream in ("research.inbox", "research.sources.resolved", "research.sources.filtered",
-                   "research.bodies.ready", "research.judged", "research.review", "research.render.request"):
+    for stream in (
+        "research.inbox",
+        "research.sources.resolved",
+        "research.sources.filtered",
+        "research.bodies.ready",
+        "research.judged",
+        "research.review",
+        "research.render.request",
+    ):
         assert counts.get(stream, 0) >= 1, f"{stream} was not consumed"
 
 

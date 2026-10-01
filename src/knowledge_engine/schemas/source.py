@@ -8,6 +8,22 @@ from pydantic import BaseModel, ConfigDict, Field
 
 
 class SearchSource(StrEnum):
+    """SearchSource.
+
+    Attributes:
+        OPENALEX: Attribute description.
+        SEMANTIC_SCHOLAR: Attribute description.
+        CROSSREF: Attribute description.
+        ARXIV: Attribute description.
+        HUGGINGFACE_PAPERS: Attribute description.
+        PUBMED: Attribute description.
+        BIORXIV: Attribute description.
+        MEDRXIV: Attribute description.
+        EUROPE_PMC: Attribute description.
+        UNPAYWALL: Attribute description.
+        DBLP: Attribute description.
+        DOAJ: Attribute description."""
+
     OPENALEX = "openalex"
     SEMANTIC_SCHOLAR = "semantic_scholar"
     CROSSREF = "crossref"
@@ -23,7 +39,22 @@ class SearchSource(StrEnum):
 
 
 class SourceRecord(BaseModel):
-    """Normalized scholarly hit; the single cross-provider search output."""
+    """Normalized scholarly hit; the single cross-provider search output.
+
+    Attributes:
+        model_config: Attribute description.
+        id: Attribute description.
+        doi: Attribute description.
+        title: Attribute description.
+        source: Attribute description.
+        authors: Attribute description.
+        year: Attribute description.
+        abstract: Attribute description.
+        pdf_url: Attribute description.
+        citation_count: Attribute description.
+        tldr_llm: Attribute description.
+        fetched_at: Attribute description.
+    """
 
     model_config = ConfigDict(extra="forbid")
 
@@ -41,6 +72,14 @@ class SourceRecord(BaseModel):
 
 
 class FetchMethod(StrEnum):
+    """FetchMethod.
+
+    Attributes:
+        CRAWL4AI: Attribute description.
+        TRAFILATURA: Attribute description.
+        PLAYWRIGHT: Attribute description.
+        JINA: Attribute description."""
+
     CRAWL4AI = "crawl4ai"
     TRAFILATURA = "trafilatura"
     PLAYWRIGHT = "playwright"
@@ -48,7 +87,17 @@ class FetchMethod(StrEnum):
 
 
 class DocumentBody(BaseModel):
-    """LLM-ready Markdown extracted from a URL (token-reduced, heuristic-chunked)."""
+    """LLM-ready Markdown extracted from a URL (token-reduced, heuristic-chunked).
+
+    Attributes:
+        model_config: Attribute description.
+        url: Attribute description.
+        title: Attribute description.
+        markdown: Attribute description.
+        char_count: Attribute description.
+        crawl_method: Attribute description.
+        captured_at: Attribute description.
+    """
 
     model_config = ConfigDict(extra="forbid")
 

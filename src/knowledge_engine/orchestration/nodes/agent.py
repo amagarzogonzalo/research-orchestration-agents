@@ -46,11 +46,26 @@ class AgentSynthesizeNode(WorkflowNode):
     __slots__ = ("agent_builder", "_max_iterations", "_agent")
 
     def __init__(self, agent_builder: AgentBuilder, *, max_iterations: int = MAX_SYNTHESIS_ITERATIONS) -> None:
+        """Create a AgentSynthesizeNode.
+
+        Args:
+            agent_builder: Agent builder.
+            max_iterations: Maximum iterations.
+        """
         self.agent_builder = agent_builder
         self._max_iterations = max_iterations
         self._agent: Any = None  # lazy: compiled create_agent graph (Any — betalpha API)
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
+        """Run the unit of work.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            dict[str, Any]: Result mapping.
+
+        """
         agent = await self._get_agent()
         prompt = self._build_prompt(state)
         result = await agent.ainvoke({"messages": [{"role": "user", "content": prompt}]})
@@ -59,18 +74,39 @@ class AgentSynthesizeNode(WorkflowNode):
         return {"notes": [notes], "iterations": state.get("iterations", 0) + 1}
 
     async def _get_agent(self) -> Any:
+        """Get agent.
+
+        Returns:
+            Any: Result.
+        """
         if self._agent is None:
             self._agent = await self.agent_builder()
         return self._agent
 
     @staticmethod
     def _build_prompt(state: WorkflowState) -> str:
+        """Build prompt.
+
+        Args:
+            state: Current workflow state.
+
+        Returns:
+            str: Result text.
+        """
         ctx = "\n".join((b.title or b.url) + "\n" + (b.markdown or "")[:3000] for b in _coerce_bodies(state))
         return f"Research question: {state.get('query', '')}\n\nAvailable evidence:\n{ctx}"
 
 
 def _coerce_bodies(state: WorkflowState) -> list[DocumentBody]:
-    """Accept DocumentBody objects or their raw dict snapshots (LangGraph state)."""
+    """Accept DocumentBody objects or their raw dict snapshots (LangGraph state).
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        list[DocumentBody]: Document bodies.
+
+    """
     out: list[DocumentBody] = []
     for b in state.get("bodies", []):
         out.append(b if isinstance(b, DocumentBody) else DocumentBody(**b))

@@ -8,6 +8,7 @@ ever sees the content (which is the whole point on rate-limited free tiers).
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
@@ -16,10 +17,20 @@ from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 class Crawl4aiAdapter(ScrapePort):
     def __init__(self, *, timeout: int = 30) -> None:
+        """Create a Crawl4aiAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self.timeout = timeout
         self._async_webcrawler = None
 
-    def _crawler(self):
+    def _crawler(self) -> Any:
+        """Return the lazy crawler class.
+
+        Returns:
+            Any: AsyncWebCrawler class.
+        """
         if self._async_webcrawler is None:  # lazy import keeps heavy dep optional
             from crawl4ai import AsyncWebCrawler
 
@@ -27,6 +38,18 @@ class Crawl4aiAdapter(ScrapePort):
         return self._async_webcrawler
 
     async def to_markdown(self, url: str) -> DocumentBody:
+        """Convert a URL to Markdown.
+
+        Args:
+            url: Target URL.
+
+        Returns:
+            DocumentBody: Fetched Markdown body.
+
+        Raises:
+            ScrapeError: When the operation fails.
+
+        """
         AsyncWebCrawler = self._crawler()
         try:
             async with AsyncWebCrawler() as crawler:
@@ -46,4 +69,12 @@ class Crawl4aiAdapter(ScrapePort):
 
 
 def _fallback_title(url: str) -> str:
+    """Fallback title.
+
+    Args:
+        url: Target URL.
+
+    Returns:
+        str: Result text.
+    """
     return url.rstrip("/").rsplit("/", 1)[-1] or url

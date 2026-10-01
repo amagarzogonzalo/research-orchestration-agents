@@ -14,6 +14,15 @@ import redis.asyncio as aioredis
 
 class CircuitBreaker:
     def __init__(self, rc: aioredis.Redis | None, name: str, *, threshold: int = 3, cooldown: float = 60.0) -> None:
+        """Create a CircuitBreaker.
+
+        Args:
+            rc: Redis client.
+            name: Object name.
+            threshold: Failure threshold.
+            cooldown: Cooldown in seconds.
+
+        """
         self.rc = rc
         self.name = name
         self.threshold = threshold
@@ -25,6 +34,11 @@ class CircuitBreaker:
         self._local_fails = 0
 
     async def allow(self) -> bool:
+        """Allow.
+
+        Returns:
+            bool: True on success.
+        """
         if self.rc is not None:
             try:
                 trip = await self.rc.get(self._trip_key)
@@ -36,6 +50,7 @@ class CircuitBreaker:
         return self._local_trip < time.time()
 
     async def record_success(self) -> None:
+        """Record success."""
         if self.rc is not None:
             try:
                 await self.rc.delete(self._fail_key)
@@ -45,6 +60,7 @@ class CircuitBreaker:
         self._local_fails = 0
 
     async def record_failure(self) -> None:
+        """Record failure."""
         if self.rc is not None:
             try:
                 fails = await self.rc.incr(self._fail_key)
