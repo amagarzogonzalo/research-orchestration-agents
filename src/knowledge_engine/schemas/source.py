@@ -13,6 +13,13 @@ class SearchSource(StrEnum):
     CROSSREF = "crossref"
     ARXIV = "arxiv"
     HUGGINGFACE_PAPERS = "huggingface_papers"
+    PUBMED = "pubmed"
+    BIORXIV = "biorxiv"
+    MEDRXIV = "medrxiv"
+    EUROPE_PMC = "europe_pmc"
+    UNPAYWALL = "unpaywall"
+    DBLP = "dblp"
+    DOAJ = "doaj"
 
 
 class SourceRecord(BaseModel):
@@ -36,6 +43,8 @@ class SourceRecord(BaseModel):
 class FetchMethod(StrEnum):
     CRAWL4AI = "crawl4ai"
     TRAFILATURA = "trafilatura"
+    PLAYWRIGHT = "playwright"
+    JINA = "jina"
 
 
 class DocumentBody(BaseModel):

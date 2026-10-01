@@ -19,9 +19,15 @@ from knowledge_engine.infrastructure.providers import (
 from knowledge_engine.infrastructure.rate_limit import TokenBucketLimiter
 from knowledge_engine.infrastructure.router import FallbackRouter
 from knowledge_engine.infrastructure.scrape.scrape_router import ScrapeRouter
+from knowledge_engine.infrastructure.search.biorxiv import BiorxivAdapter
+from knowledge_engine.infrastructure.search.dblp import DblpAdapter
 from knowledge_engine.infrastructure.search.demux import DemuxSearchAdapter
+from knowledge_engine.infrastructure.search.doaj import DoajAdapter
+from knowledge_engine.infrastructure.search.europe_pmc import EuropePmcAdapter
 from knowledge_engine.infrastructure.search.openalex import OpenAlexAdapter
+from knowledge_engine.infrastructure.search.pubmed import PubMedAdapter
 from knowledge_engine.infrastructure.search.semantic_scholar import SemanticScholarAdapter
+from knowledge_engine.infrastructure.search.unpaywall import UnpaywallAdapter, is_usable_email
 from knowledge_engine.orchestration.event_pipeline import EventPipeline
 from knowledge_engine.orchestration.pipeline import Pipeline
 from knowledge_engine.orchestration.stations import default_stations
@@ -34,21 +40,34 @@ class Settings:
         self.openalex_mailto = os.environ.get("OPENALEX_MAILTO", "")
         self.crossref_mailto = os.environ.get("CROSSREF_MAILTO", self.openalex_mailto)
         self.s2_key = os.environ.get("SEMANTIC_SCHOLAR_API_KEY")
+        self.unpaywall_email = os.environ.get("UNPAYWALL_EMAIL", "")
 
     @classmethod
     def load(cls) -> Settings:
         return cls()
 
 
+def _federated_sources(settings: Settings) -> list:
+    """Shared source list: DOI backbone, biomedical depth, community/CS, preprints, OA."""
+    sources: list = [
+        OpenAlexAdapter(settings.openalex_mailto),
+        PubMedAdapter(),
+        EuropePmcAdapter(),
+        SemanticScholarAdapter(settings.s2_key),
+        BiorxivAdapter("biorxiv"),
+        BiorxivAdapter("medrxiv"),
+        DblpAdapter(),
+        DoajAdapter(),
+    ]
+    if is_usable_email(settings.unpaywall_email):
+        sources.append(UnpaywallAdapter(settings.unpaywall_email))
+    return sources
+
+
 def build_container(settings: Settings | None = None) -> tuple[Pipeline, RedisStreamBroker]:
     settings = settings or Settings.load()
 
-    search = DemuxSearchAdapter(
-        [
-            OpenAlexAdapter(settings.openalex_mailto),
-            SemanticScholarAdapter(settings.s2_key),
-        ]
-    )
+    search = DemuxSearchAdapter(_federated_sources(settings))
     scrape = ScrapeRouter()
     router = FallbackRouter(
         [GroqAdapter(), GeminiAdapter(), MistralAdapter(), OpenRouterAdapter()],
@@ -77,12 +96,7 @@ def build_event_pipeline(settings: Settings | None = None, *, auto_approve_revie
     """Composition root for the event-driven choreography (ADR 0007)."""
     settings = settings or Settings.load()
 
-    search = DemuxSearchAdapter(
-        [
-            OpenAlexAdapter(settings.openalex_mailto),
-            SemanticScholarAdapter(settings.s2_key),
-        ]
-    )
+    search = DemuxSearchAdapter(_federated_sources(settings))
     scrape = ScrapeRouter()
     router = FallbackRouter(
         [GroqAdapter(), GeminiAdapter(), MistralAdapter(), OpenRouterAdapter()],
