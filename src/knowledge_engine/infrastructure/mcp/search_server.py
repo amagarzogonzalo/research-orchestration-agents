@@ -20,7 +20,7 @@ def build_search_server(search: SearchPort, *, name: str = "scholarly-search") -
 
     @server.tool
     async def search_papers(query: str, limit: int = 10) -> list[dict[str, Any]]:
-        """Search scholarly literature (OpenAlex/Semantic Scholar/Crossref/arXiv)."""
+        """Search scholarly literature across the federated demux (open metadata, biomedical, preprints, OA)."""
         records = await search.search(query, limit=limit)
         return [r.model_dump(mode="json") for r in records]
 
