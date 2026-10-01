@@ -59,3 +59,32 @@ so the resilience core is verifiable offline.
 - Semantic Scholar: shared 1k req/s public limit — always behind the token bucket + circuit breaker.
 - OpenRouter: ~20 RPM, no SLA — reserved for the fallback cascade only.
 - Cost is recomputed locally (never trusted from vendor) for internally-consistent metrics.
+
+## Federated search sources
+
+All keyless. The set mirrors industry practice (Elicit: Semantic Scholar +
+PubMed + OpenAlex; ScholarXIV/Academix add arXiv, Crossref, dblp) with an
+OA-full-text layer on top:
+
+| Source | Role | Auth / limits |
+|---|---|---|
+| OpenAlex | DOI-first metadata backbone (free per-ID lookups) | mailto polite pool |
+| PubMed (E-utilities) | Biomedical depth, 33M+ records, MeSH syntax | keyless, self-throttled 3/s |
+| Europe PMC | Biomedical + OA full-text links | keyless |
+| Semantic Scholar | Influence/citation signal | keyless (shared quota) |
+| Crossref | DOI validation backbone | mailto polite pool |
+| arXiv | Physics/math/CS preprints | keyless |
+| bioRxiv / medRxiv | Life-science preprints (browse + DOI fetch) | keyless |
+| HuggingFace Papers | Community-ranked ML papers, code links | keyless |
+| dblp | CS bibliography, venue metadata | keyless |
+| DOAJ | OA journals, full-text links | keyless |
+| Unpaywall | Legal OA PDF resolution by DOI (fetch only) | real `UNPAYWALL_EMAIL` required |
+
+Scrape tier: crawl4ai → trafilatura (local, free) → Jina Reader (remote last
+resort, keyless ~20 RPM, optional `JINA_API_KEY`). Papers With Code is
+officially sunset; its successor (HuggingFace Papers) is wired above.
+
+Deliberately not wired: ORCID (researcher profiles, not papers), OpenCitations
+(no verifiable live endpoint: v1 410, v2 paths 404/400), OpenAIRE (OAF schema
+too nested to map robustly; same records arrive via OpenAlex), key-gated APIs
+(CORE, BASE, Lens, ADS), Google Scholar (no API; scraping violates ToS).

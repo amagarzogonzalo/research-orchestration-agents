@@ -88,7 +88,7 @@ class PubMedAdapter(SearchPort, FetchPort):
         resp.raise_for_status()
         payload = resp.json().get("result", {})
         records = []
-        for pmid in payload.get("uids", []):
+        for pmid in pmids:
             item = payload.get(str(pmid))
             if isinstance(item, dict):
                 records.append(self._to_record(str(pmid), item))
@@ -125,7 +125,7 @@ class PubMedAdapter(SearchPort, FetchPort):
             doi: DOI to resolve (bare, without URL prefix).
 
         Returns:
-            The resolved record, or None when PubMed does not index it.
+            SourceRecord | None: The resolved record, or None when PubMed does not index it.
 
         Raises:
             SearchError: If the E-utilities calls fail.

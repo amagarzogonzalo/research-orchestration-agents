@@ -230,7 +230,7 @@ def _default_search() -> SearchPort:
 
     # Order: DOI backbone first, biomedical depth next, then community/CS,
     # preprints, OA. Unpaywall last: DOI-only fetch that fills OA-PDF gaps.
-    sources: list = [
+    sources: list[SearchPort] = [
         OpenAlexAdapter(os.environ.get("OPENALEX_MAILTO", "")),
         PubMedAdapter(),
         EuropePmcAdapter(),
