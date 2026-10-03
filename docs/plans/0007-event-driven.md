@@ -1,7 +1,7 @@
 ---
 @id: "plans/0007"
 type: ADR
-status: ACCEPTED
+status: SUPERSEDED
 date: 2026-09-03
 supersedes:
   - 0005   # 0005's synchronous graph is subsumed by event choreography
@@ -11,6 +11,11 @@ related:
 ---
 
 # 0007 — Event-Driven Choreography Over the Shell
+
+> **SUPERSEDED (single-user redesign):** the Redis-Streams event shell was
+> removed — `broker.py`, `container.py`, `worker.py`, `event_pipeline.py`,
+> `stations.py`, `pipeline.py`, `core/events.py` are deleted. The runtime is
+> the files-only LangGraph facade in `engine.py` (ADR 0008). Kept as history.
 
 ## Context
 

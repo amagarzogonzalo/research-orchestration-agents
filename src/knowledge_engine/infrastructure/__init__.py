@@ -1,1 +1,1 @@
-"""Infrastructure adapters (Redis, providers, search, scrape, store)."""
+"""Infrastructure adapters (providers, search, scrape, store)."""

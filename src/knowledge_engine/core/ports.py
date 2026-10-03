@@ -92,34 +92,6 @@ class ScrapePort(abc.ABC):
         ...
 
 
-class BrokerPort(abc.ABC):
-    """Event shell transport (Redis Streams in production)."""
-
-    @abc.abstractmethod
-    async def publish(self, stream: str, payload: dict) -> str:
-        """Publish an event.
-
-        Args:
-            stream: Stream name.
-            payload: Event payload.
-
-        Returns:
-            str: Event identifier.
-        """
-        ...
-
-    @abc.abstractmethod
-    async def consume_group(self, group: str, consumer: str, handler: object) -> None:
-        """Consume a group stream.
-
-        Args:
-            group: Consumer group name.
-            consumer: Consumer name.
-            handler: Event handler callable.
-        """
-        ...
-
-
 class BrowserPort(abc.ABC):
     """Full browser automation: render + interact with live pages."""
 

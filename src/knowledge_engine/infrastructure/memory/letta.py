@@ -6,12 +6,14 @@ adapter is a thin, dependency-guarded client; enable via the `memory` extra.
 
 from __future__ import annotations
 
+from typing import Any
+
 try:  # pragma: no cover - optional dependency
     from letta_client import Client  # type: ignore
 
     _LETTA_AVAILABLE = True
 except ImportError:  # pragma: no cover
-    Client = None  # type: ignore
+    Client = None
     _LETTA_AVAILABLE = False
 
 
@@ -33,7 +35,7 @@ class LettaMemoryAdapter:
         self.client = Client(base_url=base_url, token=token)
         self.agent_id = agent_id
 
-    async def write(self, block: dict) -> None:
+    async def write(self, block: dict[str, Any]) -> None:
         # placeholder: agent.memory.create_block(name=..., value=...)
         """Write.
 
