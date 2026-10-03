@@ -31,7 +31,54 @@ logger = logging.getLogger(__name__)
 PreprintServer = Literal["biorxiv", "medrxiv"]
 
 _PAGE_SIZE = 30
-_MAX_PAGES = 2
+# Four pages (120 records) per server: the API has no keyword search, so a
+# bounded recent slice is the only recall lever; calls stop early on limit.
+_MAX_PAGES = 4
+# The date-range endpoint pages forward from the window start, so a wide
+# window would scan stale records first. Bias to the freshest slice instead:
+# recent preprints are this source's value-add; the archive is already
+# covered by OpenAlex / PubMed / Europe PMC in the same fan-out.
+_WINDOW_DAYS = 14
+
+# Short glue words carry no topical signal; requiring them (AND semantics)
+# silently empties results (e.g. "with" in "pretraining with synthetic data").
+_STOPWORDS = frozenset(
+    {
+        "with",
+        "from",
+        "that",
+        "this",
+        "what",
+        "which",
+        "about",
+        "into",
+        "than",
+        "then",
+        "them",
+        "they",
+        "their",
+        "there",
+        "these",
+        "those",
+        "such",
+        "only",
+        "also",
+        "between",
+        "under",
+        "after",
+        "before",
+        "while",
+        "when",
+        "where",
+        "will",
+        "would",
+        "could",
+        "should",
+        "your",
+        "have",
+        "does",
+    }
+)
 
 
 class BiorxivAdapter(SearchPort, FetchPort):
@@ -116,7 +163,12 @@ class BiorxivAdapter(SearchPort, FetchPort):
 
     @staticmethod
     def _matches(item: dict, tokens: list[str]) -> bool:
-        """Every substantive query token must appear in title or abstract.
+        """Substantive query tokens must appear in title or abstract.
+
+        Short queries (1-2 tokens) require every token; longer queries match
+        on a majority (rounded up, minimum 2) — requiring all of 4+ tokens
+        inside a 120-record slice otherwise yields nothing (calibrated
+        2026-10-03: 7 single-token vs 0 all-token hits for a 3-token query).
 
         Args:
             item: Item.
@@ -127,8 +179,12 @@ class BiorxivAdapter(SearchPort, FetchPort):
 
 
         """
-        haystack = f"{item.get('title') or ''}\n{item.get('abstract') or ''}".lower()
-        return all(t in haystack for t in tokens)
+        # Hyphenation varies ("pre-training" vs "pretraining"); strip hyphens
+        # on both sides so spelling variants still match.
+        haystack = f"{item.get('title') or ''}\n{item.get('abstract') or ''}".lower().replace("-", "")
+        needles = [t.replace("-", "") for t in tokens]
+        need = len(needles) if len(needles) <= 2 else max(2, -(-len(needles) // 2))
+        return sum(1 for t in needles if t in haystack) >= need
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
         """Browse the recent window and keep records matching every query token.
@@ -137,7 +193,7 @@ class BiorxivAdapter(SearchPort, FetchPort):
         (bounded to ``_MAX_PAGES``) and filters client-side.
 
         Args:
-            query: Search terms (tokenized client-side; terms under 3 chars ignored).
+            query: Search terms (tokenized client-side; terms under 3 chars and stopwords ignored).
             limit: Max records to return.
 
         Returns:
@@ -146,9 +202,11 @@ class BiorxivAdapter(SearchPort, FetchPort):
         Raises:
             SearchError: If the API calls fail.
         """
-        tokens = [t.lower() for t in query.split() if len(t) > 2]
+        tokens = [t.lower() for t in query.split() if len(t) > 2 and t.lower() not in _STOPWORDS]
+        if not tokens:
+            return []
         end = datetime.now(UTC).date()
-        start = end - timedelta(days=90)
+        start = end - timedelta(days=_WINDOW_DAYS)
         hits: list[SourceRecord] = []
         seen: set[str] = set()
         try:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import re
 from datetime import UTC, datetime
 from xml.etree import ElementTree as ET
@@ -32,6 +33,16 @@ class ArxivAdapter(SearchPort):
         """
         self._timeout = timeout
 
+    def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
+        return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"})
+
     @staticmethod
     def _to_record(entry: ET.Element) -> SourceRecord:
         """Convert an item to a record.
@@ -57,16 +68,22 @@ class ArxivAdapter(SearchPort):
             """
             return entry.find(name, _NS)
 
-        title = re.sub(r"\s+", " ", (_tag("atom:title").text or "").strip()) if _tag("atom:title") else ""
+        # NOTE: never test an Element for truthiness — childless elements are
+        # falsy even when present, which silently blanked every leaf field.
+        title_el = _tag("atom:title")
+        title = re.sub(r"\s+", " ", (title_el.text or "").strip()) if title_el is not None else ""
         authors = []
         for author in entry.findall("atom:author", _NS):
             name = author.findtext("atom:name", namespaces=_NS)
             if name:
                 authors.append(name.strip())
-        summary = re.sub(r"\s+", " ", (_tag("atom:summary").text or "").strip()) if _tag("atom:summary") else ""
-        id_link = _tag("atom:id").text if _tag("atom:id") else ""
+        summary_el = _tag("atom:summary")
+        summary = re.sub(r"\s+", " ", (summary_el.text or "").strip()) if summary_el is not None else ""
+        id_el = _tag("atom:id")
+        id_link = id_el.text if id_el is not None and id_el.text else ""
         arxiv_id = id_link.rsplit("/abs/", 1)[-1] if id_link else ""
-        published = (_tag("atom:published").text if _tag("atom:published") else "")[:4]
+        published_el = _tag("atom:published")
+        published = (published_el.text if published_el is not None and published_el.text else "")[:4]
         year = int(published) if published.isdigit() else None
         pdf_url = None
         for link in entry.findall("atom:link", _NS):
@@ -101,8 +118,13 @@ class ArxivAdapter(SearchPort):
         """
         params = {"search_query": f"all:{query}", "max_results": limit}
         try:
-            async with httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": "knowledge-engine"}) as client:
+            async with self._client() as client:
                 resp = await client.get(_BASE, params=params)
+                if resp.status_code == 429:
+                    # export.arxiv.org asks clients to back off (~3s between
+                    # requests); one polite retry beats dropping the source.
+                    await asyncio.sleep(5)
+                    resp = await client.get(_BASE, params=params)
                 resp.raise_for_status()
         except httpx.HTTPError as exc:
             raise SearchError(f"arXiv search failed for {query!r}: {exc}") from exc
