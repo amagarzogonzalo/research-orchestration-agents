@@ -55,7 +55,6 @@ rules:
         - /src/
       exclude:
         - /src/knowledge_engine/scripts/*
-        - /src/knowledge_engine/worker.py
 
   - id: no-vendor-imports-in-core
     languages: [python]

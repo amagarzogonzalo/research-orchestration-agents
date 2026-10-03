@@ -13,7 +13,12 @@
     "*": "allow",
     "bash": "allow",
     "edit": "allow",
-    "read": "allow",
+    "read": {
+      "*": "allow",
+      "*.env": "allow",
+      "*.env.*": "allow",
+      "*.env.example": "allow"
+    },
     "glob": "allow",
     "grep": "allow",
     "task": "allow",
@@ -22,7 +27,9 @@
     "question": "allow",
     "webfetch": "allow",
     "websearch": "allow",
-    "external_directory": "allow",
+    "external_directory": {
+      "*": "allow"
+    },
     "doom_loop": "allow"
   },
   "agent": {
