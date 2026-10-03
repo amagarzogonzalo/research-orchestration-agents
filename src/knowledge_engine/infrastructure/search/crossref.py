@@ -64,6 +64,13 @@ class CrossrefAdapter(SearchPort, FetchPort):
         date_parts = (item.get("issued", {}).get("date-parts") or [[None]])[0]
         if date_parts and date_parts[0]:
             year = date_parts[0]
+        container = item.get("container-title") or []
+        venue = str(container[0]) if container else None
+        references = [
+            str(ref.get("DOI")).strip()
+            for ref in item.get("reference", []) or []
+            if isinstance(ref, dict) and str(ref.get("DOI") or "").strip()
+        ]
         return SourceRecord(
             id=f"crossref:{item.get('DOI', '')}",
             doi=item.get("DOI"),
@@ -73,6 +80,8 @@ class CrossrefAdapter(SearchPort, FetchPort):
             year=year,
             abstract=item.get("abstract"),
             citation_count=item.get("is-referenced-by-count", 0),
+            venue=venue,
+            references=references,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 

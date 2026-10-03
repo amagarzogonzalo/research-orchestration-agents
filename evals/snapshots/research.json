@@ -1,20 +1,17 @@
 {
   "citations": [
     "doaj:5c3e3ea8e8b2469e8706f069570090a8",
-    "europe_pmc:MED:42251377",
     "europe_pmc:MED:42297857",
-    "europe_pmc:MED:42382850",
-    "europe_pmc:MED:42682590",
-    "europe_pmc:PMC:PMC13600821",
     "huggingface_papers:2412.11919",
     "huggingface_papers:2501.08292",
+    "huggingface_papers:2505.04253",
     "huggingface_papers:2512.19134",
     "huggingface_papers:2603.20309"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 6,
-    "paragraphs": 10,
+    "list_items": 14,
+    "paragraphs": 18,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -26,11 +23,12 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "12ee514a3ca981a7",
+  "hash": "6bccb7db2fd4ea15",
   "headings": [
-    "2:overview-of-hallucination-in-large-language-models",
-    "2:mechanism-of-retrieval-augmented-generation-rag",
-    "2:advanced-rag-frameworks-and-precision-enhancements",
-    "2:open-questions"
+    "2:the-hallucination-problem-in-large-language-models",
+    "2:core-mechanism-of-rag-in-reducing-hallucinations",
+    "2:advanced-paradigms-for-enhancing-rag-precision",
+    "2:open-questions",
+    "2:practical-takeaways"
   ]
 }

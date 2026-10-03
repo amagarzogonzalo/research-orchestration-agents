@@ -117,6 +117,7 @@ class PubMedAdapter(SearchPort, FetchPort):
             abstract=None,
             pdf_url=None,
             citation_count=0,
+            venue=item.get("source") or None,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 

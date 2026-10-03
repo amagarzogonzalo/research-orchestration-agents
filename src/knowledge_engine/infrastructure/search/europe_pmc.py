@@ -105,6 +105,7 @@ class EuropePmcAdapter(SearchPort, FetchPort):
             abstract=item.get("abstractText"),
             pdf_url=EuropePmcAdapter._pdf_url(item),
             citation_count=cited,
+            venue=((item.get("journalInfo") or {}).get("journal") or {}).get("title") or None,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 

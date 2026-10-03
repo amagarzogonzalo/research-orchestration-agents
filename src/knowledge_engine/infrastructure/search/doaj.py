@@ -92,6 +92,7 @@ class DoajAdapter(SearchPort):
             abstract=bib.get("abstract"),
             pdf_url=fulltext,
             citation_count=0,
+            venue=((bib.get("journal") or {}).get("title")) or None,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 

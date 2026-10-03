@@ -52,6 +52,8 @@ class SourceRecord(BaseModel):
         abstract: Attribute description.
         pdf_url: Attribute description.
         citation_count: Attribute description.
+        venue: Attribute description.
+        references: Attribute description.
         tldr_llm: Attribute description.
         fetched_at: Attribute description.
     """
@@ -67,6 +69,8 @@ class SourceRecord(BaseModel):
     abstract: str | None = None
     pdf_url: str | None = None
     citation_count: int = 0
+    venue: str | None = None  # journal / conference / server, when the API returns it
+    references: list[str] = Field(default_factory=list)  # cited IDs (DOIs or canonical ids)
     tldr_llm: str | None = None  # ~50-token summary for downstream filtering
     fetched_at: str | None = None
 

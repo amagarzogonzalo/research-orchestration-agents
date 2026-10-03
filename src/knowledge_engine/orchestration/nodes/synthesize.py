@@ -10,6 +10,7 @@ the loop (Saga compensation lives at the graph layer via error_handler).
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from typing import Any
 
 from knowledge_engine.core.exceptions import ProviderExhausted
@@ -36,7 +37,11 @@ _SYNTHESIS_SYSTEM = (
     '"[^openalex:W123]: Paper Title Here. Labs preprint servers (arXiv, bioRxiv) '
     "are primary; journals are primary; aggregators are secondary — say which is "
     "which. Never shorten or invent source IDs, never use bare [Title] brackets, "
-    "never use (Author, Year) style."
+    "never use (Author, Year) style. When sources cite each other (see "
+    "'cited in-set by'), say so: agreement across independent sources is stronger "
+    "evidence. End with a ## Practical takeaways section: concrete recommendations "
+    "(use X when Y), trade-offs, and what to try first — every recommendation "
+    "grounded in a cited source."
 )
 
 
@@ -90,14 +95,16 @@ class SynthesizeNode(WorkflowNode):
             str: Result text.
 
         """
+        sources = list(state.get("filtered") or state.get("sources", []))
+        cited_by = _cited_by_map(sources)
         if state.get("bodies"):
             evidence = "\n---\n".join(_labeled_body(b, state) for b in state["bodies"])
         else:
             parts = []
-            for src in state.get("filtered") or state.get("sources", []):
+            for src in sources:
                 # IDs are part of the evidence: the model can only cite exact
                 # source IDs it has actually seen (see _SYNTHESIS_SYSTEM).
-                parts.append(f"[{_src_id(src)}]\n{_src_title(src)}\n{_src_abstract(src)[:2000]}")
+                parts.append(_ledger_line(src, cited_by.get(_norm_ref(_src_id(src)), [])))
             evidence = "\n---\n".join(parts) or "(no sources)"
         prompt = (
             f"Synthesize the research findings into structured notes for query:\n"
@@ -126,6 +133,74 @@ def _body_text(body: object) -> str:
     else:
         title, markdown = "", ""
     return f"{title}\n{markdown[:4000]}"
+
+
+def _norm_ref(value: str) -> str:
+    """Normalize an ID/DOI for cross-source matching.
+
+    Args:
+        value: Raw identifier.
+
+    Returns:
+        str: Lowercased identifier without URL/DOI prefixes.
+    """
+    text = value.strip().lower()
+    for prefix in ("https://doi.org/", "http://doi.org/", "doi:"):
+        if text.startswith(prefix):
+            text = text[len(prefix) :]
+    return text
+
+
+def _cited_by_map(sources: Sequence[object]) -> dict[str, list[str]]:
+    """Map each retrieved source to the in-set sources citing it.
+
+    Matches on normalized IDs and DOIs so OpenAlex references resolve
+    Crossref records and vice versa.
+
+    Args:
+        sources: Retrieved sources.
+
+    Returns:
+        dict[str, list[str]]: Normalized id -> citing source ids.
+    """
+    by_norm: dict[str, str] = {}
+    for src in sources:
+        sid = _src_id(src)
+        if sid:
+            by_norm.setdefault(_norm_ref(sid), sid)
+        doi = _src_doi(src)
+        if doi:
+            by_norm.setdefault(_norm_ref(doi), sid or doi)
+    cited: dict[str, list[str]] = {}
+    for src in sources:
+        sid = _src_id(src)
+        refs = _src_references(src)
+        for other_norm, other_sid in by_norm.items():
+            if other_sid == sid or not other_norm:
+                continue
+            if any(_norm_ref(ref) == other_norm for ref in refs):
+                cited.setdefault(other_norm, []).append(sid)
+    return cited
+
+
+def _ledger_line(src: object, cited_by: list[str]) -> str:
+    """Render one evidence ledger line with venue + in-set citations.
+
+    Args:
+        src: Source record.
+        cited_by: IDs of retrieved sources citing this one.
+
+    Returns:
+        str: Ledger line.
+    """
+    venue = _src_venue(src)
+    meta = ", ".join(part for part in (venue, _src_year(src)) if part)
+    header = f"[{_src_id(src)}] {_src_title(src)}"
+    if meta:
+        header += f" — {meta}"
+    if cited_by:
+        header += f" | cited in-set by: {', '.join(sorted(set(cited_by)))}"
+    return f"{header}\n{_src_abstract(src)[:2000]}"
 
 
 def _src_id(src: object) -> str:
@@ -204,6 +279,64 @@ def _src_abstract(src: object) -> str:
     if isinstance(src, dict):
         return src.get("abstract", "") or ""
     return getattr(src, "abstract", "") or ""
+
+
+def _src_doi(src: object) -> str:
+    """DOI from a SourceRecord (Pydantic) or its raw dict snapshot.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str: DOI text.
+    """
+    if isinstance(src, dict):
+        return src.get("doi", "") or ""
+    return getattr(src, "doi", "") or ""
+
+
+def _src_venue(src: object) -> str:
+    """Venue from a SourceRecord (Pydantic) or its raw dict snapshot.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str: Venue text.
+    """
+    if isinstance(src, dict):
+        return src.get("venue", "") or ""
+    return getattr(src, "venue", "") or ""
+
+
+def _src_year(src: object) -> str:
+    """Year from a SourceRecord (Pydantic) or its raw dict snapshot.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str: Year text.
+    """
+    if isinstance(src, dict):
+        return str(src.get("year") or "")
+    return str(getattr(src, "year", "") or "")
+
+
+def _src_references(src: object) -> list[str]:
+    """References from a SourceRecord (Pydantic) or its raw dict snapshot.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        list[str]: Cited IDs.
+    """
+    if isinstance(src, dict):
+        refs = src.get("references", []) or []
+    else:
+        refs = getattr(src, "references", []) or []
+    return [str(r) for r in refs if r]
 
 
 __all__ = ["SynthesizeNode", "ProviderExhausted"]
