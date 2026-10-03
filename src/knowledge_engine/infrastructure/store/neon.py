@@ -73,19 +73,18 @@ class NeonStoreAdapter:
             )
             await conn.commit()
 
-    async def get(self, artifact_id: str) -> dict | None:
-        """Get.
+    async def get(self, artifact_id: str) -> dict[str, Any] | None:
+        """Get an artifact row by id.
 
         Args:
             artifact_id: Artifact identifier.
 
         Returns:
-            dict | None: Mapping or None.
-
+            dict[str, Any] | None: Row mapping or None.
         """
         async with await psycopg.AsyncConnection.connect(self.dsn, row_factory=dict_row) as conn:
             cur = await conn.execute("SELECT * FROM knowledge_artifacts WHERE id = %s", (artifact_id,))
-            row = await cur.fetchone()
+            row: dict[str, Any] | None = await cur.fetchone()
             return row
 
 
