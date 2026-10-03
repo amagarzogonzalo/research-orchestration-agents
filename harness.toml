@@ -44,5 +44,7 @@ enabled = false
 port    = 8787
 
 [evals]
-# Pinned on purpose: the judge must NOT follow the active profile. Free tier.
-judge_model = "deepseek/deepseek-flash"
+# Pinned on purpose: the judge must NOT follow the active profile. Must be a
+# valid OpenRouter model ID (verified against /api/v1/models); :free suffix
+# guarantees the free tier.
+judge_model = "qwen/qwen3.8-27b:free"

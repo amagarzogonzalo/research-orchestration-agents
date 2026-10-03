@@ -26,12 +26,8 @@ class CassetteMiss(RuntimeError):
 
 
 def _key(request: dict[str, Any]) -> str:
-    norm = {
-        k: request.get(k) for k in ("model", "messages", "tools", "reasoning", "response_format")
-    }
-    return hashlib.sha256(
-        json.dumps(norm, sort_keys=True, ensure_ascii=False, default=str).encode()
-    ).hexdigest()[:24]
+    norm = {k: request.get(k) for k in ("model", "messages", "tools", "reasoning", "response_format")}
+    return hashlib.sha256(json.dumps(norm, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()[:24]
 
 
 class Cassette:
@@ -83,6 +79,122 @@ class Cassette:
                 + "\n"
             )
         return response
+
+    async def achat(self, client: Any, **request: Any) -> dict[str, Any]:
+        """Async mirror of :meth:`chat` for ``await``-style live clients.
+
+        Args:
+            client: Async callable invoked as ``await client(**request)`` on a miss.
+            **request: Request fields (must be JSON-serializable for the key).
+
+        Returns:
+            dict[str, Any]: Recorded or replayed response mapping.
+
+        Raises:
+            CassetteMiss: In replay mode without a matching recording.
+        """
+        k = _key(request)
+        path = self.dir / f"{k}.json"
+
+        if self.mode == "replay":
+            if not path.exists():
+                raise CassetteMiss(
+                    f"no recording for {self.name}/{k}\n"
+                    f"  model={request.get('model')}\n"
+                    f"  first_msg={str(request.get('messages', [{}])[0])[:120]}\n"
+                    "Run `make evals-live` to re-record, then review the cassette diff."
+                )
+            rec = json.loads(path.read_text())
+            self.calls.append({"key": k, "replayed": True, "usage": rec.get("usage", {})})
+            return rec["response"]
+
+        t0 = time.time()
+        response = await client(**request)
+        elapsed = time.time() - t0
+        usage = response.get("usage", {}) if isinstance(response, dict) else {}
+        self.calls.append({"key": k, "replayed": False, "usage": usage, "wall_s": elapsed})
+
+        if self.mode == "record":
+            path.write_text(
+                json.dumps(
+                    {
+                        "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "request": request,
+                        "response": response,
+                        "usage": usage,
+                        "wall_s": round(elapsed, 3),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                    ensure_ascii=False,
+                    default=str,
+                )
+                + "\n"
+            )
+        return response
+
+    async def acall(
+        self,
+        name: str,
+        fn: Any,
+        payload: dict[str, Any],
+        encode: Any,
+        decode: Any,
+    ) -> Any:
+        """Record/replay a non-chat call (search, scrape) with JSON-serializable results.
+
+        Args:
+            name: Stable call label namespacing the recording.
+            fn: Async callable invoked as ``await fn(**payload)`` on a miss.
+            payload: Call arguments (JSON-serializable for the key).
+            encode: Maps the live result to JSON-serializable data.
+            decode: Rebuilds the result from recorded data.
+
+        Returns:
+            Any: Decoded recorded result, or the live result.
+
+        Raises:
+            CassetteMiss: In replay mode without a matching recording.
+        """
+        key = hashlib.sha256(
+            json.dumps({"name": name, "payload": payload}, sort_keys=True, ensure_ascii=False, default=str).encode()
+        ).hexdigest()[:24]
+        path = self.dir / f"{key}.json"
+
+        if self.mode == "replay":
+            if not path.exists():
+                raise CassetteMiss(
+                    f"no recording for {self.name}/{name}/{key}. "
+                    "Run `make evals-live` to re-record, then review the cassette diff."
+                )
+            rec = json.loads(path.read_text())
+            self.calls.append({"key": key, "replayed": True, "usage": {}})
+            return decode(rec["response"])
+
+        t0 = time.time()
+        result = await fn(**payload)
+        elapsed = time.time() - t0
+        self.calls.append({"key": key, "replayed": False, "usage": {}, "wall_s": elapsed})
+
+        if self.mode == "record":
+            path.write_text(
+                json.dumps(
+                    {
+                        "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                        "name": name,
+                        "payload": payload,
+                        "response": encode(result),
+                        "usage": {},
+                        "wall_s": round(elapsed, 3),
+                    },
+                    indent=2,
+                    sort_keys=True,
+                    ensure_ascii=False,
+                    default=str,
+                )
+                + "\n"
+            )
+        return result
 
     @property
     def usage(self) -> dict[str, int]:

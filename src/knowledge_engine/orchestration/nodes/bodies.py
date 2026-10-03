@@ -109,6 +109,11 @@ def _derive_url(src: SourceRecord) -> str | None:
     """
     if src.id.startswith("arxiv:"):
         return f"https://arxiv.org/abs/{src.id.replace('arxiv:', '')}"
+    if src.id.startswith("huggingface_papers:"):
+        # HF Papers IDs are arXiv IDs; the abs page scrapes cleanly.
+        arxiv_id = src.id.replace("huggingface_papers:", "")
+        if arxiv_id:
+            return f"https://arxiv.org/abs/{arxiv_id}"
     if src.id.startswith("europe_pmc:"):
         _, _, rest = src.id.partition("europe_pmc:")
         source, _, ext_id = rest.partition(":")

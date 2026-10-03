@@ -90,3 +90,18 @@ async def test_search_raises_search_error() -> None:
     adapter._client = lambda: _client(lambda request: httpx.Response(500))  # type: ignore[method-assign]
     with pytest.raises(SearchError):
         await adapter.search("synthetic data")
+
+
+@pytest.mark.asyncio
+async def test_search_strips_filter_punctuation() -> None:
+    """Trailing ?/!/:/; in the query must not reach title.search (HTTP 400)."""
+    seen: dict[str, str] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["filter"] = str(request.url.params.get("filter", ""))
+        return httpx.Response(200, json=_works_payload())
+
+    adapter = OpenAlexAdapter("test@example.com")
+    adapter._client = lambda: _client(handler)  # type: ignore[method-assign]
+    await adapter.search("What is RAG?", limit=2)
+    assert seen["filter"] == "title.search:What is RAG"

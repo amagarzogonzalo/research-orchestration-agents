@@ -1,4 +1,4 @@
-.PHONY: help install test test-fast lint types arch semgrep agents context check \
+.PHONY: help install test test-fast lint types arch semgrep agents context check dup \
         profile profiles evals evals-live evals-accept sessions \
         compress-on compress-off compress-savings compress-help
 
@@ -32,6 +32,9 @@ semgrep:            ## custom security/correctness rules (isolated via uvx)
 
 agents:             ## structural checks on AGENTS.md
 	uv run python bin/lint_agents.py
+
+dup:                ## copy/paste detection (jscpd, advisory; needs npx network)
+	npx -y jscpd@4 src --config .jscpd.json
 
 context:            ## what the always-on prompt costs, enforced
 	uv run python bin/context_budget.py

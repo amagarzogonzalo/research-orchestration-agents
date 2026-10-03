@@ -33,6 +33,8 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
         if ":" not in line or line.startswith((" ", "\t", "-")):
             continue
         key, _, raw = line.partition(":")
+        # YAML dumps quote special keys ("@id": ...); quotes are syntax.
+        key = key.strip().strip("\"'")
         raw = raw.strip()
         kind = (
             "list"

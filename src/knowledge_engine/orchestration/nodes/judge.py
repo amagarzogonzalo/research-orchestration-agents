@@ -30,6 +30,7 @@ _JUDGE_SYSTEM = (
 
 REVIEW_NODE = "review"
 SYNTHESIZE_NODE = "synthesize"
+JUDGE_NODE = "judge"
 
 
 class JudgeNode(WorkflowNode):
@@ -111,4 +112,4 @@ def _parse_score(raw: str) -> float:
         return 0.0
 
 
-__all__ = ["JudgeNode", "REVIEW_NODE", "SYNTHESIZE_NODE", "judge_route"]
+__all__ = ["JUDGE_NODE", "JudgeNode", "REVIEW_NODE", "SYNTHESIZE_NODE", "judge_route"]

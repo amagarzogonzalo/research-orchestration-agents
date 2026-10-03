@@ -1,0 +1,8 @@
+{
+  "dependencies": ["."],
+  "graphs": {
+    "deep": "./src/knowledge_engine/studio.py:graph_deep",
+    "research": "./src/knowledge_engine/studio.py:graph_research"
+  },
+  "env": ".env"
+}

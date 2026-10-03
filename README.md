@@ -78,7 +78,7 @@ OA-full-text layer on top:
 | PubMed (E-utilities) | Biomedical depth, 33M+ records, MeSH syntax | keyless, self-throttled 3/s |
 | Europe PMC | Biomedical + OA full-text links | keyless |
 | Semantic Scholar | Influence/citation signal | keyless (shared quota) |
-| Crossref | DOI validation backbone | mailto polite pool |
+| Crossref | DOI registry fallback (fetch + validation) | mailto polite pool |
 | arXiv | Physics/math/CS preprints | keyless |
 | bioRxiv / medRxiv | Life-science preprints: freshest ~14d slice + DOI fetch (archive via OpenAlex) | keyless |
 | HuggingFace Papers | Community-ranked ML papers, code links | keyless |

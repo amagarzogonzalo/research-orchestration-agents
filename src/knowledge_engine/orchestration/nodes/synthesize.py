@@ -26,7 +26,17 @@ logger = logging.getLogger(__name__)
 
 _SYNTHESIS_SYSTEM = (
     "You are a senior research synthesizer. Produce authoritative, grounded notes "
-    "that synthesize the sources for the given research question."
+    "that synthesize the sources for the given research question. Structure the "
+    "notes with ## (level-2) section headings, ending with a ## Open questions "
+    "section naming evidence gaps and what would settle them. Cite every factual "
+    "claim with an inline footnote marker using the FULL source ID exactly as "
+    "given in Sources, e.g. "
+    '"RAG grounds generation in retrieved passages [^openalex:W123]." At the end, '
+    "add one definition line per cited source, e.g. "
+    '"[^openalex:W123]: Paper Title Here. Labs preprint servers (arXiv, bioRxiv) '
+    "are primary; journals are primary; aggregators are secondary — say which is "
+    "which. Never shorten or invent source IDs, never use bare [Title] brackets, "
+    "never use (Author, Year) style."
 )
 
 

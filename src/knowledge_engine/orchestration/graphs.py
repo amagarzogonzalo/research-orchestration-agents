@@ -16,10 +16,12 @@ from typing import Any
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.errors import NodeError
 from langgraph.graph import END, START, StateGraph
-from langgraph.types import RetryPolicy, TimeoutPolicy
+from langgraph.types import RetryPolicy, Send, TimeoutPolicy
 
+from knowledge_engine.orchestration.guardrails import should_stop
 from knowledge_engine.orchestration.nodes import (
     FETCH_NODE,
+    JUDGE_NODE,
     RENDER_NODE,
     REVIEW_NODE,
     SYNTHESIZE_NODE,
@@ -27,14 +29,20 @@ from knowledge_engine.orchestration.nodes import (
     review_route,
 )
 from knowledge_engine.orchestration.nodes.agent import AgentSynthesizeNode
+from knowledge_engine.orchestration.nodes.aggregate import AGGREGATE_NODE, AggregateNode
 from knowledge_engine.orchestration.nodes.bodies import BodiesNode, FetchBodyNode
+from knowledge_engine.orchestration.nodes.branch import BRANCH_NODE, BranchNode
+from knowledge_engine.orchestration.nodes.critic import CRITIC_NODE, CriticNode
+from knowledge_engine.orchestration.nodes.decompose import DECOMPOSE_NODE, DecomposeNode
 from knowledge_engine.orchestration.nodes.ingest import IngestNode
+from knowledge_engine.orchestration.nodes.intent import INTENT_NODE, IntentNode
 from knowledge_engine.orchestration.nodes.judge import JudgeNode
 from knowledge_engine.orchestration.nodes.relevance import RelevanceNode
 from knowledge_engine.orchestration.nodes.render import RenderNode
 from knowledge_engine.orchestration.nodes.review import ReviewNode
 from knowledge_engine.orchestration.nodes.synthesize import SynthesizeNode
 from knowledge_engine.orchestration.state import WorkflowState
+from knowledge_engine.schemas.decomposition import IntentKind
 
 logger = getLogger(__name__)
 
@@ -69,6 +77,11 @@ class NodeSet:
     judge: JudgeNode
     review: ReviewNode
     render: RenderNode
+    intent: IntentNode | None = None
+    decompose: DecomposeNode | None = None
+    branch: BranchNode | None = None
+    aggregate: AggregateNode | None = None
+    critic: CriticNode | None = None
 
 
 async def _error_handler(state: WorkflowState, error: NodeError) -> dict[str, Any]:
@@ -106,7 +119,7 @@ def build_workflow(
     Raises:
         ValueError: When the workflow name is unknown.
     """
-    builder = {"research": _build_research, "qa": _build_qa, "summary": _build_summary}.get(name)
+    builder = {"research": _build_research, "qa": _build_qa, "summary": _build_summary, "deep": _build_deep}.get(name)
     if builder is None:
         raise ValueError(f"unknown workflow: {name!r}")
     return builder(nodes, checkpointer=checkpointer, store=store)
@@ -213,12 +226,132 @@ def _build_summary(
     return g.compile(checkpointer=checkpointer, store=store)
 
 
+def _require_deep(nodes: NodeSet) -> NodeSet:
+    """Return nodes or raise when the deep set is incomplete.
+
+    Args:
+        nodes: Node set.
+
+    Returns:
+        NodeSet: The same node set.
+
+    Raises:
+        ConfigurationError: When any deep node is missing.
+    """
+    from knowledge_engine.core.exceptions import ConfigurationError
+
+    missing = [n for n in ("intent", "decompose", "branch", "aggregate", "critic") if getattr(nodes, n) is None]
+    if missing:
+        raise ConfigurationError(f"deep workflow needs nodes: {', '.join(missing)}")
+    return nodes
+
+
+def intent_route(state: WorkflowState) -> str:
+    """Route after intent: deep enters the loop, the rest answer in one pass.
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        str: Next node name.
+    """
+    if state.get("intent", IntentKind.DEEP.value) == IntentKind.DEEP.value:
+        return DECOMPOSE_NODE
+    return SYNTHESIZE_NODE
+
+
+def dispatch(state: WorkflowState) -> Any:
+    """Fan out one Send per planned sub-query (empty plan fails safe to judge).
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        Any: Send list or the judge node name.
+    """
+    sends = [Send(BRANCH_NODE, {"sub_query": sq}) for sq in state.get("sub_queries", []) if sq.get("query")]
+    return sends or JUDGE_NODE
+
+
+def deep_route(state: WorkflowState) -> str:
+    """Route after aggregate: replan on gaps, else critic → judge.
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        str: Next node name.
+    """
+    if should_stop(
+        score=state.get("rubric_score") or 0.0,
+        gaps=state.get("gaps", []),
+        depth=state.get("depth", 0),
+        rounds=state.get("rounds", 0),
+        llm_calls=state.get("llm_calls", 0),
+    ):
+        return CRITIC_NODE
+    return DECOMPOSE_NODE
+
+
+def synthesize_route(state: WorkflowState) -> str:
+    """Route after synthesize: cheap intents render, deep refines via judge.
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        str: Next node name.
+    """
+    if state.get("intent", IntentKind.DEEP.value) == IntentKind.DEEP.value:
+        return JUDGE_NODE
+    return RENDER_NODE
+
+
+def _build_deep(
+    nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None, store: Any | None = None
+) -> Any:
+    """Deep: recursive planner over homogeneous branch workers + rubric gate.
+
+    Args:
+        nodes: Node set (must include the deep nodes).
+        checkpointer: Durability checkpointer.
+        store: Cross-thread memory store.
+
+    Returns:
+        Any: Compiled deep graph.
+    """
+    _require_deep(nodes)
+    g = _base()
+    _register(g, nodes)
+    g.add_node(INTENT_NODE, nodes.intent)  # type: ignore[arg-type]
+    g.add_node(DECOMPOSE_NODE, nodes.decompose)  # type: ignore[arg-type]
+    g.add_node(BRANCH_NODE, nodes.branch)  # type: ignore[arg-type]
+    g.add_node(AGGREGATE_NODE, nodes.aggregate)  # type: ignore[arg-type]
+    g.add_node(CRITIC_NODE, nodes.critic)  # type: ignore[arg-type]
+    g.add_edge(START, INTENT_NODE)
+    g.add_conditional_edges(INTENT_NODE, intent_route, [DECOMPOSE_NODE, SYNTHESIZE_NODE])
+    g.add_conditional_edges(DECOMPOSE_NODE, dispatch, [BRANCH_NODE, JUDGE_NODE])
+    g.add_edge(BRANCH_NODE, AGGREGATE_NODE)
+    g.add_conditional_edges(AGGREGATE_NODE, deep_route, [DECOMPOSE_NODE, CRITIC_NODE])
+    g.add_edge(CRITIC_NODE, JUDGE_NODE)
+    g.add_conditional_edges(JUDGE_NODE, judge_route, [SYNTHESIZE_NODE, REVIEW_NODE])
+    g.add_conditional_edges(REVIEW_NODE, review_route, [RENDER_NODE, END])
+    g.add_conditional_edges(SYNTHESIZE_NODE, synthesize_route, [JUDGE_NODE, RENDER_NODE])
+    g.add_edge(RENDER_NODE, END)
+    return g.compile(checkpointer=checkpointer, store=store)
+
+
 __all__ = [
     "END",
     "AgentSynthesizeNode",
+    "AggregateNode",
     "BodiesNode",
+    "BranchNode",
+    "CriticNode",
+    "DecomposeNode",
     "FetchBodyNode",
     "IngestNode",
+    "IntentNode",
     "JudgeNode",
     "NodeSet",
     "RelevanceNode",
@@ -226,4 +359,8 @@ __all__ = [
     "ReviewNode",
     "SynthesizeNode",
     "build_workflow",
+    "deep_route",
+    "dispatch",
+    "intent_route",
+    "synthesize_route",
 ]
