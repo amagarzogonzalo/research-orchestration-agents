@@ -1,0 +1,26 @@
+{
+  "citations": [],
+  "code_langs": [],
+  "counts": {
+    "list_items": 12,
+    "paragraphs": 12,
+    "tables": 0,
+    "words_bucket": "<500"
+  },
+  "frontmatter": {
+    "@id": "str",
+    "citations": "list",
+    "provenance": "list",
+    "title": "str",
+    "tldr_llm": "str",
+    "type": "str"
+  },
+  "hash": "363d7364124d01a3",
+  "headings": [
+    "1:comparing-retrieval-augmented-generation-rag-with-long-context-models-for-reducing-hallucinations",
+    "2:1-definition-and-impact-of-hallucinations-in-large-language-models",
+    "2:2-mechanisms-and-efficacy-of-retrieval-augmented-generation-rag",
+    "2:3-evidence-gaps-and-open-questions",
+    "3:source-citations"
+  ]
+}

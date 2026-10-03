@@ -152,14 +152,21 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
                 notes.append(f"[{cid}] JUDGE UNCALIBRATED, verdict discarded: {bad}")
                 jcfg = None
         if jcfg:
-            res = jd.score(
-                runs[0]["artifact"],
-                rubric,
-                lambda **r: cassette.chat(client, **r),
-                model,
-                samples=int(jcfg.get("samples", 3)),
-            )
-            ok, msg = res.passes(float(jcfg.get("min_score", 7)))
+            try:
+                res = jd.score(
+                    runs[0]["artifact"],
+                    rubric,
+                    lambda **r: cassette.chat(client, **r),
+                    model,
+                    samples=int(jcfg.get("samples", 3)),
+                )
+            except CassetteMiss as exc:
+                failures.append(f"[{cid}] judge recording missing: {exc}")
+                res = None
+            if res is not None:
+                ok, msg = res.passes(float(jcfg.get("min_score", 7)))
+            else:
+                ok, msg = False, "no verdict"
             if jcfg.get("advisory"):
                 # Noisy free-tier judges report signal but never block the gate;
                 # deterministic layers (invariants/budgets/snapshots) are the gate.
