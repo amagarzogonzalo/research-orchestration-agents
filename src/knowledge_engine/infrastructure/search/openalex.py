@@ -146,9 +146,17 @@ def _inverted_to_text(inverted: dict) -> str:
     """
     if not inverted:
         return ""
-    length = max(inverted.values())
-    words: list[str] = [""] * (length + 1)
-    for word, positions in inverted.items():
-        for pos in positions:
-            words[pos] = word
+    # Values are lists of integer positions (e.g. {"Deep": [0, 98]}); max()
+    # over the raw values would compare lists, not positions (TypeError
+    # downstream when sizing the word buffer).
+    positions = [
+        pos for locs in inverted.values() if isinstance(locs, list) for pos in locs if isinstance(pos, int)
+    ]
+    words: list[str] = [""] * (max(positions, default=-1) + 1)
+    for word, locs in inverted.items():
+        if not isinstance(locs, list):
+            continue
+        for pos in locs:
+            if isinstance(pos, int) and 0 <= pos < len(words):
+                words[pos] = word
     return " ".join(words).strip()

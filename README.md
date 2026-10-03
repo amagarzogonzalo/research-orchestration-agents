@@ -74,9 +74,9 @@ OA-full-text layer on top:
 | Semantic Scholar | Influence/citation signal | keyless (shared quota) |
 | Crossref | DOI validation backbone | mailto polite pool |
 | arXiv | Physics/math/CS preprints | keyless |
-| bioRxiv / medRxiv | Life-science preprints (browse + DOI fetch) | keyless |
+| bioRxiv / medRxiv | Life-science preprints: freshest ~14d slice + DOI fetch (archive via OpenAlex) | keyless |
 | HuggingFace Papers | Community-ranked ML papers, code links | keyless |
-| dblp | CS bibliography, venue metadata | keyless |
+| dblp | CS bibliography, venue metadata | keyless, bot-gated from some networks (degrades gracefully) |
 | DOAJ | OA journals, full-text links | keyless |
 | Unpaywall | Legal OA PDF resolution by DOI (fetch only) | real `UNPAYWALL_EMAIL` required |
 

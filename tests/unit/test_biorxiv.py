@@ -58,6 +58,37 @@ async def _boom(request: httpx.Request) -> httpx.Response:
     return httpx.Response(500, json={"error": "down"})
 
 
+async def test_search_ignores_stopwords() -> None:
+    records = await _adapter(_browse).search("single neurons with transitions")
+    assert len(records) == 1
+    assert records[0].doi == "10.1101/2024.10.30.621034"
+
+
+async def test_search_all_stopwords_returns_empty_without_http() -> None:
+    async def _never(request: httpx.Request) -> httpx.Response:
+        raise AssertionError("API must not be called when no content tokens remain")
+
+    assert await _adapter(_never).search("with what") == []
+
+
+def test_matches_ignores_hyphenation() -> None:
+    from knowledge_engine.infrastructure.search.biorxiv import BiorxivAdapter
+
+    item = {"title": "Pre-trained models", "abstract": ""}
+    assert BiorxivAdapter._matches(item, ["pretrained"]) is True
+    assert BiorxivAdapter._matches(item, ["trained"]) is True
+
+
+def test_matches_majority_for_long_queries() -> None:
+    from knowledge_engine.infrastructure.search.biorxiv import BiorxivAdapter
+
+    item = {"title": "Synthetic data generation", "abstract": "Training data release."}
+    assert BiorxivAdapter._matches(item, ["synthetic", "data", "pretraining"]) is True
+    assert BiorxivAdapter._matches(item, ["synthetic", "quantum", "zebrafish"]) is False
+    # Short queries still require every token.
+    assert BiorxivAdapter._matches(item, ["synthetic", "quantum"]) is False
+
+
 async def test_search_raises_typed_error_on_http_failure() -> None:
     with pytest.raises(SearchError):
         await _adapter(_boom).search("hippocampus")
