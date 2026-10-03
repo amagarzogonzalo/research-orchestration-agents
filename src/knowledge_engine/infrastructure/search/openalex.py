@@ -119,8 +119,10 @@ class OpenAlexAdapter(SearchPort, FetchPort):
 
         """
         url = f"{_BASE}/works"
+        # OpenAlex rejects filter punctuation (?, !, :) with HTTP 400; strip it.
+        clean = query.strip().rstrip("?!:;.,")
         params = {
-            "filter": f"title.search:{query}",
+            "filter": f"title.search:{clean}",
             "per-page": limit,
             "mailto": self.mailto,
         }

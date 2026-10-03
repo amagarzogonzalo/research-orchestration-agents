@@ -78,8 +78,31 @@ class FakeProvider(ProviderPort):
                     left = line.split(" | ")[0].strip()  # "[0] openalex:W1"
                     ids.append(left.rsplit(" ", 1)[-1])
             text = json.dumps({"relevant_ids": ids})
+        elif "classify intent" in user.lower():
+            text = "deep"
+        elif "sub-queries json" in user.lower():
+            text = json.dumps(
+                {
+                    "sub_queries": [
+                        {"query": "sub query one", "source": "search", "rationale": "covers aspect A"},
+                        {"query": "sub query two", "source": "search", "rationale": "covers aspect B"},
+                    ]
+                }
+            )
         elif req.affinity == Affinity.MICRO:
             text = "true"  # legacy per-source relevance path
+        elif "critic rubric" in user.lower():
+            text = json.dumps(
+                {
+                    "verdict": "sufficient",
+                    "coverage": 0.8,
+                    "diversity": 0.8,
+                    "grounding": 0.8,
+                    "contradictions": [],
+                    "unanswered": [],
+                    "revision_guidance": "evidence sufficient",
+                }
+            )
         elif "user prompt" in user or user.startswith("what is"):
             text = "agent answer"
         elif "score" in user.lower() or "groundedness" in user.lower():

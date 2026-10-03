@@ -31,6 +31,7 @@ from langchain_core.tools import BaseTool
 from knowledge_engine.core.ports import BrowserPort, ScrapePort, SearchPort
 from knowledge_engine.infrastructure.mcp.browser_server import build_browser_server
 from knowledge_engine.infrastructure.mcp.model import ProviderChatModel
+from knowledge_engine.infrastructure.mcp.research_server import build_research_server
 from knowledge_engine.infrastructure.mcp.scrape_server import build_scrape_server
 from knowledge_engine.infrastructure.mcp.search_server import build_search_server
 
@@ -41,6 +42,7 @@ async def load_tools(
     search: SearchPort | None = None,
     scrape: ScrapePort | None = None,
     browser: BrowserPort | None = None,
+    extra_servers: list[FastMCP] | None = None,
 ) -> list[BaseTool]:
     """Discover MCP tools from the provided servers (single shared context).
 
@@ -48,6 +50,7 @@ async def load_tools(
         search: Optional search port → ``search_papers`` tool.
         scrape: Optional scrape port → ``fetch_markdown`` tool.
         browser: Optional browser port → ``browser_act`` tool (full automation).
+        extra_servers: Optional pre-built servers (e.g. ``build_research_server``).
 
     Returns:
         list[BaseTool]: LangChain tools discovered from the enabled servers.
@@ -59,6 +62,7 @@ async def load_tools(
         servers.append(build_scrape_server(scrape))
     if browser is not None:
         servers.append(build_browser_server(browser))
+    servers.extend(extra_servers or [])
     if not servers:
         return []
     tools: list[BaseTool] = []
@@ -116,4 +120,4 @@ def make_agent_builder(
     return _build
 
 
-__all__ = ["ProviderChatModel", "build_agent", "load_tools", "make_agent_builder"]
+__all__ = ["ProviderChatModel", "build_agent", "build_research_server", "load_tools", "make_agent_builder"]

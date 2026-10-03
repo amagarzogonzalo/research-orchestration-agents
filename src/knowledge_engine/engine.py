@@ -29,9 +29,14 @@ from knowledge_engine.infrastructure.scrape.scrape_router import ScrapeRouter
 from knowledge_engine.infrastructure.search.demux import DemuxSearchAdapter
 from knowledge_engine.orchestration.graphs import NodeSet, build_workflow
 from knowledge_engine.orchestration.nodes import (
+    AggregateNode,
     BodiesNode,
+    BranchNode,
+    CriticNode,
+    DecomposeNode,
     FetchBodyNode,
     IngestNode,
+    IntentNode,
     JudgeNode,
     RelevanceNode,
     RenderNode,
@@ -217,16 +222,41 @@ class ResearchEngine:
         review = ReviewNode(
             interactive=bool(interactive_review if interactive_review is not None else not self.auto_approve_review)
         )
+        ingest = IngestNode(self._search, limit=self.search_limit)
+        relevance = RelevanceNode(self._provider)
+        fetch_body = FetchBodyNode(self._scrape)
+        synthesize = SynthesizeNode(self._provider)
         return NodeSet(
-            ingest=IngestNode(self._search, limit=self.search_limit),
-            relevance=RelevanceNode(self._provider),
+            ingest=ingest,
+            relevance=relevance,
             bodies=BodiesNode(),
-            fetch_body=FetchBodyNode(self._scrape),
-            synthesize=SynthesizeNode(self._provider),
+            fetch_body=fetch_body,
+            synthesize=synthesize,
             judge=JudgeNode(self._provider),
             review=review,
             render=RenderNode(root=self.store_root),
+            intent=IntentNode(provider=self._provider),
+            decompose=DecomposeNode(provider=self._provider),
+            branch=BranchNode(
+                ingest=IngestNode(self._search, limit=min(self.search_limit, 5)),
+                relevance=relevance,
+                fetch_body=fetch_body,
+                synthesize=synthesize,
+            ),
+            aggregate=AggregateNode(provider=self._provider),
+            critic=CriticNode(provider=self._provider),
         )
+
+    def compiled_graph(self, workflow: str = "deep") -> Any:
+        """Return the compiled graph for Studio/deploys (public surface).
+
+        Args:
+            workflow: One of ``research``, ``qa``, ``summary``, ``deep``.
+
+        Returns:
+            Any: Compiled graph.
+        """
+        return self._runtime_for(workflow).graph(workflow)
 
     def _runtime_for(self, workflow: str) -> GraphRuntime:
         """Build the runtime for a workflow.
@@ -258,7 +288,7 @@ class ResearchEngine:
 
         Args:
             query: Research question to investigate.
-            workflow: One of ``research``, ``qa``, ``summary``.
+            workflow: One of ``research``, ``qa``, ``summary``, ``deep``.
             thread_id: Optional stable id; derived from the query when absent.
             unique: When True, append a random suffix so parallel duplicate
                 submissions of the same query land on separate LangGraph
@@ -380,6 +410,7 @@ def _default_search() -> SearchPort:
 
     """
     from knowledge_engine.infrastructure.search.biorxiv import BiorxivAdapter
+    from knowledge_engine.infrastructure.search.crossref import CrossrefAdapter
     from knowledge_engine.infrastructure.search.dblp import DblpAdapter
     from knowledge_engine.infrastructure.search.doaj import DoajAdapter
     from knowledge_engine.infrastructure.search.europe_pmc import EuropePmcAdapter
@@ -389,10 +420,12 @@ def _default_search() -> SearchPort:
     from knowledge_engine.infrastructure.search.semantic_scholar import SemanticScholarAdapter
     from knowledge_engine.infrastructure.search.unpaywall import UnpaywallAdapter, is_usable_email
 
-    # Order: DOI backbone first, biomedical depth next, then community/CS,
-    # preprints, OA. Unpaywall last: DOI-only fetch that fills OA-PDF gaps.
+    # Order: DOI backbone first (OpenAlex, then Crossref registry fallback),
+    # biomedical depth next, then community/CS, preprints, OA. Unpaywall last:
+    # DOI-only fetch that fills OA-PDF gaps.
     sources: list[SearchPort] = [
         OpenAlexAdapter(os.environ.get("OPENALEX_MAILTO", "")),
+        CrossrefAdapter(os.environ.get("CROSSREF_MAILTO", "")),
         PubMedAdapter(),
         EuropePmcAdapter(),
         HuggingFacePapersAdapter(),

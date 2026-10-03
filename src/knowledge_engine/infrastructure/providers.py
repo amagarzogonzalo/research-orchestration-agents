@@ -38,13 +38,15 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
     model_id: str = "gpt-4o-mini"  # overridden by subclasses to a free model
     affinity: Affinity | None = None
 
-    def __init__(self, api_key: str | None = None) -> None:
+    def __init__(self, api_key: str | None = None, cassette: Any | None = None) -> None:
         """Create a LiteLLMProviderAdapter.
 
         Args:
             api_key: API key.
+            cassette: Eval cassette routing model calls through record/replay.
         """
         self.api_key = api_key
+        self.cassette = cassette
         self.raw_client = None  # placeholders for Instructor wrapping
 
     async def complete(self, req: ChatRequest) -> ChatResult:
@@ -62,14 +64,25 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
         """
         started = time.perf_counter()
         messages = [m.model_dump() for m in req.messages]
-        try:
+        request = {
+            "model": self.model_id,
+            "messages": messages,
+            "temperature": req.temperature,
+            "max_tokens": req.max_tokens,
+        }
+
+        async def live(**kwargs: Any) -> dict[str, Any]:
             resp = await litellm.acompletion(
-                model=self.model_id,
-                messages=messages,
-                temperature=req.temperature,
-                max_tokens=req.max_tokens,
+                **kwargs,
                 **({"api_key": self.api_key} if self.api_key else {}),
             )
+            return resp.model_dump(mode="json")
+
+        try:
+            if self.cassette is not None:
+                data = await self.cassette.achat(live, **request)
+            else:
+                data = await live(**request)
         except litellm.exceptions.RateLimitError as exc:
             _emit_transient(self.name, started)
             raise ProviderUnavailable(f"{self.name} 429") from exc
@@ -77,19 +90,20 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
             _emit_transient(self.name, started)
             raise ProviderUnavailable(f"{self.name} API error") from exc
 
-        usage = resp.usage
-        finish_text = resp.choices[0].message.content or ""
+        usage = data.get("usage", {}) or {}
+        choices = data.get("choices", []) or [{}]
+        finish_text = ((choices[0].get("message") or {}).get("content")) or ""
+        prompt_tokens = usage.get("prompt_tokens") or 0
+        completion_tokens = usage.get("completion_tokens") or 0
         result = ChatResult.from_response(
             finish_text,
             provider=self.name,
             model=self.model_id,
             usage=UsageSummary(
-                input_tokens=usage.prompt_tokens or 0,
-                output_tokens=usage.completion_tokens or 0,
-                total_tokens=(usage.prompt_tokens or 0) + (usage.completion_tokens or 0),
-                cost_usd=compute_cost_usd(
-                    self.name, self.model_id, usage.prompt_tokens or 0, usage.completion_tokens or 0
-                ),
+                input_tokens=prompt_tokens,
+                output_tokens=completion_tokens,
+                total_tokens=prompt_tokens + completion_tokens,
+                cost_usd=compute_cost_usd(self.name, self.model_id, prompt_tokens, completion_tokens),
             ),
         )
         _emit_success(self.name, result.usage, started)
@@ -182,7 +196,7 @@ class GroqAdapter(LiteLLMProviderAdapter):
         affinity: Attribute description."""
 
     name = "Groq"
-    model_id = "groq/llama-3.3-70b-versatile"
+    model_id = "groq/openai/gpt-oss-20b"  # verified live 2026-10-03; llama-3.3 retired upstream
     affinity = Affinity.MICRO
 
 
@@ -208,7 +222,7 @@ class GeminiAdapter(LiteLLMProviderAdapter):
         affinity: Attribute description."""
 
     name = "Gemini"
-    model_id = "gemini/gemini-2.0-flash"
+    model_id = "gemini/gemini-flash-lite-latest"  # verified live 2026-10-03 (litellm 1.x maps only -latest aliases)
     affinity = Affinity.MACRO
 
 

@@ -33,6 +33,15 @@ class WorkflowState(TypedDict, total=False):
         thread_id: Attribute description.
         workflow: Attribute description.
         query: Attribute description.
+        mode: Attribute description.
+        intent: Attribute description.
+        depth: Attribute description.
+        rounds: Attribute description.
+        llm_calls: Attribute description.
+        sub_queries: Attribute description.
+        branch_notes: Attribute description.
+        rubric_score: Attribute description.
+        gaps: Attribute description.
         sources: Attribute description.
         filtered: Attribute description.
         bodies: Attribute description.
@@ -48,6 +57,15 @@ class WorkflowState(TypedDict, total=False):
     thread_id: str
     workflow: str
     query: str
+    mode: str | None
+    intent: str
+    depth: int
+    rounds: int
+    llm_calls: Annotated[int, add]
+    sub_queries: list[dict[str, Any]]
+    branch_notes: Annotated[list[str], add]
+    rubric_score: float | None
+    gaps: list[str]
     sources: list[SourceRecord]
     filtered: list[SourceRecord]
     bodies: Annotated[list[DocumentBody], add]

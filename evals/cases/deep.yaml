@@ -1,0 +1,35 @@
+# Recursive deep-research run: intent -> decompose -> parallel branches ->
+# aggregate -> critic -> judge -> review -> render, with search/scrape/LLM
+# recorded to cassettes. Replay is offline and deterministic.
+id: deep
+description: >
+  A complete deep research() run terminates structurally sound: YAML frontmatter
+  with provenance, at least two sections, cited quantitative claims, valid
+  footnote links, and bounded token/call/latency cost despite fan-out.
+
+entrypoint: "evals.adapters:deep_run"
+input:
+  query: "Compare retrieval-augmented generation with long-context models for reducing hallucinations"
+  max_sources: 5
+
+samples: 1
+pass_at_k: 1
+
+invariants:
+  frontmatter_keys: ["@id", type, title, provenance, citations, tldr_llm]
+  min_sections: 2
+  must_cite: []
+  no_uncited_claims: true
+  valid_links: true
+  forbidden_patterns: ["as an ai", "\\bTODO\\b", "as of my (last )?(knowledge|training)"]
+  max_chars: 40000
+
+budget:
+  max_total_tokens: 300000
+  max_model_calls: 80
+  max_wall_s: 1800
+
+judge:
+  rubric: rubrics/default.md
+  min_score: 6
+  samples: 1

@@ -9,6 +9,7 @@ verifiable offline). Returns ``output_path`` + ``status=done``.
 from __future__ import annotations
 
 import logging
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -48,7 +49,10 @@ class RenderNode(WorkflowNode):
             dict[str, Any]: Result mapping.
 
         """
-        notes = "\n\n".join(state.get("notes", []))
+        notes = _complete_footnotes(
+            "\n\n".join(state.get("notes", [])),
+            state.get("filtered") or state.get("sources", []),
+        )
         provenance = state.get("filtered") or state.get("sources", [])
         title = _title_from(state.get("query", ""))
         artifact = KnowledgeArtifact(
@@ -103,6 +107,66 @@ def _tldr(notes: str) -> str:
 
     """
     return (notes.replace("\n", " ").strip() or "")[:200]
+
+
+_FOOTNOTE_REF = re.compile(r"\[\^([A-Za-z0-9_.:-]+)\]")
+_FOOTNOTE_DEF = re.compile(r"(?m)^\[\^([A-Za-z0-9_.:-]+)\]:")
+
+
+def _complete_footnotes(notes: str, provenance: list[SourceRecord]) -> str:
+    """Append missing footnote definitions from provenance.
+
+    Models cite [^<source-id>] but forget some definitions; every dangling
+    marker is completed from the source title so references always resolve.
+    Markers for unknown IDs are left untouched.
+
+    Args:
+        notes: Synthesized notes.
+        provenance: Provenance records.
+
+    Returns:
+        str: Notes with complete footnote definitions.
+    """
+    titles = {s.id: (s.title or s.id) for s in provenance}
+    missing = sorted(set(_FOOTNOTE_REF.findall(notes)) - set(_FOOTNOTE_DEF.findall(notes)))
+    additions = []
+    for marker in missing:
+        sid = _resolve_marker(marker, titles)
+        if sid is not None:
+            additions.append(f"[^{marker}]: {titles[sid]}")
+    if not additions:
+        return notes
+    return notes.rstrip() + "\n\n" + "\n".join(additions) + "\n"
+
+
+def _resolve_marker(marker: str, titles: dict[str, str]) -> str | None:
+    """Resolve a footnote marker to a provenance source id.
+
+    Models shorten IDs (``arx-2412-11919`` for ``huggingface_papers:2412.11919``);
+    match exact, ``/``- or ``:``-suffixed, then normalized-substring IDs.
+
+    Args:
+        marker: Footnote marker text.
+        titles: Source id to title mapping.
+
+    Returns:
+        str | None: Matching source id, or None when unresolvable.
+    """
+    if marker in titles:
+        return marker
+    low = marker.lower()
+    for sid in titles:
+        slowed = sid.lower()
+        if slowed.endswith("/" + low) or slowed.endswith(":" + low):
+            return sid
+    norm = re.sub(r"[^a-z0-9]", "", low)
+    for sid in titles:
+        # Match a shortened marker against the bare id (after the last : or /):
+        # "arx-2412-11919" resolves "huggingface_papers:2412.11919".
+        bare = re.sub(r"[^a-z0-9]", "", re.split(r"[:/]", sid)[-1].lower())
+        if len(bare) >= 8 and norm.endswith(bare):
+            return sid
+    return None
 
 
 def _title_from(query: str) -> str:

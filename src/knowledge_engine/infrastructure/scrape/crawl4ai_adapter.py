@@ -51,11 +51,11 @@ class Crawl4aiAdapter(ScrapePort):
             ScrapeError: When the operation fails.
 
         """
-        AsyncWebCrawler = self._crawler()
         try:
+            AsyncWebCrawler = self._crawler()
             async with AsyncWebCrawler() as crawler:
                 result = await crawler.arun(url=url, cache_mode="bypass")
-        except Exception as exc:  # noqa: BLE001 - wrap crawl4ai/Playwright failures
+        except Exception as exc:  # noqa: BLE001 - wrap missing-dep + crawl4ai/Playwright failures
             raise ScrapeError(f"Crawl4AI failed for {url}: {exc}") from exc
         markdown = (result.markdown or "") if result else ""
         title = (result.metadata.get("title") if result and result.metadata else "") or fallback_title(url)

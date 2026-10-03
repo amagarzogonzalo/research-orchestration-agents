@@ -9,22 +9,38 @@ or a :class:`langgraph.types.Command` for explicit routing.
 from __future__ import annotations
 
 from knowledge_engine.orchestration.nodes.agent import AgentSynthesizeNode
+from knowledge_engine.orchestration.nodes.aggregate import AGGREGATE_NODE, AggregateNode
 from knowledge_engine.orchestration.nodes.bodies import FETCH_NODE, JOIN_NODE, BodiesNode, FetchBodyNode
+from knowledge_engine.orchestration.nodes.branch import BRANCH_NODE, BranchNode
+from knowledge_engine.orchestration.nodes.critic import CRITIC_NODE, CriticNode
+from knowledge_engine.orchestration.nodes.decompose import DECOMPOSE_NODE, DecomposeNode
 from knowledge_engine.orchestration.nodes.ingest import IngestNode
-from knowledge_engine.orchestration.nodes.judge import REVIEW_NODE, SYNTHESIZE_NODE, JudgeNode, judge_route
+from knowledge_engine.orchestration.nodes.intent import INTENT_NODE, IntentNode
+from knowledge_engine.orchestration.nodes.judge import JUDGE_NODE, REVIEW_NODE, SYNTHESIZE_NODE, JudgeNode, judge_route
 from knowledge_engine.orchestration.nodes.relevance import RelevanceNode
 from knowledge_engine.orchestration.nodes.render import RenderNode
 from knowledge_engine.orchestration.nodes.review import END, RENDER_NODE, ReviewNode, review_route
 from knowledge_engine.orchestration.nodes.synthesize import SynthesizeNode
 
 __all__ = [
+    "AGGREGATE_NODE",
     "AgentSynthesizeNode",
+    "AggregateNode",
+    "BRANCH_NODE",
     "BodiesNode",
+    "BranchNode",
+    "CRITIC_NODE",
+    "CriticNode",
+    "DECOMPOSE_NODE",
+    "DecomposeNode",
     "END",
     "FETCH_NODE",
     "FetchBodyNode",
+    "INTENT_NODE",
     "IngestNode",
+    "IntentNode",
     "JOIN_NODE",
+    "JUDGE_NODE",
     "JudgeNode",
     "RENDER_NODE",
     "REVIEW_NODE",
