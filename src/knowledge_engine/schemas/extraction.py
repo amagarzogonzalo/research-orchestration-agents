@@ -45,7 +45,14 @@ class ExtractionRequest(BaseModel):
 
 
 class GraphStatus(StrEnum):
-    """Lifecycle status of a research run."""
+    """Lifecycle status of a research run.
+
+    Attributes:
+        RUNNING: Actively running.
+        AWAITING_REVIEW: Paused for human review.
+        DONE: Completed successfully.
+        FAILED: Failed terminally.
+    """
 
     RUNNING = "running"
     AWAITING_REVIEW = "awaiting_review"

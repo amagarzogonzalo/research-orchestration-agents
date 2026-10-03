@@ -1,7 +1,8 @@
-"""Integration tests: checkpointer factory (memory default; file → FileCheckpointer).
+"""Integration tests: checkpointer factory (memory/file default; postgres opt-in).
 
-Files-only philosophy: no SQLite/Postgres — the durable checkpointer is the
-JSON-file one under ``research_store/checkpoints``.
+Default stays files-only: the durable checkpointer is the JSON-file one under
+``research_store/checkpoints``. ``postgres`` (Supabase) is the opt-in cloud kind
+and needs the ``store`` extra + ``DATABASE_URL``.
 """
 
 from __future__ import annotations
@@ -27,8 +28,20 @@ def test_file_kind_returns_file_checkpointer(tmp_path) -> None:
     assert isinstance(cp, FileCheckpointer)
 
 
+def test_postgres_kind_needs_dsn_and_extra(monkeypatch) -> None:
+    monkeypatch.delenv("DATABASE_URL", raising=False)
+    with pytest.raises(ConfigurationError):
+        build_checkpointer("postgres")
+
+
+def test_postgres_kind_returns_context_manager() -> None:
+    pytest.importorskip("langgraph.checkpoint.postgres.aio")
+    cm = build_checkpointer("postgres", conn_string="postgresql://user:pass@localhost:5432/postgres?sslmode=disable")
+    assert hasattr(cm, "__aenter__") and hasattr(cm, "__aexit__")
+
+
 def test_legacy_db_kinds_raise_cleanly() -> None:
-    # SQLite/Postgres/Redis are out of scope for the files-only library.
-    for kind in ("sqlite", "postgres", "redis", "kafka"):
+    # SQLite/Redis/Kafka stay out of scope; postgres is the only DB kind.
+    for kind in ("sqlite", "redis", "kafka"):
         with pytest.raises(ConfigurationError):
             build_checkpointer(kind)
