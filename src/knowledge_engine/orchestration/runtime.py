@@ -43,10 +43,12 @@ class GraphRuntime:
     Attributes:
         nodes: Attribute description.
         checkpointer: Attribute description.
+        store: Attribute description.
     """
 
     nodes: NodeSet
     checkpointer: BaseCheckpointSaver[Any] | None = None
+    store: Any | None = None
     _graphs: dict[str, CompiledStateGraph[Any, Any, Any, Any]] = field(default_factory=dict, init=False)
 
     def graph(self, workflow: str) -> CompiledStateGraph[Any, Any, Any, Any]:
@@ -59,7 +61,9 @@ class GraphRuntime:
             CompiledStateGraph[Any, Any, Any, Any]: Compiled graph.
         """
         if workflow not in self._graphs:
-            self._graphs[workflow] = build_workflow(workflow, self.nodes, checkpointer=self.checkpointer)
+            self._graphs[workflow] = build_workflow(
+                workflow, self.nodes, checkpointer=self.checkpointer, store=self.store
+            )
         return self._graphs[workflow]
 
     def _config(self, thread_id: str) -> RunnableConfig:
@@ -124,6 +128,27 @@ class GraphRuntime:
         """
         snapshot = await self.graph(workflow).aget_state(self._config(thread_id))
         return _to_result(snapshot.values)
+
+    async def delete_thread(self, thread_id: str) -> None:
+        """Delete a thread's checkpoints (retention hook for one-shot runs).
+
+        Call after the artifact is archived (``ResearchStore`` files or
+        Supabase Storage) and HITL resume is no longer needed. Keeps the
+        Postgres tables from growing one thread per query.
+
+        Args:
+            thread_id: Run thread identifier.
+        """
+        checkpointer = self.checkpointer
+        if checkpointer is None:
+            return
+        adelete = getattr(checkpointer, "adelete_thread", None)
+        if callable(adelete):
+            await adelete(thread_id)
+            return
+        delete = getattr(checkpointer, "delete_thread", None)
+        if callable(delete):
+            delete(thread_id)
 
 
 def _to_result(values: Any) -> RunResult:

@@ -85,13 +85,20 @@ async def _error_handler(state: WorkflowState, error: NodeError) -> dict[str, An
     return {"status": "failed", "judge_critique": f"failed at {error.node}: {error.error}"}
 
 
-def build_workflow(name: str, nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
+def build_workflow(
+    name: str,
+    nodes: NodeSet,
+    *,
+    checkpointer: BaseCheckpointSaver[Any] | None = None,
+    store: Any | None = None,
+) -> Any:
     """Build and compile the requested workflow graph.
 
     Args:
         name: Workflow name.
         nodes: Node set.
         checkpointer: Durability checkpointer.
+        store: Cross-thread memory store (LangGraph ``BaseStore``).
 
     Returns:
         Any: Compiled graph.
@@ -102,7 +109,7 @@ def build_workflow(name: str, nodes: NodeSet, *, checkpointer: BaseCheckpointSav
     builder = {"research": _build_research, "qa": _build_qa, "summary": _build_summary}.get(name)
     if builder is None:
         raise ValueError(f"unknown workflow: {name!r}")
-    return builder(nodes, checkpointer=checkpointer)
+    return builder(nodes, checkpointer=checkpointer, store=store)
 
 
 def _base() -> StateGraph[Any, Any, Any, Any]:
@@ -134,12 +141,15 @@ def _register(g: StateGraph[Any, Any, Any, Any], nodes: NodeSet) -> None:
     g.add_node("render", nodes.render)
 
 
-def _build_research(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
+def _build_research(
+    nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None, store: Any | None = None
+) -> Any:
     """Build the research workflow graph.
 
     Args:
         nodes: Node set.
         checkpointer: Durability checkpointer.
+        store: Cross-thread memory store.
 
     Returns:
         Any: Compiled research graph.
@@ -154,15 +164,18 @@ def _build_research(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | 
     g.add_conditional_edges("judge", judge_route, {SYNTHESIZE_NODE: SYNTHESIZE_NODE, REVIEW_NODE: REVIEW_NODE})
     g.add_conditional_edges("review", review_route, {RENDER_NODE: RENDER_NODE, END: END})
     g.add_edge(RENDER_NODE, END)
-    return g.compile(checkpointer=checkpointer)
+    return g.compile(checkpointer=checkpointer, store=store)
 
 
-def _build_qa(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
+def _build_qa(
+    nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None, store: Any | None = None
+) -> Any:
     """Q&A: no body fan-out, no judge loop — answer from abstracts directly.
 
     Args:
         nodes: Node set.
         checkpointer: Durability checkpointer.
+        store: Cross-thread memory store.
 
     Returns:
         Any: Compiled QA graph.
@@ -174,15 +187,18 @@ def _build_qa(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None =
     g.add_edge("relevance", SYNTHESIZE_NODE)
     g.add_edge(SYNTHESIZE_NODE, RENDER_NODE)
     g.add_edge(RENDER_NODE, END)
-    return g.compile(checkpointer=checkpointer)
+    return g.compile(checkpointer=checkpointer, store=store)
 
 
-def _build_summary(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None) -> Any:
+def _build_summary(
+    nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None, store: Any | None = None
+) -> Any:
     """Summary: ingest + bodies + synthesize (no relevance gate, no judge).
 
     Args:
         nodes: Node set.
         checkpointer: Durability checkpointer.
+        store: Cross-thread memory store.
 
     Returns:
         Any: Compiled summary graph.
@@ -194,7 +210,7 @@ def _build_summary(nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | N
     g.add_edge(FETCH_NODE, SYNTHESIZE_NODE)
     g.add_edge(SYNTHESIZE_NODE, RENDER_NODE)
     g.add_edge(RENDER_NODE, END)
-    return g.compile(checkpointer=checkpointer)
+    return g.compile(checkpointer=checkpointer, store=store)
 
 
 __all__ = [

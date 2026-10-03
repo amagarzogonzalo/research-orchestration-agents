@@ -47,12 +47,16 @@ from knowledge_engine.store.research_store import ResearchStore
 
 @dataclass
 class ResearchEngine:
-    """High-level research library surface (files-only persistence).
+    """High-level research library surface (files by default, Supabase opt-in).
 
     Attributes:
         store_root: Attribute description.
         search_limit: Attribute description.
         auto_approve_review: Attribute description.
+        checkpointer_kind: ``file`` (default, portable) or ``postgres`` (Supabase).
+        store_kind: ``memory`` (default) or ``postgres`` (Supabase long-term memory).
+        database_url: Supabase session-pooler DSN; falls back to ``DATABASE_URL`` env.
+        cleanup_after_run: Delete the thread's checkpoints after a finished run.
         search: Attribute description.
         scrape: Attribute description.
         provider: Attribute description.
@@ -63,6 +67,10 @@ class ResearchEngine:
     store_root: str = "research_store"
     search_limit: int = 10
     auto_approve_review: bool = True
+    checkpointer_kind: str = "file"
+    store_kind: str = "memory"
+    database_url: str | None = None
+    cleanup_after_run: bool = False
     # Optional injection points; defaults are built lazily from env.
     search: SearchPort | None = None
     scrape: ScrapePort | None = None
@@ -70,7 +78,10 @@ class ResearchEngine:
     browser: BrowserActionPort | None = None
     discoverer: ModelDiscoverer | None = None
     _store: ResearchStore = field(init=False)
-    _checkpointer: FileCheckpointer = field(init=False)
+    _checkpointer: Any = field(init=False)
+    _memory_store: Any = field(init=False)
+    _checkpointer_cm: Any = field(init=False, default=None)
+    _memory_store_cm: Any = field(init=False, default=None)
     _search: SearchPort = field(init=False)
     _scrape: ScrapePort = field(init=False)
     _provider: Any = field(init=False)
@@ -80,11 +91,88 @@ class ResearchEngine:
         """Initialize derived components."""
         load_dotenv()
         self._store = ResearchStore(self.store_root)
-        self._checkpointer = FileCheckpointer(f"{self.store_root}/checkpoints")
+        self._checkpointer = self._build_checkpointer()
+        self._memory_store = self._build_memory_store()
         self._search = self.search or _default_search()
         self._scrape = self.scrape or ScrapeRouter()
         self._provider = self.provider or _default_provider()
         self._discoverer = self.discoverer or _default_discoverer()
+
+    def _dsn(self) -> str | None:
+        """Return the configured Supabase DSN, if any.
+
+        Returns:
+            str | None: DSN or None.
+        """
+        return self.database_url or os.environ.get("DATABASE_URL")
+
+    def _build_checkpointer(self) -> Any:
+        """Build the LangGraph checkpointer for the configured kind.
+
+        Postgres returns an async context manager (no running loop at build
+        time); call ``await setup()`` once to enter it.
+
+        Returns:
+            Any: Checkpointer instance or context manager.
+        """
+        if self.checkpointer_kind == "file":
+            return FileCheckpointer(f"{self.store_root}/checkpoints")
+        from knowledge_engine.orchestration.checkpoint import build_checkpointer
+
+        cm = build_checkpointer(self.checkpointer_kind, conn_string=self._dsn())
+        if self.checkpointer_kind == "postgres":
+            self._checkpointer_cm = cm
+            return None
+        return cm
+
+    def _build_memory_store(self) -> Any:
+        """Build the LangGraph cross-thread store for the configured kind.
+
+        Returns:
+            Any: Store instance or context manager (postgres; see above).
+        """
+        from knowledge_engine.orchestration.store_factory import build_store
+
+        if self.store_kind == "memory":
+            return build_store("memory")
+        cm = build_store(self.store_kind, conn_string=self._dsn())
+        if self.store_kind == "postgres":
+            self._memory_store_cm = cm
+            return None
+        return cm
+
+    async def setup(self) -> None:
+        """Enter Supabase resources and create tables (postgres kinds only).
+
+        No-op for ``file``/``memory``. Calls ``setup()`` on the entered saver
+        and store (creates ``checkpoints``/``stores`` tables on first run).
+        """
+        from knowledge_engine.orchestration.checkpoint import setup_postgres
+
+        if self._checkpointer_cm is not None and self._checkpointer is None:
+            self._checkpointer = await self._checkpointer_cm.__aenter__()
+        if self._memory_store_cm is not None and self._memory_store is None:
+            self._memory_store = await self._memory_store_cm.__aenter__()
+        entered = [r for r in (self._checkpointer, self._memory_store) if r is not None and self._uses_postgres()]
+        if entered:
+            await setup_postgres(*entered)
+
+    def _uses_postgres(self) -> bool:
+        """Return True when either persistence kind is postgres.
+
+        Returns:
+            bool: True on success.
+        """
+        return self.checkpointer_kind == "postgres" or self.store_kind == "postgres"
+
+    async def close(self) -> None:
+        """Exit Supabase resources (postgres kinds only)."""
+        if self._memory_store_cm is not None and self._memory_store is not None:
+            await self._memory_store_cm.__aexit__(None, None, None)
+            self._memory_store = None
+        if self._checkpointer_cm is not None and self._checkpointer is not None:
+            await self._checkpointer_cm.__aexit__(None, None, None)
+            self._checkpointer = None
 
     @property
     def store(self) -> ResearchStore:
@@ -97,14 +185,22 @@ class ResearchEngine:
         return self._store
 
     @property
-    def checkpointer(self) -> FileCheckpointer:
-        """File-based LangGraph checkpointer (durability + HITL).
+    def checkpointer(self) -> Any:
+        """LangGraph checkpointer (file-based by default, Supabase opt-in).
 
         Returns:
-            FileCheckpointer: Checkpoint store.
-
+            Any: Checkpoint saver.
         """
         return self._checkpointer
+
+    @property
+    def memory_store(self) -> Any:
+        """LangGraph cross-thread store (memory by default, Supabase opt-in).
+
+        Returns:
+            Any: Store instance.
+        """
+        return self._memory_store
 
     def _nodeset(self, *, interactive_review: bool | None = None) -> NodeSet:
         """Build the node set.
@@ -141,9 +237,17 @@ class ResearchEngine:
         Returns:
             GraphRuntime: Graph runtime.
 
-
+        Raises:
+            ConfigurationError: When a postgres kind was requested but
+                ``await setup()`` was not called first.
         """
-        runtime = GraphRuntime(nodes=self._nodeset(), checkpointer=self._checkpointer)
+        if (self.checkpointer_kind == "postgres" and self._checkpointer is None) or (
+            self.store_kind == "postgres" and self._memory_store is None
+        ):
+            from knowledge_engine.core.exceptions import ConfigurationError
+
+            raise ConfigurationError("postgres persistence requested: call 'await engine.setup()' first")
+        runtime = GraphRuntime(nodes=self._nodeset(), checkpointer=self._checkpointer, store=self._memory_store)
         runtime.graph(workflow)  # pre-compile
         return runtime
 
@@ -175,6 +279,8 @@ class ResearchEngine:
         self._store.write_metadata(tid, result.state.model_dump(mode="json") | {"query": query})
         self._store.write_sources(tid, result.state.sources)
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})
+        if self.cleanup_after_run and not result.interrupted:
+            await runtime.delete_thread(tid)
         return result
 
     async def resume(self, workflow: str, thread_id: str, payload: Any) -> RunResult:

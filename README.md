@@ -34,7 +34,7 @@ pip install -e ".[dev, providers]"               # + scrape / vector / memory ex
 cp .env.example .env                             # fill free-tier LLM keys
 ```
 
-Runtime floor: **Python 3.11 or 3.12** (Letta caps `<3.14`; `requires-python` enforces this).
+Runtime floor: **Python 3.11 or 3.12** (`requires-python` enforces this).
 
 ## Run
 
