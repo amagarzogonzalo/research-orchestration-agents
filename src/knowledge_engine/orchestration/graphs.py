@@ -67,6 +67,11 @@ class NodeSet:
         judge: Judge node.
         review: Review node.
         render: Render node.
+        intent: Intent-router node (deep workflow, optional).
+        decompose: Decompose node (deep workflow, optional).
+        branch: Branch node (deep workflow, optional).
+        aggregate: Aggregate node (deep workflow, optional).
+        critic: Critic node (deep workflow, optional).
     """
 
     ingest: IngestNode
