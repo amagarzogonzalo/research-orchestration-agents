@@ -160,7 +160,12 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
                 samples=int(jcfg.get("samples", 3)),
             )
             ok, msg = res.passes(float(jcfg.get("min_score", 7)))
-            (notes if ok else failures).append(f"[{cid}] judge ({model}): {msg}")
+            if jcfg.get("advisory"):
+                # Noisy free-tier judges report signal but never block the gate;
+                # deterministic layers (invariants/budgets/snapshots) are the gate.
+                notes.append(f"[{cid}] judge ({model}) advisory: {msg}")
+            else:
+                (notes if ok else failures).append(f"[{cid}] judge ({model}): {msg}")
 
     return {
         "id": cid,

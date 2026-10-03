@@ -105,6 +105,10 @@ class _RecordingScrape:
 def research_run(query: str, max_sources: int = 8, cassette: Any | None = None, **_: Any) -> dict[str, Any]:
     """Run the real research workflow with cassette-routed network calls.
 
+    Uses a FIXED thread id and a dedicated store root, wiped on every run:
+    replay must reproduce the exact artifact (judge cassette keys hash the
+    full text, so any per-run identifier breaks replay). Single sample only.
+
     Args:
         query: Scholarly query string.
         max_sources: Maximum sources.
@@ -114,10 +118,16 @@ def research_run(query: str, max_sources: int = 8, cassette: Any | None = None, 
     Returns:
         dict[str, Any]: Artifact, sources, and events for the harness.
     """
+    import shutil
+
     from knowledge_engine.engine import ResearchEngine
 
+    root = Path("research_store/evals")
+    shutil.rmtree(root / "eval-research", ignore_errors=True)
+    shutil.rmtree(root / "checkpoints" / "eval-research", ignore_errors=True)
+
     async def go() -> dict[str, Any]:
-        engine = ResearchEngine(store_root="research_store", search_limit=max_sources)
+        engine = ResearchEngine(store_root=str(root), search_limit=max_sources)
         if cassette is not None:
             provider = getattr(engine, "_provider", None)
             for adapter in getattr(provider, "adapters", {}).values():
@@ -126,7 +136,7 @@ def research_run(query: str, max_sources: int = 8, cassette: Any | None = None, 
             # calls through the cassette. Production code uses the facade.
             engine._search = _RecordingSearch(engine._search, cassette)
             engine._scrape = _RecordingScrape(engine._scrape, cassette)
-        result = await engine.research(query, workflow="research", unique=True)
+        result = await engine.research(query, workflow="research", thread_id="eval-research")
         s = result.state
         return {
             "artifact": _read(s.output_path),
@@ -140,6 +150,9 @@ def research_run(query: str, max_sources: int = 8, cassette: Any | None = None, 
 def deep_run(query: str, max_sources: int = 8, cassette: Any | None = None, **_: Any) -> dict[str, Any]:
     """Run the recursive deep workflow with cassette-routed network calls.
 
+    Fixed thread id + dedicated store root (same replay-stability contract as
+    :func:`research_run`): judge cassette keys hash the full artifact text.
+
     Args:
         query: Scholarly query string.
         max_sources: Maximum sources.
@@ -149,17 +162,23 @@ def deep_run(query: str, max_sources: int = 8, cassette: Any | None = None, **_:
     Returns:
         dict[str, Any]: Artifact, sources, events, and deep-loop metadata.
     """
+    import shutil
+
     from knowledge_engine.engine import ResearchEngine
 
+    root = Path("research_store/evals")
+    shutil.rmtree(root / "eval-deep", ignore_errors=True)
+    shutil.rmtree(root / "checkpoints" / "eval-deep", ignore_errors=True)
+
     async def go() -> dict[str, Any]:
-        engine = ResearchEngine(store_root="research_store", search_limit=max_sources)
+        engine = ResearchEngine(store_root=str(root), search_limit=max_sources)
         if cassette is not None:
             provider = getattr(engine, "_provider", None)
             for adapter in getattr(provider, "adapters", {}).values():
                 adapter.cassette = cassette
             engine._search = _RecordingSearch(engine._search, cassette)
             engine._scrape = _RecordingScrape(engine._scrape, cassette)
-        result = await engine.research(query, workflow="deep", unique=True)
+        result = await engine.research(query, workflow="deep", thread_id="eval-deep")
         s = result.state
         return {
             "artifact": _read(s.output_path),

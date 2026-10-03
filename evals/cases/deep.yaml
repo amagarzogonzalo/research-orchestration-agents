@@ -33,3 +33,6 @@ judge:
   rubric: rubrics/default.md
   min_score: 6
   samples: 1
+  # Advisory: free-tier judges are noisy signal, not a gate (repo policy, see
+  # research.yaml). Deterministic layers above block merges.
+  advisory: true

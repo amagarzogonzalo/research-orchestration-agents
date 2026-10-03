@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-03T08:38:24Z",
+  "request": {
+    "max_tokens": 400,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How retrieval-augmented generation reduces hallucinations in large language models\n\nPapers:\n[0] crossref:10.1002/9781394374717.fmatter | Advanced Retrieval‐Augmented Generation\n[1] crossref:10.59350/pn1ra-vpc97 | Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models\n[2] crossref:10.59350/pp2bd-w3k04 | Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models\n[3] crossref:10.59350/pn1ra-vpc | Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models\n[4] crossref:10.59350/qh78c-0s230 | Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models\n[5] pubmed:42819897 | In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins.\n[6] pubmed:42770666 | Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study.\n[7] pubmed:42735403 | Locally Deployed Large Language Models for AI-Assisted Outpatient Prescription Review: Crossover Study.\n[8] pubmed:42719386 | Dynamic alignment of large language models for evidence-grounded heart failure decision support.\n[9] pubmed:42712418 | Large language model enhanced framework for systematic reviews and meta-analyses.\n[10] europe_pmc:MED:42682590 | Knowledge-enhanced large language model construction for garlic cultivation using GraphRAG.\n[11] europe_pmc:PMC:PMC13600821 | Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models\n[12] europe_pmc:MED:42382850 | Resource-efficient retrieval-augmented question answering for the Indian Lok Sabha dataset.\n[13] europe_pmc:MED:42297857 | Fine grained reranking via caption bridging for knowledge augmented visual question answering.\n[14] europe_pmc:MED:42251377 | Mitigating hallucinations in healthcare AI: a systematic review of evidence-based strategies.\n[15] huggingface_papers:2412.11919 | RetroLLM: Empowering Large Language Models to Retrieve Fine-grained\n  Evidence within Generation\n[16] huggingface_papers:2512.19134 | QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation\n[17] huggingface_papers:2603.20309 | BubbleRAG: Evidence-Driven Retrieval-Augmented Generation for Black-Box Knowledge Graphs\n[18] huggingface_papers:2501.08292 | HALoGEN: Fantastic LLM Hallucinations and Where to Find Them\n[19] huggingface_papers:2505.04253 | LLM-Independent Adaptive RAG: Let the Question Speak for Itself\n[20] biorxiv:10.64898/2026.09.18.721350 | BELL: Biomodel Evidence and LLM-based Logic\n[21] medrxiv:10.64898/2026.09.17.26363303 | LLM-enabled Natural History Study Analysis to Support Rare Disease Research\n[22] medrxiv:10.64898/2026.09.17.26363298 | Impact of mass oral cholera vaccination in an endemic area of the Democratic Republic of the Congo: a surveillance-based counterfactual modeling analysis\n[23] medrxiv:10.64898/2026.09.17.26363314 | Large language model linguistic perplexity in childhood onset psychosis: unique features and developmental trends\n[24] doaj:5c3e3ea8e8b2469e8706f069570090a8 | AI-Powered Standard Operating Procedure Generation and Optimization Using Large Language Models for Chemical Laboratory Applications\n\nRelevant papers:",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"How retrieval-augmented generation reduces hallucinations in large language models\". So we need papers that discuss retrieval-augmented generation (RAG) and its effect on hallucinations. Let's scan list.\n\n[0] Advanced Retrieval‐Augmented Generation – likely general, maybe includes hallucination reduction? Might be relevant.\n\n[1-4] all same title about image captioning; not about hallucinations.\n\n[5] In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins. Might involve RAG but not hallucinations.\n\n[6] Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study. This likely addresses hallucinations via fact-checking. Relevant.\n\n[7] Locally Deployed Large Language Models for AI-Assisted Outpatient Prescription Review: Crossover Study. Might involve RAG? Not sure.\n\n[8] Dynamic alignment of large language models for evidence-grounded heart failure decision support. Might involve RAG and hallucinations? Possibly.\n\n[9] Large language model enhanced framework for systematic reviews and meta-analyses. Might involve RAG but not hallucinations.\n\n[10] Knowledge-enhanced large language model construction for garlic cultivation using GraphRAG. RAG but not hallucinations.\n\n[11] Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models. RAG but not hallucinations.\n\n[12] Resource-efficient retrieval-augmented question answering for the Indian Lok Sabha dataset. RAG but not hallucinations.\n\n[13] Fine grained reranking via caption bridging for knowledge augmented visual question answering. RAG but not hallucinations.\n\n[14] Mitigating hallucinations in healthcare AI: a systematic review of evidence-based strategies. This is about hallucinations but not necessarily RAG. Might be relevant as general.\n\n[15]",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791016704,
+    "id": "chatcmpl-8fd84b50-e0c0-4e0d-a86c-406acfe1beda",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_24bfb4a850",
+    "usage": {
+      "completion_time": 0.44989311,
+      "completion_tokens": 400,
+      "completion_tokens_details": {
+        "reasoning_tokens": 398
+      },
+      "prompt_time": 0.052371441,
+      "prompt_tokens": 987,
+      "prompt_tokens_details": null,
+      "queue_time": 0.196587511,
+      "total_time": 0.502264551,
+      "total_tokens": 1387
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m40em5skeqgvrv2vcqt5vt2d",
+      "seed": 1050440991
+    }
+  },
+  "usage": {
+    "completion_time": 0.44989311,
+    "completion_tokens": 400,
+    "completion_tokens_details": {
+      "reasoning_tokens": 398
+    },
+    "prompt_time": 0.052371441,
+    "prompt_tokens": 987,
+    "prompt_tokens_details": null,
+    "queue_time": 0.196587511,
+    "total_time": 0.502264551,
+    "total_tokens": 1387
+  },
+  "wall_s": 0.899
+}
