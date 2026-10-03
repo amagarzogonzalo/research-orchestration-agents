@@ -95,7 +95,9 @@ class SynthesizeNode(WorkflowNode):
         else:
             parts = []
             for src in state.get("filtered") or state.get("sources", []):
-                parts.append(f"{_src_title(src)}\n{_src_abstract(src)[:2000]}")
+                # IDs are part of the evidence: the model can only cite exact
+                # source IDs it has actually seen (see _SYNTHESIS_SYSTEM).
+                parts.append(f"[{_src_id(src)}]\n{_src_title(src)}\n{_src_abstract(src)[:2000]}")
             evidence = "\n---\n".join(parts) or "(no sources)"
         prompt = (
             f"Synthesize the research findings into structured notes for query:\n"
@@ -124,6 +126,20 @@ def _body_text(body: object) -> str:
     else:
         title, markdown = "", ""
     return f"{title}\n{markdown[:4000]}"
+
+
+def _src_id(src: object) -> str:
+    """ID from a SourceRecord (Pydantic) or its raw dict snapshot.
+
+    Args:
+        src: Source record.
+
+    Returns:
+        str: Source ID.
+    """
+    if isinstance(src, dict):
+        return src.get("id", "") or ""
+    return getattr(src, "id", "") or ""
 
 
 def _src_title(src: object) -> str:

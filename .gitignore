@@ -16,5 +16,5 @@ knowledge_base/
 research_store/
 **/__pycache__/
 *.pyc
-# harness: recorded model outputs (ground truth is regenerated per project)
-evals/cassettes/
+# NOTE: evals/cassettes/ is intentionally COMMITTED — recorded model outputs
+# are the offline deterministic suite (fresh clones replay without keys).

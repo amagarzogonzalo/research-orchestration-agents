@@ -1,0 +1,32 @@
+{
+  "citations": [
+    "2412.11919",
+    "2501.08292",
+    "2512.19134",
+    "2603.20309",
+    "42297857",
+    "8538743",
+    "pn1ra-vpc97"
+  ],
+  "code_langs": [],
+  "counts": {
+    "list_items": 9,
+    "paragraphs": 9,
+    "tables": 0,
+    "words_bucket": "<1000"
+  },
+  "frontmatter": {
+    "@id": "str",
+    "citations": "empty",
+    "provenance": "empty",
+    "title": "str",
+    "tldr_llm": "str",
+    "type": "str"
+  },
+  "hash": "6c09ef6d4446add8",
+  "headings": [
+    "2:mechanisms-of-hallucination-reduction-in-rag",
+    "2:structural-and-domain-specific-implementations",
+    "2:open-questions"
+  ]
+}
