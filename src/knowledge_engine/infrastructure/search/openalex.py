@@ -67,6 +67,13 @@ class OpenAlexAdapter(SearchPort, FetchPort):
         best_oa = item.get("best_oa_location") or {}
         abstract = item.get("abstract_inverted_index")
         abstract_text = _inverted_to_text(abstract) if abstract else None
+        venue = (item.get("primary_location") or {}).get("source", {}) or {}
+        venue_name = venue.get("display_name") or None
+        references = [
+            f"openalex:{str(ref).rsplit('/', 1)[-1]}"
+            for ref in item.get("referenced_works", []) or []
+            if str(ref).rsplit("/", 1)[-1]
+        ]
         return SourceRecord(
             id=f"openalex:{item.get('id', '').rsplit('/', 1)[-1]}",
             doi=(item.get("doi") or "").replace("https://doi.org/", "") or None,
@@ -77,6 +84,8 @@ class OpenAlexAdapter(SearchPort, FetchPort):
             abstract=abstract_text,
             pdf_url=best_oa.get("pdf_url"),
             citation_count=item.get("cited_by_count", 0),
+            venue=venue_name,
+            references=references,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 

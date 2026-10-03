@@ -4,19 +4,21 @@
     "limit": 5,
     "query": "How retrieval-augmented generation reduces hallucinations in large language models"
   },
-  "recorded_at": "2026-10-03T09:26:53Z",
+  "recorded_at": "2026-10-03T10:03:55Z",
   "response": [
     {
       "abstract": null,
       "authors": [],
       "citation_count": 0,
       "doi": "10.1002/9781394374717.fmatter",
-      "fetched_at": "2026-10-03T09:26:20.808640+00:00",
+      "fetched_at": "2026-10-03T10:03:43.056068+00:00",
       "id": "crossref:10.1002/9781394374717.fmatter",
       "pdf_url": null,
+      "references": [],
       "source": "crossref",
       "title": "Advanced Retrieval‐Augmented Generation",
       "tldr_llm": null,
+      "venue": "Advanced Retrieval‐Augmented Generation",
       "year": 2026
     },
     {
@@ -26,12 +28,18 @@
       ],
       "citation_count": 0,
       "doi": "10.59350/pn1ra-vpc97",
-      "fetched_at": "2026-10-03T09:26:20.808910+00:00",
+      "fetched_at": "2026-10-03T10:03:43.056580+00:00",
       "id": "crossref:10.59350/pn1ra-vpc97",
       "pdf_url": null,
+      "references": [
+        "10.48550/arxiv.2209.14491",
+        "10.48550/arxiv.2302.08268",
+        "10.48550/arxiv.2207.13162"
+      ],
       "source": "crossref",
       "title": "Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models",
       "tldr_llm": null,
+      "venue": null,
       "year": 2024
     },
     {
@@ -41,12 +49,18 @@
       ],
       "citation_count": 0,
       "doi": "10.59350/qh78c-0s230",
-      "fetched_at": "2026-10-03T09:26:20.808985+00:00",
+      "fetched_at": "2026-10-03T10:03:43.056774+00:00",
       "id": "crossref:10.59350/qh78c-0s230",
       "pdf_url": null,
+      "references": [
+        "10.48550/arxiv.2209.14491",
+        "10.48550/arxiv.2302.08268",
+        "10.48550/arxiv.2207.13162"
+      ],
       "source": "crossref",
       "title": "Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models",
       "tldr_llm": null,
+      "venue": null,
       "year": 2024
     },
     {
@@ -56,12 +70,18 @@
       ],
       "citation_count": 0,
       "doi": "10.59350/pp2bd-w3k04",
-      "fetched_at": "2026-10-03T09:26:20.809025+00:00",
+      "fetched_at": "2026-10-03T10:03:43.056895+00:00",
       "id": "crossref:10.59350/pp2bd-w3k04",
       "pdf_url": null,
+      "references": [
+        "10.48550/arxiv.2209.14491",
+        "10.48550/arxiv.2302.08268",
+        "10.48550/arxiv.2207.13162"
+      ],
       "source": "crossref",
       "title": "Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models",
       "tldr_llm": null,
+      "venue": null,
       "year": 2024
     },
     {
@@ -71,12 +91,18 @@
       ],
       "citation_count": 0,
       "doi": "10.59350/pn1ra-vpc",
-      "fetched_at": "2026-10-03T09:26:20.809061+00:00",
+      "fetched_at": "2026-10-03T10:03:43.057001+00:00",
       "id": "crossref:10.59350/pn1ra-vpc",
       "pdf_url": null,
+      "references": [
+        "10.48550/arxiv.2209.14491",
+        "10.48550/arxiv.2302.08268",
+        "10.48550/arxiv.2207.13162"
+      ],
       "source": "crossref",
       "title": "Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models",
       "tldr_llm": null,
+      "venue": null,
       "year": 2024
     },
     {
@@ -87,12 +113,14 @@
       ],
       "citation_count": 0,
       "doi": "10.1088/3049-4761/aea41f",
-      "fetched_at": "2026-10-03T09:26:23.477781+00:00",
+      "fetched_at": "2026-10-03T10:03:45.705146+00:00",
       "id": "pubmed:42819897",
       "pdf_url": null,
+      "references": [],
       "source": "pubmed",
       "title": "In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins.",
       "tldr_llm": null,
+      "venue": "Mach Learn Eng",
       "year": 2026
     },
     {
@@ -114,12 +142,14 @@
       ],
       "citation_count": 0,
       "doi": "10.2196/92090",
-      "fetched_at": "2026-10-03T09:26:23.477844+00:00",
+      "fetched_at": "2026-10-03T10:03:45.705436+00:00",
       "id": "pubmed:42770666",
       "pdf_url": null,
+      "references": [],
       "source": "pubmed",
       "title": "Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study.",
       "tldr_llm": null,
+      "venue": "J Med Internet Res",
       "year": 2026
     },
     {
@@ -136,12 +166,14 @@
       ],
       "citation_count": 0,
       "doi": "10.2196/97520",
-      "fetched_at": "2026-10-03T09:26:23.477864+00:00",
+      "fetched_at": "2026-10-03T10:03:45.705582+00:00",
       "id": "pubmed:42735403",
       "pdf_url": null,
+      "references": [],
       "source": "pubmed",
       "title": "Locally Deployed Large Language Models for AI-Assisted Outpatient Prescription Review: Crossover Study.",
       "tldr_llm": null,
+      "venue": "JMIR Med Inform",
       "year": 2026
     },
     {
@@ -160,12 +192,14 @@
       ],
       "citation_count": 0,
       "doi": "10.1177/20552076261487568",
-      "fetched_at": "2026-10-03T09:26:23.477878+00:00",
+      "fetched_at": "2026-10-03T10:03:45.705770+00:00",
       "id": "pubmed:42719386",
       "pdf_url": null,
+      "references": [],
       "source": "pubmed",
       "title": "Dynamic alignment of large language models for evidence-grounded heart failure decision support.",
       "tldr_llm": null,
+      "venue": "Digit Health",
       "year": 2026
     },
     {
@@ -180,12 +214,14 @@
       ],
       "citation_count": 0,
       "doi": "10.1136/bmjdhai-2025-000017",
-      "fetched_at": "2026-10-03T09:26:23.477892+00:00",
+      "fetched_at": "2026-10-03T10:03:45.705890+00:00",
       "id": "pubmed:42712418",
       "pdf_url": null,
+      "references": [],
       "source": "pubmed",
       "title": "Large language model enhanced framework for systematic reviews and meta-analyses.",
       "tldr_llm": null,
+      "venue": "BMJ Digit Health Ai",
       "year": 2025
     },
     {
@@ -202,12 +238,14 @@
       ],
       "citation_count": 0,
       "doi": "10.3389/fpls.2026.1912355",
-      "fetched_at": "2026-10-03T09:26:21.379735+00:00",
+      "fetched_at": "2026-10-03T10:03:44.107923+00:00",
       "id": "europe_pmc:MED:42682590",
       "pdf_url": null,
+      "references": [],
       "source": "europe_pmc",
       "title": "Knowledge-enhanced large language model construction for garlic cultivation using GraphRAG.",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -224,12 +262,14 @@
       ],
       "citation_count": 0,
       "doi": null,
-      "fetched_at": "2026-10-03T09:26:21.379855+00:00",
+      "fetched_at": "2026-10-03T10:03:44.108202+00:00",
       "id": "europe_pmc:PMC:PMC13600821",
       "pdf_url": null,
+      "references": [],
       "source": "europe_pmc",
       "title": "Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models",
       "tldr_llm": null,
+      "venue": null,
       "year": null
     },
     {
@@ -240,12 +280,14 @@
       ],
       "citation_count": 0,
       "doi": "10.3389/frai.2026.1798021",
-      "fetched_at": "2026-10-03T09:26:21.379891+00:00",
+      "fetched_at": "2026-10-03T10:03:44.108300+00:00",
       "id": "europe_pmc:MED:42382850",
       "pdf_url": null,
+      "references": [],
       "source": "europe_pmc",
       "title": "Resource-efficient retrieval-augmented question answering for the Indian Lok Sabha dataset.",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -262,12 +304,14 @@
       ],
       "citation_count": 0,
       "doi": "10.1038/s41598-026-57349-w",
-      "fetched_at": "2026-10-03T09:26:21.379919+00:00",
+      "fetched_at": "2026-10-03T10:03:44.108458+00:00",
       "id": "europe_pmc:MED:42297857",
       "pdf_url": null,
+      "references": [],
       "source": "europe_pmc",
       "title": "Fine grained reranking via caption bridging for knowledge augmented visual question answering.",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -278,12 +322,14 @@
       ],
       "citation_count": 1,
       "doi": "10.1186/s12913-026-14851-1",
-      "fetched_at": "2026-10-03T09:26:21.379941+00:00",
+      "fetched_at": "2026-10-03T10:03:44.108559+00:00",
       "id": "europe_pmc:MED:42251377",
       "pdf_url": null,
+      "references": [],
       "source": "europe_pmc",
       "title": "Mitigating hallucinations in healthcare AI: a systematic review of evidence-based strategies.",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -299,12 +345,14 @@
       ],
       "citation_count": 0,
       "doi": null,
-      "fetched_at": "2026-10-03T09:26:22.232292+00:00",
+      "fetched_at": "2026-10-03T10:03:46.906836+00:00",
       "id": "huggingface_papers:2412.11919",
       "pdf_url": "https://arxiv.org/pdf/2412.11919",
+      "references": [],
       "source": "huggingface_papers",
       "title": "RetroLLM: Empowering Large Language Models to Retrieve Fine-grained\n  Evidence within Generation",
       "tldr_llm": null,
+      "venue": null,
       "year": 2024
     },
     {
@@ -317,12 +365,14 @@
       ],
       "citation_count": 0,
       "doi": null,
-      "fetched_at": "2026-10-03T09:26:22.232331+00:00",
+      "fetched_at": "2026-10-03T10:03:46.907112+00:00",
       "id": "huggingface_papers:2512.19134",
       "pdf_url": "https://arxiv.org/pdf/2512.19134",
+      "references": [],
       "source": "huggingface_papers",
       "title": "QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation",
       "tldr_llm": null,
+      "venue": null,
       "year": 2025
     },
     {
@@ -339,12 +389,14 @@
       ],
       "citation_count": 0,
       "doi": null,
-      "fetched_at": "2026-10-03T09:26:22.232339+00:00",
+      "fetched_at": "2026-10-03T10:03:46.907252+00:00",
       "id": "huggingface_papers:2603.20309",
       "pdf_url": "https://arxiv.org/pdf/2603.20309",
+      "references": [],
       "source": "huggingface_papers",
       "title": "BubbleRAG: Evidence-Driven Retrieval-Augmented Generation for Black-Box Knowledge Graphs",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -357,12 +409,14 @@
       ],
       "citation_count": 0,
       "doi": null,
-      "fetched_at": "2026-10-03T09:26:22.232345+00:00",
+      "fetched_at": "2026-10-03T10:03:46.907360+00:00",
       "id": "huggingface_papers:2501.08292",
       "pdf_url": "https://arxiv.org/pdf/2501.08292",
+      "references": [],
       "source": "huggingface_papers",
       "title": "HALoGEN: Fantastic LLM Hallucinations and Where to Find Them",
       "tldr_llm": null,
+      "venue": null,
       "year": 2025
     },
     {
@@ -380,12 +434,14 @@
       ],
       "citation_count": 0,
       "doi": null,
-      "fetched_at": "2026-10-03T09:26:22.232350+00:00",
+      "fetched_at": "2026-10-03T10:03:46.907461+00:00",
       "id": "huggingface_papers:2505.04253",
       "pdf_url": "https://arxiv.org/pdf/2505.04253",
+      "references": [],
       "source": "huggingface_papers",
       "title": "LLM-Independent Adaptive RAG: Let the Question Speak for Itself",
       "tldr_llm": null,
+      "venue": null,
       "year": 2025
     },
     {
@@ -397,12 +453,14 @@
       ],
       "citation_count": 0,
       "doi": "10.64898/2026.09.18.721350",
-      "fetched_at": "2026-10-03T09:26:40.356416+00:00",
+      "fetched_at": "2026-10-03T10:03:53.467700+00:00",
       "id": "biorxiv:10.64898/2026.09.18.721350",
       "pdf_url": null,
+      "references": [],
       "source": "biorxiv",
       "title": "BELL: Biomodel Evidence and LLM-based Logic",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -414,12 +472,14 @@
       ],
       "citation_count": 0,
       "doi": "10.64898/2026.09.17.26363303",
-      "fetched_at": "2026-10-03T09:26:38.734375+00:00",
+      "fetched_at": "2026-10-03T10:03:49.650525+00:00",
       "id": "medrxiv:10.64898/2026.09.17.26363303",
       "pdf_url": null,
+      "references": [],
       "source": "medrxiv",
       "title": "LLM-enabled Natural History Study Analysis to Support Rare Disease Research",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -452,12 +512,14 @@
       ],
       "citation_count": 0,
       "doi": "10.64898/2026.09.17.26363298",
-      "fetched_at": "2026-10-03T09:26:38.734813+00:00",
+      "fetched_at": "2026-10-03T10:03:49.650984+00:00",
       "id": "medrxiv:10.64898/2026.09.17.26363298",
       "pdf_url": null,
+      "references": [],
       "source": "medrxiv",
       "title": "Impact of mass oral cholera vaccination in an endemic area of the Democratic Republic of the Congo: a surveillance-based counterfactual modeling analysis",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -485,12 +547,14 @@
       ],
       "citation_count": 0,
       "doi": "10.64898/2026.09.17.26363314",
-      "fetched_at": "2026-10-03T09:26:40.533739+00:00",
+      "fetched_at": "2026-10-03T10:03:51.611500+00:00",
       "id": "medrxiv:10.64898/2026.09.17.26363314",
       "pdf_url": null,
+      "references": [],
       "source": "medrxiv",
       "title": "Large language model linguistic perplexity in childhood onset psychosis: unique features and developmental trends",
       "tldr_llm": null,
+      "venue": null,
       "year": 2026
     },
     {
@@ -502,15 +566,17 @@
       ],
       "citation_count": 0,
       "doi": "10.1109/ACCESS.2026.3660770",
-      "fetched_at": "2026-10-03T09:26:41.060310+00:00",
+      "fetched_at": "2026-10-03T10:03:55.496900+00:00",
       "id": "doaj:5c3e3ea8e8b2469e8706f069570090a8",
       "pdf_url": "https://ieeexplore.ieee.org/document/11370815/",
+      "references": [],
       "source": "doaj",
       "title": "AI-Powered Standard Operating Procedure Generation and Optimization Using Large Language Models for Chemical Laboratory Applications",
       "tldr_llm": null,
+      "venue": "IEEE Access",
       "year": 2026
     }
   ],
   "usage": {},
-  "wall_s": 33.801
+  "wall_s": 16.031
 }

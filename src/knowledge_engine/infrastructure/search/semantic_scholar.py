@@ -72,6 +72,7 @@ class SemanticScholarAdapter(SearchPort, FetchPort):
             abstract=item.get("abstract"),
             pdf_url=item.get("openAccessPdf", {}).get("url"),
             citation_count=item.get("citationCount", 0),
+            venue=item.get("venue") or None,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 
@@ -90,7 +91,7 @@ class SemanticScholarAdapter(SearchPort, FetchPort):
 
         """
         url = f"{_BASE}/paper/DOI:{doi}"
-        params = {"fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf"}
+        params = {"fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf,venue"}
         try:
             async with self._client() as client:
                 resp = await client.get(url, params=params)
@@ -122,7 +123,7 @@ class SemanticScholarAdapter(SearchPort, FetchPort):
         params = {
             "query": query,
             "limit": limit,
-            "fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf",
+            "fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf,venue",
         }
         try:
             async with self._client() as client:

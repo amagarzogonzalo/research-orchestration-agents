@@ -100,6 +100,7 @@ class DblpAdapter(SearchPort):
             abstract=None,
             pdf_url=ee if is_pdf else None,
             citation_count=0,
+            venue=str(info.get("venue") or "") or None,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 

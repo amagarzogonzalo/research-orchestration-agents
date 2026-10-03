@@ -88,7 +88,7 @@ def _frontmatter(state: WorkflowState, title: str, provenance: list[SourceRecord
         "@id": state.get("thread_id"),
         "type": "KnowledgeBaseArticle",
         "title": title,
-        "provenance": [{"id": s.id, "doi": s.doi, "title": s.title} for s in provenance],
+        "provenance": [{"id": s.id, "doi": s.doi, "title": s.title, "venue": s.venue} for s in provenance],
         "citations": [s.doi or s.id for s in provenance],
         "tldr_llm": _tldr("\n\n".join(state.get("notes", []))),
     }
