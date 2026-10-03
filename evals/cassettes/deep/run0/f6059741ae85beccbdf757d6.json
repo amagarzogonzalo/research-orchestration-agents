@@ -1,0 +1,538 @@
+{
+  "name": "search:search",
+  "payload": {
+    "limit": 5,
+    "query": "What are hallucinations in the context of large language models, and why are they problematic?"
+  },
+  "recorded_at": "2026-10-03T09:20:38Z",
+  "response": [
+    {
+      "abstract": null,
+      "authors": [
+        "Nicolò Brunello"
+      ],
+      "citation_count": 3,
+      "doi": "10.1016/b978-0-443-33592-1.00007-3",
+      "fetched_at": "2026-10-03T09:20:14.707221+00:00",
+      "id": "crossref:10.1016/b978-0-443-33592-1.00007-3",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Trustworthiness of large language models: hallucinations",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Chun-Yi Kuan",
+        "Hung-yi Lee"
+      ],
+      "citation_count": 2,
+      "doi": "10.21437/interspeech.2025-324",
+      "fetched_at": "2026-10-03T09:20:14.707333+00:00",
+      "id": "crossref:10.21437/interspeech.2025-324",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Teaching Audio-Aware Large Language Models What Does Not Hear: Mitigating Hallucinations through Synthesized Negative Samples",
+      "tldr_llm": null,
+      "year": 2025
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Ran Afek"
+      ],
+      "citation_count": 0,
+      "doi": "10.2139/ssrn.5557161",
+      "fetched_at": "2026-10-03T09:20:14.707361+00:00",
+      "id": "crossref:10.2139/ssrn.5557161",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Accuracy and Fluency: Understanding Hallucinations in Large Language Models",
+      "tldr_llm": null,
+      "year": 2025
+    },
+    {
+      "abstract": "<jats:p>We argue that phase transitions in the underlying graph of associative memory belonging to Transformers provide a unifying explanation for the ob- served hallucinations and creative outputs of large language models (LLMs). They also provide insights into useful ways to mitigate hallucinations, by shrinking the semantic horizon of the token graph used by the Transformer.</jats:p>",
+      "authors": [
+        "Bernardo A. Huberman",
+        "Sayandev Mukherjee"
+      ],
+      "citation_count": 3,
+      "doi": "10.2139/ssrn.4676180",
+      "fetched_at": "2026-10-03T09:20:14.707381+00:00",
+      "id": "crossref:10.2139/ssrn.4676180",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Hallucinations and Emergence in Large Language Models",
+      "tldr_llm": null,
+      "year": 2024
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Jerry Liu"
+      ],
+      "citation_count": 0,
+      "doi": "10.31979/etd.y2dz-empz",
+      "fetched_at": "2026-10-03T09:20:14.707402+00:00",
+      "id": "crossref:10.31979/etd.y2dz-empz",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Structured Chain-of-Thought Reasoning to Mitigate Hallucinations in Large Language Models",
+      "tldr_llm": null,
+      "year": null
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "King AJ",
+        "Banks A",
+        "Hernández LH",
+        "Thompson SS",
+        "Stevens L",
+        "Potter LN",
+        "Kaphingst KA",
+        "Estabrooks PA",
+        "Del Fiol G",
+        "Wetter DW",
+        "Schlechter CR."
+      ],
+      "citation_count": 0,
+      "doi": "10.2196/92356",
+      "fetched_at": "2026-10-03T09:20:16.257061+00:00",
+      "id": "europe_pmc:MED:42462047",
+      "pdf_url": null,
+      "source": "europe_pmc",
+      "title": "An Acceptance Criteria Framework for Determining the Implementation Fit of Custom Large Language Models in Public Health Interventions.",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Sharpton T",
+        "Davis Ii EW",
+        "Alexiev A."
+      ],
+      "citation_count": 0,
+      "doi": "10.1371/journal.pcbi.1014776",
+      "fetched_at": "2026-10-03T09:20:16.257150+00:00",
+      "id": "europe_pmc:MED:42748119",
+      "pdf_url": null,
+      "source": "europe_pmc",
+      "title": "A practical risk framework for large language model use in life science research.",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Marya A",
+        "Selvaraj S."
+      ],
+      "citation_count": 0,
+      "doi": "10.1016/j.identj.2026.109802",
+      "fetched_at": "2026-10-03T09:20:16.257175+00:00",
+      "id": "europe_pmc:MED:42556102",
+      "pdf_url": null,
+      "source": "europe_pmc",
+      "title": "Artificial Intelligence Hallucinations in Dentistry: Implications and Safeguards for Clinical Practice.",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Uçar MT",
+        "Bostan E",
+        "Ortabağ T",
+        "Dönmez E."
+      ],
+      "citation_count": 0,
+      "doi": "10.3390/diagnostics16162620",
+      "fetched_at": "2026-10-03T09:20:16.257199+00:00",
+      "id": "europe_pmc:MED:42651021",
+      "pdf_url": null,
+      "source": "europe_pmc",
+      "title": "Comparative Evaluation of ChatGPT-5.2, Claude Sonnet 4.5, and DeepSeek-V3.2 for Rosacea-Related Information: Accuracy, Reliability, Readability, and Reference Hallucinations.",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Ke R",
+        "Ribeiro RM."
+      ],
+      "citation_count": 0,
+      "doi": "10.1007/s44163-026-01589-2",
+      "fetched_at": "2026-10-03T09:20:16.257220+00:00",
+      "id": "europe_pmc:MED:42661809",
+      "pdf_url": null,
+      "source": "europe_pmc",
+      "title": "Roadmap for using large language models (LLMs) to accelerate cross-disciplinary research with an example from computational biology.",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "Like students facing hard exam questions, large language models sometimes\nguess when uncertain, producing plausible yet incorrect statements instead of\nadmitting uncertainty. Such \"hallucinations\" persist even in state-of-the-art\nsystems and undermine trust. We argue that language models hallucinate because\nthe training and evaluation procedures reward guessing over acknowledging\nuncertainty, and we analyze the statistical causes of hallucinations in the\nmodern training pipeline. Hallucinations need not be mysterious -- they\noriginate simply as errors in binary classification. If incorrect statements\ncannot be distinguished from facts, then hallucinations in pretrained language\nmodels will arise through natural statistical pressures. We then argue that\nhallucinations persist due to the way most evaluations are graded -- language\nmodels are optimized to be good test-takers, and guessing when uncertain\nimproves test performance. This \"epidemic\" of penalizing uncertain responses\ncan only be addressed through a socio-technical mitigation: modifying the\nscoring of existing benchmarks that are misaligned but dominate leaderboards,\nrather than introducing additional hallucination evaluations. This change may\nsteer the field toward more trustworthy AI systems.",
+      "authors": [
+        "Adam Tauman Kalai",
+        "Ofir Nachum",
+        "Santosh S. Vempala",
+        "Edwin Zhang"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:17.290581+00:00",
+      "id": "huggingface_papers:2509.04664",
+      "pdf_url": "https://arxiv.org/pdf/2509.04664",
+      "source": "huggingface_papers",
+      "title": "Why Language Models Hallucinate",
+      "tldr_llm": null,
+      "year": 2025
+    },
+    {
+      "abstract": "Large Language Models (LLMs) suffer from hallucinations, referring to the\nnon-factual information in generated content, despite their superior capacities\nacross tasks. Meanwhile, knowledge editing has been developed as a new popular\nparadigm to correct the erroneous factual knowledge encoded in LLMs with the\nadvantage of avoiding retraining from scratch. However, one common issue of\nexisting evaluation datasets for knowledge editing is that they do not ensure\nLLMs actually generate hallucinated answers to the evaluation questions before\nediting. When LLMs are evaluated on such datasets after being edited by\ndifferent techniques, it is hard to directly adopt the performance to assess\nthe effectiveness of different knowledge editing methods in correcting\nhallucinations. Thus, the fundamental question remains insufficiently\nvalidated: Can knowledge editing really correct hallucinations in LLMs? We\nproposed HalluEditBench to holistically benchmark knowledge editing methods in\ncorrecting real-world hallucinations. First, we rigorously construct a massive\nhallucination dataset with 9 domains, 26 topics and more than 6,000\nhallucinations. Then, we assess the performance of knowledge editing methods in\na holistic way on five dimensions including Efficacy, Generalization,\nPortability, Locality, and Robustness. Through HalluEditBench, we have provided\nnew insights into the potentials and limitations of different knowledge editing\nmethods in correcting hallucinations, which could inspire future improvements\nand facilitate the progress in the field of knowledge editing.",
+      "authors": [
+        "Baixiang Huang",
+        "Canyu Chen",
+        "Xiongxiao Xu",
+        "Ali Payani",
+        "Kai Shu"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:17.290617+00:00",
+      "id": "huggingface_papers:2410.16251",
+      "pdf_url": "https://arxiv.org/pdf/2410.16251",
+      "source": "huggingface_papers",
+      "title": "Can Knowledge Editing Really Correct Hallucinations?",
+      "tldr_llm": null,
+      "year": 2024
+    },
+    {
+      "abstract": "Generation of plausible yet incorrect factual information, termed\nhallucination, is an unsolved issue in large language models. We study the\nability of language models to deliberate on the responses they give in order to\ncorrect their mistakes. We develop the Chain-of-Verification (CoVe) method\nwhereby the model first (i) drafts an initial response; then (ii) plans\nverification questions to fact-check its draft; (iii) answers those questions\nindependently so the answers are not biased by other responses; and (iv)\ngenerates its final verified response. In experiments, we show CoVe decreases\nhallucinations across a variety of tasks, from list-based questions from\nWikidata, closed book MultiSpanQA and longform text generation.",
+      "authors": [
+        "Shehzaad Dhuliawala",
+        "Mojtaba Komeili",
+        "Jing Xu",
+        "Roberta Raileanu",
+        "Xian Li",
+        "Asli Celikyilmaz",
+        "Jason Weston"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:17.290626+00:00",
+      "id": "huggingface_papers:2309.11495",
+      "pdf_url": "https://arxiv.org/pdf/2309.11495",
+      "source": "huggingface_papers",
+      "title": "Chain-of-Verification Reduces Hallucination in Large Language Models",
+      "tldr_llm": null,
+      "year": 2023
+    },
+    {
+      "abstract": "Multimodal Large Language Models (MLLMs) frequently exhibit hallucination\nphenomena, but the underlying reasons remain poorly understood. In this paper,\nwe present an empirical analysis and find that, although MLLMs incorrectly\ngenerate the objects in the final output, they are actually able to recognize\nvisual objects in the preceding layers. We speculate that this may be due to\nthe strong knowledge priors of the language model suppressing the visual\ninformation, leading to hallucinations. Motivated by this, we propose a novel\ndynamic correction decoding method for MLLMs (DeCo), which adaptively selects\nthe appropriate preceding layers and proportionally integrates knowledge into\nthe final layer to adjust the output logits. Note that DeCo is model agnostic\nand can be seamlessly incorporated with various classic decoding strategies and\napplied to different MLLMs. We evaluate DeCo on widely-used benchmarks,\ndemonstrating that it can reduce hallucination rates by a large margin compared\nto baselines, highlighting its potential to mitigate hallucinations. Code is\navailable at https://github.com/zjunlp/DeCo.",
+      "authors": [
+        "Chenxi Wang",
+        "Xiang Chen",
+        "Ningyu Zhang",
+        "Bozhong Tian",
+        "Haoming Xu",
+        "Shumin Deng",
+        "Huajun Chen"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:17.290632+00:00",
+      "id": "huggingface_papers:2410.11779",
+      "pdf_url": "https://arxiv.org/pdf/2410.11779",
+      "source": "huggingface_papers",
+      "title": "MLLM can see? Dynamic Correction Decoding for Hallucination Mitigation",
+      "tldr_llm": null,
+      "year": 2024
+    },
+    {
+      "abstract": "Large language models are prone to hallucinating factually incorrect statements. A key source of these errors is exposure to new factual information through supervised fine-tuning (SFT), which can increase hallucinations w.r.t. knowledge acquired during pre-training. In this work, we explore whether SFT-induced hallucinations can be mitigated using established tools from the continual learning literature, since they arise as a by-product of knowledge degradation during training. We propose a self-distillation-based SFT method that facilitates effective factual learning while minimizing hallucinations w.r.t. pre-existing knowledge by regularizing output-distribution drift. We also show that, in settings where new knowledge acquisition is unnecessary, suppressing factual plasticity by freezing parameter groups, can preserve task performance while reducing hallucinations. Lastly, we investigate the mechanism behind SFT-induced hallucinations through three hypotheses: capacity limitations, behavior cloning, and localized interference. Our experiments show that a main driver is interference among overlapping semantic representations, and that self-distillation succeeds by mitigating this interference.",
+      "authors": [
+        "Guy Kaplan",
+        "Zorik Gekhman",
+        "Zhen Zhu",
+        "Lotem Rozner",
+        "Yuval Reif",
+        "Swabha Swayamdipta",
+        "Derek Hoiem",
+        "Roy Schwartz"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:17.290638+00:00",
+      "id": "huggingface_papers:2604.15574",
+      "pdf_url": "https://arxiv.org/pdf/2604.15574",
+      "source": "huggingface_papers",
+      "title": "Why Fine-Tuning Encourages Hallucinations and How to Fix It",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "Sex hormone signaling during neurodevelopment may act as a modulator of risk for neurodevelopmental disorders (NDDs), including autism spectrum disorders (ASDs). By conducting a systematic and multi-modal evaluation of estradiol effects across loss-of-function deletions in 36 functionally diverse, large-effect ASD/NDD genes in human induced pluripotent stem cell-derived neurons and larval zebrafish, we uncover convergent and divergent gene-by-estradiol interactions at the transcriptomic, circuit, and behavioral levels. Whereas estradiol partially ameliorates dysregulated expression signatures across all ASD/NDD gene knockouts examined, it selectively and rapidly dampens network hyperexcitability phenotypes in only a subset of ASD/NDD gene knockouts. Two genes, ASH1L and SCN2A, are particularly responsive to estradiol treatment, with dramatic rescue of molecular and cellular effects in human knockout neurons, coupled with behavioral phenotypes in larval zebrafish mutants. The seven most estradiol responsive genes show enhanced protein-protein interaction network connectivity, strong co-expression in specific postnatal time periods, and enrichment in upper-layer mature excitatory neurons. Altogether, we describe distinct estradiol rescue in different modalities, elucidating shared transcriptomic effects as well as gene-specific cellular and behavioral rescue in the context of loss of function mutations of select ASD/NDD genes.",
+      "authors": [
+        "Pruitt, A.",
+        "Yang, L.",
+        "Lee, S.",
+        "Balafkan, N.",
+        "Gao, S.",
+        "Seah, C.",
+        "Dai, Y.",
+        "Davidson, E.",
+        "Khan, S.",
+        "Sen, A.",
+        "Liu, J.",
+        "Wood, I.",
+        "Xu, G.",
+        "Huang, X.",
+        "Carlson, M.",
+        "Zhao, D.",
+        "Jamadagni, P.",
+        "Dossou, G.",
+        "Retallick-Townsley, K.",
+        "Liu, X.",
+        "Papademetris, X.",
+        "Deans, P. J. M.",
+        "Fernandez Garcia, M.",
+        "Gao, H.",
+        "Wang, T.",
+        "Wang, Z. W.",
+        "Huckins, L. M.",
+        "Hoffman, E. J.",
+        "Brennand, K. J."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.02.18.706588",
+      "fetched_at": "2026-10-03T09:20:21.388012+00:00",
+      "id": "biorxiv:10.64898/2026.02.18.706588",
+      "pdf_url": null,
+      "source": "biorxiv",
+      "title": "Convergent and divergent phenotypic impacts of estradiol on neurodevelopmental disorder risk genes",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "The process of evolution by natural selection leads to phenotypes of increasing fitness. For cellular chemical reaction networks, this means optimising a variety of fitness functions such as robustness, precision, or sensitivity to external stimuli. We argue that these diverse goals can be achieved by a versatile, generic mechanism: coupling chemical reaction networks to reservoirs that are strongly out of equilibrium. Using theory and numerics we show that this mechanism of optimisation comes at the price of significant heat dissipation. We compute the heat flux caused by kinetic proofreading in Escherichia coli and show that it constitutes a significant fraction of the total heat flux experimentally measured in this model organism. We then demonstrate that the degree of optimality achievable saturates, and that Nature appears to operate near saturation despite high energetic costs. We argue that `life is hot' largely because of the need for a versatile mechanism to optimise a variety of fitness functions.",
+      "authors": [
+        "Schilling, T.",
+        "Warren, P.",
+        "Poon, W. C. K."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.02.13.705721",
+      "fetched_at": "2026-10-03T09:20:21.388073+00:00",
+      "id": "biorxiv:10.64898/2026.02.13.705721",
+      "pdf_url": null,
+      "source": "biorxiv",
+      "title": "Why Life is Hot",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "Fluent sentence production relies on the precise and timely coordination of lexical retrieval, morphosyntactic planning, and motor execution. While a left-dominant fronto-parieto-temporal network has been identified for these subcomponents of sentence production, less is known about the time course of engagement of these regions. One key issue is the extent to which the engagement of neural regions is sequential. The aim of the present study was to delineate spatiotemporal patterns of subcomponents of sentence production, namely lexical retrieval, inflection, and constituent assembly, and identify any lexical category differences (nouns versus verbs) in these processes. Magnetoencephalographic (MEG) responses were measured using a novel picture-icon paradigm in which verbal responses were elicited using object or action pictures followed by an icon that indicated the subcomponent sentence processes: lexical access, inflection (plurals for nouns, tense for verbs), and constituent assembly (adjective + object or pronoun + action). MEG data from twenty native English-speaking right-handed neurotypical adults was analysed for both stimulus-locked and response-locked timelines. We focused on responses in left hemisphere speech-language regions of interest (ROI): precentral gyrus (M1), inferior frontal gyrus (IFG), anterior temporal lobe (ATL), posterior temporal lobe (PTL), and inferior parietal lobe (IPL). The results revealed the following: 1) early and largely simultaneous engagement of all ROIs for lexical access; 2) compared to noun lexical access, verb lexical access is associated with a larger neural response across multiple language ROIs; 3) morphosyntactic planning engaged all ROIs, showing commonalities as well as unique patterns for each morphosyntactic condition; 4) noun morphosyntax vs noun lexical access showed a larger response across multiple ROIs compared to verb morphosyntax vs verb lexical access; 5) M1 was coactivated with other ROIs early in the planning stage, suggesting simultaneity of language and motor planning. The findings support a network model of language in which the syntactic, semantic, and phonological properties of a word are bound to a single anatomically distributed representation.",
+      "authors": [
+        "Wei, Y.",
+        "Slevc, L. R.",
+        "Brodbeck, C.",
+        "Faroqi-Shah, Y."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.17.752155",
+      "fetched_at": "2026-10-03T09:20:21.388115+00:00",
+      "id": "biorxiv:10.64898/2026.09.17.752155",
+      "pdf_url": null,
+      "source": "biorxiv",
+      "title": "Spatiotemporal dynamics of lexical and morphosyntactic planning during language production revealed by magnetoencephalography",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "In cocktail party-type environments, listeners must segregate simultaneous acoustic sources and select one for processing. Behavioral studies have established that both low-level voice differences (e.g., pitch) and high-level linguistic differences (e.g., word content) aid these processes. Electroencephalography (EEG) studies have demonstrated that the brain filters voices based on low-level features early in sensory processing, but it is unclear whether linguistic differences also support early filtering. In this EEG study, listeners attended to a lateralized auditory stream of target syllables while ignoring distractor stimuli from the opposite hemifield. In contrast to previous auditory attention studies, target stimuli were always attended and statistically identical across conditions; instead, we manipulated the distractors. Specifically, we manipulated whether targets and distractors were spoken in the same voice or different voices, as well as whether they were composed of the same or different linguistic content. Critically, distractors were temporally offset from targets, enabling an investigation of whether acoustically matched, always attended target stimuli are differentially encoded as a function of surrounding context. Differences in either voice or linguistic features supported target recall: Recall was poor only when both streams were in the same voice and had similar linguistic content. However, voice and linguistic features had independent, additive effects on neural processing. Specifically, target dissimilarity in acoustics and linguistic content both contributed to more robust, larger-magnitude target-evoked EEG responses. Overall, results demonstrate that both linguistic dissimilarity and low-level acoustic dissimilarity improve early attentional filtering of distractors in multi-source acoustic scenes.",
+      "authors": [
+        "Luthra, S.",
+        "Parker, E.",
+        "Brown, M.",
+        "Gezae, G.",
+        "Kim, H. S.",
+        "Liang, W.",
+        "Noyce, A.",
+        "Shinn-Cunningham, B. G."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.17.752368",
+      "fetched_at": "2026-10-03T09:20:21.388168+00:00",
+      "id": "biorxiv:10.64898/2026.09.17.752368",
+      "pdf_url": null,
+      "source": "biorxiv",
+      "title": "Voice and linguistic features support early attentional filtering of irrelevant stimuli",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "Autism spectrum disorder (ASD) is a neurodevelopmental condition often associated with auditory symptoms, including impairments in sound perception and hypersensitivity. These symptoms are thought to be partly due to the delayed development of the auditory brainstem, as evidenced through aberrant auditory brainstem responses (ABRs) and exaggerated startle responses in infants diagnosed with ASD. Loss-of-function mutations in CNTNAP2, a gene implicated in auditory processing and language development, are causally associated with ASD. Accordingly, knocking out Cntnap2 causes auditory brainstem impairments in rats; however, it is unknown if similar disruptions are observed in mice due to a possible conserved role of Cntnap2 in the auditory brainstem. To test this, we characterized the development of auditory processing, reactivity, and sensory filtering in juvenile and adult Cntnap2 knockout (KO) mice. We found that juvenile KO mice exhibited larger ABR wave III amplitudes and smaller wave IV widths, which normalized in adult mice, suggesting the possibility of transient hyperexcitability in the developing auditory brainstem. Additionally, our acoustic startle measurements revealed sex-specific phenotypes in which male KO mice exhibit an exaggerated startle response that persists into adulthood, while prepulse inhibition (PPI) remained generally intact in KO mice at both ages. These results demonstrate that loss of Cntnap2 in mice produces auditory brainstem abnormalities similar to rats, but causes species- and sex-specific effects on auditory reactivity, establishing the mouse model as a complementary animal model for investigating neural mechanisms underlying auditory dysfunction in ASD.",
+      "authors": [
+        "Chan, N.",
+        "Seheult, S. S. D. I.",
+        "Warr, A.",
+        "Faure, P. A.",
+        "Schmid, S.",
+        "Choe, K. Y."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.17.752490",
+      "fetched_at": "2026-10-03T09:20:21.388207+00:00",
+      "id": "biorxiv:10.64898/2026.09.17.752490",
+      "pdf_url": null,
+      "source": "biorxiv",
+      "title": "Cntnap2 deletion in mice causes developmentally transient alterations in auditory processing and persistent startle hyperreactivity",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "While large language models are powerful generators of new text, forecasting disease progression from longitudinal health histories remains a challenging problem. We introduce GenEHR, an autoregressive generative model trained on electronic health records (EHRs) from millions of patients that explicitly represents the irregular time intervals between visits when forecasting future clinical events. We combine the general-purpose patient representation learned during foundational training with parameter-efficient supervised adaptation for the task of pan-cancer risk stratification. In five large EHR cohorts supervised adaptation substantially improved prediction performance of a first cancer diagnosis within a five year horizon window. Our retrospective results support the evaluation of GenEHR-CancerRisk as a prospective clinical decision-support tool for prioritizing patients for risk-based screening for aggressive cancer types, such as pancreatic and ovarian cancer.",
+      "authors": [
+        "Khan, A.",
+        "Forster, D. T.",
+        "Harsh, M.",
+        "Zheng, C.",
+        "Warner, E. T.",
+        "Ritter, D.",
+        "Chang, A.",
+        "Wei, Q.",
+        "Sorensen, T. K.",
+        "Marks, D. S.",
+        "Sequist, L. V.",
+        "Hadlock, J. J.",
+        "Fillmore, N. R.",
+        "Sander, C."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.09.26362676",
+      "fetched_at": "2026-10-03T09:20:35.312887+00:00",
+      "id": "medrxiv:10.64898/2026.09.09.26362676",
+      "pdf_url": null,
+      "source": "medrxiv",
+      "title": "Identifying cohorts at elevated risk of cancers using generative modeling of patient health states",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "BackgroundRare diseases affect an estimated 300 million people worldwide, yet the research needed to guide diagnosis and treatment is often fragmented across multiple unstructured literature sources. Natural history studies (NHS) are a key source of this evidence, but manually extracting structured information from NHS publications can be tedious and does not scale.\n\nMethodsWe have developed a proof-of-concept for an information extraction pipeline testing three open-source large-language models (LLMs) - Athena-v3-AWQ, Googles Gemma3-27B, and Metas Llama-3.1-70B-Instruct, to extract key NHS characteristics from PubMed abstracts curated from a Chan Zuckerberg Initiative disease research state model corpus (302 gold-standard and 8,338 full-corpus abstracts), and compared the models on efficiency, extraction completeness, and expert-rated accuracy.\n\nResultsAll three models processed abstracts with success rates exceeding 99%. However, Gemma achieved the best overall performance, with the highest expert-rated accuracy (68.0% of outputs rated \"good\" vs. 36.0% for Llama and 10.0% for Athena) and the fastest runtime on the full corpus ([~]16 minutes for 3,547 abstracts), despite Llama scoring higher on the automated Token F1 metric (0.874 vs. 0.723), highlighting a divergence between automated and human evaluation. Athenas lower performance was largely attributable to verbatim copying rather than synthesis of extracted content.\n\nConclusionsThese findings illustrate how locally deployed open-source LLMs can extract structured NHS characteristics at scale, thus supporting their use to accelerate evidence synthesis in rare disease research.",
+      "authors": [
+        "Li, K.",
+        "Sid, E.",
+        "Zhu, Q."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.17.26363303",
+      "fetched_at": "2026-10-03T09:20:37.136643+00:00",
+      "id": "medrxiv:10.64898/2026.09.17.26363303",
+      "pdf_url": null,
+      "source": "medrxiv",
+      "title": "LLM-enabled Natural History Study Analysis to Support Rare Disease Research",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "BackgroundOral cholera vaccines (OCVs) are a key component of cholera control recommended in cholera-endemic areas. Yet evidence of their population-level impact is limited, especially in Africa where most cholera deaths occur. Here, we estimate the impact of mass administration of OCVs in the cholera-endemic city of Uvira, Democratic Republic of the Congo.\n\nMethodsWe conducted enhanced cholera surveillance at the two official cholera treatment facilities in Uvira between Jan 2017 and Dec 2023, centered around a mass vaccination campaign that achieved 66% coverage with at least one dose of Euvichol Plus vaccine in 2020. We combined systematic rapid diagnostic case testing with repeated, representative population surveys capturing healthcare-seeking behavior, vaccination, population mobility, and antibody profiles to estimate seroincidence. We developed a Bayesian framework that integrates these data into an ensemble of mechanistic cholera transmission models that account for time-varying transmissibility, realistic immunity dynamics and loss of vaccination coverage to population turnover. OCV impact was assessed through ensemble counterfactual modeling of alternative vaccination scenarios.\n\nFindingsWe estimate that the 2020 mass vaccination averted 56% (95% Credible Interval: 34-81) of infections and deaths over the subsequent three years. This corresponds to 2,350 (median, 95% CrI: 890-8,960) averted facility-attended cases, and 44 (median, 95% CrI: 16-150) averted facility and community deaths. Vaccination of all of Uviras eligible population would have averted 64% (median, 95% CrI: 43-87) of cases and deaths, with a negative but limited influence of vaccine coverage loss because of population turnover (71% median, 95% CrI: 52-90 at half the population turnover).\n\nInterpretationAlthough mass vaccination averted a significant fraction of cholera cases that would have otherwise occurred in this endemic setting, imperfect coverage, population turnover, and high transmission rates contributed in offsetting the larger potential benefits of OCV. Successful cholera control in Uvira hinges on multisectorial approaches including provision of safe water and sanitation. Setting and communicating realistic expectations for mass vaccination programs in highly endemic areas is critical for maintaining confidence in the current generation of OCVs.\n\nFundingGavi (M&E 9166 09 20 A16) and the Wellcome Trust (221688/Z/20/Z).\n\nResearch in ContextO_ST_ABSEvidence before this studyC_ST_ABSWe searched PubMed for studies published between January 1, 2000 and June 2026 using the terms (\"oral cholera vaccine\" OR \"OCV\") AND (\"vaccine effectiveness\" OR \"vaccine impact\" OR \"indirect protection\" OR \"herd immunity\" OR \"population-level protection\"). We also reviewed World Health Organisation (WHO) position papers and reports from the Global Task Force on Cholera Control (GTFCC). Inactivated oral cholera vaccines provide strong direct protection against symptomatic cholera, with randomized controlled trials and observational studies reporting effectiveness estimates typically exceeding 50% in the first three years after vaccination. In a previous study we showed that one-dose vaccine effectiveness was 52% 12-17 months after vaccination in Uvira, DRC. However, evidence on the population-level impact of preventive mass vaccination campaigns, which encompasses both direct and indirect protection, is thin. The only published estimates from clinical trials, both conducted in South Asia, reported overall protection of 37% over a 2-year period in Dhaka, Bangladesh and 75% over a 3-year period in Kolkata, India. No rigorous real-world estimates of mass OCV impact have been published from sub-Saharan Africa, where the vast majority of global cholera deaths occur. A major obstacle behind this gap is the lack of high-quality pre- and post-vaccination surveillance to support robust estimation of impact. The WHO and GTFCC have identified this evidence gap as a major research priority.\n\nAdded value of this studyTo our knowledge, this is the first study to provide a rigorous, data-driven estimate of the population-level impact of a preventive mass OCV campaign in a cholera-endemic African setting. Drawing on 7 years of enhanced clinical surveillance, three population-representative household surveys measuring vaccine coverage, population mobility and health-care seeking behaviors, a serological survey, and a novel ensemble of compartmental transmission models, we estimated that the 2020 campaign in Uvira, DRC -- which achieved approximately 66% coverage of at least one dose of Euvichol Plus vaccine -- averted 56% (95% CrI: 34-81) of cholera cases and deaths over the subsequent three years. This corresponds to 2,350 (median, 95% CrI: 890-8,960) averted cases that would have sought care at official cholera treatment facilities, and 44 (median, 95% CrI: 16-150) averted deaths. Our transmission modeling framework also yielded new insights into cholera natural history in this endemic setting: symptomatic infection conferred strong and durable immunity (mean duration 6 years), while immunity following asymptomatic infection was substantially weaker. We further quantify how vaccination coverage and population turnover jointly determine vaccination program impact, providing a practical framework for informing future campaign design.\n\nImplications of all the available evidenceTaken together with prior evidence from South Asia, our findings indicate that preventive mass OCV campaigns can avert a substantial fraction of cholera cases and deaths in highly endemic settings across different epidemiological contexts. Nonetheless, the resurgence of cholera a year after the vaccination campaign underscores that OCV campaigns alone are insufficient for sustained cholera control in similar settings due to high transmission rates and high population mobility. Investments in water and sanitation infrastructure remains essential.",
+      "authors": [
+        "Perez-Saez, J.",
+        "Malembaka, E. B.",
+        "Bouman, J. A.",
+        "Bugeme, P. M.",
+        "Hutchins, C.",
+        "Jackson, J.",
+        "Tshiwedi-Tsilabia, E.",
+        "Hulse, J. D.",
+        "Saidi, J. M.",
+        "Rumedeka, B. B.",
+        "Itongwa, M.",
+        "Cumming, O.",
+        "German, E.",
+        "Kulondwa, J.-C.",
+        "Dighe, A. B.",
+        "Clutter, C.",
+        "Lessler, J. T.",
+        "Leung, D. T.",
+        "Gallandat, K.",
+        "Lee, E. C.",
+        "Okitayemba, P. W.",
+        "Mukadi-Bamuleka, D.",
+        "Knee, J.",
+        "Azman, A. S."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.17.26363298",
+      "fetched_at": "2026-10-03T09:20:37.136805+00:00",
+      "id": "medrxiv:10.64898/2026.09.17.26363298",
+      "pdf_url": null,
+      "source": "medrxiv",
+      "title": "Impact of mass oral cholera vaccination in an endemic area of the Democratic Republic of the Congo: a surveillance-based counterfactual modeling analysis",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "ObjectiveChild and early adolescent onset psychosis (COP) is associated with subtle changes in language linked to thought disorder, a key contributor to functional impairment. Large language models (LLM) can detect deviations from expected language patterns by jointly analyzing sentence structure and word choice. This integrated information is captured by measures such as (pseudo)-perplexity, which quantify how difficult it is for an LLM to predict individual words given the surrounding linguistic context. The objective was to determine if perplexity measures change with age and whether they are altered in COP.\n\nMethodThis study tested for a difference in perplexity in COP cases (N = 23) mean age 12.78 years as compared to controls (N = 15) mean age 11.67 years. Extensive manually transcribed interviews were analyzed (controls: 3,829; cases: 6,579 mean words).\n\nResultsPerplexity derived from Large Language Model Meta AI (LLaMA) had a significant negative correlation with age in cases but not in controls. Pseudo-perplexity derived from Bidirectional Encoder Representations from Transformers (BERT) did not have a significant correlation with age in either group. Group differences were evaluated using generalized linear models with (pseudo)-perplexity as the dependent variable, case status as the predictor and age and number of words as covariates. The model predicting perplexity was significant and case status significantly predicted perplexity. In contrast, the model predicting pseudo-perplexity was not significant.\n\nConclusionThese differences in perplexity are interpreted as reflecting an altered developmental trajectory in the real-time semantic and syntactic planning that directs the flow of language in individuals with COP.\n\nPlain language summaryChildhood onset psychosis (COP) is difficult to detect with subtle changes in language that impair communication and functioning. We used large language models (LLMs) to detect developmental changes in language in COP and controls. LLMs found language in COP harder to predict with improved prediction with increasing age in COP but not in controls. LLMs can use easily collected language samples to detect COP and identify changes in language that could be targeted to improve communication.",
+      "authors": [
+        "Deo, A.",
+        "Lando, C.",
+        "Fradkin, Y.",
+        "Ali, A.",
+        "Silamongkol, T.",
+        "Carpenter, E.",
+        "Rosenkranz, C.",
+        "Escoto, A.",
+        "McDonnell, C.",
+        "He, R.",
+        "Hinzen, W.",
+        "GRaves, W. W.",
+        "Solis, J.",
+        "Barr, W.",
+        "Deaso, E.",
+        "Glahn, D.",
+        "Pato, M. T.",
+        "Zald, D.",
+        "Pato, C."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.17.26363314",
+      "fetched_at": "2026-10-03T09:20:38.165104+00:00",
+      "id": "medrxiv:10.64898/2026.09.17.26363314",
+      "pdf_url": null,
+      "source": "medrxiv",
+      "title": "Large language model linguistic perplexity in childhood onset psychosis: unique features and developmental trends",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "BackgroundIndividuals undergoing lung cancer screening (LCS) represent a population at high risk for atherosclerotic cardiovascular disease (ASCVD), yet opportunities for cardiovascular prevention during screening encounters may be underutilized. While prior studies have examined whether statins are prescribed in eligible patients, little is known about the timing of statin initiation following LCS, particularly among statin-naive individuals.\n\nMethodsWe conducted a retrospective cohort study using electronic health record data from a large academic health system in Missouri. Adults aged 50-80 who underwent LCS between January 1, 2015, and December 31, 2023, were statin-naive, and met 2019 ACC/AHA criteria for primary prevention were included. The primary outcome was time-to-statin initiation following LCS. Kaplan-Meier methods and Cox proportional hazards models were used to evaluate timing and predictors of statin initiation across demographic, clinical, and socioeconomic subgroups.\n\nResultsAmong 3,100 statin-eligible, statin-naive individuals who had undergone LCS, only 27.3% were prescribed a statin within one year of LCS. Uptake accrued gradually (10.5% by 90 days; 17.8% by 180 days; 23.2% by 270 days; 27.1% by 360 days). In adjusted models, earlier statin initiation was independently associated with a higher ASCVD risk category, a cardiology visit in the year preceding LCS, and former (versus current) smoking; older age and male sex were associated with slower initiation. Race, insurance type, and area deprivation were not independently associated with time-to-statin initiation.\n\nConclusionsDespite high ASCVD risk, most statin-eligible patients undergoing LCS did not receive timely statin therapy. Earlier initiation tracked calculated ASCVD risk and specialty (cardiology) contact rather than race, sex, insurance, or area deprivation. Because most patients at high calculated risk still went untreated, integrating cardiovascular risk assessment and preventive decision support into LCS workflows may help reduce missed opportunities for ASCVD prevention.",
+      "authors": [
+        "Che Ngang, I.",
+        "Zewde, E. K.",
+        "Gopalsamy Ramaswamy, S.",
+        "Anandarajah, A.",
+        "Bowe, B.",
+        "Odeny, B."
+      ],
+      "citation_count": 0,
+      "doi": "10.64898/2026.09.16.26363270",
+      "fetched_at": "2026-10-03T09:20:38.165685+00:00",
+      "id": "medrxiv:10.64898/2026.09.16.26363270",
+      "pdf_url": null,
+      "source": "medrxiv",
+      "title": "Time-to-Statin Prescription for Primary Atherosclerotic Cardiovascular Disease Prevention in a Lung Cancer Screening Program in Missouri: A Retrospective Cohort Study",
+      "tldr_llm": null,
+      "year": 2026
+    }
+  ],
+  "usage": {},
+  "wall_s": 51.827
+}

@@ -91,7 +91,7 @@ class SynthesizeNode(WorkflowNode):
 
         """
         if state.get("bodies"):
-            evidence = "\n---\n".join(_body_text(b) for b in state["bodies"])
+            evidence = "\n---\n".join(_labeled_body(b, state) for b in state["bodies"])
         else:
             parts = []
             for src in state.get("filtered") or state.get("sources", []):
@@ -140,6 +140,40 @@ def _src_id(src: object) -> str:
     if isinstance(src, dict):
         return src.get("id", "") or ""
     return getattr(src, "id", "") or ""
+
+
+def _labeled_body(body: object, state: WorkflowState) -> str:
+    """Render a body prefixed with its source ID when resolvable.
+
+    Bodies carry URLs, not source IDs; reverse-map through the same URL
+    derivation the fetch fan-out used. Unmatched bodies render unlabeled
+    (dict snapshots after a resume carry no mappable attributes).
+
+    Args:
+        body: Document body.
+        state: Current workflow state.
+
+    Returns:
+        str: Labeled body snippet.
+    """
+    from knowledge_engine.orchestration.nodes.bodies import _derive_url
+
+    text = _body_text(body)
+    url = body.get("url") if isinstance(body, dict) else getattr(body, "url", "")
+    if not url:
+        return text
+    for raw in state.get("filtered") or state.get("sources", []):
+        # Dict snapshots after a checkpoint resume carry no mappable attributes.
+        src: object = raw
+        if isinstance(src, dict):
+            continue
+        try:
+            if _derive_url(src) == url:  # type: ignore[arg-type]
+                sid = _src_id(src)
+                return f"[{sid}]\n{text}" if sid else text
+        except Exception:  # noqa: BLE001 - derivation must never break synthesis
+            continue
+    return text
 
 
 def _src_title(src: object) -> str:

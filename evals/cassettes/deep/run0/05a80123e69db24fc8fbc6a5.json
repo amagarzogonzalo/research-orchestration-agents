@@ -1,0 +1,236 @@
+{
+  "name": "search:search",
+  "payload": {
+    "limit": 5,
+    "query": "What are long-context models (e.g., GPT‑4 with extended context, LLaMA‑2‑Chat‑70B, etc.) and how do they handle longer input sequences?"
+  },
+  "recorded_at": "2026-10-03T09:20:24Z",
+  "response": [
+    {
+      "abstract": "<jats:title>Abstract</jats:title>\n                  <jats:p>We conducted a comparative reception analysis of Spanish‑to‑Czech translations by OpenAI’s GPT‑3.5, GPT‑4, and\n                    DeepSeek‑V3 across two text domains (marketing and literary), two evaluation criteria (naturalness and grammar), and two prompting\n                    strategies (simple vs. detailed). Additionally, the consistency of these translations was assessed using the Levenshtein distance\n                    metric. A reading task in which 132 Czech native speakers gave ratings of the translations on a 5‑point Likert scale revealed\n                    that, contrary to previous findings, simple prompts produced reliably higher‑quality translations than detailed prompts. Next,\n                    literary translations were rated lower than marketing translations, and grammar ratings exceeded those for naturalness.\n                    Additionally, GPT‑4 outperformed the other two models on the literary translations only. Finally, DeepSeek‑V3 showed greater\n                    consistency but lower quality of literary translation, suggesting that increased consistency may be at the expense of creativity.\n                    These findings provide empirical insights into how prompting strategy, text type, and model choice may influence machine\n                    translation quality.</jats:p>",
+      "authors": [
+        "Enrique Gutiérrez Rubio",
+        "Václav Jonáš Podlipský"
+      ],
+      "citation_count": 0,
+      "doi": "10.1075/ts.25064.gut",
+      "fetched_at": "2026-10-03T09:20:01.266300+00:00",
+      "id": "crossref:10.1075/ts.25064.gut",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "How well do Large Language Models handle Machine Translation?",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "<jats:p>O educador cubano José Martí nos convoca a “conhecer as forças do mundo” a fim de “fazê-las trabalhar”, ao invés de apenas valorar as mudanças como boas ou más. As Inteligências Artificiais (doravante IA) são, sem dúvida, uma das “forças” do contemporâneo. Há, no entanto, muito a ser debatido e compreendido ainda. Dentre as tecnologias de IA, as assim chamadas inteligências artificiais gerativas, como o Chat-GPT, têm se tornado cada vez mais populares no ambiente acadêmico. Diante desse cenário e das reflexões desenvolvidos na GrupA – Grupo de Práticas em Semântica e Discurso (UFBA/CNPq), passei a me perguntar sobre os modos de construir o programa de uma disciplina que ministro para os cursos de Letras da Universidade Federal da Bahia - Estratégias Argumentativas em Língua Portuguesa. Esse questionamento, unindo preocupações de ensino e de pesquisa, me conduziu à construção da sequência didática que ora apresento e discuto nesse artigo, e que apliquei durante dois semestres consecutivos no ano de 2023. Junto às práticas pedagógicas de Paulo Freire, retomamos diferentes autores a fim de construir essa sequência didática em quatro etapas: a) tematização; b) problematização; c) avaliação; e d) transvaloração. As conclusões do artigo discutem a precarização dos letramentos das classes trabalhadoras no capitalismo algorítmico, ao passo que apontam a possibilidade de produzir fissuras no ritual ideológico.</jats:p>",
+      "authors": [
+        "Isadora Machado"
+      ],
+      "citation_count": 2,
+      "doi": "10.28998/2317-9945.202483.384-399",
+      "fetched_at": "2026-10-03T09:20:01.266389+00:00",
+      "id": "crossref:10.28998/2317-9945.202483.384-399",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Devir algoritmo: usos do CHAT-GPT em aulas de argumentação",
+      "tldr_llm": null,
+      "year": 2024
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "David Li",
+        "Kartik Gupta",
+        "Mousumi Bhaduri",
+        "Paul Sathiadoss",
+        "Sahir Bhatnagar",
+        "Jaron Chong"
+      ],
+      "citation_count": 21,
+      "doi": "10.1016/j.clinimag.2024.110382",
+      "fetched_at": "2026-10-03T09:20:01.266415+00:00",
+      "id": "crossref:10.1016/j.clinimag.2024.110382",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Comparative diagnostic accuracy of GPT-4o and LLaMA 3-70b: Proprietary vs. open-source large language models in radiology",
+      "tldr_llm": null,
+      "year": 2025
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Wonseong Kim",
+        "Jan Spörer",
+        "Choong Lyol Lee",
+        "Siegfried Handschuh"
+      ],
+      "citation_count": 6,
+      "doi": "10.1145/3677052.3698675",
+      "fetched_at": "2026-10-03T09:20:01.266438+00:00",
+      "id": "crossref:10.1145/3677052.3698675",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Is Small Really Beautiful for Central Bank Communication? Evaluating Language Models for Finance: Llama-3-70B, GPT-4, FinBERT-FOMC, FinBERT, and VADER",
+      "tldr_llm": null,
+      "year": 2024
+    },
+    {
+      "abstract": null,
+      "authors": [],
+      "citation_count": 0,
+      "doi": "10.7717/peerj-cs.3862/table-3",
+      "fetched_at": "2026-10-03T09:20:01.266455+00:00",
+      "id": "crossref:10.7717/peerj-cs.3862/table-3",
+      "pdf_url": null,
+      "source": "crossref",
+      "title": "Table 3: Comparison of BERTScore and ROUGE scores for GPT-4 Turbo, GPT-4o, Gemini, GPT-3.5 Turbo, Mistral-8x22B, Llama-3.1, Llama-4 on English and Russian languages.",
+      "tldr_llm": null,
+      "year": null
+    },
+    {
+      "abstract": null,
+      "authors": [],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:02.536395+00:00",
+      "id": "europe_pmc:PMC:PMC13323440",
+      "pdf_url": null,
+      "source": "europe_pmc",
+      "title": "ECR 2026 Book of Abstracts",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:02.536474+00:00",
+      "id": "europe_pmc:PMC:PMC11688754",
+      "pdf_url": null,
+      "source": "europe_pmc",
+      "title": "Full GSA 2024 Abstract Book PDF",
+      "tldr_llm": null,
+      "year": 2024
+    },
+    {
+      "abstract": "Large context window is a desirable feature in large language models (LLMs).\nHowever, due to high fine-tuning costs, scarcity of long texts, and\ncatastrophic values introduced by new token positions, current extended context\nwindows are limited to around 128k tokens. This paper introduces LongRoPE that,\nfor the first time, extends the context window of pre-trained LLMs to an\nimpressive 2048k tokens, with up to only 1k fine-tuning steps at within 256k\ntraining lengths, while maintaining performance at the original short context\nwindow. This is achieved by three key innovations: (i) we identify and exploit\ntwo forms of non-uniformities in positional interpolation through an efficient\nsearch, providing a better initialization for fine-tuning and enabling an 8x\nextension in non-fine-tuning scenarios; (ii) we introduce a progressive\nextension strategy that first fine-tunes a 256k length LLM and then conducts a\nsecond positional interpolation on the fine-tuned extended LLM to achieve a\n2048k context window; (iii) we readjust LongRoPE on 8k length to recover the\nshort context window performance. Extensive experiments on LLaMA2 and Mistral\nacross various tasks demonstrate the effectiveness of our method. Models\nextended via LongRoPE retain the original architecture with minor modifications\nto the positional embedding, and can reuse most pre-existing optimizations.",
+      "authors": [
+        "Yiran Ding",
+        "Li Lyna Zhang",
+        "Chengruidong Zhang",
+        "Yuanyuan Xu",
+        "Ning Shang",
+        "Jiahang Xu",
+        "Fan Yang",
+        "Mao Yang"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:03.314120+00:00",
+      "id": "huggingface_papers:2402.13753",
+      "pdf_url": "https://arxiv.org/pdf/2402.13753",
+      "source": "huggingface_papers",
+      "title": "LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens",
+      "tldr_llm": null,
+      "year": 2024
+    },
+    {
+      "abstract": "Long-context modeling is becoming a core capability of modern large vision-language models (LVLMs), enabling sustained context management across long-document understanding, video analysis, and multi-turn tool use in agentic workflows. Yet practical training recipes remain insufficiently explored, particularly for designing and balancing long-context data mixtures. In this work, we present a systematic study of long-context continued pre-training for LVLMs, extending a 7B model from 32K to 128K context with extensive ablations on long-document data. We first show that long-document VQA is substantially more effective than OCR transcription. Building on this observation, our ablations further yield three key findings: i) for sequence-length distribution, balanced data outperforms target-length-focused data (e.g., 128K), suggesting that long-context ability requires generalizable key-information retrieval across various lengths and positions; ii) retrieval remains the primary bottleneck, favoring retrieval-heavy mixtures with modest reasoning data for task diversity; and iii) pure long-document VQA largely preserves short-context capabilities, suggesting that instruction-formatted long data reduces the need for short-data mixing. Based on these findings, we introduce MMProLong, obtained by long-context continued pre-training from Qwen2.5-VL-7B with only a 5B-token budget. MMProLong improves long-document VQA scores by 7.1% and maintains strong performance at 256K and 512K contexts beyond its 128K training window, without additional training. It further generalizes to webpage-based multimodal needle retrieval, long-context vision-text compression, and long-video understanding without task-specific supervision. Overall, our study establishes a practical LongPT recipe and an empirical foundation for advancing long-context vision-language models.",
+      "authors": [
+        "Zhaowei Wang",
+        "Lishu Luo",
+        "Haodong Duan",
+        "Weiwei Liu",
+        "Sijin Wu",
+        "Ji Luo",
+        "Shen Yan",
+        "Shuai Peng",
+        "Sihang Yuan",
+        "Chaoyi Huang",
+        "Yi Lin",
+        "Yangqiu Song"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:03.314153+00:00",
+      "id": "huggingface_papers:2605.13831",
+      "pdf_url": "https://arxiv.org/pdf/2605.13831",
+      "source": "huggingface_papers",
+      "title": "Training Long-Context Vision-Language Models Effectively with Generalization Beyond 128K Context",
+      "tldr_llm": null,
+      "year": 2026
+    },
+    {
+      "abstract": "Rotary Position Embeddings (RoPE) have been shown to effectively encode\npositional information in transformer-based language models. However, these\nmodels fail to generalize past the sequence length they were trained on. We\npresent YaRN (Yet another RoPE extensioN method), a compute-efficient method to\nextend the context window of such models, requiring 10x less tokens and 2.5x\nless training steps than previous methods. Using YaRN, we show that LLaMA\nmodels can effectively utilize and extrapolate to context lengths much longer\nthan their original pre-training would allow, while also surpassing previous\nthe state-of-the-art at context window extension. In addition, we demonstrate\nthat YaRN exhibits the capability to extrapolate beyond the limited context of\na fine-tuning dataset. We publish the checkpoints of Llama 2 7B/13B fine-tuned\nusing YaRN with 64k and 128k context windows at\nhttps://github.com/jquesnelle/yarn",
+      "authors": [
+        "Bowen Peng",
+        "Jeffrey Quesnelle",
+        "Honglu Fan",
+        "Enrico Shippole"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:03.314160+00:00",
+      "id": "huggingface_papers:2309.00071",
+      "pdf_url": "https://arxiv.org/pdf/2309.00071",
+      "source": "huggingface_papers",
+      "title": "YaRN: Efficient Context Window Extension of Large Language Models",
+      "tldr_llm": null,
+      "year": 2023
+    },
+    {
+      "abstract": "Long context is an important topic in Natural Language Processing (NLP),\nrunning through the development of NLP architectures, and offers immense\nopportunities for Large Language Models (LLMs) giving LLMs the lifelong\nlearning potential akin to humans. Unfortunately, the pursuit of a long context\nis accompanied by numerous obstacles. Nevertheless, long context remains a core\ncompetitive advantage for LLMs. In the past two years, the context length of\nLLMs has achieved a breakthrough extension to millions of tokens. Moreover, the\nresearch on long-context LLMs has expanded from length extrapolation to a\ncomprehensive focus on architecture, infrastructure, training, and evaluation\ntechnologies.\n  Inspired by the symphonic poem, Thus Spake Zarathustra, we draw an analogy\nbetween the journey of extending the context of LLM and the attempts of humans\nto transcend its mortality. In this survey, We will illustrate how LLM\nstruggles between the tremendous need for a longer context and its equal need\nto accept the fact that it is ultimately finite. To achieve this, we give a\nglobal picture of the lifecycle of long-context LLMs from four perspectives:\narchitecture, infrastructure, training, and evaluation, showcasing the full\nspectrum of long-context technologies. At the end of this survey, we will\npresent 10 unanswered questions currently faced by long-context LLMs. We hope\nthis survey can serve as a systematic introduction to the research on\nlong-context LLMs.",
+      "authors": [
+        "Xiaoran Liu",
+        "Ruixiao Li",
+        "Mianqiu Huang",
+        "Zhigeng Liu",
+        "Yuerong Song",
+        "Qipeng Guo",
+        "Siyang He",
+        "Qiqi Wang",
+        "Linlin Li",
+        "Qun Liu",
+        "Yaqian Zhou",
+        "Xuanjing Huang",
+        "Xipeng Qiu"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:03.314167+00:00",
+      "id": "huggingface_papers:2502.17129",
+      "pdf_url": "https://arxiv.org/pdf/2502.17129",
+      "source": "huggingface_papers",
+      "title": "Thus Spake Long-Context Large Language Model",
+      "tldr_llm": null,
+      "year": 2025
+    },
+    {
+      "abstract": "Current long context large language models (LLMs) can process inputs up to\n100,000 tokens, yet struggle to generate outputs exceeding even a modest length\nof 2,000 words. Through controlled experiments, we find that the model's\neffective generation length is inherently bounded by the sample it has seen\nduring supervised fine-tuning (SFT). In other words, their output limitation is\ndue to the scarcity of long-output examples in existing SFT datasets. To\naddress this, we introduce AgentWrite, an agent-based pipeline that decomposes\nultra-long generation tasks into subtasks, enabling off-the-shelf LLMs to\ngenerate coherent outputs exceeding 20,000 words. Leveraging AgentWrite, we\nconstruct LongWriter-6k, a dataset containing 6,000 SFT data with output\nlengths ranging from 2k to 32k words. By incorporating this dataset into model\ntraining, we successfully scale the output length of existing models to over\n10,000 words while maintaining output quality. We also develop LongBench-Write,\na comprehensive benchmark for evaluating ultra-long generation capabilities.\nOur 9B parameter model, further improved through DPO, achieves state-of-the-art\nperformance on this benchmark, surpassing even much larger proprietary models.\nIn general, our work demonstrates that existing long context LLM already\npossesses the potential for a larger output window--all you need is data with\nextended output during model alignment to unlock this capability. Our code &\nmodels are at: https://github.com/THUDM/LongWriter.",
+      "authors": [
+        "Yushi Bai",
+        "Jiajie Zhang",
+        "Xin Lv",
+        "Linzhi Zheng",
+        "Siqi Zhu",
+        "Lei Hou",
+        "Yuxiao Dong",
+        "Jie Tang",
+        "Juanzi Li"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-03T09:20:03.314172+00:00",
+      "id": "huggingface_papers:2408.07055",
+      "pdf_url": "https://arxiv.org/pdf/2408.07055",
+      "source": "huggingface_papers",
+      "title": "LongWriter: Unleashing 10,000+ Word Generation from Long Context LLMs",
+      "tldr_llm": null,
+      "year": 2024
+    }
+  ],
+  "usage": {},
+  "wall_s": 38.387
+}
