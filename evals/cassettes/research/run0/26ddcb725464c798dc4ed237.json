@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://arxiv.org/abs/2407.01219"
   },
-  "recorded_at": "2026-10-04T09:50:04Z",
+  "recorded_at": "2026-10-04T11:59:24Z",
   "response": {
-    "captured_at": "2026-10-04T09:50:04.800918+00:00",
+    "captured_at": "2026-10-04T11:59:24.097618+00:00",
     "char_count": 2382,
     "crawl_method": "trafilatura",
     "markdown": "# Computer Science > Computation and Language\n\n\\[Submitted on 1 Jul 2024\\]\n\n# Title:Searching for Best Practices in Retrieval-Augmented Generation\n\nView PDF HTML (experimental)\nAbstract:Retrieval-augmented generation (RAG) techniques have proven to be effective in integrating up-to-date information, mitigating hallucinations, and enhancing response quality, particularly in specialized domains. While many RAG approaches have been proposed to enhance large language models through query-dependent retrievals, these approaches still suffer from their complex implementation and prolonged response times. Typically, a RAG workflow involves multiple processing steps, each of which can be executed in various ways. Here, we investigate existing RAG approaches and their potential combinations to identify optimal RAG practices. Through extensive experiments, we suggest several strategies for deploying RAG that balance both performance and efficiency. Moreover, we demonstrate that multimodal retrieval techniques can significantly enhance question-answering capabilities about visual inputs and accelerate the generation of multimodal content using a \"retrieval as generation\" strategy.\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
@@ -13,5 +13,5 @@
     "url": "https://arxiv.org/abs/2407.01219"
   },
   "usage": {},
-  "wall_s": 7.703
+  "wall_s": 0.983
 }

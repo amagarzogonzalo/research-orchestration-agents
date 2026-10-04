@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://arxiv.org/abs/2509.21875"
   },
-  "recorded_at": "2026-10-04T09:50:09Z",
+  "recorded_at": "2026-10-04T11:59:24Z",
   "response": {
-    "captured_at": "2026-10-04T09:50:09.673103+00:00",
+    "captured_at": "2026-10-04T11:59:24.295355+00:00",
     "char_count": 3002,
     "crawl_method": "trafilatura",
     "markdown": "# Computer Science > Computation and Language\n\n\\[Submitted on 26 Sep 2025 (v1), last revised 3 Feb 2026 (this version, v3)\\]\n\n# Title:LUMINA: Detecting Hallucinations in RAG System with Context-Knowledge Signals\n\nView PDF HTML (experimental)\nAbstract:Retrieval-Augmented Generation (RAG) aims to mitigate hallucinations in large language models (LLMs) by grounding responses in retrieved documents. Yet, RAG-based LLMs still hallucinate even when provided with correct and sufficient context. A growing line of work suggests that this stems from an imbalance between how models use external context and their internal knowledge, and several approaches have attempted to quantify these signals for hallucination detection. However, existing methods require extensive hyperparameter tuning, limiting their generalizability. We propose LUMINA, a novel framework that detects hallucinations in RAG systems through context--knowledge signals: external context utilization is quantified via distributional distance, while internal knowledge utilization is measured by tracking how predicted tokens evolve across transformer layers. We further introduce a framework for statistically validating these measurements. Experiments on common RAG hallucination benchmarks and four open-source LLMs show that LUMINA achieves consistently high AUROC and AUPRC scores, outperforming prior utilization-based methods by up to +13% AUROC on HalluRAG. Moreover, LUMINA remains robust under relaxed assumptions about retrieval quality and model matching, offering both effectiveness and practicality.\n\nLUMINA: this https URL\n\n## Submission history\n\nFrom: Samuel Yeh \\[view email\\]\n**\\[v1\\]**Fri, 26 Sep 2025 04:57:46 UTC (780 KB)\n\n**\\[v2\\]**Tue, 14 Oct 2025 05:15:14 UTC (780 KB)\n\n**\\[v3\\]**Tue, 3 Feb 2026 05:10:36 UTC (797 KB)\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
@@ -13,5 +13,5 @@
     "url": "https://arxiv.org/abs/2509.21875"
   },
   "usage": {},
-  "wall_s": 11.057
+  "wall_s": 0.959
 }

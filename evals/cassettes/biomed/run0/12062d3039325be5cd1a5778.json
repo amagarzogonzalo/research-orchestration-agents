@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://europepmc.org/article/MED/42793101"
+  },
+  "recorded_at": "2026-10-04T12:26:56Z",
+  "response": {
+    "captured_at": "2026-10-04T12:26:56.584119+00:00",
+    "char_count": 2360,
+    "crawl_method": "jina",
+    "markdown": "*   [Abstract](https://europepmc.org/article/MED/42793101#abstract)\n*   [Figures](https://europepmc.org/article/MED/42793101#figures-and-tables)\n*   [Free full text](https://europepmc.org/article/MED/42793101#free-full-text)\n*   [Similar Articles](https://europepmc.org/article/MED/42793101#similar-articles)\n*   [Funding](https://europepmc.org/article/MED/42793101#funding)\n\nBiomolecules, 02 Sep 2026, 16(9):1268  \n[https://doi.org/10.3390/biom16091268](https://doi.org/10.3390/biom16091268)PMID: 42793101 PMCID: PMC13604784\n\nReview![Image 1](https://europepmc.org/img/open_access_logo_white_blue.728eb8cc.svg)Free full text in Europe PMC\n\nShare this article _Share with email_ _Share with twitter_ _Share with linkedin_ _Share with facebook_\n\n## Abstract\n\n* * *\n\nThe clustered regularly interspaced short palindromic repeats (CRISPR)/CRISPR-associated protein (Cas) system began as a tool for programmable genome editing. CRISPR/Cas technologies have evolved into a versatile platform for functional genomic screening, epigenome editing, therapeutic target discovery, and highly sensitive molecular diagnostics. New effectors and engineered variants continue to push these applications into personalized medicine and point-of-care testing. Here, this review highlights recent advances in therapeutic target discovery and therapeutic and molecular diagnostic development utilizing CRISPR/Cas technologies. We discuss how CRISPR interference (CRISPRi), CRISPR activation (CRISPRa), base editing, and prime editing have improved our understanding of disease mechanisms, while creating new opportunities for therapeutic intervention. Current applications in cancer immunotherapy, infectious disease, and neurological disorders are also discussed. In diagnostics, CRISPR-based platforms enable sensitive detection of infectious pathogens, cancer biomarkers, and genetic disorders using programmable nuclease activity in both laboratory and point-of-care settings. Collectively, these advances continue to expand the role of CRISPR/Cas technology across biological discovery, disease diagnostics, and therapeutic development, driving progress in precision medicine.\n\n## Figures\n\n## Free full text\n\n## Similar Articles\n\n* * *\n\nTo arrive at the top five similar articles we use a word-weighted algorithm to compare words from the Title and Abstract of each citation.",
+    "title": "Recent Advances in CRISPR/Cas Technologies for Biological Discovery, Therapeutics, and Diagnostics. - Abstract",
+    "url": "https://europepmc.org/article/MED/42793101"
+  },
+  "usage": {},
+  "wall_s": 1.854
+}

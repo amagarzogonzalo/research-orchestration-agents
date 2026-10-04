@@ -48,6 +48,7 @@ async def _ok(request: httpx.Request) -> httpx.Response:
 async def test_search_maps_records_and_doi() -> None:
     records = await _adapter(_ok).search("attention", limit=10)
     assert [r.id for r in records] == ["pubmed:123", "pubmed:456"]
+    assert records[1].venue == "SOSP"
     first = records[0]
     assert first.source is SearchSource.PUBMED
     assert first.title == "Attention and transformers"
@@ -55,6 +56,26 @@ async def test_search_maps_records_and_doi() -> None:
     assert first.year == 2017
     assert first.doi == "10.1000/xyz"
     assert records[1].doi is None
+
+
+def test_parse_abstracts_reads_labeled_sections() -> None:
+    from knowledge_engine.infrastructure.search.pubmed import _parse_abstracts
+
+    xml = (
+        "<PubmedArticleSet><PubmedArticle><MedlineCitation><PMID>123</PMID>"
+        "<Article><Abstract>"
+        '<AbstractText Label="BACKGROUND">Why.</AbstractText>'
+        "<AbstractText>What we did.</AbstractText>"
+        "</Abstract></Article></MedlineCitation></PubmedArticle></PubmedArticleSet>"
+    )
+    assert _parse_abstracts(xml) == {"123": "BACKGROUND: Why.\nWhat we did."}
+
+
+def test_parse_abstracts_tolerates_malformed_xml() -> None:
+    from knowledge_engine.infrastructure.search.pubmed import _parse_abstracts
+
+    assert _parse_abstracts("not xml<") == {}
+    assert _parse_abstracts("<PubmedArticleSet/>") == {}
 
 
 async def test_search_respects_limit() -> None:

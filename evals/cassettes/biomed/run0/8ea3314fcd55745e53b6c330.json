@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.17504/protocols.io.wikfccw"
+  },
+  "recorded_at": "2026-10-04T12:26:35Z",
+  "response": {
+    "captured_at": "2026-10-04T12:26:35.788549+00:00",
+    "char_count": 2924,
+    "crawl_method": "jina",
+    "markdown": "[Skip to main content](https://doi.org/10.17504/protocols.io.wikfccw#main-content)\n\n[](https://doi.org/)\n\n*   [AI Features](https://doi.org/advanced-ai)\n*   Plans\n*   [Case study](https://doi.org/university-of-california-case-study)\n*   [Contact Sales](https://doi.org/contact-sales)\n\nSearch\n\n[Log in](https://doi.org/sign-in)[Sign up free](https://doi.org/create)\n\n## 404 - Page not found\n\nSorry, we can't find the page you were looking for.\n\n[](https://doi.org/)\n\n[info@protocols.io](mailto:info@protocols.io)\n\n[](https://bsky.app/profile/protocolsio.bsky.social)[](https://www.facebook.com/protocols.io)[](https://www.linkedin.com/company/protocolsio)\n\nGDPR settings\n\n## About\n\n*   [What is a protocol?](https://doi.org/what-is-protocol)\n*   [About us](https://doi.org/about)\n*   [Blog](https://doi.org/blog)\n*   [Request a demo](https://doi.org/help/demo)\n*   [Contact Sales](https://doi.org/contact-sales)\n*   [Contact us](https://doi.org/contact-us)\n\n## Platform\n\n*   [For institutions](https://doi.org/for-institutions)\n*   [Premium partners](https://doi.org/organizations)\n*   [We enter protocols](https://doi.org/we-enter-protocols)\n*   [Protocols entry methods](https://doi.org/entry-methods)\n*   [For developers](https://doi.org/developers)\n*   [Advanced AI](https://doi.org/advanced-ai)\n*   [Analytics](https://doi.org/analytics)\n*   [RSS](https://doi.org/protocols.rss)\n*   [Plans](https://doi.org/plans)\n*   [Billing policy](https://doi.org/billing-overview)\n*   [Security](https://doi.org/help/faq#q-149)\n\n## More info\n\n*   [Release notes](https://doi.org/help/release-notes)\n*   [Webinars](https://doi.org/webinars)\n*   [Case studies](https://doi.org/university-of-california-case-study)\n*   [Startup program](https://doi.org/startup-program)\n*   [Branding](https://doi.org/brand)\n*   [Help](https://doi.org/help)\n*   [Accessibility (VPAT)](https://doi.org/accessibility)\n*   [Tutorials](https://doi.org/tutorials)\n*   [FAQ](https://doi.org/help/faq)\n\nprotocols.io is a collaborative platform for creating and sharing experimental research workflows, methods, and protocols. Secure, centralized workspaces and advanced AI features help academic, government, and corporate research teams manage evolving protocols, optimize workflow development, and improve reproducibility. ISSN 2473-1838.\n*   [Terms of Service](https://doi.org/terms)\n*   [Privacy Policy](https://doi.org/privacy)\n*   Manage Cookies\n*   [Code of Conduct](https://doi.org/code-of-conduct)\n*   [Trademarks](https://doi.org/trademarks)\n*   [Supporters](https://doi.org/supporters)\n\nCopyright 2026\n\n## Your privacy, your choice\n\nThe protocols.io website uses cookies.\n\nBy continuing to browse the site, you accept our use of cookies, [Privacy Policy](https://doi.org/privacy) and [Terms of Service](https://doi.org/terms).\n\nIf you reject optional cookies, the site may not work as expected.\n\nCustomize Reject optional cookies Accept all cookies",
+    "title": "GUIDE-seq simplified library preparation protocol (CRISPR/Cas9 off-target cleavage detection)",
+    "url": "https://doi.org/10.17504/protocols.io.wikfccw"
+  },
+  "usage": {},
+  "wall_s": 2.93
+}

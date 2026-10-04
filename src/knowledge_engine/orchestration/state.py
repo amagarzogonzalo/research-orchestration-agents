@@ -40,6 +40,7 @@ class WorkflowState(TypedDict, total=False):
         llm_calls: Attribute description.
         sub_queries: Attribute description.
         branch_notes: Attribute description.
+        branch_sources: Attribute description.
         rubric_score: Attribute description.
         gaps: Attribute description.
         sources: Attribute description.
@@ -64,6 +65,7 @@ class WorkflowState(TypedDict, total=False):
     llm_calls: Annotated[int, add]
     sub_queries: list[dict[str, Any]]
     branch_notes: Annotated[list[str], add]
+    branch_sources: Annotated[list[SourceRecord], add]
     rubric_score: float | None
     gaps: list[str]
     sources: list[SourceRecord]
@@ -76,6 +78,25 @@ class WorkflowState(TypedDict, total=False):
     review_dir: str | None
     output_path: str | None
     status: str
+
+
+def merge_sources(*lists: list[SourceRecord]) -> list[SourceRecord]:
+    """Merge source lists, deduped by id, preserving order.
+
+    Args:
+        *lists: Source lists in priority order.
+
+    Returns:
+        list[SourceRecord]: Merged sources.
+    """
+    seen: set[str] = set()
+    merged: list[SourceRecord] = []
+    for records in lists:
+        for record in records:
+            if record.id not in seen:
+                seen.add(record.id)
+                merged.append(record)
+    return merged
 
 
 def to_graph_state(state: WorkflowState) -> GraphState:
@@ -91,7 +112,7 @@ def to_graph_state(state: WorkflowState) -> GraphState:
     return GraphState(
         thread_id=state.get("thread_id", ""),
         query=state.get("query", ""),
-        sources=state.get("sources", []),
+        sources=merge_sources(state.get("sources", []), state.get("branch_sources", [])),
         filtered=state.get("filtered", []),
         bodies=state.get("bodies", []),
         synthetic_notes=state.get("notes", []),
@@ -161,5 +182,6 @@ __all__ = [
     "MAX_SYNTHESIS_ITERATIONS",
     "WorkflowState",
     "WorkflowNode",
+    "merge_sources",
     "to_graph_state",
 ]

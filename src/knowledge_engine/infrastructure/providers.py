@@ -239,5 +239,5 @@ class MistralAdapter(LiteLLMProviderAdapter):
         affinity: Attribute description."""
 
     name = "Mistral"
-    model_id = "mistral/mistral-large-latest"
+    model_id = "mistral/open-mistral-7b"  # verified live 2026-10-03; large-latest/small-latest 429 on free key
     affinity = Affinity.MILLION

@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://europepmc.org/article/MED/42510922"
+  },
+  "recorded_at": "2026-10-04T12:26:58Z",
+  "response": {
+    "captured_at": "2026-10-04T12:26:58.362113+00:00",
+    "char_count": 1484,
+    "crawl_method": "jina",
+    "markdown": "## Search life-sciences literature\n\n[Advanced search](https://europepmc.org/advancesearch)|[Recent history](https://europepmc.org/recentHistory)\n\nThis website requires cookies, and the limited processing of your personal data in order to function. By using the site you are agreeing to this as outlined in our [privacy notice and cookie policy](https://europepmc.org/PrivacyNotice).\n\nFollow us\n\n[News blog](http://blog.europepmc.org/)[Technical blog](https://europepmc.github.io/techblog/)[Bluesky](https://bsky.app/profile/europepmc.org)[YouTube](https://www.youtube.com/user/EuropePMC)\n\n## Partnerships & funding\n\nEurope PMC is developed by [EMBL-EBI](https://www.ebi.ac.uk/) with support from the [Europe PMC Funders' Group](https://europepmc.org/Funders/), in collaboration with the [National Library of Medicine (NLM)](https://www.nlm.nih.gov/), as part of the [PubMed Central International](https://www.ncbi.nlm.nih.gov/pmc/about/pmci/) archive network.\n\n![Image 1](blob:http://localhost/c205899a11054c1cd876dfbe5aae9757)![Image 2](https://europepmc.org/img/gbc-footer.86def661.png)![Image 3](blob:http://localhost/55f06063981d61ebcb597a644b6e7b96)\n\nEurope PMC is an [ELIXIR Core Data Resource](https://elixir-europe.org/platforms/data/core-data-resources), [Global Core Biodata Resource](https://globalbiodata.org/what-we-do/global-core-biodata-resources/), and conforms with [EMBL-EBI’s long term data preservation policies](https://www.ebi.ac.uk/long-term-data-preservation).",
+    "title": "Europe PMC",
+    "url": "https://europepmc.org/article/MED/42510922"
+  },
+  "usage": {},
+  "wall_s": 1.961
+}

@@ -85,7 +85,9 @@ class BranchNode(WorkflowNode):
             "iterations": 0,
         }
         notes = (await self.synthesize.run(leaf)).get("notes", [])
-        return {"branch_notes": notes, "bodies": bodies, "llm_calls": 2}
+        # Contribute the actually-used sources to the add-reducer channel so
+        # provenance, footnotes, and durable snapshots see branch evidence.
+        return {"branch_notes": notes, "bodies": bodies, "llm_calls": 2, "branch_sources": filtered}
 
     async def _retrieve(self, query: str, source: SourceKind) -> list[Any]:
         """Retrieve sources via the routed port (MCP with search fallback).

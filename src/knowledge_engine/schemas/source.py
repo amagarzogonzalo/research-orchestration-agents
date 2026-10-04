@@ -22,7 +22,8 @@ class SearchSource(StrEnum):
         EUROPE_PMC: Attribute description.
         UNPAYWALL: Attribute description.
         DBLP: Attribute description.
-        DOAJ: Attribute description."""
+        DOAJ: Attribute description.
+        OSF_PREPRINTS: Attribute description."""
 
     OPENALEX = "openalex"
     SEMANTIC_SCHOLAR = "semantic_scholar"
@@ -36,6 +37,7 @@ class SearchSource(StrEnum):
     UNPAYWALL = "unpaywall"
     DBLP = "dblp"
     DOAJ = "doaj"
+    OSF_PREPRINTS = "osf_preprints"
 
 
 class SourceRecord(BaseModel):

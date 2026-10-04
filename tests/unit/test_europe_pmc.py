@@ -53,6 +53,16 @@ async def test_search_respects_limit() -> None:
     assert len(records) == 1
 
 
+def test_to_record_maps_journal_venue() -> None:
+    item = dict(_ITEM)
+    item["journalInfo"] = {"journal": {"title": "J Chem Inf Model"}}
+    assert EuropePmcAdapter._to_record(item).venue == "J Chem Inf Model"
+
+
+def test_to_record_venue_missing_is_none() -> None:
+    assert EuropePmcAdapter._to_record(_ITEM).venue is None
+
+
 async def _boom(request: httpx.Request) -> httpx.Response:
     return httpx.Response(500, json={"error": "down"})
 

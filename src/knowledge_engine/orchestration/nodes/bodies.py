@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 from typing import Any
 
 from langgraph.types import Command, Send
@@ -87,10 +88,40 @@ class FetchBodyNode(WorkflowNode):
         async with self._sem:
             try:
                 body = await self.scrape.to_markdown(url)
+                body.markdown = _strip_references(body.markdown)
+                body.char_count = len(body.markdown)
                 return {"bodies": [body]}
             except Exception as exc:  # noqa: BLE001 - partial fan-out tolerated
                 logger.warning("scrape failed for %s: %s", src.id, exc)
                 return {"bodies": []}
+
+
+def _strip_references(markdown: str) -> str:
+    """Cut a trailing references/bibliography section from scraped Markdown.
+
+    Bibliography DOI lists are not evidence for claims, but models mine them
+    for citation markers pointing at unretrieved papers. Only cuts when the
+    heading sits past the first third (never gut the body on a false match).
+
+    Args:
+        markdown: Scraped Markdown.
+
+    Returns:
+        str: Markdown without the trailing bibliography.
+    """
+    matches = list(
+        re.finditer(
+            r"(?m)^(#{0,3}\s*)?(references|bibliography|works cited|literature cited)\s*$",
+            markdown,
+            re.IGNORECASE,
+        )
+    )
+    if not matches:
+        return markdown
+    cut = matches[-1].start()
+    if cut < len(markdown) // 3:
+        return markdown
+    return markdown[:cut].rstrip() + "\n"
 
 
 def _derive_url(src: SourceRecord) -> str | None:

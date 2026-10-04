@@ -16,7 +16,7 @@ from typing import Any
 
 import yaml
 
-from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState
+from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState, merge_sources
 from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.extraction import GraphStatus
 from knowledge_engine.schemas.source import SourceRecord
@@ -49,11 +49,14 @@ class RenderNode(WorkflowNode):
             dict[str, Any]: Result mapping.
 
         """
-        notes = _complete_footnotes(
+        # Research path keeps filtered-wins semantics; deep branches contribute
+        # their actually-used sources through the add-reducer channel.
+        base = state.get("filtered") or state.get("sources", [])
+        provenance = merge_sources(base, state.get("branch_sources", []))
+        notes = _normalize_citations(
             "\n\n".join(state.get("notes", [])),
-            state.get("filtered") or state.get("sources", []),
+            provenance,
         )
-        provenance = state.get("filtered") or state.get("sources", [])
         title = _title_from(state.get("query", ""))
         artifact = KnowledgeArtifact(
             id=f"{state['thread_id']}",
@@ -109,8 +112,42 @@ def _tldr(notes: str) -> str:
     return (notes.replace("\n", " ").strip() or "")[:200]
 
 
-_FOOTNOTE_REF = re.compile(r"\[\^([A-Za-z0-9_.:-]+)\]")
-_FOOTNOTE_DEF = re.compile(r"(?m)^\[\^([A-Za-z0-9_.:-]+)\]:")
+_FOOTNOTE_REF = re.compile(r"\[\^([A-Za-z0-9_.:/-]+)\]")
+_FOOTNOTE_DEF = re.compile(r"(?m)^\[\^([A-Za-z0-9_.:/-]+)\]:")
+
+
+def _normalize_citations(notes: str, provenance: list[SourceRecord]) -> str:
+    """Rewrite plain [known-id] citations to footnote markers, then complete defs.
+
+    Models alternate between ``[^id]`` and bare ``[id]`` styles run to run;
+    normalizing first makes the published reference format deterministic.
+
+    Args:
+        notes: Synthesized notes.
+        provenance: Provenance records.
+
+    Returns:
+        str: Notes with footnote markers and complete definitions.
+    """
+    known: dict[str, str] = {}
+    for record in provenance:
+        known[record.id] = record.id
+        if record.doi:
+            known[record.doi] = record.id
+
+    def _rewrite(match: re.Match[str]) -> str:
+        sid = known.get(match.group(1))
+        return f"[^{sid}]" if sid is not None else match.group(0)
+
+    notes = re.sub(r"(?<!\^)\[([A-Za-z0-9_.:/-]+)\]", _rewrite, notes)
+    # Split multi-cite brackets ([^a, b] -> [^a] [^b]) so every marker is
+    # individually resolvable by the footnote completion below.
+    notes = re.sub(
+        r"\[\^([A-Za-z0-9_.:/-]+(?:\s*,\s*[A-Za-z0-9_.:/-]+)+)\]",
+        lambda m: " ".join(f"[^{part.strip()}]" for part in m.group(1).split(",")),
+        notes,
+    )
+    return _complete_footnotes(notes, provenance)
 
 
 def _complete_footnotes(notes: str, provenance: list[SourceRecord]) -> str:
@@ -178,6 +215,11 @@ def _resolve_marker(marker: str, titles: dict[str, str]) -> str | None:
     Returns:
         str | None: Matching source id, or None when unresolvable.
     """
+    if marker in titles:
+        return marker
+    # Collapse mechanically doubled prefixes ("10.1/10.1/x" -> "10.1/x") and
+    # match all subsequent forms against the deduped marker.
+    marker = re.sub(r"([^/]+/)\1", r"\1", marker)
     if marker in titles:
         return marker
     low = marker.lower()

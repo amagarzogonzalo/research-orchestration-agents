@@ -30,6 +30,41 @@ logger = logging.getLogger(__name__)
 
 _ESEARCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi"
 _ESUMMARY = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esummary.fcgi"
+_EFETCH = "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi"
+
+# esummary carries no abstracts; one batched efetch covers the top records.
+_EFETCH_ABSTRACT_LIMIT = 5
+
+
+def _parse_abstracts(xml_text: str) -> dict[str, str]:
+    """Parse PMID -> abstract text from an efetch XML payload.
+
+    Args:
+        xml_text: efetch XML response.
+
+    Returns:
+        dict[str, str]: PMID to abstract text.
+    """
+    import xml.etree.ElementTree as ET
+
+    out: dict[str, str] = {}
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError:
+        return out
+    for article in root.iter("PubmedArticle"):
+        pmid_el = article.find("./MedlineCitation/PMID")
+        if pmid_el is None or not pmid_el.text:
+            continue
+        parts = []
+        for node in article.iter("AbstractText"):
+            label = node.get("Label")
+            text = "".join(node.itertext()).strip()
+            if text:
+                parts.append(f"{label}: {text}" if label else text)
+        if parts:
+            out[pmid_el.text.strip()] = "\n".join(parts)
+    return out
 
 
 class PubMedAdapter(SearchPort, FetchPort):
@@ -164,9 +199,36 @@ class PubMedAdapter(SearchPort, FetchPort):
                 )
                 resp.raise_for_status()
                 idlist = [str(i) for i in resp.json().get("esearchresult", {}).get("idlist", [])]
-                return await self._summaries(client, idlist[:limit])
+                records = await self._summaries(client, idlist[:limit])
+                await self._fill_abstracts(client, records)
+                return records
         except httpx.HTTPError as exc:
             raise SearchError(f"PubMed search failed for {query!r}: {exc}") from exc
+
+    async def _fill_abstracts(self, client: httpx.AsyncClient, records: list[SourceRecord]) -> None:
+        """Fill abstracts for the top records via one batched efetch call.
+
+        Best-effort: failures leave abstracts empty rather than failing search.
+
+        Args:
+            client: HTTP client.
+            records: Records to enrich in place.
+        """
+        targets = [r for r in records[:_EFETCH_ABSTRACT_LIMIT] if not r.abstract]
+        if not targets:
+            return
+        try:
+            pmids = [r.id.replace("pubmed:", "") for r in targets]
+            resp = await self._throttled_get(
+                client, _EFETCH, {"db": "pubmed", "id": ",".join(pmids), "retmode": "xml"}
+            )
+            resp.raise_for_status()
+            for pmid, text in _parse_abstracts(resp.text).items():
+                for record in targets:
+                    if record.id == f"pubmed:{pmid}" and text:
+                        record.abstract = text
+        except Exception as exc:  # noqa: BLE001 - abstracts are enrichment, never fatal
+            logger.warning("pubmed efetch abstracts failed: %s", exc)
 
     async def fetch(self, doi: str) -> SourceRecord | None:
         """Resolve a DOI to a PubMed record via a ``[DOI]``-tagged lookup.
