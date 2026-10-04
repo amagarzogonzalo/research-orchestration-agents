@@ -22,9 +22,41 @@ logger = logging.getLogger(__name__)
 
 _RELEVANCE_SYSTEM = (
     "You are a research librarian. Given a research topic and a list of papers, "
-    "decide which papers are directly relevant to the topic. "
+    "decide which papers are directly relevant to the topic. Prefer peer-reviewed "
+    "journal venues and highly-cited primary sources over aggregators, blogs, and "
+    "preprints when both cover the same claim — but keep unique-coverage items. "
     'Reply ONLY with JSON: {"relevant_ids": ["id1", "id2", ...]}. No prose.'
 )
+
+
+def _ledger_line(index: int, src: object) -> str:
+    """Render one ledger line with authority signals.
+
+    Args:
+        index: Ledger position.
+        src: Source record.
+
+    Returns:
+        str: Ledger line.
+    """
+    if isinstance(src, dict):
+        sid = str(src.get("id", ""))
+        title = str(src.get("title", ""))
+        venue = str(src.get("venue") or "")
+        year = str(src.get("year") or "")
+        cites = src.get("citation_count", 0) or 0
+    else:
+        sid = str(getattr(src, "id", ""))
+        title = str(getattr(src, "title", ""))
+        venue = str(getattr(src, "venue", "") or "")
+        year = str(getattr(src, "year", "") or "")
+        cites = getattr(src, "citation_count", 0) or 0
+    meta = ", ".join(part for part in (venue, year) if part)
+    line = f"[{index}] {sid} | {title}"
+    if meta:
+        line += f" | {meta}"
+    line += f" | cited by {cites}"
+    return line
 
 
 class RelevanceNode(WorkflowNode):
@@ -56,7 +88,7 @@ class RelevanceNode(WorkflowNode):
         sources = state.get("sources", [])
         if not sources:
             return {"filtered": []}
-        ledger = "\n".join(f"[{i}] {s.id} | {s.title}" for i, s in enumerate(sources))
+        ledger = "\n".join(_ledger_line(i, s) for i, s in enumerate(sources))
         query = state.get("query", "")
         user = f"Research topic: {query}\n\nPapers:\n{ledger}\n\nRelevant papers:"
         ids: list[str] | None = None

@@ -91,6 +91,27 @@ async def test_relevance_parses_id_in_json() -> None:
     assert _parse_relevant_ids("not json") is None
 
 
+async def test_relevance_ledger_carries_authority_signals() -> None:
+    seen: list[str] = []
+
+    class CaptureProvider(FakeProvider):
+        async def complete(self, req):
+            seen.append(req.messages[-1].content)
+            return await super().complete(req)
+
+    src = SourceRecord(
+        id="s1",
+        title="t",
+        source=SearchSource.OPENALEX,
+        venue="Nature",
+        year=2024,
+        citation_count=13235,
+    )
+    await RelevanceNode(CaptureProvider()).run(await _state(sources=[src]))
+    ledger = seen[0]
+    assert "Nature" in ledger and "2024" in ledger and "13235" in ledger
+
+
 async def test_bodies_fanout_emits_send_per_source() -> None:
     out = await BodiesNode().run(await _state(filtered=[{"id": "a"}, {"id": "b"}]))
     assert hasattr(out, "goto")  # Command(goto=[Send, ...])

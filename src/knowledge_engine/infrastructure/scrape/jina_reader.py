@@ -24,6 +24,7 @@ import httpx
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
+from knowledge_engine.infrastructure.scrape.common import is_transient_http
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 logger = logging.getLogger(__name__)
@@ -76,7 +77,7 @@ class JinaReaderAdapter(ScrapePort):
                 resp.raise_for_status()
                 title, markdown = _parse(resp.text)
         except httpx.HTTPError as exc:
-            raise ScrapeError(f"Jina Reader fetch failed for {url}: {exc}") from exc
+            raise ScrapeError(f"Jina Reader fetch failed for {url}: {exc}", transient=is_transient_http(exc)) from exc
         if not markdown.strip():
             raise ScrapeError(f"Jina Reader returned no content for {url}")
         return DocumentBody(

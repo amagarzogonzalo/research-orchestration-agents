@@ -3,13 +3,12 @@
     "crossref:10.1007/978-1-0716-0687-2_14",
     "crossref:10.1007/978-1-0716-0687-2_15",
     "crossref:10.1007/978-1-0716-0822-7_6",
-    "crossref:10.1038/nmeth.3301",
-    "crossref:10.1101/741322"
+    "crossref:10.1038/nmeth.3301"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 12,
-    "paragraphs": 11,
+    "list_items": 9,
+    "paragraphs": 12,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -21,11 +20,11 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "ced1848060c1adbd",
+  "hash": "ab68c080e8fc3653",
   "headings": [
-    "2:overview-of-crispr-off-target-detection-methods",
-    "2:safety-advances-and-nuclease-engineering",
-    "2:open-questions",
-    "2:practical-takeaways"
+    "2:mechanisms-and-causes-of-crispr-off-target-activity",
+    "2:detection-and-profiling-methods",
+    "2:safety-advances-and-mitigation-strategies",
+    "2:open-questions"
   ]
 }

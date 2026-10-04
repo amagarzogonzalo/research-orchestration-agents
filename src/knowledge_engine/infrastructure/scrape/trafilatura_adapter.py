@@ -9,7 +9,7 @@ import httpx
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
-from knowledge_engine.infrastructure.scrape.common import fallback_title
+from knowledge_engine.infrastructure.scrape.common import fallback_title, is_transient_http
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 
@@ -44,7 +44,11 @@ class TrafilaturaAdapter(ScrapePort):
                 resp = await client.get(url)
                 resp.raise_for_status()
             html = resp.text
-        except Exception as exc:  # noqa: BLE001 - network + trafilatura import
+        except ImportError as exc:
+            raise ScrapeError(f"trafilatura not installed for {url}: {exc}") from exc
+        except httpx.HTTPError as exc:
+            raise ScrapeError(f"Trafilatura fetch failed for {url}: {exc}", transient=is_transient_http(exc)) from exc
+        except Exception as exc:  # noqa: BLE001 - unexpected fetch failure
             raise ScrapeError(f"Trafilatura fetch failed for {url}: {exc}") from exc
 
         try:

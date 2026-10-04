@@ -1,21 +1,17 @@
 {
   "citations": [
-    "biorxiv:10.64898/2026.09.18.721350",
-    "crossref:10.1002/9781394374717.fmatter",
     "crossref:10.59350/pn1ra-vpc97",
     "doaj:5c3e3ea8e8b2469e8706f069570090a8",
+    "europe_pmc:MED:42270954",
     "europe_pmc:MED:42297857",
+    "europe_pmc:MED:42591399",
     "europe_pmc:MED:42658861",
-    "huggingface_papers:2412.11919",
-    "huggingface_papers:2505.04253",
-    "huggingface_papers:2509.21875",
-    "huggingface_papers:2512.19134",
-    "huggingface_papers:2603.20309"
+    "medrxiv:10.64898/2026.09.17.26363303"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 9,
-    "paragraphs": 13,
+    "list_items": 11,
+    "paragraphs": 14,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -27,11 +23,12 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "a0fe19da54ef1e5a",
+  "hash": "ac20231cd432059c",
   "headings": [
-    "2:mechanisms-of-hallucination-reduction-in-rag",
-    "2:adaptive-retrieval-and-uncertainty-quantification",
-    "2:domain-specific-applications-and-safety-constraints",
-    "2:open-questions"
+    "2:foundations-of-hallucination-in-large-language-models",
+    "2:mechanism-of-retrieval-augmented-generation-rag",
+    "2:domain-specific-applications-and-safety-impacts",
+    "2:open-questions",
+    "2:practical-takeaways"
   ]
 }

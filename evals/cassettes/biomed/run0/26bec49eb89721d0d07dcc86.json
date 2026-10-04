@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://arxiv.org/abs/2608.09900"
   },
-  "recorded_at": "2026-10-04T12:26:59Z",
+  "recorded_at": "2026-10-04T13:27:45Z",
   "response": {
-    "captured_at": "2026-10-04T12:26:59.866839+00:00",
+    "captured_at": "2026-10-04T13:27:45.782455+00:00",
     "char_count": 2790,
     "crawl_method": "trafilatura",
     "markdown": "# Computer Science > Computation and Language\n\n\\[Submitted on 10 Aug 2026 (v1), last revised 11 Aug 2026 (this version, v2)\\]\n\n# Title:Decoding-Level Taboo: A Diagnostic Stress Test for LLM Robustness\n\nView PDF HTML (experimental)\nAbstract:Large language model evaluations typically focus on performance under nominal conditions, creating an illusion of capability where models comfortably walk a narrow, highly optimized generation corridor. In real-world deployments, however, complex system prompts, safety guardrails, and structural constraints continuously force models off this nominal path, driving a divergence between benchmark scores and deployment performance. To address this issue, we introduce Decoding-Level Taboo, a zero-prompt diagnostic stress test that intervenes directly in logit space at runtime, forcing models out of their nominal paths. By dynamically masking primary candidate tokens at word boundaries, Taboo forces machine circumlocution.\n\nEvaluating Taboo across several open-weight model families reveals that off-path robustness is heavily influenced by both parameter scale and post-training instruction alignment, with robustness generally improving with model size and alignment. Beyond the results presented in this paper, Taboo provides a novel primitive for generating diverse synthetic datasets, stress-testing runtime safety guardrails, and auditing model reliability prior to real-world deployment.\n\n## Submission history\n\nFrom: Javier Conde \\[view email\\]\n**\\[v1\\]**Mon, 10 Aug 2026 17:47:24 UTC (153 KB)\n\n**\\[v2\\]**Tue, 11 Aug 2026 18:46:25 UTC (153 KB)\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
@@ -13,5 +13,5 @@
     "url": "https://arxiv.org/abs/2608.09900"
   },
   "usage": {},
-  "wall_s": 0.955
+  "wall_s": 3.128
 }

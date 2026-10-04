@@ -81,8 +81,10 @@ def _uncited(artifact: str, expected: bool = True, **_: Any) -> list[str]:
     body = re.sub(r"^#{1,6} .*$", "", body, flags=re.MULTILINE)
     body = _FOOTNOTE_DEF_BLOCK.sub("", body)
     for i, para in enumerate(p for p in re.split(r"\n\s*\n", body) if p.strip()):
-        risky = re.search(r"\b\d{2,}(\.\d+)?%?\b", para) or '"' in para
-        cited = re.search(r"\[\^|\((?:src|source|cite):|\]\(https?://", para)
+        # Interrogative sentences ask; they do not assert (Open Questions).
+        declarative = " ".join(s for s in re.split(r"(?<=[?!])\s+", para) if not s.strip().endswith("?"))
+        risky = re.search(r"\b\d{2,}(\.\d+)?%?\b", declarative) or '"' in declarative
+        cited = re.search(r"\[\^|\((?:src|source|cite):|\]\(https?://", declarative)
         if risky and not cited:
             out.append(f"paragraph {i} makes a quantitative/quoted claim with no citation")
     return out
