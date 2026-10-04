@@ -58,7 +58,10 @@ class JudgeResult:
         return True, f"median {self.median} (spread {self.spread})"
 
 
-def _parse(text: str) -> dict[str, Any] | None:
+def _parse(text: str | None) -> dict[str, Any] | None:
+    # Free-tier models sometimes return empty content: no verdict, not a crash.
+    if not text:
+        return None
     text = re.sub(r"^```(?:json)?|```$", "", text.strip(), flags=re.MULTILINE).strip()
     try:
         return json.loads(text)
@@ -85,7 +88,8 @@ def score(
             response_format={"type": "json_object"},
             seed=1000 + i,
         )
-        parsed = _parse(resp["choices"][0]["message"]["content"])
+        message = ((resp.get("choices") or [{}])[0].get("message") or {})
+        parsed = _parse(message.get("content"))
         if parsed and isinstance(parsed.get("overall"), (int, float)):
             res.scores.append(float(parsed["overall"]))
             res.detail.append(parsed)

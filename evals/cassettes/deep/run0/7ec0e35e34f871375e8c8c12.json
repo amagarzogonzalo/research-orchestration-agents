@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.5040/bci-0kgi.ch-1"
+  },
+  "recorded_at": "2026-10-04T09:56:55Z",
+  "response": {
+    "captured_at": "2026-10-04T09:56:55.293420+00:00",
+    "char_count": 848,
+    "crawl_method": "trafilatura",
+    "markdown": "Or\n\nDon't have a personal account yet? Sign up now.\n\njohndoe@gmail.com\n\nAre you sure you want to reset the form?\n\nYour mail has been sent successfully\n\nAre you sure you want to remove the alert?\n\nYour session is about to expire! You will be logged out in\n\nDo you wish to stay logged in?\n\nWe're sorry, but that page can’t be found.\n\nPlease visit our Home page or try using the Search, Explore or Browse links above to find what you are looking for.\n\nYour mail has been sent successfully\n\nAre you sure you want to remove the page from \"My Saved Items\"?\n\nThis item is only available to the members of institutions that have purchased access. If you belong to such an institution please Log In\n\nUse your personal account to save 'favourite' articles, chapters and books. Sign In now\n\nDon't have a personal account yet? Sign Up now\n\n$articlemlacitations",
+    "title": "bci-0kgi.ch-1",
+    "url": "https://doi.org/10.5040/bci-0kgi.ch-1"
+  },
+  "usage": {},
+  "wall_s": 14.156
+}

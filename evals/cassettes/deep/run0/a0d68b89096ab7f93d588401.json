@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.2139/ssrn.5557161"
+  },
+  "recorded_at": "2026-10-04T09:57:53Z",
+  "response": {
+    "captured_at": "2026-10-04T09:57:53.808926+00:00",
+    "char_count": 272,
+    "crawl_method": "jina",
+    "markdown": "![Image 1: Icon for papers.ssrn.com](https://papers.ssrn.com/favicon.ico)\n\n## papers.ssrn.com\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.2139/ssrn.5557161"
+  },
+  "usage": {},
+  "wall_s": 13.131
+}

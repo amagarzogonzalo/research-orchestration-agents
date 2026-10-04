@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-04T09:57:37Z",
+  "request": {
+    "max_tokens": 400,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What are hallucinations in the context of large language models, and why are they problematic?\n\nPapers:\n[0] crossref:10.1016/b978-0-443-33592-1.00007-3 | Trustworthiness of large language models: hallucinations\n[1] crossref:10.21437/interspeech.2025-324 | Teaching Audio-Aware Large Language Models What Does Not Hear: Mitigating Hallucinations through Synthesized Negative Samples\n[2] crossref:10.2139/ssrn.5557161 | Accuracy and Fluency: Understanding Hallucinations in Large Language Models\n[3] crossref:10.2139/ssrn.4676180 | Hallucinations and Emergence in Large Language Models\n[4] crossref:10.31979/etd.y2dz-empz | Structured Chain-of-Thought Reasoning to Mitigate Hallucinations in Large Language Models\n[5] europe_pmc:MED:42462047 | An Acceptance Criteria Framework for Determining the Implementation Fit of Custom Large Language Models in Public Health Interventions.\n[6] europe_pmc:MED:42748119 | A practical risk framework for large language model use in life science research.\n[7] europe_pmc:MED:42556102 | Artificial Intelligence Hallucinations in Dentistry: Implications and Safeguards for Clinical Practice.\n[8] europe_pmc:MED:42651021 | Comparative Evaluation of ChatGPT-5.2, Claude Sonnet 4.5, and DeepSeek-V3.2 for Rosacea-Related Information: Accuracy, Reliability, Readability, and Reference Hallucinations.\n[9] europe_pmc:MED:42661809 | Roadmap for using large language models (LLMs) to accelerate cross-disciplinary research with an example from computational biology.\n[10] huggingface_papers:2509.04664 | Why Language Models Hallucinate\n[11] huggingface_papers:2410.16251 | Can Knowledge Editing Really Correct Hallucinations?\n[12] huggingface_papers:2309.11495 | Chain-of-Verification Reduces Hallucination in Large Language Models\n[13] huggingface_papers:2410.11779 | MLLM can see? Dynamic Correction Decoding for Hallucination Mitigation\n[14] huggingface_papers:2604.15574 | Why Fine-Tuning Encourages Hallucinations and How to Fix It\n[15] biorxiv:10.64898/2026.09.18.721350 | BELL: Biomodel Evidence and LLM-based Logic\n[16] biorxiv:10.64898/2026.09.14.751505 | Prediction of pH-sensing histidine residues in human cells\n[17] biorxiv:10.64898/2026.09.17.752258 | miRstring: An RNA language model enables mature miRNA decoding and artificial small RNA design across species\n[18] medrxiv:10.64898/2026.09.17.26363303 | LLM-enabled Natural History Study Analysis to Support Rare Disease Research\n[19] medrxiv:10.64898/2026.09.17.26363298 | Impact of mass oral cholera vaccination in an endemic area of the Democratic Republic of the Congo: a surveillance-based counterfactual modeling analysis\n[20] medrxiv:10.64898/2026.09.17.26363314 | Large language model linguistic perplexity in childhood onset psychosis: unique features and developmental trends\n[21] medrxiv:10.64898/2026.09.16.26363270 | Time-to-Statin Prescription for Primary Atherosclerotic Cardiovascular Disease Prevention in a Lung Cancer Screening Program in Missouri: A Retrospective Cohort Study\n[22] medrxiv:10.64898/2026.09.18.26363412 | Physiological variability in key Alzheimer's biomarkers in amyloid-positive clinical trial cohorts and the mechanistic basis of biomarker ratios\n\nRelevant papers:",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"What are hallucinations in the context of large language models, and why are they problematic?\" So we need papers that discuss hallucinations in LLMs, definition, causes, problems. Likely papers 0, 2, 3, 4, 10, 11, 12, 13, 14. Also maybe 1? It's about mitigating hallucinations via audio. That is relevant. 5-9 are about applications, not definition. 15-22 are biomedical, not about hallucinations. So relevant IDs: 0,1,2,3,4,10,11,12,13,14. Also maybe 6? It's risk framework for LLM use in life science research; might mention hallucinations. But not directly about hallucinations. The question: \"What are hallucinations in the context of large language models, and why are they problematic?\" So we need papers that define hallucinations and discuss problems. 6 might discuss risk but not definition. I'd include 6? Might be borderline. But safer to include only those that explicitly discuss hallucinations. So list: 0,1,2,3,4,10,11,12,13,14. Also 5? No. 7? It's about hallucinations in dentistry, but still about hallucinations. That might be relevant. It discusses implications and safeguards. So include 7. 8? It's about reference hallucinations. That is relevant. So include 8. 9? Roadmap for using LLMs, maybe mention hallucinations. But not sure. Might include. But keep to those that clearly discuss hallucinations. So final list: 0,1,2,3,4,7,8,10,11,12,13,14. Also 6? Might mention risk. But I'll not include. So output",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791107856,
+    "id": "chatcmpl-62685116-cb07-4b59-b661-c6917540841c",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_851252edc2",
+    "usage": {
+      "completion_time": 0.43607843,
+      "completion_tokens": 400,
+      "completion_tokens_details": {
+        "reasoning_tokens": 398
+      },
+      "prompt_time": 0.057082706,
+      "prompt_tokens": 991,
+      "prompt_tokens_details": null,
+      "queue_time": 0.21992226,
+      "total_time": 0.493161136,
+      "total_tokens": 1391
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m435hx9ve0f8hghw3sbkxd1n",
+      "seed": 2087756855
+    }
+  },
+  "usage": {
+    "completion_time": 0.43607843,
+    "completion_tokens": 400,
+    "completion_tokens_details": {
+      "reasoning_tokens": 398
+    },
+    "prompt_time": 0.057082706,
+    "prompt_tokens": 991,
+    "prompt_tokens_details": null,
+    "queue_time": 0.21992226,
+    "total_time": 0.493161136,
+    "total_tokens": 1391
+  },
+  "wall_s": 1.83
+}

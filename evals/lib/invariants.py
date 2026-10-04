@@ -66,6 +66,13 @@ def _require(artifact: str, expected: list[str], **_: Any) -> list[str]:
     ]
 
 
+# A footnote definition plus its wrapped continuation lines: models wrap long
+# reference lines, and the continuations (years, URLs) must not scan as claims.
+_FOOTNOTE_DEF_BLOCK = re.compile(
+    r"(?m)^\[\^[A-Za-z0-9_.:-]+\]:.*(?:\n(?!\s*(?:$|#{1,6}\s+|[-*+]\s+|\[\^)).*)*"
+)
+
+
 @check("no_uncited_claims")
 def _uncited(artifact: str, expected: bool = True, **_: Any) -> list[str]:
     """Paragraphs with a number or a quoted span must carry a citation."""
@@ -76,7 +83,7 @@ def _uncited(artifact: str, expected: bool = True, **_: Any) -> list[str]:
     body = re.sub(r"```.*?```", "", body, flags=re.DOTALL)
     # A year in a heading is not an uncited statistic.
     body = re.sub(r"^#{1,6} .*$", "", body, flags=re.MULTILINE)
-    body = re.sub(r"^\[\^[^\]]+\]:.*$", "", body, flags=re.MULTILINE)
+    body = _FOOTNOTE_DEF_BLOCK.sub("", body)
     for i, para in enumerate(p for p in re.split(r"\n\s*\n", body) if p.strip()):
         risky = re.search(r"\b\d{2,}(\.\d+)?%?\b", para) or '"' in para
         cited = re.search(r"\[\^|\((?:src|source|cite):|\]\(https?://", para)

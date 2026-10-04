@@ -139,6 +139,7 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
         notes.append(f"[{cid}] no snapshot yet — run with --accept to create one")
 
     jcfg = case.get("judge")
+    judge_criteria: list[dict[str, Any]] = []
     if jcfg and rubric:
         cassette, model = runs[0]["cassette"], judge_model()
         # Replay mode never calls the network (cassette.chat replays judge outputs),
@@ -165,6 +166,16 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
                 res = None
             if res is not None:
                 ok, msg = res.passes(float(jcfg.get("min_score", 7)))
+                for sample in res.detail:
+                    for criterion in sample.get("criteria", []):
+                        judge_criteria.append(
+                            {
+                                "name": criterion.get("name", "?"),
+                                "score": criterion.get("score", 0),
+                                "why": str(criterion.get("why", ""))[:160],
+                            }
+                        )
+                    break  # first sample is representative; spread is in msg
             else:
                 ok, msg = False, "no verdict"
             if jcfg.get("advisory"):
@@ -181,6 +192,9 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
         "notes": notes,
         "digest": current,
         "usage": runs[0]["usage"],
+        "budget": case.get("budget", {}),
+        "artifact_chars": len(runs[0]["artifact"]),
+        "judge_criteria": judge_criteria,
     }
 
 
@@ -216,10 +230,25 @@ def main() -> int:
 
     failed = [r for r in results if not r["ok"]]
     for r in results:
+        usage = r.get("usage", {})
+        budget = r.get("budget", {})
+        digest = r.get("digest", {})
         print(
             f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']}  "
-            f"({r.get('usage', {}).get('total_tokens', 0)} tok)"
+            f"({usage.get('total_tokens', 0)} tok)"
         )
+        print(
+            f"      cost: {usage.get('total_tokens', 0)}"
+            f"/{budget.get('max_total_tokens', '?')} tok, "
+            f"{usage.get('calls', 0)}/{budget.get('max_model_calls', '?')} calls"
+        )
+        print(
+            f"      artifact: {r.get('artifact_chars', 0)} chars, "
+            f"{len(digest.get('headings', []))} sections, "
+            f"{len(digest.get('citations', []))} citations"
+        )
+        for criterion in r.get("judge_criteria", []):
+            print(f"      judge {criterion['name']}: {criterion['score']} — {criterion['why']}")
         for n in r.get("notes", []):
             print(f"      note: {n}")
         for f in r["failures"]:

@@ -1,0 +1,87 @@
+{
+  "recorded_at": "2026-10-04T10:05:13Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a senior research synthesizer. Produce authoritative, grounded notes that synthesize the sources for the given research question. Structure the notes with ## (level-2) section headings, ending with a ## Open questions section naming evidence gaps and what would settle them. Cite every factual claim with an inline footnote marker using the FULL source ID exactly as given in Sources, e.g. \"RAG grounds generation in retrieved passages [^openalex:W123].\" At the end, add one definition line per cited source, e.g. \"[^openalex:W123]: Paper Title Here. Labs preprint servers (arXiv, bioRxiv) are primary; journals are primary; aggregators are secondary — say which is which. Never shorten or invent source IDs, never use bare [Title] brackets, never use (Author, Year) style. When sources cite each other (see 'cited in-set by'), say so: agreement across independent sources is stronger evidence. Cover every distinct option the sources support — competing approaches, vendors, and providers each get their own treatment with head-to-head trade-offs, never just the most popular one. End with a ## Practical takeaways section: concrete recommendations (use X when Y), trade-offs, and what to try first — every recommendation grounded in a cited source.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Synthesize the research findings into structured notes for query:\nCompare retrieval-augmented generation with long-context models for reducing hallucinations\n\nSources:\n[crossref:10.31979/etd.hn7u-hp8x]\netd.hn7u-hp8x\n## Publication Date\n\nSpring 2026\n\n## Degree Type\n\nMaster's Project\n\n## Degree Name\n\nMaster of Science in Computer Science (MSCS)\n\n## Department\n\nComputer Science\n\n## First Advisor\n\nMike Wu\n\n## Second Advisor\n\nAmith Kamath Belman\n\n## Third Advisor\n\nNavrati Saxena\n\n## Keywords\n\nGraphRAG, KnowledgeGraphs, LargeLanguageModels, Multi-Hop Question Answering, Query Decomposition, Retrieval-Augmented Generatio\n\n## Abstract\n\nMulti-hop questions requiring evidence across multiple documents challenge standard Retrieval-Augmented Generation (RAG), as single vector retrieval misses cross-document connections. This research investigates whether multi-signal graph enhanced retrieval can improve multi-hop QA accuracy. It presents LOOM-RAG (Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation), a graph-enhanced RAG system evaluated on the MultiHop-RAG benchmark. LOOM- RAG builds a knowledge graph with entities, typed relations, and atomic propositions, then decomposes each query into sub-questions and gathers evidence from four retrieval signals. These signals are fused via weighted combination and Reciprocal Rank Fusion, achieving 87.1% QA accuracy, a 26% improvement over Baseline RAG. An ablation study showed the multi-signal retrieval pipeline contributed 48% of the improvement, while the graph-enriched prompt contributed 52%.\n\n## Recommended Citation\n\nFonseca, Aldridge, \"LOOM-RAG: Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation for Reducing Hallucinations in LLMs\" (2026). *Master's Projects*.  1782.\n    \n\nDOI: https://doi.org/10.31979/etd.hn7u-hp8x\n        \n\nhttps://scholarworks.sjsu.edu/etd\\_projects/1782\n---\n[crossref:10.1115/detc2025-169730]\nJust a moment...\n![Image 1: Icon for asmedigitalcollection.asme.org](https://asmedigitalcollection.asme.org/favicon.ico)\n\n## asmedigitalcollection.asme.org\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n---\n[crossref:10.21203/rs.3.rs-10186581/v1]\nv1\nLarge Language Models (LLMs) deployed in pharmaceutical question-answering applications frequently generate clinically dangerous hallucinations — factually incorrect outputs that pose serious patient-safety risks. We propose and evaluate a Retrieval-Augmented Generation (RAG) pipeline that grounds LLM responses in a curated, citation-verified pharmaceutical knowledge base. The system combines dense passage retrieval using Sentence-BERT embeddings, FAISS vector indexing, cross-encoder re-ranking, and Llama 3.2 generation. Evaluated on a purpose-built dataset of 150 drug-related question–answer pairs spanning ten commonly used medications and multiple information categories, our RAG system reduces the hallucination rate from 47.8% to 12.3% — a 74.3% relative reduction — while improving Faithfulness from 0.52 to 0.87 and Factual Accuracy from 0.54 to 0.89. A clinical case study on warfarin–ibuprofen interaction demonstrates that RAG responses provide verifiable, citation-grounded information where the baseline produces potentially life-threatening misinformation. These results establish retrieval-augmented architectures as the preferred approach for safety-critical pharmaceutical AI and provide an open, reproducible evaluation framework.",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "gemini/gemini-flash-lite-latest",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "## Retrieval-Augmented Generation vs. Long-Context Models for Reducing Hallucinations\n\nHallucinations in Large Language Models (LLMs) pose significant risks, particularly in domains requiring high factual accuracy or safety compliance. To mitigate this, system designers choose between two primary architectural paradigms: Retrieval-Augmented Generation (RAG) and long-context LLMs. \n\n## Architectural Foundations of RAG\n\nRetrieval-augmented generation mitigates hallucinations by dynamically fetching external knowledge at inference time and injecting it into the LLM context window. \n\n* **Standard and Advanced RAG Pipelines:** Standard RAG uses vector similarity search (such as FAISS indexing with Sentence-BERT embeddings) to retrieve relevant documents [^crossref:10.21203/rs.3.rs-10186581/v1]. Advanced configurations incorporate cross-encoder re-ranking to prioritize high-precision context before generation [^crossref:10.21203/rs.3.rs-10186581/v1].\n* **Graph-Enhanced RAG:** Standard single-vector retrieval often struggles with multi-hop questions requiring evidence distributed across multiple documents [^crossref:10.31979/etd.hn7u-hp8x]. Systems like LOOM-RAG (Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation) construct knowledge graphs containing entities, typed relations, and atomic propositions [^crossref:10.31979/etd.hn7u-hp8x]. By decomposing queries into sub-questions and fusing evidence from multiple retrieval signals using Reciprocal Rank Fusion and weighted combinations, graph-enhanced architectures achieve high multi-hop QA accuracy (87.1% on the MultiHop-RAG benchmark, representing a 26% improvement over baseline RAG) [^crossref:10.31979/etd.hn7u-hp8x]. Ablation studies show that the multi-signal retrieval pipeline contributes roughly 48% of these accuracy gains, while graph-enriched prompts contribute 52% [^crossref:10.31979/etd.hn7u-hp8x].\n\n## Performance and Impact on Hallucinations\n\n* **Pharmaceutical Domain Efficacy:** In high-stakes, safety-critical applications like pharmaceutical question-answering, baseline LLMs frequently generate clinically dangerous, factually incorrect outputs [^crossref:10.21203/rs.3.rs-10186581/v1]. Deploying a RAG pipeline utilizing dense passage retrieval and Llama 3.2 reduces the hallucination rate from 47.8% down to 12.3%—a 74.3% relative reduction [^crossref:10.21203/rs.3.rs-10186581/v1]. \n* **Metrics Improvements:** Grounding generation in a curated, citation-verified knowledge base improves Faithfulness scores from 0.52 to 0.87 and Factual Accuracy from 0.54 to 0.89 [^crossref:10.21203/rs.3.rs-10186581/v1]. For instance, regarding critical drug-drug interactions (such as warfarin-ibuprofen), baseline models can produce life-threatening misinformation, whereas RAG systems yield verifiable, citation-grounded outputs [^crossref:10.21203/rs.3.rs-10186581/v1].\n\n## Open Questions\n\n* **Long-Context Head-to-Head Comparison:** The provided sources do not include direct performance or hallucination benchmarks comparing RAG directly against native long-context models (e.g., million-token context windows) on the same safety-critical datasets. What would settle this is a controlled comparative study measuring factual accuracy, latency, and cost per query between native long-context inference and multi-signal RAG.\n* **Scaling and Cost Dynamics:** It remains unclear at what corpus size or query frequency the computational cost and latency overhead of advanced graph-enhanced retrieval pipelines (like LOOM-RAG) surpass the token-processing costs of long-context models. Direct cost-efficiency and scaling evaluations would resolve this gap.\n\n[^crossref:10.31979/etd.hn7u-hp8x]: Fonseca, Aldridge. LOOM-RAG: Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation for Reducing Hallucinations in LLMs. Master's Project, Department of Computer Science, San Jose State University, Spring 2026. Institutional repository / academic master's project (primary).\n[^crossref:10.21203/rs.3.rs-10186581/v1]: Pharmaceutical Question-Answering Application Research Group. Large Language Models (LLMs) deployed in pharmaceutical question-answering applications frequently generate clinically dangerous hallucinations... Research Square preprint server (primary).\n\n## Practical Recommendations & Trade-offs\n\n* **Use RAG for Safety-Critical Domains:** Deploy Retrieval-Augmented Generation (such as FAISS indexing coupled with cross-encoder re-ranking and Llama 3.2) when deploying applications in safety-critical sectors like healthcare and pharmaceuticals, as it demonstrably reduces hallucination rates and provides verifiable citations [^crossref:10.21203/rs.3.rs-10186581/v1].\n* **Implement Graph-Enhanced RAG for Multi-Hop Queries:** When user inquiries require synthesizing evidence across disjoint documents, upgrade standard vector retrieval to graph-enhanced systems (e.g., LOOM-RAG) that utilize query decomposition, entity/relation knowledge graphs, and multi-signal fusion [^crossref:10.31979/etd.hn7u-hp8x]. \n* **What to Try First:** Begin with a robust baseline RAG pipeline leveraging dense passage retrieval (Sentence-BERT with vector indexing) and a cross-encoder re-ranker [^crossref:10.21203/rs.3.rs-10186581/v1]. If evaluation shows failures in multi-document reasoning or complex synthesis, layer on ontology-orchestrated knowledge graphs and multi-signal reciprocal rank fusion [^crossref:10.31979/etd.hn7u-hp8x].",
+          "function_call": null,
+          "images": [],
+          "provider_specific_fields": {
+            "thought_signatures": [
+              "EmAKXgFpFH0TbNWIfF7n2HXDSnSETdD+MvYxj9oID4w5gW01fpIv1A3ACSz8KHS2hLSTvGJIMq/0jHBvgYFQYy1WdmMyk3cEkUtDU993KaAOA19ATHG4oQ86j20r1DrbuTg="
+            ]
+          },
+          "role": "assistant",
+          "thinking_blocks": [],
+          "tool_calls": null
+        },
+        "provider_specific_fields": {
+          "native_finish_reason": "STOP"
+        }
+      }
+    ],
+    "created": 1791108309,
+    "id": "1STCatGPHZGN28oPtKbL-Qg",
+    "model": "gemini-3.5-flash-lite",
+    "object": "chat.completion",
+    "service_tier": "default",
+    "system_fingerprint": null,
+    "usage": {
+      "cache_read_input_tokens": null,
+      "completion_tokens": 1417,
+      "completion_tokens_details": {
+        "text_tokens": 1417
+      },
+      "prompt_tokens": 1143,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cached_tokens": null,
+        "image_tokens": null,
+        "text_tokens": 1143,
+        "video_tokens": null
+      },
+      "total_tokens": 2560
+    },
+    "vertex_ai_citation_metadata": [],
+    "vertex_ai_grounding_metadata": [],
+    "vertex_ai_safety_results": [],
+    "vertex_ai_url_context_metadata": []
+  },
+  "usage": {
+    "cache_read_input_tokens": null,
+    "completion_tokens": 1417,
+    "completion_tokens_details": {
+      "text_tokens": 1417
+    },
+    "prompt_tokens": 1143,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cached_tokens": null,
+      "image_tokens": null,
+      "text_tokens": 1143,
+      "video_tokens": null
+    },
+    "total_tokens": 2560
+  },
+  "wall_s": 4.677
+}

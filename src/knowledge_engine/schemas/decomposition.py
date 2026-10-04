@@ -12,13 +12,13 @@ from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
 
-MAX_DECOMPOSE_DEPTH = 2
-"""Deepest sub-query depth (root plans depth-1 workers; they may plan depth-2)."""
+MAX_DECOMPOSE_DEPTH = 3
+"""Deepest sub-query depth (root plans depth-1 workers; they may plan depth-2/3)."""
 
-MAX_SUBQUERIES = 5
+MAX_SUBQUERIES = 7
 """Fan-out cap per decomposition round (shared-budget discipline)."""
 
-MAX_DEEP_ROUNDS = 2
+MAX_DEEP_ROUNDS = 3
 """Replan-loop cap: decompose → branches → aggregate may repeat this often."""
 
 MAX_BRANCH_LLM_CALLS = 12

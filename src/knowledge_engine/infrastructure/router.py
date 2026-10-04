@@ -11,7 +11,7 @@ import inspect
 import logging
 from typing import TYPE_CHECKING, Any
 
-from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential, wait_random
 
 from knowledge_engine.core.exceptions import (
     ProviderExhausted,
@@ -163,16 +163,21 @@ class FallbackRouter(ProviderPort):
                     result = await self._retried_call(adapter, req)
                     await self._breakers[adapter.name].record_success()
                     return result
-                except _TRANSIENT as exc:
-                    logger.warning("provider %s transient failure: %s", adapter.name, exc)
-                    await self._breakers[adapter.name].record_failure()
+                except Exception as exc:  # noqa: BLE001 - cascade survives any adapter failure
+                    # Transient failures trip the breaker; config/unknown errors
+                    # just skip to the next adapter (retrying a 404 is waste).
+                    if isinstance(exc, _TRANSIENT):
+                        logger.warning("provider %s transient failure: %s", adapter.name, exc)
+                        await self._breakers[adapter.name].record_failure()
+                    else:
+                        logger.warning("provider %s failed, failing over: %s", adapter.name, exc)
                     continue
             raise ProviderExhausted(
                 f"all providers failed for affinity={req.affinity!s}; last={last.name if last else None}"
             )
 
     @retry(
-        wait=wait_exponential(multiplier=1, max=10),
+        wait=wait_exponential(multiplier=1, max=10) + wait_random(0, 1),
         stop=stop_after_attempt(3),
         retry=retry_if_exception(_is_transient),
         reraise=True,
@@ -209,13 +214,14 @@ class FallbackRouter(ProviderPort):
                 continue
             try:
                 return await self._extract_retried(adapter, req, response_model)
-            except _TRANSIENT:
-                await self._breakers[adapter.name].record_failure()
+            except Exception as exc:  # noqa: BLE001 - cascade survives any adapter failure
+                if isinstance(exc, _TRANSIENT):
+                    await self._breakers[adapter.name].record_failure()
                 continue
         raise ProviderExhausted("no provider served extraction")
 
     @retry(
-        wait=wait_exponential(multiplier=1, max=10),
+        wait=wait_exponential(multiplier=1, max=10) + wait_random(0, 1),
         stop=stop_after_attempt(3),
         retry=retry_if_exception(_is_transient),
         reraise=True,

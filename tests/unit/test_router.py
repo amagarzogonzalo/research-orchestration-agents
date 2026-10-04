@@ -57,6 +57,37 @@ async def test_router_exhausts_all_providers() -> None:
         await router.complete(_req(Affinity.MICRO))
 
 
+class ConfigErrorAdapter(BaseProviderAdapter):
+    """Non-transient failure (bad model id, auth): must fail over, not propagate."""
+
+    def __init__(self, name: str) -> None:
+        self.name = name
+        self.affinity = None
+        self.calls = 0
+
+    async def complete(self, req: ChatRequest) -> ChatResult:
+        self.calls += 1
+        raise RuntimeError(f"{self.name} misconfigured")
+
+    async def extract(self, req, response_model):
+        return None
+
+
+async def test_router_fails_over_on_non_transient_error() -> None:
+    primary = ConfigErrorAdapter("Groq")
+    secondary = FakeAdapter("OpenRouter", affinity=Affinity.FALLBACK)
+    router = FallbackRouter([primary, secondary], limiter=TokenBucketLimiter(rc=None))
+    res = await router.complete(_req(Affinity.MICRO))
+    assert res.provider == "OpenRouter"
+    assert primary.calls == 1  # no wasteful retries on config errors
+
+
+async def test_router_exhausts_when_all_misconfigured() -> None:
+    router = FallbackRouter([ConfigErrorAdapter("Groq")], limiter=TokenBucketLimiter(rc=None))
+    with pytest.raises(ProviderExhausted):
+        await router.complete(_req(Affinity.MICRO))
+
+
 async def test_circuit_breaker_skips_sick_provider() -> None:
     primary = FakeAdapter("Groq", fail=True, affinity=Affinity.MICRO)
     secondary = FakeAdapter("OpenRouter", affinity=Affinity.FALLBACK)
