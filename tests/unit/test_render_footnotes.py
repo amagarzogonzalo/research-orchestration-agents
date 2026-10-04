@@ -69,6 +69,15 @@ def test_multi_cite_brackets_split() -> None:
     assert "[^openalex:W1]:" in out and "[^openalex:W2]:" in out
 
 
+def test_multi_cite_with_repeated_carets_split() -> None:
+    from knowledge_engine.orchestration.nodes.render import _normalize_citations
+
+    prov = [_src("openalex:W1", "A"), _src("openalex:W2", "B")]
+    out = _normalize_citations("Claim [^openalex:W1, ^openalex:W2].", prov)
+    assert "[^openalex:W1] [^openalex:W2]" in out
+    assert "[^openalex:W1]:" in out and "[^openalex:W2]:" in out
+
+
 def test_plain_bracket_cites_normalize_to_footnotes() -> None:
     from knowledge_engine.orchestration.nodes.render import _normalize_citations
 

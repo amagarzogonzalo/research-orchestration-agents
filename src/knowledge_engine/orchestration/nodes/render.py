@@ -140,11 +140,11 @@ def _normalize_citations(notes: str, provenance: list[SourceRecord]) -> str:
         return f"[^{sid}]" if sid is not None else match.group(0)
 
     notes = re.sub(r"(?<!\^)\[([A-Za-z0-9_.:/-]+)\]", _rewrite, notes)
-    # Split multi-cite brackets ([^a, b] -> [^a] [^b]) so every marker is
-    # individually resolvable by the footnote completion below.
+    # Split multi-cite brackets ([^a, b] and [^a, ^b] -> [^a] [^b]) so every
+    # marker is individually resolvable by the footnote completion below.
     notes = re.sub(
-        r"\[\^([A-Za-z0-9_.:/-]+(?:\s*,\s*[A-Za-z0-9_.:/-]+)+)\]",
-        lambda m: " ".join(f"[^{part.strip()}]" for part in m.group(1).split(",")),
+        r"\[\^([A-Za-z0-9_.:/-]+(?:\s*,\s*\^?[A-Za-z0-9_.:/-]+)+)\]",
+        lambda m: " ".join(f"[^{part.strip().lstrip('^')}]" for part in m.group(1).split(",")),
         notes,
     )
     return _complete_footnotes(notes, provenance)
