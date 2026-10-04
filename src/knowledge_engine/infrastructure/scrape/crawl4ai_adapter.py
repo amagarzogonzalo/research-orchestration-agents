@@ -55,8 +55,9 @@ class Crawl4aiAdapter(ScrapePort):
             AsyncWebCrawler = self._crawler()
             async with AsyncWebCrawler() as crawler:
                 result = await crawler.arun(url=url, cache_mode="bypass")
-        except Exception as exc:  # noqa: BLE001 - wrap missing-dep + crawl4ai/Playwright failures
-            raise ScrapeError(f"Crawl4AI failed for {url}: {exc}") from exc
+        except Exception as exc:  # noqa: BLE001 - wrap crawl4ai/Playwright failures
+            transient = not isinstance(exc, (ImportError, ModuleNotFoundError))
+            raise ScrapeError(f"Crawl4AI failed for {url}: {exc}", transient=transient) from exc
         markdown = (result.markdown or "") if result else ""
         title = (result.metadata.get("title") if result and result.metadata else "") or fallback_title(url)
         return DocumentBody(

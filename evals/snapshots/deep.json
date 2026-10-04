@@ -5,8 +5,8 @@
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 9,
-    "paragraphs": 15,
+    "list_items": 7,
+    "paragraphs": 9,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -18,12 +18,12 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "61a813aea1d41176",
+  "hash": "d09f2032f8469704",
   "headings": [
-    "1:retrieval-augmented-generation-vs-long-context-models-for-reducing-hallucinations",
-    "2:architectural-paradigms",
-    "2:hallucination-reduction-and-factual-fidelity",
-    "2:practical-takeaways",
-    "2:open-questions"
+    "1:comparative-synthesis-retrieval-augmented-generation-vs-long-context-models-for-reducing-hallucinations",
+    "2:comparative-performance-and-hallucination-mitigation",
+    "2:advanced-graph-enhanced-and-multi-signal-rag-mechanisms",
+    "2:open-questions-and-research-gaps",
+    "2:practical-recommendations"
   ]
 }

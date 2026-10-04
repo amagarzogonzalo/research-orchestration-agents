@@ -108,6 +108,8 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
                 "failures": run_fail,
                 "artifact": artifact,
                 "cassette": cassette,
+                "bodies": out.get("bodies", 0),
+                "nsources": len(sources or []),
             }
         )
 
@@ -195,6 +197,8 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
         "budget": case.get("budget", {}),
         "artifact_chars": len(runs[0]["artifact"]),
         "judge_criteria": judge_criteria,
+        "bodies": runs[0].get("bodies", 0),
+        "nsources": runs[0].get("nsources", 0),
     }
 
 
@@ -233,10 +237,7 @@ def main() -> int:
         usage = r.get("usage", {})
         budget = r.get("budget", {})
         digest = r.get("digest", {})
-        print(
-            f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']}  "
-            f"({usage.get('total_tokens', 0)} tok)"
-        )
+        print(f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']}  ({usage.get('total_tokens', 0)} tok)")
         print(
             f"      cost: {usage.get('total_tokens', 0)}"
             f"/{budget.get('max_total_tokens', '?')} tok, "
@@ -247,6 +248,10 @@ def main() -> int:
             f"{len(digest.get('headings', []))} sections, "
             f"{len(digest.get('citations', []))} citations"
         )
+        bodies, nsources = r.get("bodies", 0), r.get("nsources", 0)
+        if nsources and bodies:
+            print(f"      evidence: {bodies}/{nsources} bodies fetched ({bodies * 100 // nsources}% hit rate)")
+
         for criterion in r.get("judge_criteria", []):
             print(f"      judge {criterion['name']}: {criterion['score']} — {criterion['why']}")
         for n in r.get("notes", []):

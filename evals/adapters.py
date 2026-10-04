@@ -142,6 +142,7 @@ def research_run(query: str, max_sources: int = 8, cassette: Any | None = None, 
             "artifact": _read(s.output_path),
             "sources": s.sources,
             "events": [],
+            "bodies": len(s.bodies or []),
         }
 
     return asyncio.run(go())
@@ -184,6 +185,7 @@ def deep_run(query: str, max_sources: int = 8, cassette: Any | None = None, **_:
             "artifact": _read(s.output_path),
             "sources": s.sources,
             "events": [],
+            "bodies": len(s.bodies or []),
         }
 
     return asyncio.run(go())

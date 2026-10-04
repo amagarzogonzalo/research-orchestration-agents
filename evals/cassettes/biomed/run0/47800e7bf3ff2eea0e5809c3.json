@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://arxiv.org/abs/2508.13650"
   },
-  "recorded_at": "2026-10-04T12:26:59Z",
+  "recorded_at": "2026-10-04T13:27:45Z",
   "response": {
-    "captured_at": "2026-10-04T12:26:59.153850+00:00",
+    "captured_at": "2026-10-04T13:27:45.070588+00:00",
     "char_count": 2776,
     "crawl_method": "trafilatura",
     "markdown": "# Computer Science > Computation and Language\n\n\\[Submitted on 19 Aug 2025 (v1), last revised 26 Apr 2026 (this version, v3)\\]\n\n# Title:CRISP: Persistent Concept Unlearning via Sparse Autoencoders\n\nView PDF HTML (experimental)\nAbstract:As large language models (LLMs) are increasingly deployed in real-world applications, the need to selectively remove unwanted knowledge while preserving model utility has become paramount. Recent work has explored sparse autoencoders (SAEs) to perform precise interventions on monosemantic features. However, most SAE-based methods operate at inference time, which does not create persistent changes in the model's parameters. Such interventions can be bypassed or reversed by malicious actors with parameter access. We introduce CRISP, a parameter-efficient method for persistent concept unlearning using SAEs. CRISP automatically identifies salient SAE features across multiple layers and suppresses their activations. We experiment with two LLMs and show that our method outperforms prior approaches on safety-critical unlearning tasks from the WMDP benchmark, successfully removing harmful knowledge while preserving general and in-domain capabilities. Feature-level analysis reveals that CRISP achieves semantically coherent separation between target and benign concepts, allowing precise suppression of the target features.\n\n## Submission history\n\nFrom: Tomer Ashuach \\[view email\\]\n**\\[v1\\]**Tue, 19 Aug 2025 09:01:22 UTC (10,302 KB)\n\n**\\[v2\\]**Thu, 20 Nov 2025 10:16:14 UTC (10,298 KB)\n\n**\\[v3\\]**Sun, 26 Apr 2026 09:46:29 UTC (10,299 KB)\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
@@ -13,5 +13,5 @@
     "url": "https://arxiv.org/abs/2508.13650"
   },
   "usage": {},
-  "wall_s": 0.791
+  "wall_s": 4.149
 }

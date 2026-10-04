@@ -57,7 +57,8 @@ class PlaywrightAdapter(ScrapePort):
                 finally:
                     await browser.close()
         except Exception as exc:  # noqa: BLE001 - wrap Playwright failures
-            raise ScrapeError(f"Playwright failed for {url}: {exc}") from exc
+            transient = not isinstance(exc, (ImportError, ModuleNotFoundError))
+            raise ScrapeError(f"Playwright failed for {url}: {exc}", transient=transient) from exc
 
         text = (content or "").strip()
         return DocumentBody(

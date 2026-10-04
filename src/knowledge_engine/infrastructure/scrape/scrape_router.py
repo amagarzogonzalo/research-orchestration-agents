@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import logging
 
+from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential, wait_random
+
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.infrastructure.scrape.crawl4ai_adapter import Crawl4aiAdapter
@@ -24,6 +26,18 @@ logger = logging.getLogger(__name__)
 
 _MIN_CHARS = 200
 _MAX_REPLACEMENT_RATIO = 0.02
+
+
+def _is_transient_scrape(exc: BaseException) -> bool:
+    """Whether a scrape failure is worth retrying.
+
+    Args:
+        exc: Caught exception.
+
+    Returns:
+        bool: True for transient ScrapeErrors.
+    """
+    return isinstance(exc, ScrapeError) and exc.transient
 
 
 def looks_clean(text: str) -> bool:
@@ -78,7 +92,7 @@ class ScrapeRouter(ScrapePort):
         """
         for scraper in self.chain:
             try:
-                body = await scraper.to_markdown(url)
+                body = await _fetch_with_retry(scraper, url)
             except ScrapeError as exc:
                 logger.warning("scraper %s failed for %s (%s)", type(scraper).__name__, url, exc)
                 continue
@@ -86,6 +100,25 @@ class ScrapeRouter(ScrapePort):
                 return body
             logger.warning("scraper %s yielded unusable text for %s", type(scraper).__name__, url)
         raise ScrapeError(f"all scrapers failed for {url}")
+
+
+@retry(
+    wait=wait_exponential(multiplier=0.5, max=8) + wait_random(0, 1),
+    stop=stop_after_attempt(3),
+    retry=retry_if_exception(_is_transient_scrape),
+    reraise=True,
+)
+async def _fetch_with_retry(scraper: ScrapePort, url: str) -> DocumentBody:
+    """Fetch with backoff on transient failures; permanent errors pass through.
+
+    Args:
+        scraper: Scrape adapter.
+        url: Page URL to render.
+
+    Returns:
+        DocumentBody: Fetched Markdown body.
+    """
+    return await scraper.to_markdown(url)
 
 
 def _default_chain() -> list[ScrapePort]:
