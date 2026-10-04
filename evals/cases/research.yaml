@@ -10,7 +10,7 @@ description: >
 entrypoint: "evals.adapters:research_run"
 input:
   query: "How retrieval-augmented generation reduces hallucinations in large language models"
-  max_sources: 5
+  max_sources: 8
 
 samples: 1
 pass_at_k: 1

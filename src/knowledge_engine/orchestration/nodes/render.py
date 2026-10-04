@@ -133,10 +133,36 @@ def _complete_footnotes(notes: str, provenance: list[SourceRecord]) -> str:
     for marker in missing:
         sid = _resolve_marker(marker, titles)
         if sid is not None:
-            additions.append(f"[^{marker}]: {titles[sid]}")
+            additions.append(f"[^{marker}]: {_full_citation(provenance, sid)}")
     if not additions:
         return notes
     return notes.rstrip() + "\n\n" + "\n".join(additions) + "\n"
+
+
+def _full_citation(provenance: list[SourceRecord], sid: str) -> str:
+    """Render a full reference line for a footnote definition.
+
+    Args:
+        provenance: Provenance records.
+        sid: Source id.
+
+    Returns:
+        str: Authored citation (title, authors, venue, year, doi/url).
+    """
+    rec = next((s for s in provenance if s.id == sid), None)
+    if rec is None:
+        return sid
+    parts = [rec.title or sid]
+    if rec.authors:
+        parts.append(", ".join(rec.authors[:4]))
+    meta = ", ".join(p for p in (rec.venue, str(rec.year or "")) if p)
+    if meta:
+        parts.append(f"({meta})")
+    if rec.pdf_url:
+        parts.append(rec.pdf_url)
+    elif rec.doi:
+        parts.append(f"https://doi.org/{rec.doi}")
+    return " — ".join(parts)
 
 
 def _resolve_marker(marker: str, titles: dict[str, str]) -> str | None:

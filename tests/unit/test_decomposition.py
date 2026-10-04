@@ -23,9 +23,9 @@ from knowledge_engine.schemas.decomposition import (
 
 
 def test_budgets_have_sane_bounds() -> None:
-    assert MAX_DECOMPOSE_DEPTH == 2
-    assert MAX_SUBQUERIES == 5
-    assert MAX_DEEP_ROUNDS == 2
+    assert MAX_DECOMPOSE_DEPTH == 3
+    assert MAX_SUBQUERIES == 7
+    assert MAX_DEEP_ROUNDS == 3
 
 
 def test_subquery_rejects_unknown_source() -> None:
@@ -55,8 +55,8 @@ def test_route_intent_heuristics() -> None:
 
 
 def test_depth_allowed_respects_cap() -> None:
-    assert depth_allowed(0) and depth_allowed(2)
-    assert not depth_allowed(3)
+    assert depth_allowed(0) and depth_allowed(3)
+    assert not depth_allowed(4)
 
 
 def test_budget_left_counts_llm_calls() -> None:
@@ -90,6 +90,7 @@ def test_rubric_rich_evidence_scores_high() -> None:
 
 def test_should_stop_on_score_rounds_or_budget() -> None:
     assert should_stop(score=0.9, gaps=[], depth=0, rounds=0, llm_calls=1)
-    assert should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=2, llm_calls=1)
+    assert should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=3, llm_calls=1)
     assert should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=0, llm_calls=12)
+    assert not should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=2, llm_calls=1)
     assert not should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=0, llm_calls=1)

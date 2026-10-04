@@ -39,9 +39,12 @@ _SYNTHESIS_SYSTEM = (
     "which. Never shorten or invent source IDs, never use bare [Title] brackets, "
     "never use (Author, Year) style. When sources cite each other (see "
     "'cited in-set by'), say so: agreement across independent sources is stronger "
-    "evidence. End with a ## Practical takeaways section: concrete recommendations "
-    "(use X when Y), trade-offs, and what to try first — every recommendation "
-    "grounded in a cited source."
+    "evidence. Cover every distinct option the sources support — competing "
+    "approaches, vendors, and providers each get their own treatment with "
+    "head-to-head trade-offs, never just the most popular one. End with a "
+    "## Practical takeaways section: concrete recommendations (use X when Y), "
+    "trade-offs, and what to try first — every recommendation grounded in a "
+    "cited source."
 )
 
 

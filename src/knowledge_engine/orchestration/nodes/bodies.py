@@ -59,7 +59,7 @@ class FetchBodyNode(WorkflowNode):
 
     __slots__ = ("scrape", "_sem")
 
-    def __init__(self, scrape: ScrapePort, *, concurrency: int = 4) -> None:
+    def __init__(self, scrape: ScrapePort, *, concurrency: int = 6) -> None:
         """Create a FetchBodyNode.
 
         Args:

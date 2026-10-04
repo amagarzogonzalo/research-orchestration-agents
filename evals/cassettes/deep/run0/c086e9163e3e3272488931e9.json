@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.21203/rs.3.rs-9334334/v1"
+  },
+  "recorded_at": "2026-10-04T09:59:10Z",
+  "response": {
+    "captured_at": "2026-10-04T09:59:10.677516+00:00",
+    "char_count": 1711,
+    "crawl_method": "trafilatura",
+    "markdown": "Hallucination in Retrieval-Augmented Generation (RAG) systems is commonly attributed to generative model limitations. We argue that the primary cause in enterprise document retrieval is context window contamination: single-pass retrieval aggregates chunks from semantically heterogeneous domains, forcing the synthesis model to reason over a noisy cross-domain context and producing coherent but factually unstable responses. We present PC-RAG (Pipeline-Conversational RAG), an architecture built on domain-partitioned retrieval: complex queries are decomposed into domain-isolated sub-tasks, each serviced by an independent retrieval pass. Within each partition, intra-domain multi-query expansion generates k=6 semantic variants, maximizing coverage without cross-domain interference. Evaluation on a 1,200-document production deployment (HR, legal, compliance) shows that domain partitioning alone reduces false-positive chunk inclusion by 51% and raises human-rated synthesis quality from 3.1 to 4.1 on a 5-point scale (two annotators, κ=0.79, Wilcoxon p\\<0.001). The full PC-RAG system achieves a synthesis score of 4.2, outperforming HyDE Gao et al. \\[2023\\] (3.6), standard multi-query retrieval (3.7), and RAPTOR Sarthi et al. \\[2024\\] (3.9). RAGAS automated evaluation corroborates human judgements (r=0.83, p\\<0.001). By contrast, upgrading the synthesis model alone yields only marginal gains (3.1 to 3.4, p=0.031), confirming the bottleneck is retrieval architecture, not model capacity. The pipeline further integrates conversational coreference resolution (97.4% accuracy) and a semantic reranker; median end-to-end latency is 90 s, with primary contributions accounting for only 12% of this cost.",
+    "title": "v1",
+    "url": "https://doi.org/10.21203/rs.3.rs-9334334/v1"
+  },
+  "usage": {},
+  "wall_s": 5.43
+}

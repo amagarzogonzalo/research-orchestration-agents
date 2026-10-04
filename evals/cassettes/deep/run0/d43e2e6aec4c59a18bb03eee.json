@@ -1,0 +1,428 @@
+{
+  "name": "search:search",
+  "payload": {
+    "limit": 5,
+    "query": "How does retrieval-augmented generation reduce hallucinations? Cite empirical studies or benchmarks that demonstrate its effectiveness."
+  },
+  "recorded_at": "2026-10-04T09:59:49Z",
+  "response": [
+    {
+      "abstract": null,
+      "authors": [
+        "Manuel Valdez",
+        "Arghir-Nicolae Moldovan"
+      ],
+      "citation_count": 0,
+      "doi": "10.5220/0015235400004091",
+      "fetched_at": "2026-10-04T09:59:31.888660+00:00",
+      "id": "crossref:10.5220/0015235400004091",
+      "pdf_url": null,
+      "references": [],
+      "source": "crossref",
+      "title": "Evaluating Retrieval-Augmented Generation on Social Bias Benchmarks across Small Language Models",
+      "tldr_llm": null,
+      "venue": "Proceedings of the 15th International Conference on Data Science, Technology and Applications",
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Aldridge Fonseca"
+      ],
+      "citation_count": 0,
+      "doi": "10.31979/etd.hn7u-hp8x",
+      "fetched_at": "2026-10-04T09:59:31.888748+00:00",
+      "id": "crossref:10.31979/etd.hn7u-hp8x",
+      "pdf_url": null,
+      "references": [],
+      "source": "crossref",
+      "title": "LOOM-RAG",
+      "tldr_llm": null,
+      "venue": null,
+      "year": null
+    },
+    {
+      "abstract": "<title>Abstract</title>\n                <p>Large Language Models (LLMs) deployed in pharmaceutical question-answering applications frequently generate clinically dangerous hallucinations — factually incorrect outputs that pose serious patient-safety risks. We propose and evaluate a Retrieval-Augmented Generation (RAG) pipeline that grounds LLM responses in a curated, citation-verified pharmaceutical knowledge base. The system combines dense passage retrieval using Sentence-BERT embeddings, FAISS vector indexing, cross-encoder re-ranking, and Llama 3.2 generation. Evaluated on a purpose-built dataset of 150 drug-related question–answer pairs spanning ten commonly used medications and multiple information categories, our RAG system reduces the hallucination rate from 47.8% to 12.3% — a 74.3% relative reduction — while improving Faithfulness from 0.52 to 0.87 and Factual Accuracy from 0.54 to 0.89. A clinical case study on warfarin–ibuprofen interaction demonstrates that RAG responses provide verifiable, citation-grounded information where the baseline produces potentially life-threatening misinformation. These results establish retrieval-augmented architectures as the preferred approach for safety-critical pharmaceutical AI and provide an open, reproducible evaluation framework.</p>",
+      "authors": [
+        "Pratik Kumar",
+        "Rajat Verma"
+      ],
+      "citation_count": 0,
+      "doi": "10.21203/rs.3.rs-10186581/v1",
+      "fetched_at": "2026-10-04T09:59:31.888800+00:00",
+      "id": "crossref:10.21203/rs.3.rs-10186581/v1",
+      "pdf_url": null,
+      "references": [],
+      "source": "crossref",
+      "title": "Retrieval-Augmented Generation for Reducing Hallucinations in Drug-Related Question Answering Systems",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Xiangci Li",
+        "Jessica Ouyang"
+      ],
+      "citation_count": 1,
+      "doi": "10.18653/v1/2025.findings-emnlp.218",
+      "fetched_at": "2026-10-04T09:59:31.888845+00:00",
+      "id": "crossref:10.18653/v1/2025.findings-emnlp.218",
+      "pdf_url": null,
+      "references": [],
+      "source": "crossref",
+      "title": "How Does Knowledge Selection Help Retrieval Augmented Generation?",
+      "tldr_llm": null,
+      "venue": "Findings of the Association for Computational Linguistics: EMNLP 2025",
+      "year": 2025
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "HaiChuan Hu",
+        "Congqing He",
+        "Xiaochen Xie",
+        "Quanjun Zhang"
+      ],
+      "citation_count": 8,
+      "doi": "10.2139/ssrn.5199254",
+      "fetched_at": "2026-10-04T09:59:31.888889+00:00",
+      "id": "crossref:10.2139/ssrn.5199254",
+      "pdf_url": null,
+      "references": [],
+      "source": "crossref",
+      "title": "Lrp4rag: Detecting Hallucinations in Retrieval-Augmented Generation Via Layer-Wise Relevance Propagation",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2025
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Avsar F",
+        "Vural B",
+        "Korkmaz A"
+      ],
+      "citation_count": 0,
+      "doi": "10.4103/jehp.jehp_125_26",
+      "fetched_at": "2026-10-04T09:59:36.133371+00:00",
+      "id": "pubmed:42829738",
+      "pdf_url": null,
+      "references": [],
+      "source": "pubmed",
+      "title": "Enhancing first-aid self-efficacy: A randomized trial comparing three interactive educational ınterventions.",
+      "tldr_llm": null,
+      "venue": "J Educ Health Promot",
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Pratama AA",
+        "Hendikawati P"
+      ],
+      "citation_count": 0,
+      "doi": "10.1016/j.mex.2026.104169",
+      "fetched_at": "2026-10-04T09:59:36.133573+00:00",
+      "id": "pubmed:42827925",
+      "pdf_url": null,
+      "references": [],
+      "source": "pubmed",
+      "title": "Multichannel SSA decomposition in a hybrid SSA-N-BEATS framework for complex time series forecasting.",
+      "tldr_llm": null,
+      "venue": "MethodsX",
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Qian Y",
+        "Tian H",
+        "Zhao S",
+        "Bian Y",
+        "Yu H",
+        "Di A",
+        "Jia Y",
+        "Li S",
+        "Sun R"
+      ],
+      "citation_count": 0,
+      "doi": "10.1007/s10142-026-02059-9",
+      "fetched_at": "2026-10-04T09:59:36.133660+00:00",
+      "id": "pubmed:42827142",
+      "pdf_url": null,
+      "references": [],
+      "source": "pubmed",
+      "title": "Cell-resolved testing of network-pharmacology candidates in dilated cardiomyopathy: PI3K-AKT-associated transcriptional differences are distributed across cardiac lineages and are not enriched above a genome-wide background.",
+      "tldr_llm": null,
+      "venue": "Funct Integr Genomics",
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Aichner M",
+        "Gatti M",
+        "Reining L"
+      ],
+      "citation_count": 0,
+      "doi": "10.1103/nk3g-crbw",
+      "fetched_at": "2026-10-04T09:59:36.133705+00:00",
+      "id": "pubmed:42826985",
+      "pdf_url": null,
+      "references": [],
+      "source": "pubmed",
+      "title": "Effective Residual Interaction Kernel Approach for Optical Spectra.",
+      "tldr_llm": null,
+      "venue": "Phys Rev Lett",
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Chou CH",
+        "Huang HY",
+        "Wu QY",
+        "Luo ZH",
+        "Hsu YW",
+        "Liu BH",
+        "Kei CC",
+        "Chien CH"
+      ],
+      "citation_count": 0,
+      "doi": "10.1021/acsami.6c10272",
+      "fetched_at": "2026-10-04T09:59:36.133746+00:00",
+      "id": "pubmed:42826753",
+      "pdf_url": null,
+      "references": [],
+      "source": "pubmed",
+      "title": "Overcoming the Resistance Penalty in Large-Bandgap Carbon Nanotube Electronics via Synergistic Interfacial Engineering.",
+      "tldr_llm": null,
+      "venue": "ACS Appl Mater Interfaces",
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Tedeschi L",
+        "Greer N",
+        "Kaniyamattam K",
+        "Mudireddy D",
+        "Strong R",
+        "Surabhi P",
+        "Tao J",
+        "Wang A."
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-04T09:59:34.488200+00:00",
+      "id": "europe_pmc:PMC:PMC13600821",
+      "pdf_url": null,
+      "references": [],
+      "source": "europe_pmc",
+      "title": "Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models",
+      "tldr_llm": null,
+      "venue": null,
+      "year": null
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Althobaiti M",
+        "Jun M."
+      ],
+      "citation_count": 0,
+      "doi": "10.3389/frai.2026.1785766",
+      "fetched_at": "2026-10-04T09:59:34.488319+00:00",
+      "id": "europe_pmc:MED:42591399",
+      "pdf_url": null,
+      "references": [],
+      "source": "europe_pmc",
+      "title": "Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications.",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Hasan MM",
+        "Hossain MA",
+        "Sayem FH",
+        "Paul BK",
+        "Rahman Z",
+        "Uddin MS",
+        "Mostafiz R."
+      ],
+      "citation_count": 0,
+      "doi": "10.1371/journal.pone.0348611",
+      "fetched_at": "2026-10-04T09:59:34.488384+00:00",
+      "id": "europe_pmc:MED:42658861",
+      "pdf_url": null,
+      "references": [],
+      "source": "europe_pmc",
+      "title": "CLIN-LLM: A safety-constrained hybrid framework for clinical diagnosis and treatment generation.",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Taylor E."
+      ],
+      "citation_count": 0,
+      "doi": "10.1002/eahr.70024",
+      "fetched_at": "2026-10-04T09:59:34.488433+00:00",
+      "id": "europe_pmc:MED:42695536",
+      "pdf_url": null,
+      "references": [],
+      "source": "europe_pmc",
+      "title": "When a Human-in-the-Loop Amplifies the Risk of Misalignment: Considerations for Research Ethics Oversight.",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2026
+    },
+    {
+      "abstract": null,
+      "authors": [
+        "Morales H",
+        "Rocha C",
+        "Dalmazo LMT",
+        "Takara LA",
+        "Cichelero M",
+        "Guerra B",
+        "Andrade-Silva J",
+        "Tuma P",
+        "Silva Júnior M."
+      ],
+      "citation_count": 0,
+      "doi": "10.31744/einstein_journal/2026ao2175",
+      "fetched_at": "2026-10-04T09:59:34.488485+00:00",
+      "id": "europe_pmc:MED:42561260",
+      "pdf_url": null,
+      "references": [],
+      "source": "europe_pmc",
+      "title": "Enhancing antimicrobial stewardship using a retrieval-augmented generation large language model for infectious disease management.",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2026
+    },
+    {
+      "abstract": "Memory systems are key components that enable AI systems such as LLMs and AI\nagents to achieve long-term learning and sustained interaction. However, during\nmemory storage and retrieval, these systems frequently exhibit memory\nhallucinations, including fabrication, errors, conflicts, and omissions.\nExisting evaluations of memory hallucinations are primarily end-to-end question\nanswering, which makes it difficult to localize the operational stage within\nthe memory system where hallucinations arise. To address this, we introduce the\nHallucination in Memory Benchmark (HaluMem), the first operation level\nhallucination evaluation benchmark tailored to memory systems. HaluMem defines\nthree evaluation tasks (memory extraction, memory updating, and memory question\nanswering) to comprehensively reveal hallucination behaviors across different\noperational stages of interaction. To support evaluation, we construct\nuser-centric, multi-turn human-AI interaction datasets, HaluMem-Medium and\nHaluMem-Long. Both include about 15k memory points and 3.5k multi-type\nquestions. The average dialogue length per user reaches 1.5k and 2.6k turns,\nwith context lengths exceeding 1M tokens, enabling evaluation of hallucinations\nacross different context scales and task complexities. Empirical studies based\non HaluMem show that existing memory systems tend to generate and accumulate\nhallucinations during the extraction and updating stages, which subsequently\npropagate errors to the question answering stage. Future research should focus\non developing interpretable and constrained memory operation mechanisms that\nsystematically suppress hallucinations and improve memory reliability.",
+      "authors": [
+        "Ding Chen",
+        "Simin Niu",
+        "Kehang Li",
+        "Peng Liu",
+        "Xiangping Zheng",
+        "Bo Tang",
+        "Xinchi Li",
+        "Feiyu Xiong",
+        "Zhiyu Li"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-04T09:59:39.015550+00:00",
+      "id": "huggingface_papers:2511.03506",
+      "pdf_url": "https://arxiv.org/pdf/2511.03506",
+      "references": [],
+      "source": "huggingface_papers",
+      "title": "HaluMem: Evaluating Hallucinations in Memory Systems of Agents",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2025
+    },
+    {
+      "abstract": "While reasoning in LLMs plays a natural role in math, code generation, and multi-hop factual questions, its effect on simple, single-hop factual questions remains unclear. Such questions do not require step-by-step logical decomposition, making the utility of reasoning highly counterintuitive. Nevertheless, we find that enabling reasoning substantially expands the capability boundary of the model's parametric knowledge recall, unlocking correct answers that are otherwise effectively unreachable. Why does reasoning aid parametric knowledge recall when there are no complex reasoning steps to be done? To answer this, we design a series of hypothesis-driven controlled experiments, and identify two key driving mechanisms: (1) a computational buffer effect, where the model uses the generated reasoning tokens to perform latent computation independent of their semantic content; and (2) factual priming, where generating topically related facts acts as a semantic bridge that facilitates correct answer retrieval. Importantly, this latter generative self-retrieval mechanism carries inherent risks: we demonstrate that hallucinating intermediate facts during reasoning increases the likelihood of hallucinations in the final answer. Finally, we show that our insights can be harnessed to directly improve model accuracy by prioritizing reasoning trajectories that contain hallucination-free factual statements.",
+      "authors": [
+        "Zorik Gekhman",
+        "Roee Aharoni",
+        "Eran Ofek",
+        "Mor Geva",
+        "Roi Reichart",
+        "Jonathan Herzig"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-04T09:59:39.015653+00:00",
+      "id": "huggingface_papers:2603.09906",
+      "pdf_url": "https://arxiv.org/pdf/2603.09906",
+      "references": [],
+      "source": "huggingface_papers",
+      "title": "Thinking to Recall: How Reasoning Unlocks Parametric Knowledge in LLMs",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2026
+    },
+    {
+      "abstract": "Vision-Language Models (VLMs) excel at visual understanding but often suffer\nfrom visual hallucinations, where they generate descriptions of nonexistent\nobjects, actions, or concepts, posing significant risks in safety-critical\napplications. Existing hallucination mitigation methods typically follow one of\ntwo paradigms: generation adjustment, which modifies decoding behavior to align\ntext with visual inputs, and post-hoc verification, where external models\nassess and correct outputs. While effective, generation adjustment methods\noften rely on heuristics and lack correction mechanisms, while post-hoc\nverification is complicated, typically requiring multiple models and tending to\nreject outputs rather than refine them. In this work, we introduce REVERSE, a\nunified framework that integrates hallucination-aware training with on-the-fly\nself-verification. By leveraging a new hallucination-verification dataset\ncontaining over 1.3M semi-synthetic samples, along with a novel inference-time\nretrospective resampling technique, our approach enables VLMs to both detect\nhallucinations during generation and dynamically revise those hallucinations.\nOur evaluations show that REVERSE achieves state-of-the-art hallucination\nreduction, outperforming the best existing methods by up to 12% on CHAIR-MSCOCO\nand 28% on HaloQuest. Our dataset, model, and code are available at:\nhttps://reverse-vlm.github.io.",
+      "authors": [
+        "Tsung-Han Wu",
+        "Heekyung Lee",
+        "Jiaxin Ge",
+        "Joseph E. Gonzalez",
+        "Trevor Darrell",
+        "David M. Chan"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-04T09:59:39.015690+00:00",
+      "id": "huggingface_papers:2504.13169",
+      "pdf_url": "https://arxiv.org/pdf/2504.13169",
+      "references": [],
+      "source": "huggingface_papers",
+      "title": "Generate, but Verify: Reducing Hallucination in Vision-Language Models\n  with Retrospective Resampling",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2025
+    },
+    {
+      "abstract": "Dynamic Retrieval-Augmented Generation adaptively determines when to retrieve during generation to mitigate hallucinations in large language models (LLMs). However, existing methods rely on model-internal signals (e.g., logits, entropy), which are fundamentally unreliable because LLMs are typically ill-calibrated and often exhibit high confidence in erroneous outputs. We propose QuCo-RAG, which shifts from subjective confidence to objective statistics computed from pre-training data. Our method quantifies uncertainty through two stages: (1) before generation, we identify low-frequency entities indicating long-tail knowledge gaps; (2) during generation, we verify entity co-occurrence in the pre-training corpus, where zero co-occurrence often signals hallucination risk. Both stages leverage Infini-gram for millisecond-latency queries over 4 trillion tokens, triggering retrieval when uncertainty is high. Experiments on multi-hop QA benchmarks show QuCo-RAG achieves EM gains of 5--12 points over state-of-the-art baselines with OLMo-2 models, and transfers effectively to models with undisclosed pre-training data (Llama, Qwen, GPT), improving EM by up to 14 points. Domain generalization on biomedical QA further validates the robustness of our paradigm. These results establish corpus-grounded verification as a principled, practically model-agnostic paradigm for dynamic RAG. Our code is publicly available at https://github.com/ZhishanQ/QuCo-RAG.",
+      "authors": [
+        "Dehai Min",
+        "Kailin Zhang",
+        "Tongtong Wu",
+        "Lu Cheng"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-04T09:59:39.015749+00:00",
+      "id": "huggingface_papers:2512.19134",
+      "pdf_url": "https://arxiv.org/pdf/2512.19134",
+      "references": [],
+      "source": "huggingface_papers",
+      "title": "QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2025
+    },
+    {
+      "abstract": "Large language models are prone to hallucinating factually incorrect statements. A key source of these errors is exposure to new factual information through supervised fine-tuning (SFT), which can increase hallucinations w.r.t. knowledge acquired during pre-training. In this work, we explore whether SFT-induced hallucinations can be mitigated using established tools from the continual learning literature, since they arise as a by-product of knowledge degradation during training. We propose a self-distillation-based SFT method that facilitates effective factual learning while minimizing hallucinations w.r.t. pre-existing knowledge by regularizing output-distribution drift. We also show that, in settings where new knowledge acquisition is unnecessary, suppressing factual plasticity by freezing parameter groups, can preserve task performance while reducing hallucinations. Lastly, we investigate the mechanism behind SFT-induced hallucinations through three hypotheses: capacity limitations, behavior cloning, and localized interference. Our experiments show that a main driver is interference among overlapping semantic representations, and that self-distillation succeeds by mitigating this interference.",
+      "authors": [
+        "Guy Kaplan",
+        "Zorik Gekhman",
+        "Zhen Zhu",
+        "Lotem Rozner",
+        "Yuval Reif",
+        "Swabha Swayamdipta",
+        "Derek Hoiem",
+        "Roy Schwartz"
+      ],
+      "citation_count": 0,
+      "doi": null,
+      "fetched_at": "2026-10-04T09:59:39.015780+00:00",
+      "id": "huggingface_papers:2604.15574",
+      "pdf_url": "https://arxiv.org/pdf/2604.15574",
+      "references": [],
+      "source": "huggingface_papers",
+      "title": "Why Fine-Tuning Encourages Hallucinations and How to Fix It",
+      "tldr_llm": null,
+      "venue": null,
+      "year": 2026
+    }
+  ],
+  "usage": {},
+  "wall_s": 85.548
+}

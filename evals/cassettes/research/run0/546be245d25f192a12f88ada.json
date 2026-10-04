@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://arxiv.org/abs/2512.19134"
   },
-  "recorded_at": "2026-10-03T10:04:49Z",
+  "recorded_at": "2026-10-04T09:49:50Z",
   "response": {
-    "captured_at": "2026-10-03T10:04:49.099993+00:00",
+    "captured_at": "2026-10-04T09:49:50.790067+00:00",
     "char_count": 3102,
     "crawl_method": "trafilatura",
     "markdown": "# Computer Science > Computation and Language\n\n\\[Submitted on 22 Dec 2025 (v1), last revised 17 May 2026 (this version, v2)\\]\n\n# Title:QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation\n\nView PDF HTML (experimental)\nAbstract:Dynamic Retrieval-Augmented Generation adaptively determines when to retrieve during generation to mitigate hallucinations in large language models (LLMs). However, existing methods rely on model-internal signals (e.g., logits, entropy), which are fundamentally unreliable because LLMs are typically ill-calibrated and often exhibit high confidence in erroneous outputs. We propose QuCo-RAG, which shifts from subjective confidence to objective statistics computed from pre-training data. Our method quantifies uncertainty through two stages: (1) before generation, we identify low-frequency entities indicating long-tail knowledge gaps; (2) during generation, we verify entity co-occurrence in the pre-training corpus, where zero co-occurrence often signals hallucination risk. Both stages leverage Infini-gram for millisecond-latency queries over 4 trillion tokens, triggering retrieval when uncertainty is high. Experiments on multi-hop QA benchmarks show QuCo-RAG achieves EM gains of 5--12 points over state-of-the-art baselines with OLMo-2 models, and transfers effectively to models with undisclosed pre-training data (Llama-3, Qwen2.5, GPT-4.1/5-chat), improving EM by up to 14 points. Generalization to long-form generation and biomedical QA further validates the robustness of our paradigm. These results establish corpus-grounded verification as a principled, practically model-agnostic paradigm for dynamic RAG. Our code is publicly available at this https URL.\n\n## Submission history\n\nFrom: Dehai Min \\[view email\\]\n**\\[v1\\]**Mon, 22 Dec 2025 08:28:05 UTC (346 KB)\n\n**\\[v2\\]**Sun, 17 May 2026 22:36:50 UTC (386 KB)\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
@@ -13,5 +13,5 @@
     "url": "https://arxiv.org/abs/2512.19134"
   },
   "usage": {},
-  "wall_s": 3.682
+  "wall_s": 1.803
 }

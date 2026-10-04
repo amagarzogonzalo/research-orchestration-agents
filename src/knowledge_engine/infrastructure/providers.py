@@ -74,6 +74,7 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
         async def live(**kwargs: Any) -> dict[str, Any]:
             resp = await litellm.acompletion(
                 **kwargs,
+                timeout=120,
                 **({"api_key": self.api_key} if self.api_key else {}),
             )
             return resp.model_dump(mode="json")
@@ -86,6 +87,9 @@ class LiteLLMProviderAdapter(BaseProviderAdapter):
         except litellm.exceptions.RateLimitError as exc:
             _emit_transient(self.name, started)
             raise ProviderUnavailable(f"{self.name} 429") from exc
+        except litellm.exceptions.Timeout as exc:
+            _emit_transient(self.name, started)
+            raise ProviderUnavailable(f"{self.name} timeout") from exc
         except litellm.exceptions.APIError as exc:
             _emit_transient(self.name, started)
             raise ProviderUnavailable(f"{self.name} API error") from exc

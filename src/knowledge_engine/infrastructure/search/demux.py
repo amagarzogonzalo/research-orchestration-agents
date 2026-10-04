@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 
 from knowledge_engine.core.ports import FetchPort, SearchPort
 from knowledge_engine.schemas.source import SourceRecord
@@ -92,8 +93,25 @@ class DemuxSearchAdapter(SearchPort, FetchPort):
         return None
 
 
+def _norm_title(title: str) -> str:
+    """Normalize a title for duplicate detection.
+
+    Args:
+        title: Raw title.
+
+    Returns:
+        str: Lowercased alphanumeric-only title.
+    """
+    return re.sub(r"[^a-z0-9]", "", title.lower())
+
+
 def _merge(chunks: list[list[SourceRecord] | list[SourceRecord]]) -> list[SourceRecord]:
-    """Dedupe by DOI then id, preserving order.
+    """Dedupe by DOI, then id, then normalized title, preserving order.
+
+    Title dedupe catches the same paper registered under different DOIs
+    (common with cross-registrar preprints). Titles shorter than 30
+    normalized chars never dedupe to avoid false positives on generic
+    titles. First record wins (source priority order).
 
     Args:
         chunks: Result chunks to merge.
@@ -103,11 +121,19 @@ def _merge(chunks: list[list[SourceRecord] | list[SourceRecord]]) -> list[Source
 
     """
     seen: set[str] = set()
+    seen_titles: set[str] = set()
     merged: list[SourceRecord] = []
     for chunk in chunks:
         for rec in chunk:
             key = rec.doi or rec.id
-            if key not in seen:
-                seen.add(key)
-                merged.append(rec)
+            if key in seen:
+                continue
+            title_key = _norm_title(rec.title)
+            if len(title_key) >= 30 and title_key in seen_titles:
+                logger.info("demux dropping title-duplicate %s (%s)", rec.id, rec.title[:60])
+                continue
+            seen.add(key)
+            if len(title_key) >= 30:
+                seen_titles.add(title_key)
+            merged.append(rec)
     return merged

@@ -1,16 +1,17 @@
 {
   "citations": [
-    "doaj:5c3e3ea8e8b2469e8706f069570090a8",
     "europe_pmc:MED:42297857",
     "huggingface_papers:2412.11919",
     "huggingface_papers:2501.08292",
     "huggingface_papers:2505.04253",
+    "huggingface_papers:2509.17671",
+    "huggingface_papers:2509.21875",
     "huggingface_papers:2512.19134",
     "huggingface_papers:2603.20309"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 14,
+    "list_items": 10,
     "paragraphs": 18,
     "tables": 0,
     "words_bucket": "<1000"
@@ -23,11 +24,11 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "6bccb7db2fd4ea15",
+  "hash": "f6696b0c2dc9cb03",
   "headings": [
-    "2:the-hallucination-problem-in-large-language-models",
-    "2:core-mechanism-of-rag-in-reducing-hallucinations",
-    "2:advanced-paradigms-for-enhancing-rag-precision",
+    "2:core-mechanisms-of-rag-in-hallucination-reduction",
+    "2:granularity-and-optimization-approaches",
+    "2:hallucination-detection-and-verification-in-rag-systems",
     "2:open-questions",
     "2:practical-takeaways"
   ]

@@ -2,10 +2,10 @@
   "citations": [],
   "code_langs": [],
   "counts": {
-    "list_items": 6,
-    "paragraphs": 8,
+    "list_items": 9,
+    "paragraphs": 16,
     "tables": 0,
-    "words_bucket": "<500"
+    "words_bucket": "<1000"
   },
   "frontmatter": {
     "@id": "str",
@@ -15,11 +15,12 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "1619febe9161cc87",
+  "hash": "462fd8ad7aecf921",
   "headings": [
-    "1:comparing-retrieval-augmented-generation-rag-with-long-context-models-for-reducing-hallucinations",
-    "2:retrieval-augmented-generation-rag-mechanisms-and-performance",
-    "2:open-questions",
-    "2:practical-takeaways"
+    "1:retrieval-augmented-generation-vs-long-context-models-for-reducing-hallucinations",
+    "2:architectural-foundations-of-rag",
+    "2:performance-and-impact-on-hallucinations",
+    "2:practical-recommendations-trade-offs",
+    "2:open-questions-and-future-research"
   ]
 }

@@ -6,8 +6,17 @@ from knowledge_engine.orchestration.nodes.render import _complete_footnotes
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 
-def _src(id: str, title: str) -> SourceRecord:
-    return SourceRecord(id=id, title=title, source=SearchSource.ARXIV)
+def _src(
+    id: str,
+    title: str,
+    authors: list[str] | None = None,
+    venue: str | None = None,
+    year: int | None = None,
+    doi: str | None = None,
+) -> SourceRecord:
+    return SourceRecord(
+        id=id, title=title, source=SearchSource.ARXIV, authors=authors or [], venue=venue, year=year, doi=doi
+    )
 
 
 def test_missing_definition_appended_from_provenance() -> None:
@@ -42,3 +51,13 @@ def test_shortened_ids_resolve_to_provenance() -> None:
 def test_unresolvable_ids_left_alone() -> None:
     notes = "Claim [^zzz-no-such-9]."
     assert _complete_footnotes(notes, [_src("openalex:W1", "Some Paper")]) == notes
+
+
+def test_definitions_carry_full_citation() -> None:
+    notes = "Claim [^openalex:W1]."
+    prov = [
+        _src("openalex:W1", "Some Paper", authors=["A. Uthor", "B. Writer"], venue="Nature", year=2024, doi="10.1/x")
+    ]
+    out = _complete_footnotes(notes, prov)
+    assert "[^openalex:W1]: Some Paper — A. Uthor, B. Writer — (Nature, 2024)" in out
+    assert "https://doi.org/10.1/x" in out
