@@ -92,6 +92,23 @@ async def test_search_raises_search_error() -> None:
         await adapter.search("synthetic data")
 
 
+def test_to_record_maps_venue_and_references() -> None:
+    """Venue + referenced_works survive mapping (cross-ref fuel)."""
+    from knowledge_engine.infrastructure.search.openalex import OpenAlexAdapter as OA
+
+    item = {
+        "id": "https://openalex.org/W1",
+        "doi": "https://doi.org/10.1/x",
+        "display_name": "t",
+        "authorships": [],
+        "primary_location": {"source": {"display_name": "Nature"}},
+        "referenced_works": ["https://openalex.org/W2", "https://openalex.org/W3"],
+    }
+    rec = OA._to_record(item)
+    assert rec.venue == "Nature"
+    assert rec.references == ["openalex:W2", "openalex:W3"]
+
+
 @pytest.mark.asyncio
 async def test_search_strips_filter_punctuation() -> None:
     """Trailing ?/!/:/; in the query must not reach title.search (HTTP 400)."""

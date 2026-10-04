@@ -96,7 +96,7 @@ async def test_decompose_node_fail_closed_on_garbage() -> None:
 async def test_branch_node_runs_leaf_pipeline_reducer_keys_only() -> None:
     branch = await _nodeset_branch()
     out = await branch.run({"sub_query": {"query": "memory systems", "source": "search", "depth": 1}, "llm_calls": 0})
-    assert set(out) <= {"branch_notes", "bodies", "llm_calls"}
+    assert set(out) <= {"branch_notes", "bodies", "llm_calls", "branch_sources"}
     assert len(out["branch_notes"]) == 1
     assert len(out["bodies"]) >= 1
 

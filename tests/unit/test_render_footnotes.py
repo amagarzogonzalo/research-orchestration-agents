@@ -53,6 +53,32 @@ def test_unresolvable_ids_left_alone() -> None:
     assert _complete_footnotes(notes, [_src("openalex:W1", "Some Paper")]) == notes
 
 
+def test_doubled_prefix_markers_resolve() -> None:
+    notes = "Claim [^crossref:10.1/10.1/x]."
+    prov = [_src("crossref:10.1/x", "Paper")]
+    out = _complete_footnotes(notes, prov)
+    assert "[^crossref:10.1/10.1/x]: Paper" in out
+
+
+def test_multi_cite_brackets_split() -> None:
+    from knowledge_engine.orchestration.nodes.render import _normalize_citations
+
+    prov = [_src("openalex:W1", "A"), _src("openalex:W2", "B")]
+    out = _normalize_citations("Claim [^openalex:W1, openalex:W2].", prov)
+    assert "[^openalex:W1] [^openalex:W2]" in out
+    assert "[^openalex:W1]:" in out and "[^openalex:W2]:" in out
+
+
+def test_plain_bracket_cites_normalize_to_footnotes() -> None:
+    from knowledge_engine.orchestration.nodes.render import _normalize_citations
+
+    prov = [_src("openalex:W1", "Some Paper", doi="10.1/x")]
+    out = _normalize_citations("Claim [openalex:W1] and [10.1/x] plus [2024].", prov)
+    assert "[^openalex:W1]" in out
+    assert "[2024]" in out  # not a source id: untouched
+    assert out.count("[^openalex:W1]:") == 1
+
+
 def test_definitions_carry_full_citation() -> None:
     notes = "Claim [^openalex:W1]."
     prov = [

@@ -48,29 +48,25 @@ def _cite(artifact: str, expected: list[str], sources: Any = None, **_: Any) -> 
     return [f"required source not cited: {s}" for s in expected if s not in have]
 
 
+@check("min_citations")
+def _mincite(artifact: str, expected: int, sources: Any = None, **_: Any) -> list[str]:
+    have = len(dg.citations(artifact, sources))
+    return [] if have >= expected else [f"only {have} citations, need >= {expected}"]
+
+
 @check("forbidden_patterns")
 def _forbid(artifact: str, expected: list[str], **_: Any) -> list[str]:
-    return [
-        f"forbidden pattern present: {p!r}"
-        for p in expected
-        if re.search(p, artifact, re.IGNORECASE)
-    ]
+    return [f"forbidden pattern present: {p!r}" for p in expected if re.search(p, artifact, re.IGNORECASE)]
 
 
 @check("required_patterns")
 def _require(artifact: str, expected: list[str], **_: Any) -> list[str]:
-    return [
-        f"required pattern absent: {p!r}"
-        for p in expected
-        if not re.search(p, artifact, re.IGNORECASE)
-    ]
+    return [f"required pattern absent: {p!r}" for p in expected if not re.search(p, artifact, re.IGNORECASE)]
 
 
 # A footnote definition plus its wrapped continuation lines: models wrap long
 # reference lines, and the continuations (years, URLs) must not scan as claims.
-_FOOTNOTE_DEF_BLOCK = re.compile(
-    r"(?m)^\[\^[A-Za-z0-9_.:-]+\]:.*(?:\n(?!\s*(?:$|#{1,6}\s+|[-*+]\s+|\[\^)).*)*"
-)
+_FOOTNOTE_DEF_BLOCK = re.compile(r"(?m)^\[\^[A-Za-z0-9_.:/-]+\]:.*(?:\n(?!\s*(?:$|#{1,6}\s+|[-*+]\s+|\[\^)).*)*")
 
 
 @check("no_uncited_claims")
@@ -96,8 +92,8 @@ def _uncited(artifact: str, expected: bool = True, **_: Any) -> list[str]:
 def _links(artifact: str, expected: bool = True, sources: Any = None, **_: Any) -> list[str]:
     if not expected:
         return []
-    refs = set(re.findall(r"\[\^([A-Za-z0-9_.:-]+)\]", artifact))
-    defs = set(re.findall(r"^\[\^([A-Za-z0-9_.:-]+)\]:", artifact, re.MULTILINE))
+    refs = set(re.findall(r"\[\^([A-Za-z0-9_.:/-]+)\]", artifact))
+    defs = set(re.findall(r"^\[\^([A-Za-z0-9_.:/-]+)\]:", artifact, re.MULTILINE))
     known = set(dg.citations("", sources))
     return [f"dangling footnote: [^{r}]" for r in sorted(refs - defs - known)]
 

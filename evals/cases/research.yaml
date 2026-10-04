@@ -18,6 +18,7 @@ pass_at_k: 1
 invariants:
   frontmatter_keys: ["@id", type, title, provenance, citations, tldr_llm]
   min_sections: 2
+  min_citations: 5
   must_cite: []
   no_uncited_claims: true
   valid_links: true

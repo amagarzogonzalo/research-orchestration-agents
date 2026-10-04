@@ -1,26 +1,29 @@
 {
-  "citations": [],
+  "citations": [
+    "crossref:10.21203/rs.3.rs-10186581/v1",
+    "crossref:10.31979/etd.hn7u-hp8x"
+  ],
   "code_langs": [],
   "counts": {
     "list_items": 9,
-    "paragraphs": 16,
+    "paragraphs": 15,
     "tables": 0,
     "words_bucket": "<1000"
   },
   "frontmatter": {
     "@id": "str",
-    "citations": "list",
-    "provenance": "list",
+    "citations": "empty",
+    "provenance": "empty",
     "title": "str",
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "462fd8ad7aecf921",
+  "hash": "61a813aea1d41176",
   "headings": [
     "1:retrieval-augmented-generation-vs-long-context-models-for-reducing-hallucinations",
-    "2:architectural-foundations-of-rag",
-    "2:performance-and-impact-on-hallucinations",
-    "2:practical-recommendations-trade-offs",
-    "2:open-questions-and-future-research"
+    "2:architectural-paradigms",
+    "2:hallucination-reduction-and-factual-fidelity",
+    "2:practical-takeaways",
+    "2:open-questions"
   ]
 }

@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://arxiv.org/abs/2501.02045"
+  },
+  "recorded_at": "2026-10-04T12:26:59Z",
+  "response": {
+    "captured_at": "2026-10-04T12:26:59.175167+00:00",
+    "char_count": 3081,
+    "crawl_method": "trafilatura",
+    "markdown": "# Quantitative Biology > Genomics\n\n\\[Submitted on 3 Jan 2025\\]\n\n# Title:METAGENE-1: Metagenomic Foundation Model for Pandemic Monitoring\n\nView PDF HTML (experimental)\nAbstract:We pretrain METAGENE-1, a 7-billion-parameter autoregressive transformer model, which we refer to as a metagenomic foundation model, on a novel corpus of diverse metagenomic DNA and RNA sequences comprising over 1.5 trillion base pairs. This dataset is sourced from a large collection of human wastewater samples, processed and sequenced using deep metagenomic (next-generation) sequencing methods. Unlike genomic models that focus on individual genomes or curated sets of specific species, the aim of METAGENE-1 is to capture the full distribution of genomic information present within this wastewater, to aid in tasks relevant to pandemic monitoring and pathogen detection. We carry out byte-pair encoding (BPE) tokenization on our dataset, tailored for metagenomic sequences, and then pretrain our model. In this paper, we first detail the pretraining dataset, tokenization strategy, and model architecture, highlighting the considerations and design choices that enable the effective modeling of metagenomic data. We then show results of pretraining this model on our metagenomic dataset, providing details about our losses, system metrics, and training stability over the course of pretraining. Finally, we demonstrate the performance of METAGENE-1, which achieves state-of-the-art results on a set of genomic benchmarks and new evaluations focused on human-pathogen detection and genomic sequence embedding, showcasing its potential for public health applications in pandemic monitoring, biosurveillance, and early detection of emerging health threats.\n\n## Submission history\n\nFrom: Willie Neiswanger \\[view email\\]\n**\\[v1\\]**Fri, 3 Jan 2025 18:44:43 UTC (5,988 KB)\n\n### Current browse context:\n\nq-bio.GN\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
+    "title": "2501.02045",
+    "url": "https://arxiv.org/abs/2501.02045"
+  },
+  "usage": {},
+  "wall_s": 1.044
+}

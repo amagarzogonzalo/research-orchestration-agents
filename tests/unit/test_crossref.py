@@ -16,6 +16,8 @@ _ITEM = {
     "issued": {"date-parts": [[2013]]},
     "abstract": "Abstract text.",
     "is-referenced-by-count": 1234,
+    "container-title": ["Nature"],
+    "reference": [{"DOI": "10.1038/abc"}, {"unstructured": "no doi here"}, "not-a-dict"],
 }
 
 
@@ -40,6 +42,8 @@ async def test_search_maps_work_fields() -> None:
     assert first.authors == ["G. Kucsko"]
     assert first.year == 2013
     assert first.citation_count == 1234
+    assert first.venue == "Nature"
+    assert first.references == ["10.1038/abc"]
 
 
 async def _ok_fetch(request: httpx.Request) -> httpx.Response:

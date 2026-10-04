@@ -75,3 +75,17 @@ async def _boom(request: httpx.Request) -> httpx.Response:
 async def test_search_raises_typed_error_on_http_failure() -> None:
     with pytest.raises(SearchError):
         await _adapter(_boom).search("memory networks")
+
+
+def test_to_record_maps_venue() -> None:
+    from knowledge_engine.infrastructure.search.dblp import DblpAdapter
+
+    hit = {"@key": "conf/icml/X19", "info": {"title": "t", "venue": "ICML", "year": "2019"}}
+    assert DblpAdapter._to_record(hit).venue == "ICML"
+
+
+def test_to_record_missing_venue_is_none() -> None:
+    from knowledge_engine.infrastructure.search.dblp import DblpAdapter
+
+    hit = {"@key": "journals/corr/X19", "info": {"title": "t", "year": "2019"}}
+    assert DblpAdapter._to_record(hit).venue is None

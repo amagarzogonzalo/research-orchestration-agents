@@ -36,8 +36,10 @@ _SYNTHESIS_SYSTEM = (
     "add one definition line per cited source, e.g. "
     '"[^openalex:W123]: Paper Title Here. Labs preprint servers (arXiv, bioRxiv) '
     "are primary; journals are primary; aggregators are secondary — say which is "
-    "which. Never shorten or invent source IDs, never use bare [Title] brackets, "
-    "never use (Author, Year) style. When sources cite each other (see "
+    "which. Every section MUST cite at least two sources; a section with no "
+    "citations is a failure. Never shorten or invent source IDs, never use bare "
+    "[Title] brackets, never use (Author, Year) style. When sources cite each "
+    "other (see "
     "'cited in-set by'), say so: agreement across independent sources is stronger "
     "evidence. Cover every distinct option the sources support — competing "
     "approaches, vendors, and providers each get their own treatment with "

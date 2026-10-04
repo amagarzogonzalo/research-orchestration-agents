@@ -416,6 +416,7 @@ def _default_search() -> SearchPort:
     from knowledge_engine.infrastructure.search.europe_pmc import EuropePmcAdapter
     from knowledge_engine.infrastructure.search.huggingface_papers import HuggingFacePapersAdapter
     from knowledge_engine.infrastructure.search.openalex import OpenAlexAdapter
+    from knowledge_engine.infrastructure.search.osf import OSFPreprintsAdapter
     from knowledge_engine.infrastructure.search.pubmed import PubMedAdapter
     from knowledge_engine.infrastructure.search.semantic_scholar import SemanticScholarAdapter
     from knowledge_engine.infrastructure.search.unpaywall import UnpaywallAdapter, is_usable_email
@@ -429,6 +430,7 @@ def _default_search() -> SearchPort:
         PubMedAdapter(),
         EuropePmcAdapter(),
         HuggingFacePapersAdapter(),
+        OSFPreprintsAdapter(),
         SemanticScholarAdapter(os.environ.get("SEMANTIC_SCHOLAR_API_KEY")),
         BiorxivAdapter("biorxiv"),
         BiorxivAdapter("medrxiv"),

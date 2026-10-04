@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1101/741322"
+  },
+  "recorded_at": "2026-10-04T12:26:36Z",
+  "response": {
+    "captured_at": "2026-10-04T12:26:36.638850+00:00",
+    "char_count": 2072,
+    "crawl_method": "trafilatura",
+    "markdown": "## Abstract\n\nOxford Nanopore sequencing of DNA molecules is fast gaining popularity for generating longer reads, albeit with higher error rates, in much lesser time, and without the error introduced by PCR-amplification. Recently, CRISPR-Cas9 has been used to enrich genomic regions (nCATS \\[1\\]). This was applied on 10 genomic loci (median length=18kb). Here, using the sequencing data (Accid:PRJNA531320), it is shown that the same flow can be used to identify CRISPR-Cas9 off-target edits (OTE). OTEs are an important, but unfortunately underestimated, aspect of CRISPR-Cas gene-editing. An OTE in the mitochondrial genome is shown having 7 mismatches with one of the 10 gRNAs used (GPX1), having as much enrichment as the targeted genomic loci in some samples. Previous study has shown that Cas9 bind to off-targets having as many as 10 mismatches in the PAM-distal region. This OTE has not been reported in the original study (still a pre-print), which states that sequences from parts other than the target locations arise ‘from ligation of nanopore adaptors to random breakage points, with no clear evidence of off-target cleavage by Cas9’ \\[1\\], Furthermore, a lot of reads aligning to the mitochondrial genome (sometimes full length) are inverted after the edit. It remains to be seen if these are bona fide translocations after the Cas9 edit, or ONP sequencing artifacts. This also raises the question whether the mitochondrial genome is more prone to off-targets by virtue of being non-nuclear. Another locus in ChrX (13121412) has only 1 mismatch with the second BRAF gRNA (GACCAAGGATTTCGTGGTGA). Although the number of reads for this OTE is less, its very unlikely this is random since it happens 8 out of 11 samples. With the increasing use of (TALEN/ZFN/CRISPR-Cas9) on human subjects, this provides a fast method to quickly query gRNAs for off-targets in cells obtained from the patient, which will have their own unique off-targets due to single nucleotide polymorphism or other variants.\n\n## Footnotes\n\n- Added information for another off-target on ChrX",
+    "title": "741322",
+    "url": "https://doi.org/10.1101/741322"
+  },
+  "usage": {},
+  "wall_s": 2.213
+}

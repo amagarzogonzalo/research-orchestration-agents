@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1038/nmeth.3301"
+  },
+  "recorded_at": "2026-10-04T12:26:34Z",
+  "response": {
+    "captured_at": "2026-10-04T12:26:34.639874+00:00",
+    "char_count": 1458,
+    "crawl_method": "trafilatura",
+    "markdown": "Wang, X. *et al*. *Nat. Biotechnol.* **33**, 175–178 (2015).\n\nGenome-editing tools, particularly transcription activator–like effector nucleases (TALENs) and the clustered, regularly interspaced, short palindromic repeats (CRISPR)-Cas9 system, are becoming increasingly widely used. But despite their popularity, questions about their off-target activity remain. Wang *et al*. present an unbiased off-target screen by tagging nuclease-created DNA double-strand breaks with integrase-defective lentiviral vectors (IDLV), which can be amplified by PCR and detected by sequencing. Whereas TALENs did not show any off-target effects when targeted to four endogenous genes, the Cas9 nuclease showed several, but these could be eliminated by the use of a Cas9 nickase. The IDLV assay can detect cleavage frequencies down to 1%, and the findings of frequent off-target sites with single-nucleotide bulges should inform the design of more specific guide RNAs for Cas9.\n\n### Subjects\n\n## Enjoying our latest content? \n\nLog in or create an account to continue\n\n- Access the most recent journalism from Nature's award-winning team\n- Explore the latest features & opinion covering groundbreaking research\n\nor\n\n## Rights and permissions\n\n## About this article\n\n### Cite this article\n\nCRISPR off-target detection.\n                    *Nat Methods* **12**, 174 (2015). https://doi.org/10.1038/nmeth.3301\n\n- Published:\n- Issue date:\n- DOI: https://doi.org/10.1038/nmeth.3301",
+    "title": "nmeth.3301",
+    "url": "https://doi.org/10.1038/nmeth.3301"
+  },
+  "usage": {},
+  "wall_s": 2.556
+}

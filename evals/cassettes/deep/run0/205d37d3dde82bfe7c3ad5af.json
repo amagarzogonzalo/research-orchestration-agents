@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://doi.org/10.1115/detc2025-169730"
   },
-  "recorded_at": "2026-10-04T10:05:09Z",
+  "recorded_at": "2026-10-04T12:10:13Z",
   "response": {
-    "captured_at": "2026-10-04T10:05:09.093320+00:00",
+    "captured_at": "2026-10-04T12:10:13.044978+00:00",
     "char_count": 317,
     "crawl_method": "jina",
     "markdown": "![Image 1: Icon for asmedigitalcollection.asme.org](https://asmedigitalcollection.asme.org/favicon.ico)\n\n## asmedigitalcollection.asme.org\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
@@ -13,5 +13,5 @@
     "url": "https://doi.org/10.1115/detc2025-169730"
   },
   "usage": {},
-  "wall_s": 6.979
+  "wall_s": 3.202
 }
