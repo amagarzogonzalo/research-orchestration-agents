@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.31979/etd.hn7u-hp8x"
+  },
+  "recorded_at": "2026-10-05T12:13:00Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:00.506129+00:00",
+    "char_count": 1667,
+    "crawl_method": "trafilatura",
+    "markdown": "## Publication Date\n\nSpring 2026\n\n## Degree Type\n\nMaster's Project\n\n## Degree Name\n\nMaster of Science in Computer Science (MSCS)\n\n## Department\n\nComputer Science\n\n## First Advisor\n\nMike Wu\n\n## Second Advisor\n\nAmith Kamath Belman\n\n## Third Advisor\n\nNavrati Saxena\n\n## Keywords\n\nGraphRAG, KnowledgeGraphs, LargeLanguageModels, Multi-Hop Question Answering, Query Decomposition, Retrieval-Augmented Generatio\n\n## Abstract\n\nMulti-hop questions requiring evidence across multiple documents challenge standard Retrieval-Augmented Generation (RAG), as single vector retrieval misses cross-document connections. This research investigates whether multi-signal graph enhanced retrieval can improve multi-hop QA accuracy. It presents LOOM-RAG (Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation), a graph-enhanced RAG system evaluated on the MultiHop-RAG benchmark. LOOM- RAG builds a knowledge graph with entities, typed relations, and atomic propositions, then decomposes each query into sub-questions and gathers evidence from four retrieval signals. These signals are fused via weighted combination and Reciprocal Rank Fusion, achieving 87.1% QA accuracy, a 26% improvement over Baseline RAG. An ablation study showed the multi-signal retrieval pipeline contributed 48% of the improvement, while the graph-enriched prompt contributed 52%.\n\n## Recommended Citation\n\nFonseca, Aldridge, \"LOOM-RAG: Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation for Reducing Hallucinations in LLMs\" (2026). *Master's Projects*.  1782.\n    \n\nDOI: https://doi.org/10.31979/etd.hn7u-hp8x\n        \n\nhttps://scholarworks.sjsu.edu/etd\\_projects/1782",
+    "title": "etd.hn7u-hp8x",
+    "url": "https://doi.org/10.31979/etd.hn7u-hp8x"
+  },
+  "usage": {},
+  "wall_s": 17.014
+}

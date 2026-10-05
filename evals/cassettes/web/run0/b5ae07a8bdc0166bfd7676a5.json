@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.64898/2026.02.27.708609"
+  },
+  "recorded_at": "2026-10-05T12:13:52Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:52.966781+00:00",
+    "char_count": 1801,
+    "crawl_method": "trafilatura",
+    "markdown": "## ABSTRACT\n\nRNA binding proteins (RBPs) associate with RNAs in intricate ribonucleoprotein complexes and regulate various aspects of RNA life cycle and, by extension, cell functions. Despite their significance, elucidating the functional contributions of specific RNA-RBP binding events, particularly in long-term phenotypic assays, remains challenging. Here, we harness the specificity of CRISPR/dCas13 to interfere with specific RNA-RBP interactions. We apply this methodology to GA-rich mRNA localization elements which recruit the RNA-binding protein CNBP and serve as platforms for the assembly of mRNA trafficking complexes. We show that dCas13/gRNA binds to target transcripts in a highly specific manner and interferes with CNBP recruitment leading to altered target mRNA localization and cell motility, consistent with the function of the targeted mRNAs. We describe optimizations and considerations for the stable implementation of this system. We further use it to show that interfering with the localization of the GA-containing *NET1* mRNA reduces cancer cell invasiveness and metastatic lung colonization. These data reveal a potential role for mRNA localization in oncogenic progression and illustrate how this CRISPR-based system can be used for long-term functional investigations of RNA-RBP interactions *in vivo*.\n\n### Competing Interest Statement\n\nThe authors have declared no competing interest.\n\n## Footnotes\n\n- Additional data provided from long-term assays showing that stable implementation dCas13-B2 to interfere with the localization of the GA-containing NET1 mRNA reduces cancer cell invasiveness and metastatic lung colonization (Fig 6). Stable expression of dCas13-B2 and gRNAs does not induce cellular stress response (Supplementary Figure 7). Additional authors added.",
+    "title": "2026.02.27.708609",
+    "url": "https://doi.org/10.64898/2026.02.27.708609"
+  },
+  "usage": {},
+  "wall_s": 4.962
+}

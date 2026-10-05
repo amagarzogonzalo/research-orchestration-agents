@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.64898/2026.09.14.751559"
+  },
+  "recorded_at": "2026-10-05T12:13:53Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:53.239080+00:00",
+    "char_count": 1216,
+    "crawl_method": "trafilatura",
+    "markdown": "## Abstract\n\nTDP-43 aggregates are a unifying pathological feature between several neurodegenerative diseases and myopathies. Mutations in the AAA ATPase protein VCP have been linked to TDP-43 proteinopathies in both brain and skeletal muscle including frontotemporal dementia (FTD), amyotrophic lateral sclerosis (ALS), and inclusion body myopathy (IBM). In the case of multisystem proteinopathy (MSP), patients with VCP mutations may present with combinations of these phenotypes. Of these MSP phenotypes IBM is the most common, affecting around 90% of patients. However, it is not well understood how mutations in VCP contribute to the accumulation of insoluble TDP-43 aggregates in the context of skeletal muscle. To study this further, we used *in vitro* and *in vivo* models of TDP-43 aggregation in skeletal muscle in the presence of VCP mutation or inhibition to study its effects on the ability to clear TDP-43 aggregates. Across multiple model systems we found that VCP disease mutations or inhibition causes a reduced capacity to clear insoluble TDP-43, suggesting a VCP loss of function in patients with VCP-related MSP.\n\n### Competing Interest Statement\n\nThe authors have declared no competing interest.",
+    "title": "2026.09.14.751559",
+    "url": "https://doi.org/10.64898/2026.09.14.751559"
+  },
+  "usage": {},
+  "wall_s": 4.573
+}

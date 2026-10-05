@@ -36,6 +36,18 @@ def test_labeled_body_prefixes_matching_source_id() -> None:
     assert out.startswith("[openalex:W123]\n")
 
 
+def test_build_prompt_is_stable_regardless_of_bodies_order() -> None:
+    """Fan-out completion order must not change the prompt (cassette keys)."""
+    first = DocumentBody(url="https://b.example/x", title="B", markdown="m", crawl_method=FetchMethod.TRAFILATURA)
+    second = DocumentBody(url="https://a.example/x", title="A", markdown="m", crawl_method=FetchMethod.TRAFILATURA)
+    state_fwd: dict = {"query": "q", "sources": [], "bodies": [first, second]}
+    state_rev: dict = {"query": "q", "sources": [], "bodies": [second, first]}
+    assert (
+        SynthesizeNode._build_prompt(state_fwd, None)  # type: ignore[arg-type]
+        == SynthesizeNode._build_prompt(state_rev, None)  # type: ignore[arg-type]
+    )
+
+
 def test_labeled_body_leaves_unmatched_bodies_plain() -> None:
     out = _labeled_body(_body(), {"sources": []})  # type: ignore[dict-item]
     assert out.startswith("Paper\n")

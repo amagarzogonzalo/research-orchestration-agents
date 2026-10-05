@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://arxiv.org/abs/2411.02959"
+  },
+  "recorded_at": "2026-10-05T12:13:43Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:43.154754+00:00",
+    "char_count": 3043,
+    "crawl_method": "trafilatura",
+    "markdown": "# Computer Science > Information Retrieval\n\n\\[Submitted on 5 Nov 2024 (v1), last revised 7 Feb 2025 (this version, v2)\\]\n\n# Title:HtmlRAG: HTML is Better Than Plain Text for Modeling Retrieved Knowledge in RAG Systems\n\nView PDF HTML (experimental)\nAbstract:Retrieval-Augmented Generation (RAG) has been shown to improve knowledge capabilities and alleviate the hallucination problem of LLMs. The Web is a major source of external knowledge used in RAG systems, and many commercial RAG systems have used Web search engines as their major retrieval systems. Typically, such RAG systems retrieve search results, download HTML sources of the results, and then extract plain texts from the HTML sources. Plain text documents or chunks are fed into the LLMs to augment the generation. However, much of the structural and semantic information inherent in HTML, such as headings and table structures, is lost during this plain-text-based RAG process. To alleviate this problem, we propose HtmlRAG, which uses HTML instead of plain text as the format of retrieved knowledge in RAG. We believe HTML is better than plain text in modeling knowledge in external documents, and most LLMs possess robust capacities to understand HTML. However, utilizing HTML presents new challenges. HTML contains additional content such as tags, JavaScript, and CSS specifications, which bring extra input tokens and noise to the RAG system. To address this issue, we propose HTML cleaning, compression, and a two-step block-tree-based pruning strategy, to shorten the HTML while minimizing the loss of information. Experiments on six QA datasets confirm the superiority of using HTML in RAG systems.\n\n## Submission history\n\nFrom: Jiejun Tan \\[view email\\]\n**\\[v1\\]**Tue, 5 Nov 2024 09:58:36 UTC (991 KB)\n\n**\\[v2\\]**Fri, 7 Feb 2025 08:32:24 UTC (994 KB)\n\n### Additional Features\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
+    "title": "2411.02959",
+    "url": "https://arxiv.org/abs/2411.02959"
+  },
+  "usage": {},
+  "wall_s": 3.981
+}

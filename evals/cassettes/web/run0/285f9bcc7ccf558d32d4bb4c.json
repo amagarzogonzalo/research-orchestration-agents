@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1101/2025.06.09.658393"
+  },
+  "recorded_at": "2026-10-05T12:13:49Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:49.623285+00:00",
+    "char_count": 2357,
+    "crawl_method": "trafilatura",
+    "markdown": "## Abstract\n\nA significant portion of disease-causing mutations occur at protein-protein interfaces however, the number of structurally resolved multi-protein complexes is extremely small. Here we present a computational pipeline, PIONEER2, that integrates 3D structural similarity with geometric deep learning to accurately predict protein binding partner-specific interfacial residues. We compare the performance of PIONEER2 to that of AlphaFold3 and found, using a test set of PDB structures, that their performance is quite similar. However, about 20% of AlphaFold3 predictions for protein-protein complexes in the PDB have AlphaFold3 ranking scores below 0.5, which indicates an uncertain model. For these structures, PIONEER2 outperforms AlphaFold3 at discriminating interfacial from non-interfacial residues. Further, about half of the AlphaFold3 ranking scores on high confidence protein-protein interactions (PPIs) not associated with a PDB structure are below 0.5 indicating that PIONEER2 offers superior interface prediction for a large number of PPIs for which structures are not available. We created a comprehensive 3D structurally informed interactome encompassing all 352,124 experimentally detected binary human PPIs in the current literature and made PIONEER2 interface predictions for each. We experimentally validated these predictions by generating 1,866 mutations and testing their disruptive impact on 5,010 mutation-interaction pairs. PIONEER2-predicted interfaces are found to be comparable to PDB structures in their ability to predict disruptive mutations while AlphaFold3 performance is reduced. Similarly, PIONEER2-predicted interfaces outperform AlphaFold3 in accounting for the depletion of non-deleterious common population variants and the enrichment of disease-related mutations on protein surfaces. Overall, our results suggest that PIONEER2-predicted interfaces provide a valuable tool for studying disease etiology, advancing personalized medicine and for fundamental research. We further implemented PIONEER2 as a user-friendly web server (https://pioneer2.yulab.org) platform for users to explore our 3D interactome models and conduct genome-wide functional genomics studies.\n\n### Competing Interest Statement\n\nThe authors have declared no competing interest.\n\n## Footnotes\n\n- Added PIONEER2 3D interactome web server.",
+    "title": "2025.06.09.658393",
+    "url": "https://doi.org/10.1101/2025.06.09.658393"
+  },
+  "usage": {},
+  "wall_s": 4.843
+}

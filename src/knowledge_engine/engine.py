@@ -414,12 +414,14 @@ def _default_search() -> SearchPort:
     from knowledge_engine.infrastructure.search.dblp import DblpAdapter
     from knowledge_engine.infrastructure.search.doaj import DoajAdapter
     from knowledge_engine.infrastructure.search.europe_pmc import EuropePmcAdapter
+    from knowledge_engine.infrastructure.search.google_cse import GoogleCSEAdapter
     from knowledge_engine.infrastructure.search.huggingface_papers import HuggingFacePapersAdapter
     from knowledge_engine.infrastructure.search.openalex import OpenAlexAdapter
     from knowledge_engine.infrastructure.search.osf import OSFPreprintsAdapter
     from knowledge_engine.infrastructure.search.pubmed import PubMedAdapter
     from knowledge_engine.infrastructure.search.semantic_scholar import SemanticScholarAdapter
     from knowledge_engine.infrastructure.search.unpaywall import UnpaywallAdapter, is_usable_email
+    from knowledge_engine.infrastructure.search.wikipedia import WikipediaAdapter
 
     # Order: DOI backbone first (OpenAlex, then Crossref registry fallback),
     # biomedical depth next, then community/CS, preprints, OA. Unpaywall last:
@@ -440,6 +442,13 @@ def _default_search() -> SearchPort:
     unpaywall_email = os.environ.get("UNPAYWALL_EMAIL", "")
     if is_usable_email(unpaywall_email):
         sources.append(UnpaywallAdapter(unpaywall_email))
+    # General web last: fallback breadth after the scholarly set. Wikipedia is
+    # keyless and always on; Google CSE only when key + CX engine are set.
+    sources.append(WikipediaAdapter())
+    google_key = os.environ.get("GOOGLE_API_KEY", "")
+    google_cx = os.environ.get("GOOGLE_CX_ENGINE", "")
+    if google_key and google_cx:
+        sources.append(GoogleCSEAdapter(api_key=google_key, cx=google_cx))
     return DemuxSearchAdapter(sources)
 
 

@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1145/3805712.3809882"
+  },
+  "recorded_at": "2026-10-05T12:13:07Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:07.042731+00:00",
+    "char_count": 257,
+    "crawl_method": "jina",
+    "markdown": "![Image 1: Icon for dl.acm.org](https://dl.acm.org/favicon.ico)\n\n## dl.acm.org\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.1145/3805712.3809882"
+  },
+  "usage": {},
+  "wall_s": 22.91
+}

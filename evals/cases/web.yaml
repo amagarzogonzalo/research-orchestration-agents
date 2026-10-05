@@ -1,0 +1,38 @@
+# General-knowledge run: exercises the general-web fallback tier (Wikipedia
+# keyless; Google CSE when key+CX are set) alongside the scholarly set.
+id: web
+description: >
+  A general-knowledge research() run stays structurally sound: YAML
+  frontmatter with provenance, at least two sections, valid footnote links,
+  and bounded token/call/latency cost.
+
+entrypoint: "evals.adapters:research_run"
+input:
+  query: "What is retrieval-augmented generation and how does it reduce hallucinations?"
+  max_sources: 8
+
+samples: 1
+pass_at_k: 1
+
+invariants:
+  frontmatter_keys: ["@id", type, title, provenance, citations, tldr_llm]
+  min_sections: 2
+  must_cite: []
+  no_uncited_claims: true
+  valid_links: true
+  forbidden_patterns: ["as an ai", "\\bTODO\\b", "as of my (last )?(knowledge|training)"]
+  max_chars: 30000
+
+budget:
+  # Calibrated 2026-10-05 against first record; general-web sources add calls.
+  max_total_tokens: 35000
+  max_model_calls: 40
+  max_wall_s: 1200
+
+judge:
+  rubric: rubrics/default.md
+  min_score: 6
+  samples: 1
+  # Advisory: free-tier judges are noisy signal, not a gate (repo policy, see
+  # research.yaml). Deterministic layers above block merges.
+  advisory: true
