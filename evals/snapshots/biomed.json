@@ -3,14 +3,16 @@
     "crossref:10.1007/978-1-0716-0687-2_14",
     "crossref:10.1007/978-1-0716-0687-2_15",
     "crossref:10.1007/978-1-0716-0822-7_6",
-    "crossref:10.1007/nmeth.3301",
-    "europe_pmc:MED:42519799",
-    "europe_pmc:MED:42793101"
+    "crossref:10.1016/j.omtm.2025.101498",
+    "crossref:10.17504/protocols.io.wikfccw",
+    "huggingface_papers:2501.02045",
+    "huggingface_papers:2502.18864",
+    "huggingface_papers:2505.23559"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 8,
-    "paragraphs": 6,
+    "list_items": 12,
+    "paragraphs": 12,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -22,11 +24,12 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "a51c0d42cff5f02d",
+  "hash": "b5e232a38d539783",
   "headings": [
-    "2:overview-of-crispr-off-target-challenges",
-    "2:experimental-methods-for-genome-wide-off-target-detection",
-    "2:safety-advances-and-next-generation-editors",
-    "2:open-questions"
+    "2:overview-of-crispr-off-target-detection-approaches",
+    "2:methodological-comparison-and-trade-offs",
+    "2:ai-safety-frameworks-and-broader-context-risks",
+    "2:open-questions",
+    "2:practical-recommendations-trade-offs"
   ]
 }

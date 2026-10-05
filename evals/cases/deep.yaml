@@ -36,3 +36,8 @@ judge:
   # Advisory: free-tier judges are noisy signal, not a gate (repo policy, see
   # research.yaml). Deterministic layers above block merges.
   advisory: true
+
+deepeval:
+  # Opt-in DeepEval pass (--deep only; default replay skips it). Advisory
+  # until thresholds are calibrated against live runs — same policy as judge.
+  metrics: [answer_relevancy, faithfulness, task_completion]

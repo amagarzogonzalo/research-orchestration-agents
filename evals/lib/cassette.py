@@ -10,6 +10,7 @@ is what the nightly live job is for.
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import os
@@ -31,14 +32,32 @@ def _key(request: dict[str, Any]) -> str:
 
 
 class Cassette:
-    """mode: 'replay' (default, offline) | 'record' (live, writes) | 'live'."""
+    """mode: 'replay' (default, offline) | 'record' (live, writes) | 'live'.
 
-    def __init__(self, name: str, mode: str | None = None, directory: Path | None = None):
+    Args:
+        name: Cassette namespace (case/run directory).
+        mode: Override the ``EVAL_MODE`` environment default.
+        directory: Override the cassette root.
+        memo: Shared command-level memo for record mode. Repeated identical
+            calls within one record command reuse the first live result
+            instead of re-fetching: live duplicates (bot-tOTP pages, Ray IDs,
+            timestamps) would otherwise overwrite the file with bytes the
+            earlier prompts were not built from, and replay could never match.
+    """
+
+    def __init__(
+        self,
+        name: str,
+        mode: str | None = None,
+        directory: Path | None = None,
+        memo: dict[str, Any] | None = None,
+    ):
         self.name = name
         self.mode = mode or os.environ.get("EVAL_MODE", "replay")
         self.dir = (directory or DEFAULT_DIR) / name
         self.dir.mkdir(parents=True, exist_ok=True)
         self.calls: list[dict[str, Any]] = []
+        self.memo = memo if memo is not None else {}
 
     def chat(self, client: Any, **request: Any) -> dict[str, Any]:
         k = _key(request)
@@ -57,6 +76,10 @@ class Cassette:
             return rec["response"]
 
         t0 = time.time()
+        if self.mode == "record" and k in self.memo:
+            response = self.memo[k]
+            self.calls.append({"key": k, "replayed": False, "usage": {}, "memo_hit": True})
+            return response
         response = client(**request)
         elapsed = time.time() - t0
         usage = response.get("usage", {}) if isinstance(response, dict) else {}
@@ -78,6 +101,7 @@ class Cassette:
                 )
                 + "\n"
             )
+            self.memo[k] = copy.deepcopy(response)
         return response
 
     async def achat(self, client: Any, **request: Any) -> dict[str, Any]:
@@ -109,6 +133,10 @@ class Cassette:
             return rec["response"]
 
         t0 = time.time()
+        if self.mode == "record" and k in self.memo:
+            response = copy.deepcopy(self.memo[k])
+            self.calls.append({"key": k, "replayed": False, "usage": {}, "memo_hit": True})
+            return response
         response = await client(**request)
         elapsed = time.time() - t0
         usage = response.get("usage", {}) if isinstance(response, dict) else {}
@@ -131,6 +159,7 @@ class Cassette:
                 )
                 + "\n"
             )
+            self.memo[k] = copy.deepcopy(response)
         return response
 
     async def acall(
@@ -172,18 +201,22 @@ class Cassette:
             return decode(rec["response"])
 
         t0 = time.time()
+        if self.mode == "record" and key in self.memo:
+            self.calls.append({"key": key, "replayed": False, "usage": {}, "memo_hit": True})
+            return decode(copy.deepcopy(self.memo[key]))
         result = await fn(**payload)
         elapsed = time.time() - t0
         self.calls.append({"key": key, "replayed": False, "usage": {}, "wall_s": elapsed})
 
         if self.mode == "record":
+            encoded = encode(result)
             path.write_text(
                 json.dumps(
                     {
                         "recorded_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                         "name": name,
                         "payload": payload,
-                        "response": encode(result),
+                        "response": encoded,
                         "usage": {},
                         "wall_s": round(elapsed, 3),
                     },
@@ -194,6 +227,7 @@ class Cassette:
                 )
                 + "\n"
             )
+            self.memo[key] = copy.deepcopy(encoded)
         return result
 
     @property

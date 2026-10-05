@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-05T16:09:50Z",
+  "request": {
+    "max_tokens": 400,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, and preprints when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: Are there comparative studies or benchmarks that evaluate RAG versus long-context models on hallucination metrics?\n\nPapers:\n[0] crossref:10.36227/techrxiv.177162116.61215374/v1 | Ghost Context: Cross-Context Hallucination in Long-Context Language Models | 2026 | cited by 0\n[1] crossref:10.31219/osf.io/mc762 | A Comparative Analysis to Evaluate Bias and Fairness Across Large Language Models with Benchmarks | 2024 | cited by 1\n[2] crossref:10.1088/2632-2153/ae5442/data1 | Supplementary data | cited by 0\n[3] crossref:10.2139/ssrn.6354339 | &lt;p&gt;Quantitative Metrics for Hallucination Detection in Generative Models&lt;/p&gt; | 2026 | cited by 0\n[4] crossref:10.2139/ssrn.5390586 | Prompt-Response Semantic Divergence Metrics for Faithfulness Hallucination and Misalignment Detection in Large Language Models | 2025 | cited by 0\n[5] pubmed:42831810 | A comparative analysis of the prevalence of antibodies to the hepatitis E virus (Hepeviridae: Paslahepevirus) among residents of the Amur Region with different levels of zoonotic risk of infection. | Vopr Virusol, 2026 | cited by 0\n[6] pubmed:42831589 | Divergence Between Marker Expression and Phenotype During Human Corneal Endothelial Cell Expansion. | Invest Ophthalmol Vis Sci, 2026 | cited by 0\n[7] pubmed:42831478 | Coblation intracapsular tonsillectomy outcomes in paediatric obstructive sleep disordered breathing: A Singapore study. | Ann Acad Med Singap, 2026 | cited by 0\n[8] pubmed:42831437 | Acute effects of volume-matched isometric exercise intensity on vascular function and autonomic regulation in men with elevated blood pressure. | Clin Physiol Funct Imaging, 2026 | cited by 0\n[9] pubmed:42831355 | Treatment Trajectories of Methylphenidate versus Risperidone in Preschool ADHD: A 12-Week Retrospective Study. | Turk Psikiyatri Derg, 2026 | cited by 0\n[10] europe_pmc:MED:42587692 | A Self-Controlled Benchmark of Retrieval-Augmented Generation for Large Language Models on Clinical Guideline Questions. | 2026 | cited by 0\n[11] europe_pmc:MED:42682816 | Deep learning and generative AI for medical imaging and clinical decision support systems: a structured critical review. | 2026 | cited by 0\n[12] europe_pmc:MED:42361285 | Can Small Open-Source Language Models With Retrieval-Augmented Generation Match GPT-4 Performance in Breast Cancer Clinical Decision Support? | 2026 | cited by 0\n[13] europe_pmc:MED:42490893 | Artificial intelligence for genomic science: a scoping review of concepts, architectures, applications, and open challenges. | 2026 | cited by 1\n[14] europe_pmc:MED:42106551 | A study on question answering in the ceramics domain using large language models with retrieved triples and generated textual knowledge prompts. | 2026 | cited by 0\n[15] huggingface_papers:2510.04849 | When Models Lie, We Learn: Multilingual Span-Level Hallucination\n  Detection with PsiloQA | 2025 | cited by 0\n[16] huggingface_papers:2508.21496 | ELV-Halluc: Benchmarking Semantic Aggregation Hallucinations in Long\n  Video Understanding | 2025 | cited by 0\n[17] huggingface_papers:2406.11230 | Multimodal Needle in a Haystack: Benchmarking Long-Context Capability of\n  Multimodal Large Language Models | 2024 | cited by 0\n[18] huggingface_papers:2309.14525 | Aligning Large Multimodal Models with Factually Augmented RLHF | 2023 | cited by 0\n[19] huggingface_papers:2503.19622 | Exploring Hallucination of Large Multimodal Models in Video\n  Understanding: Benchmark, Analysis and Mitigation | 2025 | cited by 0\n[20] osf:dt7gn_v1 | The Functional Connectivity of Hallucinations in Psychiatric Disorders and Neurodegenerative Disorders: A Systematic Review | 2026 | cited by 0\n[21] osf:xu3v4_v1 | Beyond Hallucination: Ethical Risks and Narrative Dislocation in  Generative AI | 2026 | cited by 0\n[22] osf:u57xs_v2 | Impaired functional double dissociation in motor-to-sensory transformation mediates aberrant predictive coding in auditory verbal hallucinations | 2026 | cited by 0\n[23] osf:be53j_v1 | Operational Closure, Predictive Coding, and Psychosis: An Evolutionary Framework for Delusion, Hallucination, and Social Cognition | 2026 | cited by 0\n\nRelevant papers:",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to identify papers relevant to the research topic: \"Are there comparative studies or benchmarks that evaluate RAG versus long-context models on hallucination metrics?\" So we need papers that compare Retrieval-Augmented Generation (RAG) vs long-context models, focusing on hallucination metrics. Prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. Keep unique-coverage items.\n\nWe have list of papers. Let's examine each:\n\n[0] Ghost Context: Cross-Context Hallucination in Long-Context Language Models. 2026. This is about hallucination in long-context models. Not necessarily comparative with RAG. Might be relevant but not comparative.\n\n[1] Comparative Analysis to Evaluate Bias and Fairness Across Large Language Models with Benchmarks. 2024. Not about hallucination.\n\n[2] Supplementary data. Not relevant.\n\n[3] Quantitative Metrics for Hallucination Detection in Generative Models. 2026. Might be metrics but not comparative RAG vs long-context.\n\n[4] Prompt-Response Semantic Divergence Metrics for Faithfulness Hallucination and Misalignment Detection in Large Language Models. 2025. Metrics but not comparative.\n\n[5-9] medical papers unrelated.\n\n[10] A Self-Controlled Benchmark of Retrieval-Augmented Generation for Large Language Models on Clinical Guideline Questions. 2026. This is a benchmark of RAG but not comparative with long-context models. Might be relevant but not comparative.\n\n[11] Deep learning and generative AI for medical imaging... not relevant.\n\n[12] Can Small Open-Source Language Models With Retrieval-Augmented Generation Match GPT-4 Performance in Breast Cancer Clinical Decision Support? 2026. Benchmark of RAG vs GPT-4 but not specifically hallucination metrics.\n\n[13] AI for genomic science scoping review. Not relevant.\n\n[14] question answering in ceramics domain using large language models with retrieved triples",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791216589,
+    "id": "chatcmpl-f01a577f-18c9-467a-b7ca-bcb9f128c7dd",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_feb9b278f1",
+    "usage": {
+      "completion_time": 0.444772737,
+      "completion_tokens": 400,
+      "completion_tokens_details": {
+        "reasoning_tokens": 398
+      },
+      "prompt_time": 0.076283456,
+      "prompt_tokens": 1299,
+      "prompt_tokens_details": null,
+      "queue_time": 0.047650408,
+      "total_time": 0.521056193,
+      "total_tokens": 1699
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m46d85yyec2rw6fw0vh14eed",
+      "seed": 673501732
+    }
+  },
+  "usage": {
+    "completion_time": 0.444772737,
+    "completion_tokens": 400,
+    "completion_tokens_details": {
+      "reasoning_tokens": 398
+    },
+    "prompt_time": 0.076283456,
+    "prompt_tokens": 1299,
+    "prompt_tokens_details": null,
+    "queue_time": 0.047650408,
+    "total_time": 0.521056193,
+    "total_tokens": 1699
+  },
+  "wall_s": 0.63
+}

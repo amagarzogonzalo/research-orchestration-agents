@@ -3,15 +3,15 @@
   "payload": {
     "url": "https://doi.org/10.2139/ssrn.5557161"
   },
-  "recorded_at": "2026-10-05T13:53:36Z",
+  "recorded_at": "2026-10-05T16:09:09Z",
   "response": {
-    "captured_at": "2026-10-05T13:53:36.791374+00:00",
-    "char_count": 272,
-    "crawl_method": "jina",
-    "markdown": "![Image 1: Icon for papers.ssrn.com](https://papers.ssrn.com/favicon.ico)\n\n## papers.ssrn.com\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
-    "title": "Just a moment...",
+    "captured_at": "2026-10-05T16:09:09.694591+00:00",
+    "char_count": 484,
+    "crawl_method": "crawl4ai",
+    "markdown": "[![SSRN Logo](https://www.ssrn.com/abstract=5557161)](https://www.ssrn.com)\n# Content Blocked\n! We have detected that you may be using an automated script or search engine our site does not support. Please retry using an alternate way of accessing our site.   \nContact Content_Protection_Services@Elsevier.com for more information.  \n\n  * Reference Number: a45db06159a26723\n  * IP Address: 217.102.66.155\n  * Timestamp: Mon, 05 Oct 2026 16:09:08 GMT \n\n\n::CLOUDFLARE_ERROR_1000S_BOX::\n",
+    "title": "Content Blocked",
     "url": "https://doi.org/10.2139/ssrn.5557161"
   },
   "usage": {},
-  "wall_s": 16.511
+  "wall_s": 1.704
 }

@@ -1,5 +1,5 @@
 .PHONY: help install test test-fast lint types arch semgrep agents context check dup \
-        profile profiles evals evals-live evals-accept sessions \
+        profile profiles evals evals-deep evals-live evals-accept sessions \
         compress-on compress-off compress-savings compress-help
 
 help:
@@ -55,6 +55,9 @@ sessions:           ## cost per model over the last 30 days
 # ---- evals (behavioral regression for LLM-driven code) --------------------
 evals:              ## offline replay, free, deterministic
 	uv run python evals/runner.py
+
+evals-deep:         ## replay + DeepEval metrics pass (needs the evals extra)
+	uv run python evals/runner.py --deep
 
 evals-live:         ## live calls, re-records cassettes. Costs money. Ask first.
 	EVAL_MODE=record uv run python evals/runner.py --record

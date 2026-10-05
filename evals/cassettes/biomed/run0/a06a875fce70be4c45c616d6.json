@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-05T14:02:58Z",
+  "recorded_at": "2026-10-05T16:06:53Z",
   "request": {
     "max_tokens": 400,
     "messages": [
@@ -25,49 +25,49 @@
         "message": {
           "content": "",
           "function_call": null,
-          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"CRISPR off-target detection methods and safety advances\". We should prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim, but keep unique-coverage items.\n\nWe have a list of 46 items (0-45). We need to output JSON with relevant_ids array.\n\nWe need to examine each paper and decide relevance.\n\nLet's parse each:\n\n[0] crossref:10.1038/nmeth.3301 | CRISPR off-target detection | Nature Methods, 2015 | cited by 0\n\nNature Methods 2015, likely a review or methods paper. Highly relevant. Include.\n\n[1] crossref:10.1007/978-1-0716-0822-7_6 | iGUIDE Method for CRISPR Off-Target Detection | Methods in Molecular Biology, 2020 | cited by 4\n\nMethods in Molecular Biology, 2020. It's a methods paper. Relevant. Include.\n\n[2] crossref:10.1007/978-1-0716-0687-2_15 | Genome-Wide CRISPR Off-Target DNA Break Detection by the BLISS Method | Methods in Molecular Biology, 2020 | cited by 7\n\nMethods in Mol Biol, 2020. Relevant. Include.\n\n[3] crossref:10.1007/978-1-0716-0687-2_14 | Detection of CRISPR/Cas9-Generated Off-Target Effect by Integration-Defective Lentiviral Vector | Methods in Molecular Biology, 2020 | cited by 4\n\nMethods in Mol Biol, 2020. Relevant. Include.\n\n[4] crossref:10.17504/protocols.io.wikfccw | GUIDE-seq simplified library preparation protocol (CRISPR",
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"CRISPR off-target detection methods and safety advances\". We should prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. Keep unique-coverage items.\n\nWe have list of papers with IDs 0-45. We need to output JSON with relevant_ids array.\n\nWe need to evaluate each paper.\n\nLet's parse each:\n\n0: crossref:10.1038/nmeth.3301 | CRISPR off-target detection | Nature Methods, 2015 | cited by 0. This is a primary peer-reviewed article in Nature Methods. Highly relevant. Include.\n\n1: crossref:10.1007/978-1-0716-0822-7_6 | iGUIDE Method for CRISPR Off-Target Detection | Methods in Molecular Biology, 2020 | cited by 4. Methods in Molecular Biology is a book series, but still peer-reviewed. It's a method. Relevant. Include.\n\n2: crossref:10.1007/978-1-0716-0687-2_15 | Genome-Wide CRISPR Off-Target DNA Break Detection by the BLISS Method | Methods in Molecular Biology, 2020 | cited by 7. Relevant. Include.\n\n3: crossref:10.1007/978-1-0716-0687-2_14 | Detection of CRISPR/Cas9-Generated Off-Target Effect by Integration-Defective Lentiviral Vector | Methods in Molecular Biology, 2020 | cited by 4. Relevant. Include.\n\n4: crossref:10.17504/protocols.io.wikfccw | GUIDE-seq simplified library preparation protocol (CRISPR/Cas9 off-target cleavage detection) v1 | 2018 | cited by 0. Protocols.io is a protocol repository,",
           "role": "assistant",
           "tool_calls": null
         }
       }
     ],
-    "created": 1791208977,
-    "id": "chatcmpl-ceda992d-f4b1-45ed-bcf6-f9617fae93a4",
+    "created": 1791216412,
+    "id": "chatcmpl-7f595219-5205-4842-94d2-f66bb0fc56a1",
     "model": "openai/gpt-oss-20b",
     "object": "chat.completion",
     "service_tier": "auto",
-    "system_fingerprint": "fp_66f3850a1a",
+    "system_fingerprint": "fp_a8c584dda7",
     "usage": {
-      "completion_time": 0.47495236,
+      "completion_time": 0.459320309,
       "completion_tokens": 400,
       "completion_tokens_details": {
         "reasoning_tokens": 398
       },
-      "prompt_time": 0.110845517,
+      "prompt_time": 0.115067243,
       "prompt_tokens": 2063,
       "prompt_tokens_details": null,
-      "queue_time": 0.26350002,
-      "total_time": 0.585797877,
+      "queue_time": 0.319447722,
+      "total_time": 0.574387552,
       "total_tokens": 2463
     },
     "usage_breakdown": null,
     "x_groq": {
-      "id": "req_01m465zvvqe12vve428rzky69r",
-      "seed": 1415732197
+      "id": "req_01m46d2rmqet7sw75t8s32esjj",
+      "seed": 806799369
     }
   },
   "usage": {
-    "completion_time": 0.47495236,
+    "completion_time": 0.459320309,
     "completion_tokens": 400,
     "completion_tokens_details": {
       "reasoning_tokens": 398
     },
-    "prompt_time": 0.110845517,
+    "prompt_time": 0.115067243,
     "prompt_tokens": 2063,
     "prompt_tokens_details": null,
-    "queue_time": 0.26350002,
-    "total_time": 0.585797877,
+    "queue_time": 0.319447722,
+    "total_time": 0.574387552,
     "total_tokens": 2463
   },
-  "wall_s": 1.296
+  "wall_s": 1.15
 }

@@ -1,0 +1,36 @@
+name: Evals drift check
+
+on:
+  schedule:
+    # Weekly, Sunday 06:00 UTC — off-peak for free-tier shared pools.
+    # Disable by commenting the cron line (manual dispatch below still works).
+    - cron: "0 6 * * 0"
+  workflow_dispatch:
+
+concurrency:
+  group: evals-drift
+  cancel-in-progress: false
+
+jobs:
+  replay:
+    name: Offline replay (free, deterministic)
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --extra dev
+      - name: Offline gate (lint, types, unit, replay)
+        run: |
+          uv run ruff check src tests
+          uv run ruff format --check src tests
+          uv run mypy src
+          uv run pytest tests/unit -q
+          uv run python evals/runner.py
+      - name: Report drift
+        if: failure()
+        run: |
+          echo "::warning::Offline evals drifted. A human must re-record"
+          echo "cassettes (make evals-live), review the diff, and run"
+          echo "make evals-accept. Never auto-accept: snapshots are the baseline."

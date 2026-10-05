@@ -22,6 +22,10 @@ from deepeval.metrics import (
 from deepeval.test_case import LLMTestCase
 
 METRICS: dict[str, dict[str, Any]] = {
+    # Thresholds are starting points, NOT calibrated: the calibration run
+    # needs free-tier judge quota (often throttled) and is still pending.
+    # The runner treats every DeepEval result as advisory until calibration
+    # lands; do not gate on these numbers.
     "answer_relevancy": {"factory": AnswerRelevancyMetric, "threshold": 0.7},
     "faithfulness": {"factory": FaithfulnessMetric, "threshold": 0.7},
     "contextual_precision": {"factory": ContextualPrecisionMetric, "threshold": 0.6},
@@ -31,6 +35,25 @@ METRICS: dict[str, dict[str, Any]] = {
     "task_completion": {"factory": TaskCompletionMetric, "threshold": 0.7},
     "step_efficiency": {"factory": StepEfficiencyMetric, "threshold": 0.6},
 }
+
+
+def select_metrics(case: dict[str, Any]) -> list[str]:
+    """Metric names requested by a case's ``deepeval:`` block.
+
+    Args:
+        case: Eval case mapping (may lack a ``deepeval`` block).
+
+    Returns:
+        list[str]: Requested registry keys, empty when the case opts out.
+
+    Raises:
+        ValueError: On unknown metric names (fail fast, not at measure time).
+    """
+    names = (case.get("deepeval") or {}).get("metrics", []) or []
+    unknown = [name for name in names if name not in METRICS]
+    if unknown:
+        raise ValueError(f"unknown deepeval metrics: {unknown} (registry: {sorted(METRICS)})")
+    return list(names)
 
 
 def build_test_case(

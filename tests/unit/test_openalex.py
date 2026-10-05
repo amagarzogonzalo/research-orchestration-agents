@@ -122,3 +122,27 @@ async def test_search_strips_filter_punctuation() -> None:
     adapter._client = lambda: _client(handler)  # type: ignore[method-assign]
     await adapter.search("What is RAG?", limit=2)
     assert seen["filter"] == "title.search:What is RAG"
+
+
+@pytest.mark.asyncio
+async def test_search_sanitizes_internal_punctuation() -> None:
+    """Parentheses/commits/inner ? in long questions must not reach title.search."""
+    seen: dict[str, str] = {}
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen["filter"] = str(request.url.params.get("filter", ""))
+        return httpx.Response(200, json=_works_payload())
+
+    adapter = OpenAlexAdapter("test@example.com")
+    adapter._client = lambda: _client(handler)  # type: ignore[method-assign]
+    await adapter.search(
+        "What are long-context models (e.g., GPT-4 with extended context, LLaMA-2-Chat-70B, etc.)?",
+        limit=2,
+    )
+    filt = seen["filter"]
+    assert filt.startswith("title.search:")
+    value = filt.removeprefix("title.search:")
+    for bad in "()?,;:":
+        assert bad not in value
+    assert "long-context models" in value
+    assert "GPT-4" in value

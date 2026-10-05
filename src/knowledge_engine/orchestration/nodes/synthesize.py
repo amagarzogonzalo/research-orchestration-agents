@@ -25,6 +25,12 @@ from knowledge_engine.schemas.source import DocumentBody
 
 logger = logging.getLogger(__name__)
 
+# Per-body evidence cap: full-text bodies (ar5iv renders 100k+ chars) must not
+# flood the synthesis prompt. ~30 bodies x 2500 chars keeps the macro call
+# inside the case token budgets; the cap binds cost, the budget stays fixed
+# (never raised to fit richer evidence).
+_MAX_BODY_CHARS = 2500
+
 _SYNTHESIS_SYSTEM = (
     "You are a senior research synthesizer. Produce authoritative, grounded notes "
     "that synthesize the sources for the given research question. Structure the "
@@ -32,11 +38,17 @@ _SYNTHESIS_SYSTEM = (
     "section naming evidence gaps and what would settle them. Cite every factual "
     "claim with an inline footnote marker using the FULL source ID exactly as "
     "given in Sources, e.g. "
-    '"RAG grounds generation in retrieved passages [^openalex:W123]." At the end, '
+    '"RAG grounds generation in retrieved passages [^openalex:W123]." Every '
+    "number, percentage, quoted phrase, or named benchmark result MUST carry "
+    "its footnote in the same sentence — a quantitative claim without a "
+    "same-sentence citation is a failure. At the end, "
     "add one definition line per cited source, e.g. "
     '"[^openalex:W123]: Paper Title Here. Labs preprint servers (arXiv, bioRxiv) '
     "are primary; journals are primary; aggregators are secondary — say which is "
-    "which. Every section MUST cite at least two sources; a section with no "
+    "which. Load-bearing claims (mechanisms, effectiveness, numbers) must rest "
+    "on primary sources: aggregators and encyclopedias supply background "
+    "only, never the sole support for a load-bearing claim. Every section "
+    "MUST cite at least two sources; a section with no "
     "citations is a failure. Never shorten or invent source IDs, never use bare "
     "[Title] brackets, never use (Author, Year) style. When sources cite each "
     "other (see "
@@ -155,7 +167,7 @@ def _body_text(body: object) -> str:
         markdown = body.get("markdown") or ""
     else:
         title, markdown = "", ""
-    return f"{title}\n{markdown[:4000]}"
+    return f"{title}\n{markdown[:_MAX_BODY_CHARS]}"
 
 
 def _norm_ref(value: str) -> str:

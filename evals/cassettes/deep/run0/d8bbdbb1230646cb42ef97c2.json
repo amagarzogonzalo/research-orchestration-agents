@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-05T13:53:49Z",
+  "recorded_at": "2026-10-05T16:09:39Z",
   "request": {
     "max_tokens": 400,
     "messages": [
@@ -25,49 +25,49 @@
         "message": {
           "content": "",
           "function_call": null,
-          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"What are the key differences in hallucination mitigation mechanisms between RAG and long-context models?\" So we need papers that discuss hallucination mitigation mechanisms in RAG and long-context models, and differences between them. We prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. But keep unique-coverage items.\n\nWe have list of papers with IDs 0-19. Let's examine each:\n\n0: Ghost Context: Cross-Context Hallucination in Long-Context Language Models. This is about long-context models. Likely relevant.\n\n1: Domain-Partitioned Retrieval as a Hallucination Mitigation Strategy in Conversational RAG: The PC-RAG Architecture. This is about RAG. Relevant.\n\n2: Retrieval-Augmented Generation (RAG) vs. Fine-Tuning: A Systematic Review of Hallucination Mitigation in Medical LLMs. This compares RAG vs fine-tuning, but not necessarily long-context models. Might be relevant but not directly about long-context models. But could provide some comparison.\n\n3: Architectural Hallucination Mitigation in Multi-Agent Document Intelligence: Domain-Isolated RAG and Dual-Channel Claim Verification. RAG.\n\n4: Architectural Hallucination Mitigation in Multi-Agent Document Intelligence: Domain-Isolated RAG, Dual-Channel Verification, and Schema-Free Extraction. RAG.\n\n5: Mitigating hallucinations in healthcare AI: a systematic review of evidence-based strategies. General.\n\n6: Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications. Not about hallucination mitigation.\n\n7: Exploring Bias in Medical Applications of Large Language Models: Protocol for a Systematic Review. Not about hallucination mitigation.\n\n8: A study on question answering in the ceramics domain using large language models with retrieved triples and generated textual knowledge prompts. Might discuss retrieval but not necessarily",
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"What are the key differences in hallucination mitigation mechanisms between RAG and long-context models?\" So we need papers that discuss hallucination mitigation mechanisms in RAG and long-context models, and differences between them. We prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. But keep unique-coverage items.\n\nWe have list of papers with IDs 0-19. Let's examine each:\n\n0: Ghost Context: Cross-Context Hallucination in Long-Context Language Models. This is about long-context models, hallucination mitigation? Might discuss mitigation mechanisms. It's a preprint (techrxiv). Not peer-reviewed. But unique coverage of long-context hallucination. Might be relevant.\n\n1: Domain-Partitioned Retrieval as a Hallucination Mitigation Strategy in Conversational RAG: The PC-RAG Architecture. This is about RAG mitigation. Preprint (rs). Might be relevant.\n\n2: Retrieval-Augmented Generation (RAG) vs. Fine-Tuning: A Systematic Review of Hallucination Mitigation in Medical LLMs. This is a systematic review comparing RAG vs fine-tuning. Might discuss mitigation mechanisms. Preprint (au). Might be relevant.\n\n3: Architectural Hallucination Mitigation in Multi-Agent Document Intelligence: Domain-Isolated RAG and Dual-Channel Claim Verification. This is about RAG mitigation. Preprint (rs). Might be relevant.\n\n4: Architectural Hallucination Mitigation in Multi-Agent Document Intelligence: Domain-Isolated RAG, Dual-Channel Verification, and Schema-Free Extraction. SSRN. Not peer-reviewed. Might be relevant but duplicate of 3? 3 and 4 are similar but 4 is SSRN. We prefer peer-reviewed. 3 is preprint. Might keep 3.\n\n5: Mitigating hallucinations in healthcare AI: a",
           "role": "assistant",
           "tool_calls": null
         }
       }
     ],
-    "created": 1791208428,
-    "id": "chatcmpl-312c3d2c-f413-4d7a-bbf4-173d03f787bd",
+    "created": 1791216579,
+    "id": "chatcmpl-f05bcfb7-3d4a-40f6-99bb-75f1ca08c232",
     "model": "openai/gpt-oss-20b",
     "object": "chat.completion",
     "service_tier": "auto",
-    "system_fingerprint": "fp_d3e146e1a5",
+    "system_fingerprint": "fp_66f3850a1a",
     "usage": {
-      "completion_time": 0.511933863,
+      "completion_time": 0.447419367,
       "completion_tokens": 400,
       "completion_tokens_details": {
         "reasoning_tokens": 398
       },
-      "prompt_time": 0.054351937,
+      "prompt_time": 0.056390211,
       "prompt_tokens": 1095,
       "prompt_tokens_details": null,
-      "queue_time": 0.016177503,
-      "total_time": 0.5662858,
+      "queue_time": 0.93408341,
+      "total_time": 0.503809578,
       "total_tokens": 1495
     },
     "usage_breakdown": null,
     "x_groq": {
-      "id": "req_01m465f405ebmb7d4s6c323tde",
-      "seed": 1645978738
+      "id": "req_01m46d7v5xez791jz0bcg6wajx",
+      "seed": 643742501
     }
   },
   "usage": {
-    "completion_time": 0.511933863,
+    "completion_time": 0.447419367,
     "completion_tokens": 400,
     "completion_tokens_details": {
       "reasoning_tokens": 398
     },
-    "prompt_time": 0.054351937,
+    "prompt_time": 0.056390211,
     "prompt_tokens": 1095,
     "prompt_tokens_details": null,
-    "queue_time": 0.016177503,
-    "total_time": 0.5662858,
+    "queue_time": 0.93408341,
+    "total_time": 0.503809578,
     "total_tokens": 1495
   },
-  "wall_s": 0.823
+  "wall_s": 1.499
 }

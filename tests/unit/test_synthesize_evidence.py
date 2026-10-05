@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from knowledge_engine.orchestration.nodes.synthesize import (
     SynthesizeNode,
+    _body_text,
     _cited_by_map,
     _labeled_body,
     _ledger_line,
@@ -34,6 +35,18 @@ def _body() -> DocumentBody:
 def test_labeled_body_prefixes_matching_source_id() -> None:
     out = _labeled_body(_body(), {"sources": [_src()]})  # type: ignore[dict-item]
     assert out.startswith("[openalex:W123]\n")
+
+
+def test_body_text_caps_evidence_per_body() -> None:
+    """Full-text bodies (ar5iv 100k chars) must not flood the prompt uncapped."""
+    long_body = DocumentBody(
+        url="https://example.org/full",
+        title="Full",
+        markdown="x" * 100000,
+        crawl_method=FetchMethod.API,
+    )
+    text = _body_text(long_body)
+    assert len(text) <= len("Full\n") + 2500
 
 
 def test_build_prompt_is_stable_regardless_of_bodies_order() -> None:
