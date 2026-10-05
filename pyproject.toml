@@ -28,6 +28,7 @@ dependencies = [
 scrape = ["crawl4ai>=0.9,<0.10", "trafilatura>=2.2,<3", "playwright>=1.62,<2"]
 browser = ["playwright>=1.62,<2", "selenium>=4.20,<5"]
 store = ["psycopg[binary,pool]>=3.1,<4", "langgraph-checkpoint-postgres>=3,<4"]  # Supabase Postgres checkpointer + store (opt-in)
+evals = ["deepeval>=4.2,<5"]  # DeepEval metrics (opt-in; default eval path stays cassette-only)
 providers = ["groq>=1.7,<2", "openai>=2.20,<3", "google-genai"]
 dev = [
     "pytest>=8",
@@ -119,7 +120,7 @@ module = [
     "selenium.*",
     "letta.*",
     "psycopg.*",
-    
+
     "google.*",
     "groq.*",
     "redis.*",
