@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1075/ts.25064.gut"
+  },
+  "recorded_at": "2026-10-05T13:53:23Z",
+  "response": {
+    "captured_at": "2026-10-05T13:53:23.461499+00:00",
+    "char_count": 286,
+    "crawl_method": "jina",
+    "markdown": "![Image 1: Icon for www.jbe-platform.com](http://www.jbe-platform.com/favicon.ico)\n\n## www.jbe-platform.com\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.1075/ts.25064.gut"
+  },
+  "usage": {},
+  "wall_s": 11.424
+}

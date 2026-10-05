@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-05T13:53:57Z",
+  "request": {
+    "max_tokens": 400,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, and preprints when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: Are there comparative studies or benchmarks that evaluate RAG versus long-context models on hallucination metrics?\n\nPapers:\n[0] crossref:10.36227/techrxiv.177162116.61215374/v1 | Ghost Context: Cross-Context Hallucination in Long-Context Language Models | 2026 | cited by 0\n[1] crossref:10.31219/osf.io/mc762 | A Comparative Analysis to Evaluate Bias and Fairness Across Large Language Models with Benchmarks | 2024 | cited by 1\n[2] crossref:10.1088/2632-2153/ae5442/data1 | Supplementary data | cited by 0\n[3] crossref:10.2139/ssrn.6354339 | &lt;p&gt;Quantitative Metrics for Hallucination Detection in Generative Models&lt;/p&gt; | 2026 | cited by 0\n[4] crossref:10.2139/ssrn.5390586 | Prompt-Response Semantic Divergence Metrics for Faithfulness Hallucination and Misalignment Detection in Large Language Models | 2025 | cited by 0\n[5] pubmed:42831146 | Alveolar Ridge Split Technique With Simultaneous Implant Placement: A Clinical Case Series With One-Year Follow-Up. | Cureus, 2026 | cited by 0\n[6] pubmed:42831108 | GLP-1 Receptor Agonists Versus DPP-4 Inhibitors and Incident Dementia Risk in COVID-19 Survivors with Type 2 Diabetes: A Target Trial Emulation Study. | Drug Des Devel Ther, 2026 | cited by 0\n[7] pubmed:42831074 | Comparative efficacy of vitamin B12 supplementation routes in adults with replacement indication: a systematic review. | EClinicalMedicine, 2026 | cited by 0\n[8] pubmed:42830906 | Sinus Laser-Assisted Closure Under Tumescent Local Anesthesia for Pilonidal Disease: A Pilot Study. | Cureus, 2026 | cited by 0\n[9] pubmed:42830852 | Tegileridine versus Sufentanil for Patient-Controlled Intravenous Analgesia After Cesarean Delivery: A Randomized Double-Blind Trial. | Drug Des Devel Ther, 2026 | cited by 0\n[10] europe_pmc:MED:42587692 | A Self-Controlled Benchmark of Retrieval-Augmented Generation for Large Language Models on Clinical Guideline Questions. | 2026 | cited by 0\n[11] europe_pmc:MED:42682816 | Deep learning and generative AI for medical imaging and clinical decision support systems: a structured critical review. | 2026 | cited by 0\n[12] europe_pmc:MED:42361285 | Can Small Open-Source Language Models With Retrieval-Augmented Generation Match GPT-4 Performance in Breast Cancer Clinical Decision Support? | 2026 | cited by 0\n[13] europe_pmc:MED:42490893 | Artificial intelligence for genomic science: a scoping review of concepts, architectures, applications, and open challenges. | 2026 | cited by 1\n[14] europe_pmc:MED:42106551 | A study on question answering in the ceramics domain using large language models with retrieved triples and generated textual knowledge prompts. | 2026 | cited by 0\n[15] huggingface_papers:2510.04849 | When Models Lie, We Learn: Multilingual Span-Level Hallucination\n  Detection with PsiloQA | 2025 | cited by 0\n[16] huggingface_papers:2508.21496 | ELV-Halluc: Benchmarking Semantic Aggregation Hallucinations in Long\n  Video Understanding | 2025 | cited by 0\n[17] huggingface_papers:2406.11230 | Multimodal Needle in a Haystack: Benchmarking Long-Context Capability of\n  Multimodal Large Language Models | 2024 | cited by 0\n[18] huggingface_papers:2309.14525 | Aligning Large Multimodal Models with Factually Augmented RLHF | 2023 | cited by 0\n[19] huggingface_papers:2503.19622 | Exploring Hallucination of Large Multimodal Models in Video\n  Understanding: Benchmark, Analysis and Mitigation | 2025 | cited by 0\n[20] osf:dt7gn_v1 | The Functional Connectivity of Hallucinations in Psychiatric Disorders and Neurodegenerative Disorders: A Systematic Review | 2026 | cited by 0\n[21] osf:xu3v4_v1 | Beyond Hallucination: Ethical Risks and Narrative Dislocation in  Generative AI | 2026 | cited by 0\n[22] osf:u57xs_v2 | Impaired functional double dissociation in motor-to-sensory transformation mediates aberrant predictive coding in auditory verbal hallucinations | 2026 | cited by 0\n[23] osf:be53j_v1 | Operational Closure, Predictive Coding, and Psychosis: An Evolutionary Framework for Delusion, Hallucination, and Social Cognition | 2026 | cited by 0\n\nRelevant papers:",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to identify papers relevant to research topic: \"Are there comparative studies or benchmarks that evaluate RAG versus long-context models on hallucination metrics?\" So we need papers that compare Retrieval-Augmented Generation (RAG) vs long-context models, focusing on hallucination metrics. Prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. Keep unique-coverage items.\n\nWe have list of 24 papers. Let's examine each.\n\nPaper 0: \"Ghost Context: Cross-Context Hallucination in Long-Context Language Models\" 2026. This is about hallucination in long-context models. Not necessarily comparative with RAG. Might be relevant but not comparative.\n\nPaper 1: \"A Comparative Analysis to Evaluate Bias and Fairness Across Large Language Models with Benchmarks\" 2024. Not about hallucination.\n\nPaper 2: Supplementary data. Not relevant.\n\nPaper 3: \"Quantitative Metrics for Hallucination Detection in Generative Models\" 2026. Might be metrics but not comparative RAG vs long-context.\n\nPaper 4: \"Prompt-Response Semantic Divergence Metrics for Faithfulness Hallucination and Misalignment Detection in Large Language Models\" 2025. Metrics but not comparative.\n\nPaper 5-9: medical case studies. Not relevant.\n\nPaper 10: \"A Self-Controlled Benchmark of Retrieval-Augmented Generation for Large Language Models on Clinical Guideline Questions.\" 2026. This is a benchmark of RAG but not comparative with long-context models. Might be relevant but not comparative.\n\nPaper 11: review of AI for medical imaging. Not relevant.\n\nPaper 12: \"Can Small Open-Source Language Models With Retrieval-Augmented Generation Match GPT-4 Performance in Breast Cancer Clinical Decision Support?\" 2026. Benchmark of RAG vs GPT-4. Not necessarily long-context.\n\nPaper 13: scoping review. Not relevant.\n\nPaper ",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791208436,
+    "id": "chatcmpl-7fb323ba-2c6c-4619-a4b3-9a6c0b80a23f",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_63473661d7",
+    "usage": {
+      "completion_time": 0.463927607,
+      "completion_tokens": 400,
+      "completion_tokens_details": {
+        "reasoning_tokens": 398
+      },
+      "prompt_time": 0.065601886,
+      "prompt_tokens": 1289,
+      "prompt_tokens_details": null,
+      "queue_time": 0.138473497,
+      "total_time": 0.529529493,
+      "total_tokens": 1689
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m465fcefefzazphmq60nknk4",
+      "seed": 2035399437
+    }
+  },
+  "usage": {
+    "completion_time": 0.463927607,
+    "completion_tokens": 400,
+    "completion_tokens_details": {
+      "reasoning_tokens": 398
+    },
+    "prompt_time": 0.065601886,
+    "prompt_tokens": 1289,
+    "prompt_tokens_details": null,
+    "queue_time": 0.138473497,
+    "total_time": 0.529529493,
+    "total_tokens": 1689
+  },
+  "wall_s": 0.825
+}

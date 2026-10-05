@@ -5,7 +5,9 @@ stripped to plain text for abstracts. Keyless with a compliant User-Agent;
 this is the always-on general-web fallback that needs no credentials.
 
 Live probe 2026-10-05: ``srsearch=retrieval%20augmented%20generation``
-HTTP 200 with ``query.search[].pageid/title/snippet``.
+HTTP 200 with ``query.search[].pageid/title/snippet``. NOTE: Wikimedia
+rejects generic User-Agents with 403 from this egress — the contact-URL form
+below is required, a bare ``knowledge-engine/0.1`` string gets 403.
 """
 
 from __future__ import annotations
@@ -23,7 +25,10 @@ from knowledge_engine.schemas.source import SearchSource, SourceRecord
 logger = logging.getLogger(__name__)
 
 _BASE = "https://en.wikipedia.org/w/api.php"
-_USER_AGENT = "knowledge-engine/0.1 (research library; contact: via repo)"
+# Wikimedia UA policy: app/version + a contactable pointer. Verified
+# 2026-10-05: this contact-URL form gets HTTP 200; a bare
+# "knowledge-engine/0.1 (research library; contact: via repo)" gets 403.
+_USER_AGENT = "knowledge-engine/0.1 (https://github.com/amagarzogonzalo/research-orchestration-agents)"
 _TAG = re.compile(r"<[^>]+>")
 
 

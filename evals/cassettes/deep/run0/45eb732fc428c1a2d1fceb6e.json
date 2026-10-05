@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.36227/techrxiv.177272838.89432844/v1"
+  },
+  "recorded_at": "2026-10-05T13:53:14Z",
+  "response": {
+    "captured_at": "2026-10-05T13:53:14.547233+00:00",
+    "char_count": 275,
+    "crawl_method": "jina",
+    "markdown": "![Image 1: Icon for www.techrxiv.org](https://www.techrxiv.org/favicon.ico)\n\n## www.techrxiv.org\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.36227/techrxiv.177272838.89432844/v1"
+  },
+  "usage": {},
+  "wall_s": 11.895
+}

@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-05T13:53:12Z",
+  "request": {
+    "max_tokens": 400,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, and preprints when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What are long-context models (e.g., GPT‑4 with extended context, LLaMA‑2‑Chat‑70B, etc.) and how do they handle longer input sequences?\n\nPapers:\n[0] crossref:10.1075/ts.25064.gut | How well do Large Language Models handle Machine Translation? | Translation Spaces, 2026 | cited by 0\n[1] crossref:10.28998/2317-9945.202483.384-399 | Devir algoritmo: usos do CHAT-GPT em aulas de argumentação | Revista Leitura, 2024 | cited by 2\n[2] crossref:10.1016/j.clinimag.2024.110382 | Comparative diagnostic accuracy of GPT-4o and LLaMA 3-70b: Proprietary vs. open-source large language models in radiology | Clinical Imaging, 2025 | cited by 21\n[3] crossref:10.1145/3677052.3698675 | Is Small Really Beautiful for Central Bank Communication? Evaluating Language Models for Finance: Llama-3-70B, GPT-4, FinBERT-FOMC, FinBERT, and VADER | Proceedings of the 5th ACM International Conference on AI in Finance, 2024 | cited by 6\n[4] crossref:10.7717/peerj-cs.3862/table-3 | Table 3: Comparison of BERTScore and ROUGE scores for GPT-4 Turbo, GPT-4o, Gemini, GPT-3.5 Turbo, Mistral-8x22B, Llama-3.1, Llama-4 on English and Russian languages. | cited by 0\n[5] europe_pmc:PMC:PMC13323440 | ECR 2026 Book of Abstracts | 2026 | cited by 0\n[6] europe_pmc:PMC:PMC11688754 | Full GSA 2024 Abstract Book PDF | 2024 | cited by 0\n[7] europe_pmc:MED:40676363 | Abstracts from the 2025 Annual Meeting of the Society of General Internal Medicine. | 2025 | cited by 0\n[8] huggingface_papers:2402.13753 | LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens | 2024 | cited by 0\n[9] huggingface_papers:2605.13831 | Training Long-Context Vision-Language Models Effectively with Generalization Beyond 128K Context | 2026 | cited by 0\n[10] huggingface_papers:2309.00071 | YaRN: Efficient Context Window Extension of Large Language Models | 2023 | cited by 0\n[11] huggingface_papers:2502.17129 | Thus Spake Long-Context Large Language Model | 2025 | cited by 0\n[12] huggingface_papers:2408.07055 | LongWriter: Unleashing 10,000+ Word Generation from Long Context LLMs | 2024 | cited by 0\n[13] osf:efw56_v1 | ACCT: Enabling Long-Context Transformer Reasoning Under Memory Constraints | 2026 | cited by 0\n[14] osf:e4mvn_v1 | Mental health consequences of extremely vivid mental imagery: A qualitative investigation of managing anxiety with hyperphantasia | 2026 | cited by 0\n[15] osf:kv3ry_v1 | Emotional and Well-being Consequences of Discrimination and Collective Action Engagement | 2026 | cited by 0\n[16] osf:8ku96_v1 | Delegating Knowledge: Belief in AI Sufficiency and its Consequences for How People Process Information | 2026 | cited by 0\n[17] osf:8gny5_v2 | The broken brain? Prevalence and consequences of brain framing of mental disorders | 2026 | cited by 0\n\nRelevant papers:",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to pick papers directly relevant to the research topic: long-context models and how they handle longer input sequences. We should prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. Keep unique-coverage items.\n\nWe have list of papers with IDs 0-17. Let's examine each:\n\n0: \"How well do Large Language Models handle Machine Translation?\" Not relevant.\n\n1: \"Devir algoritmo: usos do CHAT-GPT em aulas de argumentação\" Not relevant.\n\n2: Comparative diagnostic accuracy of GPT-4o and LLaMA 3-70b in radiology. Not about long context.\n\n3: Finance evaluation of Llama-3-70B, GPT-4, etc. Not about long context.\n\n4: Table comparing BERTScore and ROUGE for various models. Not about long context.\n\n5: ECR 2026 Book of Abstracts. Not relevant.\n\n6: Full GSA 2024 Abstract Book PDF. Not relevant.\n\n7: Abstracts from 2025 Annual Meeting of Society of General Internal Medicine. Not relevant.\n\n8: huggingface_papers:2402.13753 LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens. This is about long context. It's a preprint? huggingface_papers indicates maybe preprint. But it's a primary source. It's relevant.\n\n9: huggingface_papers:2605.13831 Training Long-Context Vision-Language Models Effectively with Generalization Beyond 128K Context. Relevant.\n\n10: huggingface_papers:2309.00071 YaRN: Efficient Context Window Extension of Large Language Models. Relevant.\n\n11: huggingface_papers:2502.17129 Thus Spake Long-Context Large Language Model. Relevant.\n\n12: huggingface_papers:2408.07055 LongWriter: Unleashing 10,000+ Word Generation from Long",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791208391,
+    "id": "chatcmpl-ff45d699-cb32-420d-8943-fe8d6678d104",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_639a5351c8",
+    "usage": {
+      "completion_time": 0.434727622,
+      "completion_tokens": 400,
+      "completion_tokens_details": {
+        "reasoning_tokens": 398
+      },
+      "prompt_time": 0.060511375,
+      "prompt_tokens": 1023,
+      "prompt_tokens_details": null,
+      "queue_time": 0.222866034,
+      "total_time": 0.495238997,
+      "total_tokens": 1423
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m465dzsme038ngrzq1bewaft",
+      "seed": 413093696
+    }
+  },
+  "usage": {
+    "completion_time": 0.434727622,
+    "completion_tokens": 400,
+    "completion_tokens_details": {
+      "reasoning_tokens": 398
+    },
+    "prompt_time": 0.060511375,
+    "prompt_tokens": 1023,
+    "prompt_tokens_details": null,
+    "queue_time": 0.222866034,
+    "total_time": 0.495238997,
+    "total_tokens": 1423
+  },
+  "wall_s": 0.87
+}

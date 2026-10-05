@@ -2,16 +2,21 @@
   "citations": [
     "crossref:10.59350/pn1ra-vpc97",
     "doaj:5c3e3ea8e8b2469e8706f069570090a8",
-    "europe_pmc:MED:42270954",
     "europe_pmc:MED:42297857",
-    "europe_pmc:MED:42591399",
     "europe_pmc:MED:42658861",
-    "medrxiv:10.64898/2026.09.17.26363303"
+    "huggingface_papers:2407.01219",
+    "huggingface_papers:2412.11919",
+    "huggingface_papers:2501.08292",
+    "huggingface_papers:2505.04253",
+    "huggingface_papers:2509.17671",
+    "huggingface_papers:2509.21875",
+    "huggingface_papers:2512.19134",
+    "huggingface_papers:2603.20309"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 11,
-    "paragraphs": 14,
+    "list_items": 14,
+    "paragraphs": 15,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -23,12 +28,12 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "ac20231cd432059c",
+  "hash": "35dee85e973ca1b4",
   "headings": [
-    "2:foundations-of-hallucination-in-large-language-models",
-    "2:mechanism-of-retrieval-augmented-generation-rag",
-    "2:domain-specific-applications-and-safety-impacts",
-    "2:open-questions",
-    "2:practical-takeaways"
+    "2:mechanisms-of-hallucination-in-large-language-models",
+    "2:core-principles-of-retrieval-augmented-generation-rag",
+    "2:advanced-optimization-and-integration-paradigms",
+    "2:detection-and-quantification-of-hallucinations-in-rag",
+    "2:open-questions"
   ]
 }
