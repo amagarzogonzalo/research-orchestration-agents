@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1088/2632-2153/ae5442/data1"
+  },
+  "recorded_at": "2026-10-05T13:54:02Z",
+  "response": {
+    "captured_at": "2026-10-05T13:54:02.729673+00:00",
+    "char_count": 270,
+    "crawl_method": "trafilatura",
+    "markdown": "To ensure we keep this website safe, please can you confirm you are a human by ticking the box below.\n\nIf you are unable to complete the above request please contact us using the below link, providing a screenshot of your experience.\n\nhttps://ioppublishing.org/contacts/",
+    "title": "data1",
+    "url": "https://doi.org/10.1088/2632-2153/ae5442/data1"
+  },
+  "usage": {},
+  "wall_s": 4.943
+}

@@ -3,12 +3,14 @@
     "crossref:10.1007/978-1-0716-0687-2_14",
     "crossref:10.1007/978-1-0716-0687-2_15",
     "crossref:10.1007/978-1-0716-0822-7_6",
-    "crossref:10.1038/nmeth.3301"
+    "crossref:10.1007/nmeth.3301",
+    "europe_pmc:MED:42519799",
+    "europe_pmc:MED:42793101"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 9,
-    "paragraphs": 12,
+    "list_items": 8,
+    "paragraphs": 6,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -20,11 +22,11 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "ab68c080e8fc3653",
+  "hash": "a51c0d42cff5f02d",
   "headings": [
-    "2:mechanisms-and-causes-of-crispr-off-target-activity",
-    "2:detection-and-profiling-methods",
-    "2:safety-advances-and-mitigation-strategies",
+    "2:overview-of-crispr-off-target-challenges",
+    "2:experimental-methods-for-genome-wide-off-target-detection",
+    "2:safety-advances-and-next-generation-editors",
     "2:open-questions"
   ]
 }

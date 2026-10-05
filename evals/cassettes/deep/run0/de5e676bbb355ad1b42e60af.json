@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-05T13:53:29Z",
+  "request": {
+    "max_tokens": 400,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, and preprints when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How does retrieval-augmented generation reduce hallucinations? Cite empirical studies or benchmarks that demonstrate its effectiveness.\n\nPapers:\n[0] crossref:10.5220/0015235400004091 | Evaluating Retrieval-Augmented Generation on Social Bias Benchmarks across Small Language Models | Proceedings of the 15th International Conference on Data Science, Technology and Applications, 2026 | cited by 0\n[1] crossref:10.31979/etd.hn7u-hp8x | LOOM-RAG | cited by 0\n[2] crossref:10.21203/rs.3.rs-10186581/v1 | Retrieval-Augmented Generation for Reducing Hallucinations in Drug-Related Question Answering Systems | 2026 | cited by 0\n[3] crossref:10.18653/v1/2025.findings-emnlp.218 | How Does Knowledge Selection Help Retrieval Augmented Generation? | Findings of the Association for Computational Linguistics: EMNLP 2025, 2025 | cited by 1\n[4] crossref:10.2139/ssrn.5199254 | Lrp4rag: Detecting Hallucinations in Retrieval-Augmented Generation Via Layer-Wise Relevance Propagation | 2025 | cited by 8\n[5] pubmed:42831200 | A reproducible, diagnostic-guided hybrid Laplace workflow for generalized linear mixed models. | MethodsX, 2026 | cited by 0\n[6] pubmed:42830452 | Inferring gene expression profiles of tumor clones. | Bioinformatics, 2026 | cited by 0\n[7] pubmed:42829738 | Enhancing first-aid self-efficacy: A randomized trial comparing three interactive educational ınterventions. | J Educ Health Promot, 2026 | cited by 0\n[8] pubmed:42827925 | Multichannel SSA decomposition in a hybrid SSA-N-BEATS framework for complex time series forecasting. | MethodsX, 2026 | cited by 0\n[9] pubmed:42827142 | Cell-resolved testing of network-pharmacology candidates in dilated cardiomyopathy: PI3K-AKT-associated transcriptional differences are distributed across cardiac lineages and are not enriched above a genome-wide background. | Funct Integr Genomics, 2026 | cited by 0\n[10] europe_pmc:PMC:PMC13600821 | Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models | cited by 0\n[11] europe_pmc:MED:42591399 | Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications. | 2026 | cited by 0\n[12] europe_pmc:MED:42658861 | CLIN-LLM: A safety-constrained hybrid framework for clinical diagnosis and treatment generation. | 2026 | cited by 0\n[13] europe_pmc:MED:42695536 | When a Human-in-the-Loop Amplifies the Risk of Misalignment: Considerations for Research Ethics Oversight. | 2026 | cited by 0\n[14] europe_pmc:MED:42561260 | Enhancing antimicrobial stewardship using a retrieval-augmented generation large language model for infectious disease management. | 2026 | cited by 0\n[15] huggingface_papers:2511.03506 | HaluMem: Evaluating Hallucinations in Memory Systems of Agents | 2025 | cited by 0\n[16] huggingface_papers:2603.09906 | Thinking to Recall: How Reasoning Unlocks Parametric Knowledge in LLMs | 2026 | cited by 0\n[17] huggingface_papers:2504.13169 | Generate, but Verify: Reducing Hallucination in Vision-Language Models\n  with Retrospective Resampling | 2025 | cited by 0\n[18] huggingface_papers:2512.19134 | QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation | 2025 | cited by 0\n[19] huggingface_papers:2604.15574 | Why Fine-Tuning Encourages Hallucinations and How to Fix It | 2026 | cited by 0\n[20] osf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram | 2026 | cited by 0\n[21] osf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach | 2025 | cited by 0\n[22] osf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh | 2025 | cited by 0\n[23] osf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG) | 2025 | cited by 0\n[24] wikipedia:50336055 | Glossary of artificial intelligence | cited by 0\n[25] wikipedia:52588198 | Artificial intelligence in healthcare | cited by 0\n\nRelevant papers:",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to pick papers directly relevant to the research topic: \"How does retrieval-augmented generation reduce hallucinations? Cite empirical studies or benchmarks that demonstrate its effectiveness.\"\n\nWe should prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. Keep unique-coverage items.\n\nWe have list of papers with IDs. Need to decide which are relevant.\n\nLet's examine each:\n\n0: Evaluating Retrieval-Augmented Generation on Social Bias Benchmarks across Small Language Models. Not about hallucinations. Not relevant.\n\n1: LOOM-RAG. Not sure. Might be a preprint. Not about hallucinations.\n\n2: Retrieval-Augmented Generation for Reducing Hallucinations in Drug-Related Question Answering Systems. This is directly about reducing hallucinations. Venue? It's 2026, maybe a conference? Not sure. But it's about hallucinations. Likely relevant.\n\n3: How Does Knowledge Selection Help Retrieval Augmented Generation? Findings of EMNLP 2025. Might discuss hallucinations? Possibly. But not explicitly about hallucinations. Might be relevant if it covers hallucination reduction. But we need empirical studies or benchmarks that demonstrate effectiveness. This might include evaluation. Could be relevant.\n\n4: Lrp4rag: Detecting Hallucinations in Retrieval-Augmented Generation Via Layer-Wise Relevance Propagation. This is about detecting hallucinations, not reducing. Might still be relevant as it deals with hallucinations. But the topic is how RAG reduces hallucinations. This paper is about detection, not reduction. Might not be directly relevant.\n\n5-9: unrelated biomedical methods. Not relevant.\n\n10: Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models. Not about hallucinations.\n\n11: Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications. Not about hallucinations.\n\n12: CLIN-LLM: A safety-constrained",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791208409,
+    "id": "chatcmpl-b5709850-35ab-43e9-ad35-3293436636cc",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_d3e146e1a5",
+    "usage": {
+      "completion_time": 0.432852042,
+      "completion_tokens": 400,
+      "completion_tokens_details": {
+        "reasoning_tokens": 398
+      },
+      "prompt_time": 0.063594403,
+      "prompt_tokens": 1285,
+      "prompt_tokens_details": null,
+      "queue_time": 0.016486209,
+      "total_time": 0.496446445,
+      "total_tokens": 1685
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m465ehedeazbkm1a9j7he65y",
+      "seed": 482341548
+    }
+  },
+  "usage": {
+    "completion_time": 0.432852042,
+    "completion_tokens": 400,
+    "completion_tokens_details": {
+      "reasoning_tokens": 398
+    },
+    "prompt_time": 0.063594403,
+    "prompt_tokens": 1285,
+    "prompt_tokens_details": null,
+    "queue_time": 0.016486209,
+    "total_time": 0.496446445,
+    "total_tokens": 1685
+  },
+  "wall_s": 0.627
+}

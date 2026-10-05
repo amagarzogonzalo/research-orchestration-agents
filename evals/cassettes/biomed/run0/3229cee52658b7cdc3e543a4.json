@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://doi.org/10.1101/741322"
   },
-  "recorded_at": "2026-10-04T13:27:20Z",
+  "recorded_at": "2026-10-05T14:03:17Z",
   "response": {
-    "captured_at": "2026-10-04T13:27:20.033297+00:00",
+    "captured_at": "2026-10-05T14:03:17.946642+00:00",
     "char_count": 207,
     "crawl_method": "jina",
     "markdown": "We have received a high number of requests from this session.\n\nTo keep the service fast and reliable for everyone, this page will reload automatically in 4 seconds.\n\nNeed help? Copied! Paste into your email.",
@@ -13,5 +13,5 @@
     "url": "https://doi.org/10.1101/741322"
   },
   "usage": {},
-  "wall_s": 15.965
+  "wall_s": 11.643
 }

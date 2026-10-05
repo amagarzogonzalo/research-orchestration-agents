@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-05T13:54:52Z",
+  "request": {
+    "max_tokens": 400,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, and preprints when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How do long-context models reduce hallucinations? Identify research or experiments that show improvements in factual consistency with extended context.\n\nPapers:\n[0] crossref:10.36227/techrxiv.177162116.61215374/v1 | Ghost Context: Cross-Context Hallucination in Long-Context Language Models | 2026 | cited by 0\n[1] crossref:10.37191/mapsci-jocr-1(1)-005 | How Do Lay People Identify Knee Swelling and What Would They Do About It: Survey Results in the Context of an Event on the Topic of Knee Osteoarthritis | Journal of Orthopaedics and Clinical Research, 2023 | cited by 0\n[2] crossref:10.1523/eneuro.0304-22.2023.f5-1 |  | cited by 0\n[3] crossref:10.32388/r9p397 | Consistency and Some Other Requirements to a Formal Theory in the Context of Multiverse Models | 2022 | cited by 0\n[4] crossref:10.1097/scs.0000000000012355 | Active Knowledge Retrieval to Reduce Hallucinations and Enhance Factual Accuracy in Large Medical Reasoning Models | Journal of Craniofacial Surgery, 2026 | cited by 0\n[5] pubmed:33640650 | Mass Image Synthesis in Mammogram with Contextual Information Based on GANs. | Comput Methods Programs Biomed, 2021 | cited by 0\n[6] europe_pmc:MED:42020757 | Evaluating large language models for accuracy incentivizes hallucinations. | 2026 | cited by 6\n[7] europe_pmc:MED:41969732 | Human-AI co-research on design and evaluation of Embodied Conversational Agent in rehabilitation contexts. | 2026 | cited by 0\n[8] europe_pmc:MED:42106551 | A study on question answering in the ceramics domain using large language models with retrieved triples and generated textual knowledge prompts. | 2026 | cited by 0\n[9] europe_pmc:MED:42388248 | A roadmap for medical large language models: a review of foundations, applications, and challenges. | 2026 | cited by 1\n[10] europe_pmc:MED:42185547 | Semantic architectures for domain-specific programming AI agents: lessons from a JavaScript semantic assistant. | 2026 | cited by 0\n[11] huggingface_papers:2511.03506 | HaluMem: Evaluating Hallucinations in Memory Systems of Agents | 2025 | cited by 0\n[12] huggingface_papers:2410.16251 | Can Knowledge Editing Really Correct Hallucinations? | 2024 | cited by 0\n[13] huggingface_papers:2309.11495 | Chain-of-Verification Reduces Hallucination in Large Language Models | 2023 | cited by 0\n[14] huggingface_papers:2309.03883 | DoLa: Decoding by Contrasting Layers Improves Factuality in Large\n  Language Models | 2023 | cited by 0\n[15] huggingface_papers:2503.19622 | Exploring Hallucination of Large Multimodal Models in Video\n  Understanding: Benchmark, Analysis and Mitigation | 2025 | cited by 0\n[16] osf:dt7gn_v1 | The Functional Connectivity of Hallucinations in Psychiatric Disorders and Neurodegenerative Disorders: A Systematic Review | 2026 | cited by 0\n[17] osf:u57xs_v2 | Impaired functional double dissociation in motor-to-sensory transformation mediates aberrant predictive coding in auditory verbal hallucinations | 2026 | cited by 0\n[18] osf:f6pd8_v1 | Reducing Hallucinations in Educational Large Language Models: The AI Token Pond Reasoning Framework with T0TTL Lifecycle Management | 2026 | cited by 0\n[19] osf:nszgk_v1 | Body mapping, embodiment and emotional responses to an experimental simulation of auditory hallucinations in a VR environment | 2026 | cited by 0\n[20] wikipedia:78730954 | List of common misconceptions about science, technology, and mathematics | cited by 0\n[21] wikipedia:44093 | Electroconvulsive therapy | cited by 0\n\nRelevant papers:",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to identify papers directly relevant to research topic: \"How do long-context models reduce hallucinations? Identify research or experiments that show improvements in factual consistency with extended context.\"\n\nWe have list of papers. Need to pick those that are peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, preprints when both cover same claim. Keep unique-coverage items.\n\nWe need to examine each paper.\n\nPaper 0: Ghost Context: Cross-Context Hallucination in Long-Context Language Models. 2026, crossref. Likely a preprint? It's crossref:10.36227/techrxiv. That is techRxiv preprint. Not peer-reviewed. Might be relevant but not peer-reviewed. But we might still include if unique coverage? But instruction: prefer peer-reviewed journal venues and highly-cited primary sources over aggregators, blogs, and preprints when both cover same claim — but keep unique-coverage items. So if this preprint covers unique claim not covered elsewhere, we might include. But we need to check if other papers cover same claim. Let's see.\n\nPaper 4: Active Knowledge Retrieval to Reduce Hallucinations and Enhance Factual Accuracy in Large Medical Reasoning Models. Journal of Craniofacial Surgery, 2026. That's a journal. But it's medical reasoning models, not necessarily long-context. But maybe uses retrieval. Might be relevant.\n\nPaper 6: Evaluating large language models for accuracy incentivizes hallucinations. 2026. Not sure venue. It's Europe PMC. Might be a preprint? But it's a study about accuracy incentives. Might not be about long-context.\n\nPaper 8: A study on question answering in the ceramics domain using large language models with retrieved triples and generated textual knowledge prompts. 2026. Might involve retrieval but not necessarily long-context.\n\nPaper 11: HaluMem: Evaluating Hallucinations in Memory Systems of Agents. 2025.",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791208491,
+    "id": "chatcmpl-91ce4bf1-0700-40bf-a98c-fe73af6f3d81",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_639a5351c8",
+    "usage": {
+      "completion_time": 0.513463654,
+      "completion_tokens": 400,
+      "completion_tokens_details": {
+        "reasoning_tokens": 398
+      },
+      "prompt_time": 0.060245538,
+      "prompt_tokens": 1106,
+      "prompt_tokens_details": null,
+      "queue_time": 0.261277974,
+      "total_time": 0.573709192,
+      "total_tokens": 1506
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m465h1dge57rw0pxe7fbcnp4",
+      "seed": 481634962
+    }
+  },
+  "usage": {
+    "completion_time": 0.513463654,
+    "completion_tokens": 400,
+    "completion_tokens_details": {
+      "reasoning_tokens": 398
+    },
+    "prompt_time": 0.060245538,
+    "prompt_tokens": 1106,
+    "prompt_tokens_details": null,
+    "queue_time": 0.261277974,
+    "total_time": 0.573709192,
+    "total_tokens": 1506
+  },
+  "wall_s": 1.041
+}

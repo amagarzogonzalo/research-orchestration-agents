@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://doi.org/10.1002/9781394374717.ch03"
   },
-  "recorded_at": "2026-10-04T13:15:41Z",
+  "recorded_at": "2026-10-05T13:47:55Z",
   "response": {
-    "captured_at": "2026-10-04T13:15:41.329278+00:00",
+    "captured_at": "2026-10-05T13:47:55.569233+00:00",
     "char_count": 296,
     "crawl_method": "jina",
     "markdown": "![Image 1: Icon for onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/favicon.ico)\n\n## onlinelibrary.wiley.com\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
@@ -13,5 +13,5 @@
     "url": "https://doi.org/10.1002/9781394374717.ch03"
   },
   "usage": {},
-  "wall_s": 10.003
+  "wall_s": 12.689
 }
