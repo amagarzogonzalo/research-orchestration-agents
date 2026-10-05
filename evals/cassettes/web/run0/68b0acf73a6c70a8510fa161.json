@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://arxiv.org/abs/2412.11919"
+  },
+  "recorded_at": "2026-10-05T12:13:43Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:43.949163+00:00",
+    "char_count": 2746,
+    "crawl_method": "trafilatura",
+    "markdown": "# Computer Science > Computation and Language\n\n\\[Submitted on 16 Dec 2024\\]\n\n# Title:RetroLLM: Empowering Large Language Models to Retrieve Fine-grained Evidence within Generation\n\nView PDF HTML (experimental)\nAbstract:Large language models (LLMs) exhibit remarkable generative capabilities but often suffer from hallucinations. Retrieval-augmented generation (RAG) offers an effective solution by incorporating external knowledge, but existing methods still face several limitations: additional deployment costs of separate retrievers, redundant input tokens from retrieved text chunks, and the lack of joint optimization of retrieval and generation. To address these issues, we propose \\textbf{RetroLLM}, a unified framework that integrates retrieval and generation into a single, cohesive process, enabling LLMs to directly generate fine-grained evidence from the corpus with constrained decoding. Moreover, to mitigate false pruning in the process of constrained evidence generation, we introduce (1) hierarchical FM-Index constraints, which generate corpus-constrained clues to identify a subset of relevant documents before evidence generation, reducing irrelevant decoding space; and (2) a forward-looking constrained decoding strategy, which considers the relevance of future sequences to improve evidence accuracy. Extensive experiments on five open-domain QA datasets demonstrate RetroLLM's superior performance across both in-domain and out-of-domain tasks. The code is available at \\url{this https URL}.\n\n### Current browse context:\n\ncs.CL\n\n### References & Citations\n\nLoading...\n\n# Bibliographic and Citation Tools\n\nBibliographic Explorer *(What is the Explorer?)*\n\nConnected Papers *(What is Connected Papers?)*\n\nLitmaps *(What is Litmaps?)*\n\nscite Smart Citations *(What are Smart Citations?)*\n\n# Code, Data and Media Associated with this Article\n\nalphaXiv *(What is alphaXiv?)*\n\nCatalyzeX Code Finder for Papers *(What is CatalyzeX?)*\n\nDagsHub *(What is DagsHub?)*\n\nGotit.pub *(What is GotitPub?)*\n\nHugging Face *(What is Huggingface?)*\n\nScienceCast *(What is ScienceCast?)*\n\n# Demos\n\n# Recommenders and Search Tools\n\nInfluence Flower *(What are Influence Flowers?)*\n\nCORE Recommender *(What is CORE?)*\n\n# arXivLabs: experimental projects with community collaborators\n\narXivLabs is a framework that allows collaborators to develop and share new arXiv features directly on our website.\n\nBoth individuals and organizations that work with arXivLabs have embraced and accepted our values of openness, community, excellence, and user data privacy. arXiv is committed to these values and only works with partners that adhere to them.\n\nHave an idea for a project that will add value for arXiv's community? **Learn more about arXivLabs**.",
+    "title": "2412.11919",
+    "url": "https://arxiv.org/abs/2412.11919"
+  },
+  "usage": {},
+  "wall_s": 3.981
+}

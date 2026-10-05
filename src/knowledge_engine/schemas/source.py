@@ -23,7 +23,9 @@ class SearchSource(StrEnum):
         UNPAYWALL: Attribute description.
         DBLP: Attribute description.
         DOAJ: Attribute description.
-        OSF_PREPRINTS: Attribute description."""
+        OSF_PREPRINTS: Attribute description.
+        WIKIPEDIA: Attribute description.
+        GOOGLE: Attribute description."""
 
     OPENALEX = "openalex"
     SEMANTIC_SCHOLAR = "semantic_scholar"
@@ -38,6 +40,8 @@ class SearchSource(StrEnum):
     DBLP = "dblp"
     DOAJ = "doaj"
     OSF_PREPRINTS = "osf_preprints"
+    WIKIPEDIA = "wikipedia"
+    GOOGLE = "google"
 
 
 class SourceRecord(BaseModel):

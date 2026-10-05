@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.64898/2026.09.15.751855"
+  },
+  "recorded_at": "2026-10-05T12:13:53Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:53.021946+00:00",
+    "char_count": 2638,
+    "crawl_method": "trafilatura",
+    "markdown": "## Abstract\n\nHuman seasonal influenza evolves rapidly, necessitating twice yearly decisions about whether to update the strains in the vaccine. To help inform this decision, we have been using high-throughput sequencing-based neutralization assays to make twice yearly measurements of how recent human sera neutralize current human H3N2 and H1N1 strains. Here we provide the third installment in this series of measurements by reporting 52,268 titers representing neutralization of 148 viral strains by 355 human sera collected between April and August of 2026. Our measurements show that new H3N2 subclade K strains with mutations in antigenic region D and new H1N1 subclade D.3.1.1 strains with mutations in antigenic region Sa (such as G155E) have reduced neutralization by human sera, with notable heterogeneity in the impact of some of these mutations across sera from different individuals. This paper is accompanied by an interactive summary (https://jbloomlab.github.io/flu-seqneut-2026/summary.html) that enables detailed exploration of the results, and all titer data are publicly available for further analysis to aid vaccine antigen selection and studies of viral evolution.\n\n### Competing Interest Statement\n\nJDB consults for Pfizer, GSK, Apriori Bio, and Merck. JDB has received stock options in the Vaccine Company. JDB is an inventor on Fred Hutch licensed patents related to techniques to characterize the antigenic effects of viral variation. SEH is a co-inventor on patents that describe the use of nucleoside-modified mRNA as a vaccine platform. SEH reports receiving consulting fees from Sanofi, Pfizer, Lumen, Novavax, and Merck. ALG reports contract testing to UW from Abbott, Cepheid, Novavax, Pfizer, Janssen, Assembly Biosciences, Aicuris, Innovative Molecules, and Hologic, research support from Gilead, personal consulting fees from Arisan Therapeutics, outside of the described work. JAE reports support to her institution from GSK, Pfizer, Moderna, and is a consultant for GSK, Pfizer, Merck, Meissa vaccines, Moderna, and Shionogi. ST reports research funding from Pfizer for a separate study.\n\n## Footnotes\n\n- ↵# Lead contact\n- We added titer measurements for 30 more sera (going from 325 to 355), thereby slightly expanding dataset. We also stratified the Fluzone adult vaccinees by whether they had been vaccinated in the prior year in Figures 7 and 8.\n- https://jbloomlab.github.io/flu-seqneut-2026/summary.html\n- https://github.com/jbloomlab/flu-seqneut-2026\n- https://nextstrain.org/community/jbloomlab/flu-seqneut-2026@main/H3N2\n- https://nextstrain.org/community/jbloomlab/flu-seqneut-2026@main/H1N1",
+    "title": "2026.09.15.751855",
+    "url": "https://doi.org/10.64898/2026.09.15.751855"
+  },
+  "usage": {},
+  "wall_s": 5.911
+}

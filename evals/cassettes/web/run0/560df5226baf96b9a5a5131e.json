@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.64898/2026.09.14.750722"
+  },
+  "recorded_at": "2026-10-05T12:13:53Z",
+  "response": {
+    "captured_at": "2026-10-05T12:13:53.480166+00:00",
+    "char_count": 1861,
+    "crawl_method": "trafilatura",
+    "markdown": "## Abstract\n\nTorpor in mammals imposes extreme energetic constraints, yet how it reshapes the immune system remains poorly understood. Here we combined single-cell RNA sequencing with quantitative image analysis of immune cell populations in splenic tissues to define immune remodeling during torpor in a natural hibernator, 13-lined ground squirrels. The torpid spleen showed a significant contraction of white pulp with a preferential reduction of B cell- and T cell-rich adaptive niches and relative preservation of innate myeloid populations. Across immune cell lineages, a conserved transcriptional program of metabolic downscaling emerged, marked by suppression of glycolysis, cell-cycle progression, RNA processing, and translation, together with reduced glucose transporter expression and induction of cold-shock RNA-binding proteins. Despite this pervasive metabolic quiescence, immune cells maintain lineage identity, with B cells undergoing numerical and transcriptional contraction linked to follicular remodeling and T cells adopting a quiescent, stress-resistant state without apoptotic enrichment. Innate cell populations remained numerically enriched but transcriptionally restrained, consistent with low-energy tissue surveillance rather than inflammatory activation. These findings identified torpor as a coordinated, multi-tiered state of reversible immune suppression, in which hierarchical metabolic and lineage-specific programs conserve energy while preserving essential immune infrastructure for rapid restoration. Our identified key molecules and pathways in immune suppression at the cellular and transcriptional levels have important implications for future development of targeted treatment for autoimmune diseases, cancers, and infectious diseases.\n\n### Competing Interest Statement\n\nThe authors have declared no competing interest.",
+    "title": "2026.09.14.750722",
+    "url": "https://doi.org/10.64898/2026.09.14.750722"
+  },
+  "usage": {},
+  "wall_s": 3.856
+}

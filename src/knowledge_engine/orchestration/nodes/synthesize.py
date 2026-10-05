@@ -103,7 +103,11 @@ class SynthesizeNode(WorkflowNode):
         sources = list(state.get("filtered") or state.get("sources", []))
         cited_by = _cited_by_map(sources)
         if state.get("bodies"):
-            evidence = "\n---\n".join(_labeled_body(b, state) for b in state["bodies"])
+            # Canonical order: the add-reducer appends bodies in completion
+            # order, which varies run to run. Sorting keeps prompts (and
+            # cassette keys) deterministic.
+            ordered = sorted(state["bodies"], key=_body_sort_key)
+            evidence = "\n---\n".join(_labeled_body(b, state) for b in ordered)
         else:
             parts = []
             for src in sources:
@@ -118,6 +122,20 @@ class SynthesizeNode(WorkflowNode):
         if critique:
             prompt += f"\n\nReviewer feedback to address:\n{critique}"
         return prompt
+
+
+def _body_sort_key(body: object) -> str:
+    """Stable sort key for bodies regardless of fan-out completion order.
+
+    Args:
+        body: Document body.
+
+    Returns:
+        str: URL fallback title.
+    """
+    if isinstance(body, dict):
+        return str(body.get("url") or body.get("title") or "")
+    return str(getattr(body, "url", "") or getattr(body, "title", "") or "")
 
 
 def _body_text(body: object) -> str:

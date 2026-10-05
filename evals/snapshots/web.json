@@ -1,0 +1,35 @@
+{
+  "citations": [
+    "crossref:10.1109/icomet69771.2026.11591943",
+    "crossref:10.18653/v1/2025.findings-emnlp.218",
+    "crossref:10.21203/rs.3.rs-10186581/v1",
+    "crossref:10.31979/etd.hn7u-hp8x",
+    "huggingface_papers:2312.05708",
+    "huggingface_papers:2312.10997",
+    "huggingface_papers:2411.02959",
+    "huggingface_papers:2412.11919",
+    "huggingface_papers:2603.20309"
+  ],
+  "code_langs": [],
+  "counts": {
+    "list_items": 8,
+    "paragraphs": 11,
+    "tables": 0,
+    "words_bucket": "<1000"
+  },
+  "frontmatter": {
+    "@id": "str",
+    "citations": "empty",
+    "provenance": "empty",
+    "title": "str",
+    "tldr_llm": "str",
+    "type": "str"
+  },
+  "hash": "86cd2762e9ea2e0c",
+  "headings": [
+    "2:definition-and-core-architecture-of-retrieval-augmented-generation-rag",
+    "2:mechanisms-for-reducing-hallucinations",
+    "2:advanced-retrieval-strategies-and-specialized-rag-paradigms",
+    "2:adaptive-retrieval-and-uncertainty-quantification"
+  ]
+}

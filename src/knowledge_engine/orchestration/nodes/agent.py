@@ -93,7 +93,8 @@ class AgentSynthesizeNode(WorkflowNode):
         Returns:
             str: Result text.
         """
-        ctx = "\n".join((b.title or b.url) + "\n" + (b.markdown or "")[:3000] for b in _coerce_bodies(state))
+        bodies = sorted(_coerce_bodies(state), key=lambda b: str(b.url or b.title or ""))
+        ctx = "\n".join((b.title or b.url) + "\n" + (b.markdown or "")[:3000] for b in bodies)
         return f"Research question: {state.get('query', '')}\n\nAvailable evidence:\n{ctx}"
 
 
