@@ -1,5 +1,5 @@
 {
-  "recorded_at": "2026-10-05T13:53:20Z",
+  "recorded_at": "2026-10-05T16:09:07Z",
   "request": {
     "max_tokens": 400,
     "messages": [
@@ -31,43 +31,47 @@
         }
       }
     ],
-    "created": 1791208399,
-    "id": "chatcmpl-97affb62-135f-4065-9af4-a51f656ceabf",
+    "created": 1791216547,
+    "id": "chatcmpl-4e04fe67-14c3-4cb5-8564-1d26b09d51f3",
     "model": "openai/gpt-oss-20b",
     "object": "chat.completion",
     "service_tier": "auto",
-    "system_fingerprint": "fp_e23fc997ca",
+    "system_fingerprint": "fp_75c733514d",
     "usage": {
-      "completion_time": 0.423452983,
+      "completion_time": 0.431765717,
       "completion_tokens": 400,
       "completion_tokens_details": {
         "reasoning_tokens": 398
       },
-      "prompt_time": 0.084196696,
+      "prompt_time": 0.38091995,
       "prompt_tokens": 1343,
-      "prompt_tokens_details": null,
-      "queue_time": 0.295290119,
-      "total_time": 0.507649679,
+      "prompt_tokens_details": {
+        "cached_tokens": 1280
+      },
+      "queue_time": 0.298494691,
+      "total_time": 0.812685667,
       "total_tokens": 1743
     },
     "usage_breakdown": null,
     "x_groq": {
-      "id": "req_01m465e7qmem5r2z49w6g3yyr2",
-      "seed": 2048733558
+      "id": "req_01m46d6w6reqg9vj9gpa91knwm",
+      "seed": 2111267991
     }
   },
   "usage": {
-    "completion_time": 0.423452983,
+    "completion_time": 0.431765717,
     "completion_tokens": 400,
     "completion_tokens_details": {
       "reasoning_tokens": 398
     },
-    "prompt_time": 0.084196696,
+    "prompt_time": 0.38091995,
     "prompt_tokens": 1343,
-    "prompt_tokens_details": null,
-    "queue_time": 0.295290119,
-    "total_time": 0.507649679,
+    "prompt_tokens_details": {
+      "cached_tokens": 1280
+    },
+    "queue_time": 0.298494691,
+    "total_time": 0.812685667,
     "total_tokens": 1743
   },
-  "wall_s": 0.909
+  "wall_s": 1.171
 }

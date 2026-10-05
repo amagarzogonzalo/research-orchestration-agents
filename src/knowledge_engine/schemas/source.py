@@ -88,12 +88,14 @@ class FetchMethod(StrEnum):
         CRAWL4AI: Attribute description.
         TRAFILATURA: Attribute description.
         PLAYWRIGHT: Attribute description.
-        JINA: Attribute description."""
+        JINA: Attribute description.
+        API: Attribute description."""
 
     CRAWL4AI = "crawl4ai"
     TRAFILATURA = "trafilatura"
     PLAYWRIGHT = "playwright"
     JINA = "jina"
+    API = "api"
 
 
 class DocumentBody(BaseModel):

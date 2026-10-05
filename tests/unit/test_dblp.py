@@ -77,6 +77,26 @@ async def test_search_raises_typed_error_on_http_failure() -> None:
         await _adapter(_boom).search("memory networks")
 
 
+async def _empty_body(request: httpx.Request) -> httpx.Response:
+    return httpx.Response(200, content=b"")
+
+
+async def test_search_raises_typed_error_on_empty_body() -> None:
+    """An empty 200 (bot-check/proxy page without JSON) is a SearchError, not a crash."""
+    with pytest.raises(SearchError):
+        await _adapter(_empty_body).search("memory networks")
+
+
+async def _html_body(request: httpx.Request) -> httpx.Response:
+    return httpx.Response(200, text="<html>bot check</html>")
+
+
+async def test_search_raises_typed_error_on_non_json_body() -> None:
+    """HTML bot-check pages surface as SearchError so the demux can isolate them."""
+    with pytest.raises(SearchError):
+        await _adapter(_html_body).search("memory networks")
+
+
 def test_to_record_maps_venue() -> None:
     from knowledge_engine.infrastructure.search.dblp import DblpAdapter
 

@@ -127,3 +127,7 @@ class DblpAdapter(SearchPort):
                 return [self._to_record(hit) for hit in hits[:limit]]
         except httpx.HTTPError as exc:
             raise SearchError(f"dblp search failed for {query!r}: {exc}") from exc
+        except ValueError as exc:
+            # Empty bodies and HTML bot-check pages are not JSON
+            # (json.JSONDecodeError subclasses ValueError).
+            raise SearchError(f"dblp search returned non-JSON for {query!r}: {exc}") from exc

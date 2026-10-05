@@ -3,15 +3,15 @@
   "payload": {
     "url": "https://doi.org/10.1002/9781394374717.fmatter"
   },
-  "recorded_at": "2026-10-05T13:47:54Z",
+  "recorded_at": "2026-10-05T16:02:48Z",
   "response": {
-    "captured_at": "2026-10-05T13:47:54.774201+00:00",
-    "char_count": 296,
-    "crawl_method": "jina",
-    "markdown": "![Image 1: Icon for onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/favicon.ico)\n\n## onlinelibrary.wiley.com\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
+    "captured_at": "2026-10-05T16:02:48.202810+00:00",
+    "char_count": 543,
+    "crawl_method": "crawl4ai",
+    "markdown": "![Icon for onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/favicon.ico)\n# onlinelibrary.wiley.com\n## Performing security verification\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n## Verification successful. Waiting for onlinelibrary.wiley.com to respond\nRay ID: `a45da70ecf430b88`\nPerformance and Security by [Cloudflare](https://www.cloudflare.com?utm_source=challenge&utm_campaign=m)[Privacy](https://www.cloudflare.com/privacypolicy/)\n",
     "title": "Just a moment...",
     "url": "https://doi.org/10.1002/9781394374717.fmatter"
   },
   "usage": {},
-  "wall_s": 12.826
+  "wall_s": 2.624
 }

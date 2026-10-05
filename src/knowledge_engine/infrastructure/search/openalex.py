@@ -7,6 +7,7 @@ back to search, and always pass `mailto` for polite-pool quota.
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 
 import httpx
@@ -16,6 +17,14 @@ from knowledge_engine.core.ports import FetchPort, SearchPort
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 _BASE = "https://api.openalex.org"
+
+# OpenAlex rejects filter punctuation (?, !, :, parens, commas) with HTTP
+# 400 anywhere in the value, not just trailing. Keep word chars, spaces and
+# hyphens (hyphenated model names like GPT-4 stay intact); everything else
+# becomes a space. Verified live 2026-10-05 against the deep-case queries
+# that 400'd with parenthesized "(e.g., ...)" clauses.
+_FILTER_KEEP = re.compile(r"[^\w\s-]", re.UNICODE)
+_FILTER_WS = re.compile(r"\s+")
 
 
 class OpenAlexAdapter(SearchPort, FetchPort):
@@ -128,8 +137,7 @@ class OpenAlexAdapter(SearchPort, FetchPort):
 
         """
         url = f"{_BASE}/works"
-        # OpenAlex rejects filter punctuation (?, !, :) with HTTP 400; strip it.
-        clean = query.strip().rstrip("?!:;.,")
+        clean = _FILTER_WS.sub(" ", _FILTER_KEEP.sub(" ", query)).strip()
         params = {
             "filter": f"title.search:{clean}",
             "per-page": limit,

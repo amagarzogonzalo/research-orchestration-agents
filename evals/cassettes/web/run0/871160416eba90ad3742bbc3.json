@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://doi.org/10.1109/icomet69771.2026.11591943"
   },
-  "recorded_at": "2026-10-05T12:13:00Z",
+  "recorded_at": "2026-10-05T16:04:35Z",
   "response": {
-    "captured_at": "2026-10-05T12:13:00.216666+00:00",
+    "captured_at": "2026-10-05T16:04:35.439964+00:00",
     "char_count": 2934,
     "crawl_method": "jina",
     "markdown": "*   [Download PDF](https://ieeexplore.ieee.org/document/ \"You do not have access to this PDF\")\n*    Download References \n*   [Request Permissions](https://ieeexplore.ieee.org/document/ \"Request permission for reuse.\")\n*   [Save to](https://ieeexplore.ieee.org/document/)\n*   [Alerts](https://ieeexplore.ieee.org/document/)\n\n## Abstract:\n\nLarge Language Models (LLMs) have been promising in creating structured output such as workflows, code, and database queries. The problem with LLMs, however, is that they...[Show More](https://ieeexplore.ieee.org/document/)\n\n## Metadata\n\n## Abstract:\n\nLarge Language Models (LLMs) have been promising in creating structured output such as workflows, code, and database queries. The problem with LLMs, however, is that they are more prone to producing hallucinations when given out-of-domain or complex input, leading to the generation of erroneous information. In this paper, a new strategy has been presented to reduce hallucinations in the structured output tasks through the use of Retrieval-Augmented Generation (RAG). The approach incorporated in the proposed solution combines a retrieval aspect, whereby applicable workflow actions and database tables are retrieved from an existing body of knowledge, and then the ultimate output is produced. Improvements in the structure output of the LLM by increasing the natural language input with these retrieved items can increase the accuracy and reliability of structured outputs. We apply the strength of this method to the workflow generation problem, where the proposed model is considerably less prone to hallucinations and, in the meantime, has high performance. Large-scale tests on in-domain and out-of-domain datasets indicate that the RAG-enhanced system is highly competitive in a wide range of applications, and it is effective and generalizes better. A small retriever model with an LLM is shown that leads to lower computational needs with no negative impact on the quality of outputs. The solution is scalable, and it is applicable to the enterprise-level application, where the accuracy of the workflow is crucial.\n\n**Date of Conference:** 22-23 May 2026\n\n**Date Added to IEEE _Xplore_:** 07 July 2026\n\n**Conference Location:** Sukkur, Pakistan\n\n* * *\n\n### I. Introduction\n\nAs the field of Artificial Intelligence (AI), particularly Natural Language Processing (NLP), has recently experienced rapid expansion, large language models (LLMs) such as GPT-3, GPT-4, and other transformer-based architectures have been widely applied to a diverse range of tasks. It involves text generation, text summarization, machine translation, and structured output generation, e.g., source code, SQL queries, and executable workflows. The opportunities of such applications are enormous, particularly in the workplaces of enterprises where workflow automation and control are very crucial in enhancing operational efficiency and productivity [1].",
@@ -13,5 +13,5 @@
     "url": "https://doi.org/10.1109/icomet69771.2026.11591943"
   },
   "usage": {},
-  "wall_s": 16.059
+  "wall_s": 3.442
 }

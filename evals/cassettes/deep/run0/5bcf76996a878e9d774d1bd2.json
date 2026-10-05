@@ -1,0 +1,83 @@
+{
+  "recorded_at": "2026-10-05T16:09:15Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a senior research synthesizer. Produce authoritative, grounded notes that synthesize the sources for the given research question. Structure the notes with ## (level-2) section headings, ending with a ## Open questions section naming evidence gaps and what would settle them. Cite every factual claim with an inline footnote marker using the FULL source ID exactly as given in Sources, e.g. \"RAG grounds generation in retrieved passages [^openalex:W123].\" Every number, percentage, quoted phrase, or named benchmark result MUST carry its footnote in the same sentence — a quantitative claim without a same-sentence citation is a failure. At the end, add one definition line per cited source, e.g. \"[^openalex:W123]: Paper Title Here. Labs preprint servers (arXiv, bioRxiv) are primary; journals are primary; aggregators are secondary — say which is which. Load-bearing claims (mechanisms, effectiveness, numbers) must rest on primary sources: aggregators and encyclopedias supply background only, never the sole support for a load-bearing claim. Every section MUST cite at least two sources; a section with no citations is a failure. Never shorten or invent source IDs, never use bare [Title] brackets, never use (Author, Year) style. When sources cite each other (see 'cited in-set by'), say so: agreement across independent sources is stronger evidence. Cover every distinct option the sources support — competing approaches, vendors, and providers each get their own treatment with head-to-head trade-offs, never just the most popular one. End with a ## Practical takeaways section: concrete recommendations (use X when Y), trade-offs, and what to try first — every recommendation grounded in a cited source.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Synthesize the research findings into structured notes for query:\nWhat are hallucinations in the context of large language models, and why are they problematic?\n\nSources:\n[crossref:10.1016/b978-0-443-33592-1.00007-3]\nScienceDirect\n[![Elsevier logo](https://www.sciencedirect.com/science/article/pii/B9780443335921000073?via%3Dihub)ScienceDirect](https://www.sciencedirect.com/)\n  * Help\n\n\n# There was a problem providing the content you requested\nPlease [contact our support team](https://service.elsevier.com/app/answers/detail/a_id/10117/supporthub/sciencedirect/kw/IP+blocked/) for more information and provide the details below.\n  * **Reference number:** a45db065dda6970a\n  * **IP Address:** 217.102.66.155\n  * **User Agent:** Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/116.0.0.0 Safari/537.36\n  * **Timestamp:** 2026-10-05 16:09:09 UTC\n  * CPE00001\n\n\n::CLOUDFLARE_ERROR_1000S_BOX::\n[![Elsevier logo with wordmark](https://www.sciencedirect.com/science/article/pii/B9780443335921000073?via%3Dihub)](https://www.elsevier.com/)\n  * [About ScienceDirect](https://www.elsevier.com/solutions/sciencedirect)\n  * [Remote access](https://www.sciencedirect.com/user/institution/login?targetURL=%2F)\n  * [Contact and support](https://service.elsevier.com/app/contact/supporthub/sciencedirect/)\n  * [Terms and conditions](https://www.elsevier.com/legal/elsevier-website-terms-and-conditions)\n  * [Privacy policy](https://www.elsevier.com/legal/privacy-policy)\n  * Cookie settings\n\n\nAll content on this site: Copyright © 2026 Elsevier B.V., its licensors, and contributors. All rights are reserved, including those for text and data mining, AI training, and similar technologies. For all open access content, the relevant licensing terms apply.\n[![RELX group home page](https://www.sciencedirect.com/science/article/pii/B9780443335921000073?via%3Dihub)](https://www.relx.com/)\n\n---\n[crossref:10.2139/ssrn.5557161]\nContent Blocked\n[![SSRN Logo](https://www.ssrn.com/abstract=5557161)](https://www.ssrn.com)\n# Content Blocked\n! We have detected that you may be using an automated script or search engine our site does not support. Please retry using an alternate way of accessing our site.   \nContact Content_Protection_Services@Elsevier.com for more information.  \n\n  * Reference Number: a45db06159a26723\n  * IP Address: 217.102.66.155\n  * Timestamp: Mon, 05 Oct 2026 16:09:08 GMT \n\n\n::CLOUDFLARE_ERROR_1000S_BOX::\n\n---\n[crossref:10.21437/interspeech.2025-324]\nISCA Archive - Teaching Audio-Aware Large Language Models What Does Not Hear: Mitigating Hallucinations through Synthesized Negative Samples\n[ISCA](https://www.isca-speech.org) [Archive](https://www.isca-archive.org) [Interspeech 2025](https://www.isca-archive.org/interspeech_2025/index.html)\n[ISCA](https://www.isca-speech.org) [Archive](https://www.isca-archive.org) [Interspeech 2025](https://www.isca-archive.org/interspeech_2025/index.html)\n### Teaching Audio-Aware Large Language Models What Does Not Hear: Mitigating Hallucinations through Synthesized Negative Samples \n##### Chun-Yi Kuan, Hung-yi Lee\nRecent advancements in audio-aware large language models (ALLMs) enable them to process and understand audio inputs. However, these models often hallucinate non-existent sound events, reducing their reliability in real-world applications. To address this, we propose LISTEN (Learning to Identify Sounds Through Extended Negative Samples), a contrastive-like training method that enhances ALLMs’ ability to distinguish between present and absent sounds using synthesized data from the backbone LLM. Unlike prior approaches, our method requires no modification to LLM parameters and efficiently integrates audio representations via a lightweight adapter. Experiments show that LISTEN effectively mitigates hallucinations while maintaining impressive performance on existing audio question and reasoning benchmarks. At the same time, it is more efficient in both data and computation.\n[](https://www.isca-archive.org/interspeech_2025/kuan25_interspeech.pdf) [](https://www.isca-archive.org/interspeech_2025/kuan25_interspeech.html) [](https://www.isca-archive.org/interspeech_2025/kuan25_interspeech.html) [](https://www.isca-archive.org/interspeech_2025/kuan25_interspeech.html)\n\n```\n@inproceedings{kuan25_interspeech,\n  title     = {{Teaching Audio-Aware Large Language Models What Does Not Hear: Mitigating Hallucinations through Synthesized Negative Samples }},\n  author    = {Chun-Yi Kuan and Hung-yi Lee},\n  year      = {2025},\n  booktitle = {{Interspeech 2025}},\n  pages     = {2073--2077},\n  doi       = {10.21437/Interspeech.2025-324},\n  issn      = {2958-1796},\n}\n```\n\nCopy\n**Cite as** : Kuan, C.-Y., Lee, H.-y. (2025) Teaching Audio-Aware Large Language Models What Does Not Hear: Mitigating Hallucinations through Synthesized Negative Samples . Proc. Interspeech 2025, 2073-2077, doi: 10.21437/Interspeech.2025-324\n**doi** : 10.21437/Interspeech.2025-324\n",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "gemini/gemini-flash-lite-latest",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "## Definition and Manifestation of Hallucinations in Large Language Models\n\nHallucinations in large language models (LLMs) and audio-aware large language models (ALLMs) refer to instances where models generate outputs, responses, or claims that are factually incorrect, ungrounded, or describe events and entities that are entirely non-existent [^crossref:10.21437/interspeech.2025-324]. In the context of audio-aware systems, hallucinations manifest specifically when a model fabricates or detects sound events that are not actually present in the given audio input [^crossref:10.21437/interspeech.2025-324]. \n\n## Why Hallucinations Are Problematic\n\nHallucinations severely limit the reliability of language and audio-aware models when deployed in real-world applications [^crossref:10.21437/interspeech.2025-324]. When models produce fictitious claims or hallucinate non-existent elements (such as ungrounded audio events), it undermines user trust and degrades performance across practical question-answering and reasoning benchmarks [^crossref:10.21437/interspeech.2025-324].\n\n## Mitigation Strategies and Approaches\n\nTo tackle the problem of hallucinations, specialized contrastive training frameworks can be implemented [^crossref:10.21437/interspeech.2025-324]. For instance, the LISTEN (Learning to Identify Sounds Through Extended Negative Samples) method uses synthesized negative samples derived from the backbone LLM to teach audio-aware models how to distinguish between actually present and absent features [^crossref:10.21437/interspeech.2025-324]. This approach requires no modification to the underlying LLM parameters and integrates audio representations efficiently via a lightweight adapter [^crossref:10.21437/interspeech.2025-324].\n\n## Open questions\n\n* What are the precise boundary conditions where backbone LLMs begin to generate ungrounded fabrications during multi-modal reasoning? \n* How do contrastive negative sampling techniques scale across different model architectures beyond audio-aware language models?\n* Controlled cross-model evaluations comparing parameter-free lightweight adapters against full fine-tuning would settle the optimal efficiency-to-robustness trade-off.\n\n## Practical takeaways\n\n* **Use contrastive training with negative samples** (such as the LISTEN method) when deploying audio-aware large language models to mitigate the generation of non-existent sound events [^crossref:10.21437/interspeech.2025-324].\n* **Leverage lightweight adapters** for integrating multi-modal representations to maintain computational and data efficiency without altering core LLM parameters [^crossref:10.21437/interspeech.2025-324].\n* **Validate models against task-specific reasoning benchmarks** after applying hallucination-mitigation strategies to ensure that factual precision is improved without degrading general benchmark performance [^crossref:10.21437/interspeech.2025-324].\n\n[^crossref:10.21437/interspeech.2025-324]: Teaching Audio-Aware Large Language Models What Does Not Hear: Mitigating Hallucinations through Synthesized Negative Samples. Interspeech 2025 primary conference proceeding.",
+          "function_call": null,
+          "images": [],
+          "provider_specific_fields": {
+            "thought_signatures": [
+              "EmAKXgFpFH0TDgmDgBmdecwFI/JtmE6YL38bXDHn4R7DZT1I8E872xheBdEaEy2HMGP9rXy7Qg6d394iqwGiDjv36bkqgEQsTZzScPS7LmjaAcmbJbMuixwPazQv2/th2qU="
+            ]
+          },
+          "role": "assistant",
+          "thinking_blocks": [],
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791216549,
+    "id": "pcvDarLBHKOuxN8P99qa0Ak",
+    "model": "gemini-flash-lite-latest",
+    "object": "chat.completion",
+    "system_fingerprint": null,
+    "usage": {
+      "cache_read_input_tokens": null,
+      "completion_tokens": 767,
+      "completion_tokens_details": {
+        "text_tokens": 767
+      },
+      "prompt_tokens": 2023,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": null,
+        "image_tokens": null,
+        "text_tokens": 2023
+      },
+      "total_tokens": 2790
+    },
+    "vertex_ai_citation_metadata": [],
+    "vertex_ai_grounding_metadata": [],
+    "vertex_ai_safety_results": [],
+    "vertex_ai_url_context_metadata": []
+  },
+  "usage": {
+    "cache_read_input_tokens": null,
+    "completion_tokens": 767,
+    "completion_tokens_details": {
+      "text_tokens": 767
+    },
+    "prompt_tokens": 2023,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": null,
+      "image_tokens": null,
+      "text_tokens": 2023
+    },
+    "total_tokens": 2790
+  },
+  "wall_s": 5.438
+}

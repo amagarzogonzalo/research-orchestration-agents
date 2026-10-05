@@ -3,15 +3,15 @@
   "payload": {
     "url": "https://doi.org/10.36227/techrxiv.177162116.61215374/v1"
   },
-  "recorded_at": "2026-10-05T13:55:04Z",
+  "recorded_at": "2026-10-05T16:09:23Z",
   "response": {
-    "captured_at": "2026-10-05T13:55:04.072895+00:00",
-    "char_count": 275,
-    "crawl_method": "jina",
-    "markdown": "![Image 1: Icon for www.techrxiv.org](https://www.techrxiv.org/favicon.ico)\n\n## www.techrxiv.org\n\n## Performing security verification\n\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.",
+    "captured_at": "2026-10-05T16:09:23.949240+00:00",
+    "char_count": 515,
+    "crawl_method": "crawl4ai",
+    "markdown": "![Icon for www.techrxiv.org](https://www.techrxiv.org/favicon.ico)\n# www.techrxiv.org\n## Performing security verification\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n## Verification successful. Waiting for www.techrxiv.org to respond\nRay ID: `a45db0baee06dde3`\nPerformance and Security by [Cloudflare](https://www.cloudflare.com?utm_source=challenge&utm_campaign=m)[Privacy](https://www.cloudflare.com/privacypolicy/)\n",
     "title": "Just a moment...",
     "url": "https://doi.org/10.36227/techrxiv.177162116.61215374/v1"
   },
   "usage": {},
-  "wall_s": 11.885
+  "wall_s": 1.655
 }

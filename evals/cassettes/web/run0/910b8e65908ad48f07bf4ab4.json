@@ -1,0 +1,83 @@
+{
+  "recorded_at": "2026-10-05T16:05:31Z",
+  "request": {
+    "max_tokens": 300,
+    "messages": [
+      {
+        "content": "Score groundedness and citation integrity 0-1 on the synthesis. Reply as JSON {\"score\": float, \"pass\": bool, \"critique\": str}.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "## Core Concepts of Retrieval-Augmented Generation\n\nRetrieval-Augmented Generation (RAG) is a paradigm that integrates large language models (LLMs) with external knowledge sources, databases, or document repositories to handle knowledge-intensive and domain-specific tasks [^huggingface_papers:2312.10997]. Traditional LLMs rely heavily on their internal static parametric memory, making them prone to outdated knowledge, long-tail information loss, and hallucinations when handling queries outside their training distribution [^huggingface_papers:2411.02959, [^huggingface_papers:2412.11919]. RAG addresses these limitations by dynamically fetching relevant external evidence at inference time and injecting it into the model input [^huggingface_papers:2603.20309].\n\nThe standard architecture of RAG generally comprises three primary components:\n1. **Retrieval:** Searching and fetching relevant context items, documents, tool descriptions, or subgraphs from an external database or knowledge graph based on an input query [^huggingface_papers:2312.05708, ^huggingface_papers:2312.10997].\n2. **Augmentation:** Integrating the retrieved textual, structural, or HTML-formatted knowledge into the LLM prompt or decoding mechanism [^huggingface_papers:2411.02959].\n3. **Generation:** Producing the final response, plan, or structured output conditioned on both the original query and the retrieved external evidence [^huggingface_papers:2312.05708, ^crossref:10.1109/icomet69771.2026.11591943].\n\nEvolutionary paradigms of RAG range from Naive RAG (static pre-generation retrieval) to Advanced RAG and Modular RAG frameworks [^huggingface_papers:2312.10997], as well as Dynamic RAG architectures that adaptively determine when and what to retrieve during the generation process [^huggingface_papers:2512.19134].\n\n## Mechanisms of Hallucination Reduction\n\nHallucinations in LLMs are broadly categorized into **intrinsic hallucinations** (arising from internal model memory flaws) and **extrinsic hallucinations** (occurring when responses fail to align with or are ungrounded by the provided context) [^huggingface_papers:2502.17125]. RAG directly suppresses hallucinations by anchoring the model's generation process to verifiable external facts [^huggingface_papers:2512.19134]. \n\nSpecific reduction mechanisms include:\n* **Evidence Grounding and Factual Verification:** By supplying domain-specific, citation-verified knowledge bases (such as in pharmaceutical QA systems combining Sentence-BERT, FAISS, and cross-encoder re-ranking), RAG systems reduce hallucination rates from 47.8% down to 12.3% (a 74.3% relative reduction) while increasing factual accuracy from 0.54 to 0.89 and faithfulness from 0.52 to 0.87 [^crossref:10.21203/rs.3.rs-10186581/v1]. \n* **Context Augmentation at Plan Generation:** Maintaining context availability during multi-step planning and tool retrieval phases ensures that the model does not hallucinate tool calls, database tables, or workflow actions when executing complex instructions [^huggingface_papers:2312.05708, ^crossref:10.1109/icomet69771.2026.11591943].\n* **Mitigating Extrinsic Errors via Token-Level Inspection:** Frameworks like LettuceDetect process context-question-answer triples via token classification models (such as ModernBERT architectures) to detect unsupported claims at the token level, achieving example-level hallucination detection F1 scores of 79.22% [^huggingface_papers:2502.17125].\n\n## Competing Approaches and Framework Architectures\n\nVarious system designs approach the retrieval and representation challenges of RAG differently, presenting distinct head-to-head trade-offs:\n\n### Text vs. HTML Modeling\n* **Plain Text RAG:** Traditional systems download web or document sources, extract plain text chunks, and feed them to the LLM [^huggingface_papers:2411.02959]. *Trade-off:* While simple, it discards critical structural and semantic HTML metadata like headings and table structures [^huggingface_papers:2411.02959].\n* **HtmlRAG:** Uses HTML directly as the format for retrieved knowledge, leveraging LLMs' native capacity to parse HTML tags, with cleaning, compression, and block-tree pruning strategies to control token noise [^huggingface_papers:2411.02959]. *Trade-off:* Preserves document structure and outperforms plain text across multiple QA datasets, though it introduces extra input tokens that require careful pruning [^huggingface_papers:2411.02959].\n\n### Static vs. Dynamic and Adaptive Retrieval\n* **Static RAG:** Executes a single retrieval phase prior to generation [^huggingface_papers:2512.19134]. *Trade-off:* Efficient for simple lookups, but fails on multi-step reasoning tasks where information needs emerge dynamically [^huggingface_papers:2512.19134].\n* **Dynamic and Adaptive RAG:** Triggers retrieval mid-generation or only when necessary [^huggingface_papers:2505.04253, ^huggingface_papers:2512.19134]. Traditional dynamic methods rely on model-internal uncertainty signals (logits, token probabilities, entropy), which are often unreliable because LLMs are poorly calibrated and exhibit high confidence in erroneous outputs [^huggingface_papers:2512.19134]. Newer alternatives include:\n  * *LLM-Independent Adaptive Retrieval:* Uses lightweight external information features (such as entity popularity and question type) across 27 features to match complex LLM-based adaptive performance without high computational overhead [^huggingface_papers:2505.04253].\n  * *QuCo-RAG:* Quantifies uncertainty using objective statistics from pre-training data (identifying long-tail knowledge gaps via low-frequency entities and verifying zero co-occurrence via Infini-gram over 4 trillion tokens), achieving Exact Match (EM) gains of 5–12 points on OLMo-2 and up to 14 points",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "gemini/gemini-flash-lite-latest",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```json\n{\n  \"score\": 1.0,\n  \"pass\": true,\n  \"critique\": \"The text is completely grounded in the provided source material, correctly citing the relevant tags for all factual claims, metrics, and technical terms.\"\n}\n```",
+          "function_call": null,
+          "images": [],
+          "provider_specific_fields": {
+            "thought_signatures": [
+              "EmAKXgFpFH0TCqB5e3RxmB3wBHLJLm9d+JiyL3cJrO6R4KdjEN9lvWv6E3gJbsGD3wt7Ahg6P9mB8d1hySkRjt4/Z3xL2D+FShEARVyolsiIdprK2/VR3KJRozGSQh70IA8="
+            ]
+          },
+          "role": "assistant",
+          "thinking_blocks": [],
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791216330,
+    "id": "ysrDasHrGN7hvdIPg8XiiAs",
+    "model": "gemini-flash-lite-latest",
+    "object": "chat.completion",
+    "system_fingerprint": null,
+    "usage": {
+      "cache_read_input_tokens": null,
+      "completion_tokens": 59,
+      "completion_tokens_details": {
+        "text_tokens": 59
+      },
+      "prompt_tokens": 1530,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": null,
+        "image_tokens": null,
+        "text_tokens": 1530
+      },
+      "total_tokens": 1589
+    },
+    "vertex_ai_citation_metadata": [],
+    "vertex_ai_grounding_metadata": [],
+    "vertex_ai_safety_results": [],
+    "vertex_ai_url_context_metadata": []
+  },
+  "usage": {
+    "cache_read_input_tokens": null,
+    "completion_tokens": 59,
+    "completion_tokens_details": {
+      "text_tokens": 59
+    },
+    "prompt_tokens": 1530,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": null,
+      "image_tokens": null,
+      "text_tokens": 1530
+    },
+    "total_tokens": 1589
+  },
+  "wall_s": 0.871
+}

@@ -41,3 +41,8 @@ judge:
   # layers above block merges; the verdict still prints every run. Flip to
   # blocking when the pipeline clears 6 (bodies + citations work in progress).
   advisory: true
+
+deepeval:
+  # Opt-in DeepEval pass (--deep only; default replay skips it). Advisory
+  # until thresholds are calibrated against live runs — same policy as judge.
+  metrics: [answer_relevancy, faithfulness]
