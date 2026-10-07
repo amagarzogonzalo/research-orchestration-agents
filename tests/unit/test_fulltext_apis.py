@@ -5,7 +5,7 @@ from __future__ import annotations
 import httpx
 import pytest
 
-from knowledge_engine.core.exceptions import ScrapeError
+from knowledge_engine.core.exceptions import ScrapeError, ScrapeSkipped
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.infrastructure.scrape.arxiv_fulltext import ArxivFullTextAdapter
 from knowledge_engine.infrastructure.scrape.europe_pmc_fulltext import EuropePmcFullTextAdapter
@@ -59,7 +59,7 @@ async def test_europepmc_med_skipped_without_network() -> None:
         called = True
         return httpx.Response(200, text=_JATS)
 
-    with pytest.raises(ScrapeError):
+    with pytest.raises(ScrapeSkipped):
         await _epmc(handler).to_markdown("https://europepmc.org/article/MED/42682590")
     assert called is False
 
@@ -120,7 +120,7 @@ async def test_arxiv_abs_maps_to_ar5iv_and_retags() -> None:
 async def test_arxiv_non_arxiv_url_skips_without_network() -> None:
     """Non-arXiv URLs raise before any fetch."""
     extractor = _FakeExtractor()
-    with pytest.raises(ScrapeError):
+    with pytest.raises(ScrapeSkipped):
         await ArxivFullTextAdapter(extractor=extractor).to_markdown("https://europepmc.org/article/MED/1")
     assert extractor.seen == []
 
