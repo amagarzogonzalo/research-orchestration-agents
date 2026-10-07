@@ -11,14 +11,21 @@ from knowledge_engine.scripts.bench import check, collect
 
 
 def test_collect_is_deterministic() -> None:
-    """Two collections agree exactly on supersteps/checkpoint bytes, ~5% on RAM."""
+    """Two collections agree exactly on supersteps/checkpoint bytes; RAM is a sanity bound.
+
+    Checkpoint bytes and superstep counts are pure logic — they must match
+    exactly. Peak RAM depends on interpreter, allocator, and GC timing, so it
+    is asserted only within a coarse sanity band (same order of magnitude);
+    the regression gate (``--check``) still guards it against the committed
+    baseline with its own tolerance.
+    """
     first, second = collect(), collect()
     for workflow in ("research", "deep"):
         assert first[workflow]["supersteps"] == second[workflow]["supersteps"], workflow
         assert first[workflow]["checkpoint_bytes"] == second[workflow]["checkpoint_bytes"], workflow
         ram_first, ram_second = int(first[workflow]["ram_kb"]), int(second[workflow]["ram_kb"])
-        jitter = max(1, int(0.05 * max(ram_first, ram_second)))
-        assert abs(ram_first - ram_second) <= jitter, workflow
+        assert ram_first > 0 and ram_second > 0, workflow
+        assert max(ram_first, ram_second) <= 2 * min(ram_first, ram_second), workflow
 
 
 def test_check_passes_on_identical_metrics() -> None:

@@ -15,8 +15,11 @@ Commands (offline, free)::
     uv run python -m knowledge_engine.scripts.bench --check    # gate vs baseline
 
 ``--check`` fails on >10% growth of RAM or checkpoint bytes and on any
-superstep growth. Determinism (identical metrics across invocations) is
-asserted in ``tests/unit/test_bench.py``.
+superstep growth. Determinism across invocations is asserted in
+``tests/unit/test_bench.py`` for the pure-logic metrics (checkpoint bytes,
+supersteps); peak RAM is environment-dependent (interpreter, allocator, GC
+timing) and is guarded against the committed baseline only, never across
+machines.
 """
 
 from __future__ import annotations
