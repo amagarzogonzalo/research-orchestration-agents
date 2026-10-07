@@ -130,6 +130,7 @@ class ModelDiscoverer:
             return self._known_good
 
         pool = await self.free_models()
+        logger.debug("select: pool=%s preferred=%s", [m.model_id for m in pool], preferred)
         candidates = [m.model_id for m in pool if not self._in_cooldown(m.model_id)]
         if preferred:
             candidates = [preferred] + [m for m in candidates if m != preferred]
@@ -142,7 +143,10 @@ class ModelDiscoverer:
 
         while True:
             if state.exhausted:
-                raise ModelSelectionError(f"tried all {len(state.candidates)} free candidates")
+                raise ModelSelectionError(
+                    f"tried all {len(state.candidates)} free candidates "
+                    f"(tried={sorted(state.tried)}, untried={state.untried})"
+                )
             candidate = state.untried[0]
             result = await self._safe_test(candidate)
             decision = ModelSelectionPolicy.on_test_result(state, result)
