@@ -4,6 +4,8 @@ from __future__ import annotations
 
 import pytest
 
+pytest.importorskip("deepeval", reason="deepeval is an opt-in extra")
+
 from evals import runner
 from evals.lib import deepeval_metrics as dm
 
