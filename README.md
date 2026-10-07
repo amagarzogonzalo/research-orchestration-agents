@@ -1,5 +1,8 @@
 # Knowledge Engine
 
+[![CI](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci.yml)
+[![CI-full](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci-full.yml/badge.svg)](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci-full.yml)
+
 Autonomous, **zero-cost** single-user research-curation library: a Hexagonal core
 orchestrated by LangGraph with files-only persistence under `research_store/`.
 Built strictly on free-tier LLMs (Gemini Flash / Groq LPU / OpenRouter / Mistral)
@@ -42,10 +45,12 @@ Runtime floor: **Python 3.11 or 3.12** (`requires-python` enforces this).
 import asyncio
 from knowledge_engine.engine import ResearchEngine
 
+
 async def main() -> None:
     engine = ResearchEngine()
     result = await engine.research("state of the art in multi-agent orchestration")
     print(result.state.output_path)
+
 
 asyncio.run(main())
 ```
@@ -65,6 +70,11 @@ Behavioral regression over recorded cassettes: `make evals` replays offline
 (free, deterministic); `make evals-live` re-records against live APIs (costs
 quota — ask first). Full operator manual (record/replay/accept loop,
 budgets, troubleshooting): [`evals/README.md`](evals/README.md).
+
+Where results land: replayed artifacts under `research_store/evals/`
+(`eval-research/article.md`, `eval-deep/article.md`), baselines in
+`evals/snapshots/`, raw evidence (every search/scrape/LLM call) in
+`evals/cassettes/<case>/run0/`.
 
 ## Troubleshooting
 
