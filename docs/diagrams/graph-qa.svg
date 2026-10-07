@@ -1,0 +1,84 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1648' height='306' viewBox='0 0 1648 306' role='img'>
+<title>QA workflow — Knowledge Engine (qa workflow)</title>
+<style> text{font-family:Inter,Helvetica,Arial,sans-serif} .lane{font-size:10px;fill:#64748b;letter-spacing:1.5px} .legend{font-size:10.5px;fill:#334155} .caption{font-size:10px;fill:#64748b}</style>
+<defs>
+<marker id='arr-2563eb' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#2563eb'/></marker>
+<marker id='arr-475569' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#475569'/></marker>
+<marker id='arr-b45309' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#b45309'/></marker>
+<marker id='arr-dc2626' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#dc2626'/></marker>
+</defs>
+<rect x='0' y='0' width='1648' height='306' rx='12' fill='#ffffff' stroke='#e2e8f0'/>
+<rect x='0' y='0' width='1648' height='86' rx='12' fill='#0f172a'/>
+<rect x='0' y='74' width='1648' height='12' fill='#0f172a'/>
+<text x='32' y='36' font-size='18' font-weight='700' fill='#f8fafc'>QA workflow</text>
+<text x='32' y='60' font-size='12' fill='#94a3b8'>Fast + cheap · answers from abstracts · no scraping, no judge loop</text>
+<text x='1616' y='36' font-size='10.5' fill='#94a3b8' text-anchor='end' font-family='ui-monospace,Consolas,monospace'>orchestration/graphs.py :: _build_qa</text>
+<text class='lane' x='124.0' y='122' text-anchor='middle'>ENTER</text>
+<text class='lane' x='404.0' y='122' text-anchor='middle'>SEARCH</text>
+<text class='lane' x='684.0' y='122' text-anchor='middle'>FILTER</text>
+<text class='lane' x='964.0' y='122' text-anchor='middle'>ANSWER</text>
+<text class='lane' x='1244.0' y='122' text-anchor='middle'>PUBLISH</text>
+<text class='lane' x='1524.0' y='122' text-anchor='middle'>EXIT</text>
+<path d='M216.0,160.0 C264.0,160.0 264.0,160.0 312.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M496.0,160.0 C544.0,160.0 544.0,160.0 592.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M776.0,160.0 C824.0,160.0 824.0,160.0 872.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M1056.0,160.0 C1104.0,160.0 1104.0,160.0 1152.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M1336.0,160.0 C1384.0,160.0 1384.0,160.0 1432.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<rect x='32' y='138' width='184' height='44' rx='22' fill='#0f172a' stroke='#0f172a'/>
+<text x='124.0' y='158' text-anchor='middle' font-size='12.5' font-weight='700' fill='#f8fafc'>START</text>
+<text x='124.0' y='173' text-anchor='middle' font-size='10' fill='#94a3b8'>entry</text>
+<rect x='312' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#93b4f5' stroke-width='1.5'/>
+<rect x='312' y='130' width='5' height='60' rx='2.5' fill='#2563eb'/>
+<text x='328' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>ingest</text>
+<text x='328' y='172' font-size='10' fill='#475569'>federated search · OpenAlex, Crossref…</text>
+<circle cx='330' cy='130' r='11' fill='#1d4ed8' stroke='#ffffff' stroke-width='2'/>
+<text x='330' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>1</text>
+<rect x='592' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#86d3a3' stroke-width='1.5'/>
+<rect x='592' y='130' width='5' height='60' rx='2.5' fill='#16a34a'/>
+<text x='608' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>relevance</text>
+<text x='608' y='172' font-size='10' fill='#475569'>topicality filter · one batched LLM call</text>
+<circle cx='610' cy='130' r='11' fill='#15803d' stroke='#ffffff' stroke-width='2'/>
+<text x='610' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>2</text>
+<rect x='872' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#86d3a3' stroke-width='1.5'/>
+<rect x='872' y='130' width='5' height='60' rx='2.5' fill='#16a34a'/>
+<text x='888' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>synthesize</text>
+<text x='888' y='172' font-size='10' fill='#475569'>answer from abstracts · no scrape</text>
+<circle cx='890' cy='130' r='11' fill='#15803d' stroke='#ffffff' stroke-width='2'/>
+<text x='890' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>3</text>
+<rect x='1152' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#c9a8f5' stroke-width='1.5'/>
+<rect x='1152' y='130' width='5' height='60' rx='2.5' fill='#9333ea'/>
+<text x='1168' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>render</text>
+<text x='1168' y='172' font-size='10' fill='#475569'>article.md · frontmatter + citations</text>
+<circle cx='1170' cy='130' r='11' fill='#7e22ce' stroke='#ffffff' stroke-width='2'/>
+<text x='1170' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>4</text>
+<rect x='1432' y='138' width='184' height='44' rx='22' fill='#0f172a' stroke='#0f172a'/>
+<text x='1524.0' y='158' text-anchor='middle' font-size='12.5' font-weight='700' fill='#f8fafc'>END</text>
+<text x='1524.0' y='173' text-anchor='middle' font-size='10' fill='#94a3b8'>exit</text>
+<g><rect x='512.6' y='136.0' width='62.8' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='544.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>sources</text></g>
+<g><rect x='786.2' y='136.0' width='75.6' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='824.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>abstracts</text></g>
+<g><rect x='1075.8' y='136.0' width='56.4' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1104.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>answer</text></g>
+<line x1='32' y1='220' x2='1616' y2='220' stroke='#e2e8f0'/>
+<text class='legend' x='32' y='242' font-weight='700'>Nodes</text>
+<rect x='84' y='231' width='34' height='12' rx='3' fill='#ffffff' stroke='#2563eb'/>
+<rect x='84' y='231' width='5' height='12' rx='2' fill='#2563eb'/>
+<text class='legend' x='124' y='242'>Data</text>
+<rect x='186' y='231' width='34' height='12' rx='3' fill='#ffffff' stroke='#16a34a'/>
+<rect x='186' y='231' width='5' height='12' rx='2' fill='#16a34a'/>
+<text class='legend' x='226' y='242'>Generate</text>
+<rect x='316' y='231' width='34' height='12' rx='3' fill='#ffffff' stroke='#d97706'/>
+<rect x='316' y='231' width='5' height='12' rx='2' fill='#d97706'/>
+<text class='legend' x='356' y='242'>Assure</text>
+<rect x='432' y='231' width='34' height='12' rx='3' fill='#ffffff' stroke='#9333ea'/>
+<rect x='432' y='231' width='5' height='12' rx='2' fill='#9333ea'/>
+<text class='legend' x='472' y='242'>Publish</text>
+<text class='legend' x='32' y='264' font-weight='700'>Edges</text>
+<line x1='84' y1='260' x2='118' y2='260' stroke='#475569' stroke-width='2.0'/>
+<text class='legend' x='124' y='264'>sequential</text>
+<line x1='224' y1='260' x2='258' y2='260' stroke='#2563eb' stroke-width='2.0'/>
+<text class='legend' x='264' y='264'>Send fan-out</text>
+<line x1='378' y1='260' x2='412' y2='260' stroke='#dc2626' stroke-width='2.0' stroke-dasharray='7,4'/>
+<text class='legend' x='418' y='264'>revise loop ≤N</text>
+<line x1='546' y1='260' x2='580' y2='260' stroke='#b45309' stroke-width='1.8' stroke-dasharray='5,4'/>
+<text class='legend' x='586' y='264'>conditional</text>
+<text class='caption' x='1616' y='294' text-anchor='end'>Send / Command routes curated from the builder · regenerate: python -m knowledge_engine.scripts.generate_graph_svg</text>
+</svg>
