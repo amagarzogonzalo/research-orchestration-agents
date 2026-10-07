@@ -1,0 +1,90 @@
+{
+  "name": "dict_snapshots_with_critique",
+  "query": "How does retrieval-augmented generation reduce hallucinations",
+  "critique": "Section 2 lacks citations.",
+  "use_object_sources": false,
+  "state": {
+    "query": "How does retrieval-augmented generation reduce hallucinations",
+    "sources": [
+      {
+        "id": "openalex:W1",
+        "doi": "10.1234/rag-survey",
+        "title": "Retrieval-Augmented Generation Survey",
+        "source": "openalex",
+        "authors": [
+          "A. Author",
+          "B. Author"
+        ],
+        "year": 2026,
+        "abstract": "A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. ",
+        "venue": "Journal of AI Research",
+        "references": [
+          "10.5678/hyper-rag"
+        ]
+      },
+      {
+        "id": "openalex:W2",
+        "doi": "10.5678/hyper-rag",
+        "title": "Hyper-RAG: combating hallucinations",
+        "source": "openalex",
+        "authors": [
+          "C. Researcher"
+        ],
+        "year": 2026,
+        "abstract": "Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. ",
+        "venue": "Nature Communications",
+        "references": []
+      }
+    ],
+    "filtered": [
+      {
+        "id": "openalex:W1",
+        "doi": "10.1234/rag-survey",
+        "title": "Retrieval-Augmented Generation Survey",
+        "source": "openalex",
+        "authors": [
+          "A. Author",
+          "B. Author"
+        ],
+        "year": 2026,
+        "abstract": "A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. ",
+        "venue": "Journal of AI Research",
+        "references": [
+          "10.5678/hyper-rag"
+        ]
+      },
+      {
+        "id": "openalex:W2",
+        "doi": "10.5678/hyper-rag",
+        "title": "Hyper-RAG: combating hallucinations",
+        "source": "openalex",
+        "authors": [
+          "C. Researcher"
+        ],
+        "year": 2026,
+        "abstract": "Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. ",
+        "venue": "Nature Communications",
+        "references": []
+      }
+    ],
+    "bodies": [
+      {
+        "url": "https://arxiv.org/abs/2404.08189",
+        "title": "Reducing hallucination in structured outputs via RAG",
+        "markdown": "# Deep paper body\nEvidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. ",
+        "char_count": 4338,
+        "crawl_method": "trafilatura",
+        "captured_at": null
+      },
+      {
+        "url": "https://www.nature.com/articles/s41467-026-71411-1",
+        "title": "Hyper-RAG full text",
+        "markdown": "# Hyper-RAG\nMechanism body with a named benchmark result: 37% reduction.\n",
+        "char_count": 76,
+        "crawl_method": "trafilatura",
+        "captured_at": null
+      }
+    ]
+  },
+  "expected_prompt": "Synthesize the research findings into structured notes for query:\nHow does retrieval-augmented generation reduce hallucinations\n\nSources:\nReducing hallucination in structured outputs via RAG\n# Deep paper body\nEvidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitative claim 42%. Evidence paragraph with quantitati\n---\nHyper-RAG full text\n# Hyper-RAG\nMechanism body with a named benchmark result: 37% reduction.\n\n\nReviewer feedback to address:\nSection 2 lacks citations."
+}
