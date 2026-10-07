@@ -1,11 +1,11 @@
 """ScrapeRouter: ordered injectable chain with a content-quality guard.
 
-Default chain is arxiv-fulltext → crawl4ai → trafilatura → Jina Reader:
-source-specific full text first (ar5iv HTML carries the whole paper, not just
-the abs page), then local extractors (free, unmetered), the remote reader last
-(keyless but rate-limited) for pages local fetch cannot retrieve. Pass an
-explicit ``chain`` to reorder or extend — e.g. insert the Playwright adapter
-ahead of trafilatura for JS-heavy pages.
+Default chain is source-specific full text first (ar5iv HTML carries the
+whole paper; Europe PMC fullTextXML serves the OA subset as JATS), then local
+extractors (free, unmetered), the remote reader last (keyless but
+rate-limited) for pages local fetch cannot retrieve. Pass an explicit
+``chain`` to reorder or extend — e.g. insert the Playwright adapter ahead of
+trafilatura for JS-heavy pages.
 
 ``looks_clean`` rejects binary PDF dumps, empty extractions and mojibake so a
 "successful" fetch that yields no usable text counts as a miss, not a body.
@@ -21,6 +21,7 @@ from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.infrastructure.scrape.arxiv_fulltext import ArxivFullTextAdapter
 from knowledge_engine.infrastructure.scrape.crawl4ai_adapter import Crawl4aiAdapter
+from knowledge_engine.infrastructure.scrape.europe_pmc_fulltext import EuropePmcFullTextAdapter
 from knowledge_engine.infrastructure.scrape.jina_reader import JinaReaderAdapter
 from knowledge_engine.infrastructure.scrape.trafilatura_adapter import TrafilaturaAdapter
 from knowledge_engine.schemas.source import DocumentBody
@@ -131,4 +132,10 @@ def _default_chain() -> list[ScrapePort]:
         list[ScrapePort]: Scrape adapters.
 
     """
-    return [ArxivFullTextAdapter(), Crawl4aiAdapter(), TrafilaturaAdapter(), JinaReaderAdapter()]
+    return [
+        ArxivFullTextAdapter(),
+        EuropePmcFullTextAdapter(),
+        Crawl4aiAdapter(),
+        TrafilaturaAdapter(),
+        JinaReaderAdapter(),
+    ]
