@@ -84,6 +84,8 @@ if __name__ == "__main__":
 
 ## 3. Phase 1 — ResearchStore → Supabase Storage (PR #1)
 
+> Design + TDD detail: [ADR 0012](plans/0012-artifact-store-port.md) · Tracking: #5
+
 ### Files to Create
 ```
 src/knowledge_engine/store/

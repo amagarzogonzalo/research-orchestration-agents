@@ -1,7 +1,7 @@
 # 0012 — Durable artifact store: port + adapters (Supabase Storage)
 
 **Status:** Proposed · **Date:** 2026-10-07 · **Type:** architecture + delivery
-**Related:** ADR 0008 (LangGraph orchestrator), ADR 0009 (portable library), `SPEC.md`
+**Tracking issue:** #5 · **Related:** ADR 0008 (LangGraph orchestrator), ADR 0009 (portable library), `SPEC.md`
 
 ## Context
 
