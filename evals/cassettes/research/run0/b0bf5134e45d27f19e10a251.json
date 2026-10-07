@@ -1,0 +1,92 @@
+{
+  "recorded_at": "2026-10-07T12:22:51Z",
+  "request": {
+    "messages": [
+      {
+        "content": "Based on the given text, please generate a comprehensive list of FACTUAL, undisputed truths, that can inferred from the provided text.\nThese truths, MUST BE COHERENT. They must NOT be taken out of context.\n\nExample:\nExample Text: \n\"Albert Einstein, the genius often associated with wild hair and mind-bending theories, famously won the Nobel Prize in Physics—though not for his groundbreaking work on relativity, as many assume. Instead, in 1968, he was honored for his discovery of the photoelectric effect, a phenomenon that laid the foundation for quantum mechanics.\"\n\nExample JSON: \n{\n  \"truths\": [\n    \"Einstein won the noble prize for his discovery of the photoelectric effect in 1968.\",\n    \"The photoelectric effect is a phenomenon that laid the foundation for quantum mechanics.\"\n  ]  \n}\n===== END OF EXAMPLE ======\n**\nIMPORTANT: Please make sure to only return in JSON format, with the \"truths\" key as a list of strings. No words or explanation is needed.\nOnly include truths that are factual, BUT IT DOESN'T MATTER IF THEY ARE FACTUALLY CORRECT.\n**\n\nText:\nRAG survey\nretrieval grounding reduces hallucination\n\nJSON:",
+        "role": "user"
+      }
+    ],
+    "model": "google/gemma-3-27b-it",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "annotations": null,
+          "audio": null,
+          "content": "\n```json\n{\n  \"truths\": [\n    \"A RAG survey was conducted.\",\n    \"Retrieval grounding reduces hallucination.\"\n  ]\n}\n```",
+          "function_call": null,
+          "reasoning": null,
+          "refusal": null,
+          "role": "assistant",
+          "tool_calls": null
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1791375748,
+    "id": "gen-1791375748-PyWWaVqMg6U8O8jH4DyG",
+    "model": "google/gemma-3-27b-it",
+    "moderation": null,
+    "object": "chat.completion",
+    "provider": "Novita",
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 39,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": 0,
+        "image_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null
+      },
+      "cost": 4.0049e-05,
+      "cost_details": {
+        "upstream_inference_completions_cost": 7.8e-06,
+        "upstream_inference_cost": 4.0049e-05,
+        "upstream_inference_prompt_cost": 3.2249e-05
+      },
+      "is_byok": false,
+      "prompt_tokens": 271,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "total_tokens": 310
+    }
+  },
+  "usage": {
+    "completion_tokens": 39,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "cost": 4.0049e-05,
+    "cost_details": {
+      "upstream_inference_completions_cost": 7.8e-06,
+      "upstream_inference_cost": 4.0049e-05,
+      "upstream_inference_prompt_cost": 3.2249e-05
+    },
+    "is_byok": false,
+    "prompt_tokens": 271,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "video_tokens": 0
+    },
+    "total_tokens": 310
+  },
+  "wall_s": 23.542
+}

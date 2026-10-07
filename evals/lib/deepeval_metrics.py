@@ -22,10 +22,11 @@ from deepeval.metrics import (
 from deepeval.test_case import LLMTestCase
 
 METRICS: dict[str, dict[str, Any]] = {
-    # Thresholds are starting points, NOT calibrated: the calibration run
-    # needs free-tier judge quota (often throttled) and is still pending.
-    # The runner treats every DeepEval result as advisory until calibration
-    # lands; do not gate on these numbers.
+    # answer_relevancy calibrated 2026-10-07 (research case): 1.00 on the
+    # real artifact vs 0.00 on a topic-mismatched control — threshold 0.7
+    # splits cleanly. faithfulness scored 1.00 on both (it checks internal
+    # claim support, not topicality), so its threshold stays a starting
+    # point. The runner treats every DeepEval result as advisory regardless.
     "answer_relevancy": {"factory": AnswerRelevancyMetric, "threshold": 0.7},
     "faithfulness": {"factory": FaithfulnessMetric, "threshold": 0.7},
     "contextual_precision": {"factory": ContextualPrecisionMetric, "threshold": 0.6},

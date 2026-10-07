@@ -1,0 +1,92 @@
+{
+  "recorded_at": "2026-10-07T12:22:57Z",
+  "request": {
+    "messages": [
+      {
+        "content": "Below is a list of Contradictions. It is a list of strings explaining why the 'actual output' does not align with the information presented in the 'retrieval context'. Contradictions happen in the 'actual output', NOT the 'retrieval context'.\nGiven the faithfulness score, which is a 0-1 score indicating how faithful the `actual output` is to the retrieval context (higher the better), CONCISELY summarize the contradictions to justify the score. \n\nExpected JSON format:\n{\n  \"reason\": \"The score is <faithfulness_score> because <your_reason>.\"\n}\n\n** \nIMPORTANT: Please make sure to only return in JSON format, with the 'reason' key providing the reason.\n\nIf there are no contradictions, just say something positive with an upbeat encouraging tone (but don't overdo it otherwise it gets annoying).\nYour reason MUST use information in `contradiction` in your reason.\nBe sure in your reason, as if you know what the actual output is from the contradictions.\n**\n\nFaithfulness Score:\n1.00\n\nContradictions:\n[]\n\nJSON:",
+        "role": "user"
+      }
+    ],
+    "model": "google/gemma-3-27b-it",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "annotations": null,
+          "audio": null,
+          "content": "\n```json\n{\n  \"reason\": \"The score is 1.00 because there are no contradictions present, indicating the actual output is perfectly aligned with the retrieval context!\"\n}\n```",
+          "function_call": null,
+          "reasoning": null,
+          "refusal": null,
+          "role": "assistant",
+          "tool_calls": null
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1791375776,
+    "id": "gen-1791375776-WZUevIZCmOpoGq0dDTPo",
+    "model": "google/gemma-3-27b-it",
+    "moderation": null,
+    "object": "chat.completion",
+    "provider": "Novita",
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 43,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": 0,
+        "image_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null
+      },
+      "cost": 3.8469e-05,
+      "cost_details": {
+        "upstream_inference_completions_cost": 8.6e-06,
+        "upstream_inference_cost": 3.8469e-05,
+        "upstream_inference_prompt_cost": 2.9869e-05
+      },
+      "is_byok": false,
+      "prompt_tokens": 251,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "total_tokens": 294
+    }
+  },
+  "usage": {
+    "completion_tokens": 43,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "cost": 3.8469e-05,
+    "cost_details": {
+      "upstream_inference_completions_cost": 8.6e-06,
+      "upstream_inference_cost": 3.8469e-05,
+      "upstream_inference_prompt_cost": 2.9869e-05
+    },
+    "is_byok": false,
+    "prompt_tokens": 251,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "video_tokens": 0
+    },
+    "total_tokens": 294
+  },
+  "wall_s": 1.872
+}

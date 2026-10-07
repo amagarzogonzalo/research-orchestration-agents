@@ -1,0 +1,92 @@
+{
+  "recorded_at": "2026-10-07T12:22:28Z",
+  "request": {
+    "messages": [
+      {
+        "content": "Given the answer relevancy score, the list of reasons of irrelevant statements made in the actual output, and the input, provide a CONCISE reason for the score. Explain why it is not higher, but also why it is at its current score.\nThe irrelevant statements represent things in the actual output that is irrelevant to addressing whatever is asked/talked about in the input.\nIf there is nothing irrelevant, just say something positive with an upbeat encouraging tone (but don't overdo it otherwise it gets annoying).\n\n\n\n**\nIMPORTANT: Please make sure to only return in JSON format, with the 'reason' key providing the reason. Ensure all strings are closed appropriately. Repair any invalid JSON before you output it.\n\nExample:\nExample JSON:\n{\n  \"reason\": \"The score is <answer_relevancy_score> because <your_reason>.\"\n}\n===== END OF EXAMPLE ======\n**\n\n\nAnswer Relevancy Score:\n0.00\n\nReasons why the score can't be higher based on irrelevant statements in the actual output:\n['This statement describes a cooking process and is completely unrelated to the topic of retrieval-augmented generation and hallucinations.', 'This statement also describes a cooking process and is completely unrelated to the topic of retrieval-augmented generation and hallucinations.']\n\nInput:\nHow retrieval-augmented generation reduces hallucinations\n\nJSON:",
+        "role": "user"
+      }
+    ],
+    "model": "google/gemma-3-27b-it",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "annotations": null,
+          "audio": null,
+          "content": ":```json\n{\n  \"reason\": \"The score is 0.00 because the response entirely focuses on irrelevant cooking instructions, failing to address the question about retrieval-augmented generation and hallucinations at all.\"\n}\n```",
+          "function_call": null,
+          "reasoning": null,
+          "refusal": null,
+          "role": "assistant",
+          "tool_calls": null
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1791375746,
+    "id": "gen-1791375746-EenlbwYT9btSm2psa6s6",
+    "model": "google/gemma-3-27b-it",
+    "moderation": null,
+    "object": "chat.completion",
+    "provider": "Novita",
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 49,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": 0,
+        "image_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null
+      },
+      "cost": 4.4429e-05,
+      "cost_details": {
+        "upstream_inference_completions_cost": 9.8e-06,
+        "upstream_inference_cost": 4.4429e-05,
+        "upstream_inference_prompt_cost": 3.4629e-05
+      },
+      "is_byok": false,
+      "prompt_tokens": 291,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "total_tokens": 340
+    }
+  },
+  "usage": {
+    "completion_tokens": 49,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "cost": 4.4429e-05,
+    "cost_details": {
+      "upstream_inference_completions_cost": 9.8e-06,
+      "upstream_inference_cost": 4.4429e-05,
+      "upstream_inference_prompt_cost": 3.4629e-05
+    },
+    "is_byok": false,
+    "prompt_tokens": 291,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "video_tokens": 0
+    },
+    "total_tokens": 340
+  },
+  "wall_s": 2.111
+}
