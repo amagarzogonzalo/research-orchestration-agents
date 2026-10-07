@@ -59,6 +59,25 @@ pytest
 The rate limiter + fallback router are unit-tested against fakes (no network, no Redis),
 so the resilience core is verifiable offline.
 
+## Evals
+
+Behavioral regression over recorded cassettes: `make evals` replays offline
+(free, deterministic); `make evals-live` re-records against live APIs (costs
+quota — ask first). Full operator manual (record/replay/accept loop,
+budgets, troubleshooting): [`evals/README.md`](evals/README.md).
+
+## Troubleshooting
+
+- **Crawl4AI fails with missing browser executable:** the installed browsers
+  must match the playwright build — run `python -m playwright install chromium`
+  after any playwright upgrade.
+- **Evals suddenly re-record or hit the network:** `EVAL_MODE=record` leaked
+  into the environment forces record mode. Unset it; the runner takes
+  `--record` explicitly, and refuses dirty cassette dirs without `--force`.
+- **Free-tier 429s / judge 404s:** shared pools throttle and free slugs get
+  retired (e.g. the `:free` suffix scheme). Back off and retry; if a model is
+  gone, re-pin `judge_model` in `harness.toml` and probe-verify the new pin.
+
 ## Zero-cost discipline
 
 - OpenAlex: single DOI/ID lookups are **free & un-metered** — prefer them over search.
