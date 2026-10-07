@@ -1,0 +1,48 @@
+# Real end-to-end research run: full LangGraph workflow (ingest -> relevance ->
+# bodies -> synthesize -> judge -> review -> render) with search/scrape/LLM
+# recorded to cassettes. Replay is offline and deterministic.
+id: research
+description: >
+  A complete research() run stays structurally sound: YAML frontmatter with
+  provenance, at least two sections, cited quantitative claims, valid footnote
+  links, and bounded token/call/latency cost.
+
+entrypoint: "evals.adapters:research_run"
+input:
+  query: "How retrieval-augmented generation reduces hallucinations in large language models"
+  max_sources: 8
+
+samples: 1
+pass_at_k: 1
+
+invariants:
+  frontmatter_keys: ["@id", type, title, provenance, citations, tldr_llm]
+  min_sections: 2
+  min_citations: 5
+  must_cite: []
+  no_uncited_claims: true
+  valid_links: true
+  forbidden_patterns: ["as an ai", "\\bTODO\\b", "as of my (last )?(knowledge|training)"]
+  max_chars: 30000
+
+budget:
+  # Calibrated 2026-10-03 against a clean record (21k tok, 24 recorded calls:
+  # LLM + search + scrape recordings). Token budget guards cost; call budget
+  # guards fan-out explosions. A cost regression fails the case.
+  max_total_tokens: 30000
+  max_model_calls: 32
+  max_wall_s: 1200
+
+judge:
+  rubric: rubrics/default.md
+  min_score: 6
+  samples: 1
+  # Advisory: free-tier judges are noisy signal, not a gate. Deterministic
+  # layers above block merges; the verdict still prints every run. Flip to
+  # blocking when the pipeline clears 6 (bodies + citations work in progress).
+  advisory: true
+
+deepeval:
+  # Opt-in DeepEval pass (--deep only; default replay skips it). Advisory
+  # until thresholds are calibrated against live runs — same policy as judge.
+  metrics: [answer_relevancy, faithfulness]

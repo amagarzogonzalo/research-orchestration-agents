@@ -1,0 +1,92 @@
+{
+  "recorded_at": "2026-10-07T12:22:53Z",
+  "request": {
+    "messages": [
+      {
+        "content": "Based on the given text, please extract a comprehensive list of FACTUAL, undisputed truths, that can inferred from the provided actual AI output. \nThese truths, MUST BE COHERENT, and CANNOT be taken out of context.\n\nExample:\nExample Text: \n\"Albert Einstein, the genius often associated with wild hair and mind-bending theories, famously won the Nobel Prize in Physics—though not for his groundbreaking work on relativity, as many assume. Instead, in 1968, he was honored for his discovery of the photoelectric effect, a phenomenon that laid the foundation for quantum mechanics.\"\n\nExample JSON: \n{\n  \"claims\": [\n    \"Einstein won the noble prize for his discovery of the photoelectric effect in 1968.\",\n    \"The photoelectric effect is a phenomenon that laid the foundation for quantum mechanics.\"\n  ]  \n}\n===== END OF EXAMPLE ======\n\n**\nIMPORTANT: Please make sure to only return in JSON format, with the \"claims\" key as a list of strings. No words or explanation is needed.\nOnly include claims that are factual, BUT IT DOESN'T MATTER IF THEY ARE FACTUALLY CORRECT. The claims you extract should include the full context it was presented in, NOT cherry picked facts.\nYou should NOT include any prior knowledge, and take the text at face value when extracting claims.\nYou should be aware that it is an AI that is outputting these claims.\n**\n\nAI Output:\n## Cooking Pasta\n\nBoil water with salt [^x:1]. Add pasta and stir for nine minutes [^x:1].\n\nJSON:",
+        "role": "user"
+      }
+    ],
+    "model": "google/gemma-3-27b-it",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "annotations": null,
+          "audio": null,
+          "content": "\n```json\n{\n  \"claims\": [\n    \"Boil water with salt [^x:1].\",\n    \"Add pasta and stir for nine minutes [^x:1].\"\n  ]\n}\n```",
+          "function_call": null,
+          "reasoning": null,
+          "refusal": null,
+          "role": "assistant",
+          "tool_calls": null
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1791375772,
+    "id": "gen-1791375772-9e85DUYDv9ZqoIMGb8UQ",
+    "model": "google/gemma-3-27b-it",
+    "moderation": null,
+    "object": "chat.completion",
+    "provider": "Novita",
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 50,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": 0,
+        "image_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null
+      },
+      "cost": 5.1531e-05,
+      "cost_details": {
+        "upstream_inference_completions_cost": 1e-05,
+        "upstream_inference_cost": 5.1531e-05,
+        "upstream_inference_prompt_cost": 4.1531e-05
+      },
+      "is_byok": false,
+      "prompt_tokens": 349,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "total_tokens": 399
+    }
+  },
+  "usage": {
+    "completion_tokens": 50,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "cost": 5.1531e-05,
+    "cost_details": {
+      "upstream_inference_completions_cost": 1e-05,
+      "upstream_inference_cost": 5.1531e-05,
+      "upstream_inference_prompt_cost": 4.1531e-05
+    },
+    "is_byok": false,
+    "prompt_tokens": 349,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "video_tokens": 0
+    },
+    "total_tokens": 399
+  },
+  "wall_s": 2.145
+}

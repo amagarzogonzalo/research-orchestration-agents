@@ -4,6 +4,7 @@
     python evals/runner.py              # replay cassettes, offline, free
     python evals/runner.py --record     # live calls, re-record cassettes ($)
     python evals/runner.py --accept     # adopt current digests as snapshots
+    python evals/runner.py --deep       # + DeepEval metrics pass (opt-in extra)
     python evals/runner.py -k article   # filter by case id
 
 Exit 0 green, 1 regression. Provider-agnostic: any OpenAI-shaped endpoint.
@@ -16,6 +17,7 @@ import argparse
 import importlib
 import json
 import os
+import re
 import sys
 import time
 import tomllib
@@ -29,12 +31,7 @@ sys.path.insert(0, str(ROOT))
 from lib import digest as dg
 from lib import invariants as inv
 from lib import judge as jd
-from lib.cassette import Cassette, CassetteMiss
-
-try:
-    import yaml
-except ImportError:
-    sys.exit("pip install pyyaml")
+from lib.cassette import DEFAULT_DIR, Cassette, CassetteMiss
 
 
 def judge_model() -> str:
@@ -71,7 +68,99 @@ def _noop_client(**request):
     raise RuntimeError("live judge client used in replay mode — re-record with `make evals-live`")
 
 
-def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
+def _text_of(response: dict[str, Any]) -> str:
+    """Extract judge text from a chat-completions response mapping.
+
+    Args:
+        response: Raw chat response.
+
+    Returns:
+        str: First choice message content.
+    """
+    return str((((response.get("choices") or [{}])[0].get("message") or {}).get("content") or ""))
+
+
+def _deepeval_notes(
+    case: dict[str, Any],
+    query: str,
+    artifact: str,
+    sources: list[dict[str, Any]] | None,
+    chat: Any,
+    model: str,
+    measure: Any | None = None,
+) -> list[str]:
+    """Run the case's DeepEval metrics as advisory signal (never a failure).
+
+    The opt-in ``evals`` extra may be absent and free-tier judge quota may be
+    throttled — either way this reports a note, never a gate failure. Judge
+    traffic flows through the same cassette path as the classic judge.
+
+    Args:
+        case: Eval case mapping with an optional ``deepeval:`` block.
+        query: Case input query.
+        artifact: Rendered article text.
+        sources: Source records as plain dicts.
+        chat: Callable ``(**request) -> response`` (cassette-routed).
+        model: Pinned judge model name.
+        measure: Override ``(names, test_case, model)`` (tests inject stubs).
+
+    Returns:
+        list[str]: Advisory notes, possibly a skip reason.
+    """
+    from evals.lib import deepeval_metrics as dm
+
+    try:
+        names = dm.select_metrics(case)
+    except ValueError as exc:
+        return [f"[{case.get('id')}] deepeval config error: {exc}"]
+    if not names:
+        return []
+    try:
+        from evals.lib.deepeval_judge import PinnedJudge
+
+        def prompt_to_text(prompt: str) -> str:
+            """Bridge a bare prompt to the cassette-routed chat client."""
+            return _text_of(
+                chat(
+                    model=model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=0.0,
+                )
+            )
+
+        test_case = dm.build_test_case(
+            query, artifact, sources or [], expected=(case.get("deepeval") or {}).get("expected")
+        )
+        judge = PinnedJudge(prompt_to_text, model)
+        run = measure or dm.run_selected
+        results = run(names, test_case, model=judge)
+    except ImportError as exc:
+        return [f"[{case.get('id')}] deepeval skipped (opt-in extra not installed): {exc}"]
+    except Exception as exc:  # noqa: BLE001 - advisory signal must never fail the gate
+        return [f"[{case.get('id')}] deepeval skipped: {type(exc).__name__}: {str(exc)[:120]}"]
+    return [f"[{case.get('id')}] deepeval {r['name']}: {r['score']:.2f} (threshold {r['threshold']})" for r in results]
+
+
+def _citation_yield(artifact: str, sources: list[dict[str, Any]] | None) -> str:
+    """Share of retrieved sources actually cited in the artifact footnotes.
+
+    Informational only (precision signal for the relevance loop): junk that
+    passes relevance but never gets cited shows up here, not in the gate.
+
+    Args:
+        artifact: Rendered article text.
+        sources: Source records as plain dicts.
+
+    Returns:
+        str: Human-readable "used/total sources cited" summary.
+    """
+    ids = {s.get("id") for s in (sources or []) if isinstance(s, dict) and s.get("id")}
+    used = set(re.findall(r"\[\^([^\]]+)\]", artifact or "")) & ids
+    total = len(sources or [])
+    return f"{len(used)}/{total} sources cited"
+
+
+def run_case(case: dict[str, Any], mode: str, deep: bool = False) -> dict[str, Any]:
     cid = case["id"]
     k = int(case.get("samples", 1))
     entry = load_entrypoint(case["entrypoint"])
@@ -79,8 +168,11 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
     rubric = (ROOT / rubric_path).read_text() if rubric_path else None
 
     runs, failures, notes = [], [], []
+    # One memo per case: repeated identical calls across samples reuse the
+    # first live result, so files always match the prompts built from them.
+    memo: dict[str, Any] = {}
     for i in range(k):
-        cassette = Cassette(f"{cid}/run{i}", mode=mode)
+        cassette = Cassette(f"{cid}/run{i}", mode=mode, memo=memo)
         t0 = time.time()
         try:
             out = entry(**case.get("input", {}), cassette=cassette)
@@ -108,6 +200,9 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
                 "failures": run_fail,
                 "artifact": artifact,
                 "cassette": cassette,
+                "bodies": out.get("bodies", 0),
+                "nsources": len(sources or []),
+                "sources": [s.model_dump(mode="json") if hasattr(s, "model_dump") else s for s in (sources or [])],
             }
         )
 
@@ -139,6 +234,7 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
         notes.append(f"[{cid}] no snapshot yet — run with --accept to create one")
 
     jcfg = case.get("judge")
+    judge_criteria: list[dict[str, Any]] = []
     if jcfg and rubric:
         cassette, model = runs[0]["cassette"], judge_model()
         # Replay mode never calls the network (cassette.chat replays judge outputs),
@@ -152,15 +248,56 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
                 notes.append(f"[{cid}] JUDGE UNCALIBRATED, verdict discarded: {bad}")
                 jcfg = None
         if jcfg:
-            res = jd.score(
-                runs[0]["artifact"],
-                rubric,
-                lambda **r: cassette.chat(client, **r),
-                model,
-                samples=int(jcfg.get("samples", 3)),
-            )
-            ok, msg = res.passes(float(jcfg.get("min_score", 7)))
-            (notes if ok else failures).append(f"[{cid}] judge ({model}): {msg}")
+            try:
+                res = jd.score(
+                    runs[0]["artifact"],
+                    rubric,
+                    lambda **r: cassette.chat(client, **r),
+                    model,
+                    samples=int(jcfg.get("samples", 3)),
+                )
+            except CassetteMiss as exc:
+                failures.append(f"[{cid}] judge recording missing: {exc}")
+                res = None
+            if res is not None:
+                ok, msg = res.passes(float(jcfg.get("min_score", 7)))
+                for sample in res.detail:
+                    for criterion in sample.get("criteria", []):
+                        judge_criteria.append(
+                            {
+                                "name": criterion.get("name", "?"),
+                                "score": criterion.get("score", 0),
+                                "why": str(criterion.get("why", ""))[:160],
+                            }
+                        )
+                    break  # first sample is representative; spread is in msg
+            else:
+                ok, msg = False, "no verdict"
+            if jcfg.get("advisory"):
+                # Noisy free-tier judges report signal but never block the gate;
+                # deterministic layers (invariants/budgets/snapshots) are the gate.
+                notes.append(f"[{cid}] judge ({model}) advisory: {msg}")
+            else:
+                (notes if ok else failures).append(f"[{cid}] judge ({model}): {msg}")
+
+    if deep:
+        # Opt-in DeepEval pass (default `make evals` skips this: separate
+        # cassette traffic, calibrated separately). Advisory until the
+        # thresholds below are calibrated against live runs.
+        first = runs[0]
+        cassette, model = first["cassette"], judge_model()
+        client = _client() if mode == "record" else _noop_client
+        notes += _deepeval_notes(
+            case,
+            str(case.get("input", {}).get("query", "")),
+            first["artifact"],
+            first.get("sources"),
+            lambda **r: cassette.chat(client, **r),
+            model,
+        )
+
+    first = runs[0]
+    notes.append(f"[{cid}] citation yield: {_citation_yield(first['artifact'], first.get('sources'))}")
 
     return {
         "id": cid,
@@ -169,12 +306,61 @@ def run_case(case: dict[str, Any], mode: str) -> dict[str, Any]:
         "notes": notes,
         "digest": current,
         "usage": runs[0]["usage"],
+        "budget": case.get("budget", {}),
+        "artifact_chars": len(runs[0]["artifact"]),
+        "judge_criteria": judge_criteria,
+        "bodies": runs[0].get("bodies", 0),
+        "nsources": runs[0].get("nsources", 0),
     }
 
 
+def record_dir(cid: str, i: int) -> Path:
+    """Cassette directory for one case run.
+
+    Args:
+        cid: Case id.
+        i: Sample index.
+
+    Returns:
+        Path: Directory holding that run's recordings.
+    """
+    return DEFAULT_DIR / cid / f"run{i}"
+
+
+def find_dirty_record_dirs(cases: list[dict[str, Any]]) -> dict[str, list[str]]:
+    """Map case ids to non-empty cassette dirs that a record would overwrite.
+
+    Record mode overwrites on success but preserves files for calls that fail
+    live — a later replay then hits those stale files and diverges from the
+    recorded run. Recording into a dirty dir is the trap; wipe first.
+
+    Args:
+        cases: Eval case mappings (each with ``id`` and ``samples``).
+
+    Returns:
+        dict[str, list[str]]: Case id to sorted non-empty run-dir names.
+    """
+    dirty: dict[str, list[str]] = {}
+    for case in cases:
+        cid = str(case["id"])
+        runs = int(case.get("samples", 1))
+        hit = sorted(
+            f"run{i}" for i in range(runs) if record_dir(cid, i).exists() and any(record_dir(cid, i).iterdir())
+        )
+        if hit:
+            dirty[cid] = hit
+    return dirty
+
+
 def main() -> int:
+    try:
+        import yaml
+    except ImportError:
+        sys.exit("pip install pyyaml")
     ap = argparse.ArgumentParser()
     ap.add_argument("--record", action="store_true")
+    ap.add_argument("--deep", action="store_true")
+    ap.add_argument("--force", action="store_true")
     ap.add_argument("--accept", action="store_true")
     ap.add_argument("-k", default="")
     ap.add_argument("--json", action="store_true")
@@ -187,7 +373,14 @@ def main() -> int:
         print("no cases matched")
         return 1
 
-    results = [run_case(c, mode) for c in cases]
+    if mode == "record" and not args.force and (dirty := find_dirty_record_dirs(cases)):
+        print("refusing to record into non-empty cassette dirs (stale files make replay diverge):")
+        for cid, runs in dirty.items():
+            print(f"  {cid}: {', '.join(runs)}")
+        print("wipe them first, or re-run with --force to overwrite anyway.")
+        return 2
+
+    results = [run_case(c, mode, deep=args.deep) for c in cases]
 
     if args.accept:
         (ROOT / "snapshots").mkdir(exist_ok=True)
@@ -204,10 +397,26 @@ def main() -> int:
 
     failed = [r for r in results if not r["ok"]]
     for r in results:
+        usage = r.get("usage", {})
+        budget = r.get("budget", {})
+        digest = r.get("digest", {})
+        print(f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']}  ({usage.get('total_tokens', 0)} tok)")
         print(
-            f"{'PASS' if r['ok'] else 'FAIL'}  {r['id']}  "
-            f"({r.get('usage', {}).get('total_tokens', 0)} tok)"
+            f"      cost: {usage.get('total_tokens', 0)}"
+            f"/{budget.get('max_total_tokens', '?')} tok, "
+            f"{usage.get('calls', 0)}/{budget.get('max_model_calls', '?')} calls"
         )
+        print(
+            f"      artifact: {r.get('artifact_chars', 0)} chars, "
+            f"{len(digest.get('headings', []))} sections, "
+            f"{len(digest.get('citations', []))} citations"
+        )
+        bodies, nsources = r.get("bodies", 0), r.get("nsources", 0)
+        if nsources and bodies:
+            print(f"      evidence: {bodies}/{nsources} bodies fetched ({bodies * 100 // nsources}% hit rate)")
+
+        for criterion in r.get("judge_criteria", []):
+            print(f"      judge {criterion['name']}: {criterion['score']} — {criterion['why']}")
         for n in r.get("notes", []):
             print(f"      note: {n}")
         for f in r["failures"]:

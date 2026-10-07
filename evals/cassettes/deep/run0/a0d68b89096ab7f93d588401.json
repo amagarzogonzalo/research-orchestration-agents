@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.2139/ssrn.5557161"
+  },
+  "recorded_at": "2026-10-07T08:43:47Z",
+  "response": {
+    "captured_at": "2026-10-07T08:43:47.065245+00:00",
+    "char_count": 484,
+    "crawl_method": "crawl4ai",
+    "markdown": "[![SSRN Logo](https://www.ssrn.com/abstract=5557161)](https://www.ssrn.com)\n# Content Blocked\n! We have detected that you may be using an automated script or search engine our site does not support. Please retry using an alternate way of accessing our site.   \nContact Content_Protection_Services@Elsevier.com for more information.  \n\n  * Reference Number: a46b9e8e1f4f2f85\n  * IP Address: 217.102.66.155\n  * Timestamp: Wed, 07 Oct 2026 08:43:39 GMT \n\n\n::CLOUDFLARE_ERROR_1000S_BOX::\n",
+    "title": "Content Blocked",
+    "url": "https://doi.org/10.2139/ssrn.5557161"
+  },
+  "usage": {},
+  "wall_s": 16.407
+}

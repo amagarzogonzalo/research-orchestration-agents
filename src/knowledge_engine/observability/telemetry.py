@@ -7,7 +7,9 @@ Initializes a tracer + meter exported via OTLP to a free self-hosted sink
 
 from __future__ import annotations
 
+import logging
 import os
+from typing import Any
 
 from opentelemetry import metrics, trace
 from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
@@ -16,6 +18,8 @@ from opentelemetry.sdk.metrics.export import ConsoleMetricExporter, PeriodicExpo
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
+logger = logging.getLogger(__name__)
 
 _OTEL_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "http://localhost:4318")
 _SERVICE_NAME = os.environ.get("OTEL_SERVICE_NAME", "knowledge-engine")
@@ -26,10 +30,22 @@ _METRICS_EXPORTER = os.environ.get("OTEL_METRICS_EXPORTER", "none").strip()
 
 
 def _resource() -> Resource:
+    """Resource.
+
+    Returns:
+        Resource: Telemetry resource.
+
+    """
     return Resource.create({"service.name": _SERVICE_NAME})
 
 
 def _init_trace() -> trace.Tracer:
+    """Init trace.
+
+    Returns:
+        trace.Tracer: Telemetry tracer.
+
+    """
     provider = TracerProvider(resource=_resource())
     if _TRACES_EXPORTER not in {"", "none"}:
         if _TRACES_EXPORTER == "otlp" or _TRACES_EXPORTER == "http":
@@ -42,22 +58,43 @@ def _init_trace() -> trace.Tracer:
 
 
 class _ConsoleExporter:
-    """Minimal fallback exporter printing spans when OTLP is disabled."""
+    """Minimal fallback exporter logging spans when OTLP is disabled."""
 
-    def export(self, spans, timeout_millis=30000):
+    def export(self, spans: Any, timeout_millis: int = 30000) -> Any:
+        """Export spans to the console.
+
+        Args:
+            spans: Spans to export.
+            timeout_millis: Export timeout in milliseconds.
+
+        Returns:
+            Any: Success result.
+        """
         for span in spans:
-            print(span)
+            logger.info("span: %s", span)
         return _OkResult()
 
     def shutdown(self):
+        """Shut down the exporter."""
         pass
 
 
 class _OkResult:
+    """_OkResult.
+
+    Attributes:
+        status: Attribute description."""
+
     status = "success"
 
 
 def _init_meter() -> metrics.Meter:
+    """Init meter.
+
+    Returns:
+        metrics.Meter: Telemetry meter.
+
+    """
     readers = []
     if _METRICS_EXPORTER == "console":
         readers.append(PeriodicExportingMetricReader(ConsoleMetricExporter()))

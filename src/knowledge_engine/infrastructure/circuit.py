@@ -8,11 +8,22 @@ Redis outage.
 from __future__ import annotations
 
 import time
+from typing import TYPE_CHECKING
 
-import redis.asyncio as aioredis
+if TYPE_CHECKING:
+    import redis.asyncio as aioredis
 
 
 class CircuitBreaker:
+    """Per-provider circuit breaker with Redis-backed and in-process state.
+
+    Args:
+        rc: Redis client (None selects the in-process fallback).
+        name: Provider name used to namespace breaker keys.
+        threshold: Consecutive failures before tripping.
+        cooldown: Trip cooldown in seconds.
+    """
+
     def __init__(self, rc: aioredis.Redis | None, name: str, *, threshold: int = 3, cooldown: float = 60.0) -> None:
         self.rc = rc
         self.name = name
@@ -25,6 +36,11 @@ class CircuitBreaker:
         self._local_fails = 0
 
     async def allow(self) -> bool:
+        """Allow.
+
+        Returns:
+            bool: True on success.
+        """
         if self.rc is not None:
             try:
                 trip = await self.rc.get(self._trip_key)
@@ -36,6 +52,7 @@ class CircuitBreaker:
         return self._local_trip < time.time()
 
     async def record_success(self) -> None:
+        """Record success."""
         if self.rc is not None:
             try:
                 await self.rc.delete(self._fail_key)
@@ -45,6 +62,7 @@ class CircuitBreaker:
         self._local_fails = 0
 
     async def record_failure(self) -> None:
+        """Record failure."""
         if self.rc is not None:
             try:
                 fails = await self.rc.incr(self._fail_key)

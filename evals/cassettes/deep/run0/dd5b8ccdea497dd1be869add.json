@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1016/b978-0-443-33592-1.00007-3"
+  },
+  "recorded_at": "2026-10-07T08:43:47Z",
+  "response": {
+    "captured_at": "2026-10-07T08:43:47.085267+00:00",
+    "char_count": 1653,
+    "crawl_method": "crawl4ai",
+    "markdown": "[![Elsevier logo](https://www.sciencedirect.com/science/article/pii/B9780443335921000073?via%3Dihub)ScienceDirect](https://www.sciencedirect.com/)\n  * Help\n\n\n# There was a problem providing the content you requested\nPlease [contact our support team](https://service.elsevier.com/app/answers/detail/a_id/10117/supporthub/sciencedirect/kw/IP+blocked/) for more information and provide the details below.\n  * **Reference number:** a46b9e7f9bf6def8\n  * **IP Address:** 217.102.66.155\n  * **User Agent:** Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/116.0.0.0 Safari/537.36\n  * **Timestamp:** 2026-10-07 08:43:36 UTC\n  * CPE00001\n\n\n::CLOUDFLARE_ERROR_1000S_BOX::\n[![Elsevier logo with wordmark](https://www.sciencedirect.com/science/article/pii/B9780443335921000073?via%3Dihub)](https://www.elsevier.com/)\n  * [About ScienceDirect](https://www.elsevier.com/solutions/sciencedirect)\n  * [Remote access](https://www.sciencedirect.com/user/institution/login?targetURL=%2F)\n  * [Contact and support](https://service.elsevier.com/app/contact/supporthub/sciencedirect/)\n  * [Terms and conditions](https://www.elsevier.com/legal/elsevier-website-terms-and-conditions)\n  * [Privacy policy](https://www.elsevier.com/legal/privacy-policy)\n  * Cookie settings\n\n\nAll content on this site: Copyright © 2026 Elsevier B.V., its licensors, and contributors. All rights are reserved, including those for text and data mining, AI training, and similar technologies. For all open access content, the relevant licensing terms apply.\n[![RELX group home page](https://www.sciencedirect.com/science/article/pii/B9780443335921000073?via%3Dihub)](https://www.relx.com/)\n",
+    "title": "ScienceDirect",
+    "url": "https://doi.org/10.1016/b978-0-443-33592-1.00007-3"
+  },
+  "usage": {},
+  "wall_s": 16.81
+}

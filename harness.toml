@@ -44,5 +44,9 @@ enabled = false
 port    = 8787
 
 [evals]
-# Pinned on purpose: the judge must NOT follow the active profile. Free tier.
-judge_model = "deepseek/deepseek-flash"
+# Pinned on purpose: the judge must NOT follow the active profile. Must be a
+# valid OpenRouter model ID serving the free tier. NOTE 2026-10-07: the
+# `:free` suffix scheme was retired upstream (all such slugs 404) — free
+# models are now requested WITHOUT the suffix; verified live for the pin
+# below. Re-verify with a one-call probe if the judge ever 404s again.
+judge_model = "google/gemma-3-27b-it"

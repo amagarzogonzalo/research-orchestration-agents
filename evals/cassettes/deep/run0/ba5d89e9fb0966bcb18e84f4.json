@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:45:26Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What are the comparative strengths and weaknesses of RAG versus long-context models in reducing hallucinations?\nPapers:\ncrossref:10.1037/0000267-002 | Theoretical models for prevention: Strengths and weaknesses. | Strengths-based prevention: Reducing violence and other public health problems.\ncrossref:10.31979/etd.hn7u-hp8x | LOOM-RAG\ncrossref:10.5089/9781616353759.022.a004 | World Bank Experience with Rural Development: A long-term evaluation highlights strengths and weaknesses\ncrossref:10.2139/ssrn.5539079 | Mitigating Hallucinations in RAG-Based AI Assistants&amp;nbsp;\n&lt;div&gt;\n Advanced Techniques and Mathematical Models for Reducing AI-Generated Misinformation\n&lt;/div&gt;\ncrossref:10.5040/9781472926661.ch-003 | What are my Strengths and Weaknesses? | Resources for Teaching French 14–16\neurope_pmc:MED:42581210 | Domain-specific versus general large language models: a review and empirical benchmark in real medical texts.\neurope_pmc:MED:42180301 | Neuro-symbolic reasoning engine for tax optimisation.\neurope_pmc:MED:41849345 | Development, system design, safety, and performance metrics of a conversational agent for reducing depressive and anxious symptoms based on a large language model: The MHAI study.\neurope_pmc:MED:42009701 | Designing metaverse interaction systems for the Turkish language enhanced by fine-tuning and retrieval-augmented generation (RAG).\neurope_pmc:MED:41882314 | WiseMind: a knowledge-guided multi-agent framework for accurate and empathetic psychiatric diagnosis.\nhuggingface_papers:2406.11230 | Multimodal Needle in a Haystack: Benchmarking Long-Context Capability of\n  Multimodal Large Language Models\nhuggingface_papers:2410.12787 | The Curse of Multi-Modalities: Evaluating Hallucinations of Large\n  Multimodal Models across Language, Visual, and Audio\nhuggingface_papers:2406.16338 | VideoHallucer: Evaluating Intrinsic and Extrinsic Hallucinations in\n  Large Video-Language Models\nhuggingface_papers:2410.11779 | MLLM can see? Dynamic Correction Decoding for Hallucination Mitigation\nhuggingface_papers:2408.07852 | Training Language Models on the Knowledge Graph: Insights on\n  Hallucinations and Their Detectability\nosf:dt7gn_v1 | The Functional Connectivity of Hallucinations in Psychiatric Disorders and Neurodegenerative Disorders: A Systematic Review\nosf:u57xs_v2 | Impaired functional double dissociation in motor-to-sensory transformation mediates aberrant predictive coding in auditory verbal hallucinations\nosf:f6pd8_v1 | Reducing Hallucinations in Educational Large Language Models: The AI Token Pond Reasoning Framework with T0TTL Lifecycle Management\nosf:nszgk_v1 | Body mapping, embodiment and emotional responses to an experimental simulation of auditory hallucinations in a VR environment\nmedrxiv:10.64898/2026.09.22.26363627 | Comparative safety and sedation-related outcomes of fospropofol disodium versus propofol for adult sedation outside general anaesthesia induction or maintenance (including ICU and procedural sedation): a systematic review, meta-analysis and trial sequential analysis\nwikipedia:78730954 | List of common misconceptions about science, technology, and mathematics\nduckduckgo:https://blog.saaro.net/en/rag-vs-long-context-2026-was-die-daten-wirklich-sagen | RAG vs. Long Context 2026: What the Data Really Says · saaro\nduckduckgo:https://usewire.io/blog/long-context-vs-rag-what-the-data-shows/ | RAG vs long context: what the 2026 data shows | Wire Blog\nduckduckgo:https://aimlinsights.com/2026/06/02/rag-vs-long-context-windows-complete-ai-architecture-guide/ | RAG vs Long Context Windows: Complete AI Architecture Guide\nduckduckgo:https://niteagent.com/blog/llm-context-2026-rag-vs-long-context/ | LLM Context in 2026: Long Context vs RAG Decision Guide\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: comparative strengths and weaknesses of RAG vs long-context models in reducing hallucinations.\n\nWe have a list of papers with various sources: crossref, europe_pmc, huggingface_papers, osf, medrxiv, wikipedia, duckduckgo blog links.\n\nWe need to filter: require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when venue is off-domain (law, medicine, social science for computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover same claim — but keep unique-coverage items.\n\nTopic: comparative strengths and weaknesses of RAG vs long-context models in reducing hallucinations. So we need papers that discuss RAG vs long-context, hallucinations, strengths/weaknesses.\n\nLet's examine each:\n\n1. crossref:10.1037/0000267-002 | Theoretical models for prevention: Strengths and weaknesses. | Strengths-based prevention: Reducing violence and other public health problems. This is about prevention, violence, public health. Not relevant.\n\n2. crossref:10.31979/etd.hn7u-hp8x | LOOM-RAG. This is a thesis about LOOM-RAG. Might discuss RAG. But not necessarily about hallucinations or long-context. Might be relevant if it compares RAG vs long-context. But title only LOOM-RAG. Might be relevant but uncertain. But we can consider it maybe relevant.\n\n3. crossref:10.5089/9781616353759.022.a004 | World Bank Experience with Rural Development: A long-term evaluation highlights strengths and weaknesses. Not relevant.\n\n4. crossref:10.2139/ssrn.5539079 | Mitigating Hallucinations in RAG-Based AI Assistants. This is about mitigating hallucinations in RAG-based AI assistants. It likely discusses RAG and hallucinations. But does it compare to long-context? Title doesn't mention long-context. Might still be relevant as it addresses hallucinations in RAG. But the research question is comparative strengths and weaknesses of RAG vs long-context. So we need comparison. This paper might not compare. So maybe not relevant.\n\n5. <div> Advanced Techniques and Mathematical Models for Reducing AI-Generated Misinformation. This is generic. Not relevant.\n\n6. crossref:10.5040/9781472926661.ch-003 | What are my Strengths and Weaknesses? | Resources for Teaching French 14–16. Not relevant.\n\n7. europe_pmc:MED:42581210 | Domain-specific versus general large language models: a review and empirical benchmark in real medical texts. This is about domain-specific vs general LLMs. Not about RAG vs long-context. Not relevant.\n\n8. europe_pmc:MED:42180301 | Neuro-symbolic reasoning engine for tax optimisation. Not relevant.\n\n9. europe_pmc:MED:41849345 | Development, system design, safety, and performance metrics of a conversational agent for reducing depressive and anxious symptoms based on a large language model: The MHAI study. Not relevant.\n\n10. europe_pmc:MED:42009701 | Designing metaverse interaction systems for the Turkish language enhanced by fine-tuning and retrieval-augmented generation (RAG). This is about RAG but not about hallucinations or comparison.\n\n11. europe_pmc:MED:41882314 | WiseMind: a knowledge-guided multi-agent framework for accurate and empathetic psychiatric diagnosis. Not relevant.\n\n12. huggingface_papers:2406.11230 | Multimodal Needle in a Haystack: Benchmarking Long-Context Capability of Multimodal Large Language Models. This is about long-context capability. Might discuss hallucinations? Not sure. Title doesn't mention hallucinations. Might not be relevant.\n\n13. huggingface_papers:2410.12787 | The Curse of Multi-Modalities: Evaluating Hallucinations of Large Multimodal Models across Language, Visual, and Audio. This is about hallucinations in multimodal models. Not about RAG vs long-context.\n\n14. huggingface_papers:2406.16338 | VideoHallucer: Evaluating Intrinsic and Extrinsic Hallucinations in Large Video-Language Models. Not relevant.\n\n15. huggingface_papers:2410.11779 | MLLM can see? Dynamic Correction Decoding for Hallucination Mitigation. Not relevant.\n\n16. huggingface_papers:2408.07852 | Training Language Models on the Knowledge Graph: Insights on Hallucinations and Their Detectability. Not relevant.\n\n17. osf:dt7gn_v1 | The Functional Connectivity of Hallucinations in Psychiatric Disorders and Neurodegenerative Disorders: A Systematic Review. Not relevant.\n\n18. osf:u57xs_v2 | Impaired functional double dissociation in motor-to-sensory transformation mediates aberrant predictive coding in auditory verbal hallucinations. Not relevant.\n\n19. osf:f6pd8_v1 | Reducing Hallucinations in Educational Large Language Models: The AI Token Pond Reasoning Framework with T0TTL Lifecycle Management. This is about hallucinations in educational LLMs. Might discuss mitigation but not RAG vs long-context.\n\n20. osf:nszgk_v1 | Body mapping, embodiment and emotional responses to an experimental simulation of auditory hallucinations in a VR environment. Not relevant.\n\n21. medrxiv:10.64898/2026.09.22.26363627 | Comparative safety and sedation-related outcomes of fospropofol disodium versus propofol for adult sedation outside general anaesthesia induction or maintenance (including ICU and procedural sedation): a systematic review, meta-analysis and trial sequential analysis. Not relevant.\n\n22. wikipedia:78730954 | List of common misconceptions about science, technology, and mathematics. Not relevant.\n\n23. duckduckgo:https://blog.saaro.net/en/rag-vs-long-context-2026-was-die-daten-wirklich-sagen | RAG vs. Long Context 2026: What the Data Really Says · saaro. This is a blog about RAG vs long context. Likely contains comparison. Good.\n\n24. duckduckgo:https://usewire.io/blog/long-context-vs-rag-what-the-data-shows/ | RAG vs long context: what the 2026 data shows | Wire Blog. Good.\n\n25. duckduckgo:https://aimlinsights.com/2026/06/02/rag-vs-long-context-windows-complete-ai-architecture-guide/ | RAG vs Long Context Windows: Complete AI Architecture Guide. Good.\n\n26. duckduckgo:https://niteagent.com/blog/llm-context-2026-rag-vs-long-context/ | LLM Context in 2026: Long Context vs RAG Decision Guide. Good.\n\nWe need to decide which are",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362725,
+    "id": "chatcmpl-2164ea14-ae2e-4669-b7ec-f81fcbd02595",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_e23fc997ca",
+    "usage": {
+      "completion_time": 1.677762507,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.0591873,
+      "prompt_tokens": 1188,
+      "prompt_tokens_details": null,
+      "queue_time": 0.296090456,
+      "total_time": 1.736949807,
+      "total_tokens": 2688
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4arkvwpeaaa4pcrhs1enpfx",
+      "seed": 147734468
+    }
+  },
+  "usage": {
+    "completion_time": 1.677762507,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.0591873,
+    "prompt_tokens": 1188,
+    "prompt_tokens_details": null,
+    "queue_time": 0.296090456,
+    "total_time": 1.736949807,
+    "total_tokens": 2688
+  },
+  "wall_s": 2.232
+}

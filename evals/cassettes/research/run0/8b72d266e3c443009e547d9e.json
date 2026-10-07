@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:30:56Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How retrieval-augmented generation reduces hallucinations in large language models\nPapers:\ncrossref:10.1002/9781394374717.fmatter | Advanced Retrieval‐Augmented Generation | Advanced Retrieval‐Augmented Generation\ncrossref:10.59350/pn1ra-vpc97 | Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models\ncrossref:10.1115/detc2025-169730 | Reducing Hallucinations in Large Language Models Through Integrated Self-Verification and Retrieval-Augmented Generation | Volume 2B: 45th Computers and Information in Engineering Conference (CIE)\ncrossref:10.1002/9781394374717.ch03 | Retrieval‐Augmented Generation | Advanced Retrieval‐Augmented Generation\ncrossref:10.2139/ssrn.7357178 | Retrieval-Augmented Generation and Knowledge-Grounded Large Language Models\npubmed:42819897 | In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins. | Mach Learn Eng\npubmed:42770666 | Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study. | J Med Internet Res\npubmed:42735403 | Locally Deployed Large Language Models for AI-Assisted Outpatient Prescription Review: Crossover Study. | JMIR Med Inform\npubmed:42719386 | Dynamic alignment of large language models for evidence-grounded heart failure decision support. | Digit Health\npubmed:42712418 | Large language model enhanced framework for systematic reviews and meta-analyses. | BMJ Digit Health Ai\npubmed:42695570 | Adaptive NLI-Driven Claim Verification with Statistical Decision Modeling for Low-Latency Hallucination Reduction in Large Language Models. | J Vis Exp\npubmed:42676370 | Benchmarking retrieval augmented generation LLMs for Arabic noise robustness. | Front Big Data\npubmed:42644472 | Interoperable Web Platform Based on Large Language Models for Medical Data Analysis: A Protocol for Clinical Decision Support. | J Vis Exp\neurope_pmc:MED:42682590 | Knowledge-enhanced large language model construction for garlic cultivation using GraphRAG.\neurope_pmc:PMC:PMC13600821 | Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models\neurope_pmc:MED:42382850 | Resource-efficient retrieval-augmented question answering for the Indian Lok Sabha dataset.\neurope_pmc:MED:42297857 | Fine grained reranking via caption bridging for knowledge augmented visual question answering.\neurope_pmc:MED:42251377 | Mitigating hallucinations in healthcare AI: a systematic review of evidence-based strategies.\neurope_pmc:MED:42270954 | Does ChatGPT need a psychiatrist? Similarities between human psychopathology and errors in large language models.\neurope_pmc:MED:42591399 | Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications.\neurope_pmc:MED:42658861 | CLIN-LLM: A safety-constrained hybrid framework for clinical diagnosis and treatment generation.\nhuggingface_papers:2412.11919 | RetroLLM: Empowering Large Language Models to Retrieve Fine-grained\n  Evidence within Generation\nhuggingface_papers:2512.19134 | QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation\nhuggingface_papers:2603.20309 | BubbleRAG: Evidence-Driven Retrieval-Augmented Generation for Black-Box Knowledge Graphs\nhuggingface_papers:2501.08292 | HALoGEN: Fantastic LLM Hallucinations and Where to Find Them\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"How retrieval-augmented generation reduces hallucinations in large language models\". We must consider topical overlap: drop items whose title shares only generic words with query, especially when venue off-domain. For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover same claim, but keep unique-coverage items.\n\nWe need to output JSON with relevant_ids list.\n\nWe have list of papers with IDs like crossref:10.1002/9781394374717.fmatter etc. We need to decide which are relevant.\n\nLet's examine each:\n\n1. crossref:10.1002/9781394374717.fmatter | Advanced Retrieval‐Augmented Generation | Advanced Retrieval‐Augmented Generation\nTitle: \"Advanced Retrieval‐Augmented Generation\". This is a book chapter? It's a book \"Advanced Retrieval‐Augmented Generation\". Might be a general overview. Could be relevant but generic. The topic is about reducing hallucinations. This title doesn't mention hallucinations. Might be generic. Might not be directly relevant. But could contain discussion. But we might drop if generic. The instruction: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query. This title shares \"Retrieval-Augmented Generation\" which is the core concept. But no mention of hallucinations. Might still be relevant as a general overview. But we might keep if it covers hallucination reduction. Hard to know. But we can consider it relevant because it's about RAG. But maybe we should keep it.\n\n2. crossref:10.59350/pn1ra-vpc97 | Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models\nTitle: \"Refining AI Vision: How Retrieval-Augmented Generation Transforms Image Captioning in Large Language Models\". This is about image captioning, not hallucinations. Might not be relevant.\n\n3. crossref:10.1115/detc2025-169730 | Reducing Hallucinations in Large Language Models Through Integrated Self-Verification and Retrieval-Augmented Generation | Volume 2B: 45th Computers and Information in Engineering Conference (CIE)\nTitle: \"Reducing Hallucinations in Large Language Models Through Integrated Self-Verification and Retrieval-Augmented Generation\". This is directly about reducing hallucinations via RAG. Venue: CIE conference. It's engineering. It's relevant. Keep.\n\n4. crossref:10.1002/9781394374717.ch03 | Retrieval‐Augmented Generation | Advanced Retrieval‐Augmented Generation\nTitle: \"Retrieval‐Augmented Generation\". Generic. Might be a chapter. Might not mention hallucinations. Might be generic. Might drop.\n\n5. crossref:10.2139/ssrn.7357178 | Retrieval-Augmented Generation and Knowledge-Grounded Large Language Models\nTitle: \"Retrieval-Augmented Generation and Knowledge-Grounded Large Language Models\". Generic. Might not mention hallucinations. Might drop.\n\n6. pubmed:42819897 | In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins. | Mach Learn Eng\nTitle: \"In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins.\" Not about hallucinations. Drop.\n\n7. pubmed:42770666 | Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study. | J Med Internet Res\nTitle: \"Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study\". This is about reliability and explainability, maybe includes hallucination reduction via fact-checking. Might be relevant. It's a study. Might keep.\n\n8. pubmed:42735403 | Locally Deployed Large Language Models for AI-Assisted Outpatient Prescription Review: Crossover Study. | JMIR Med Inform\nNot about hallucinations. Drop.\n\n9. pubmed:42719386 | Dynamic alignment of large language models for evidence-grounded heart failure decision support. | Digit Health\nNot about hallucinations. Drop.\n\n10. pubmed:42712418 | Large language model enhanced framework for systematic reviews and meta-analyses. | BMJ Digit Health Ai\nNot about hallucinations. Drop.\n\n11. pubmed:42695570 | Adaptive NLI-Driven Claim Verification with Statistical Decision Modeling for Low-Latency Hallucination Reduction in Large Language Models. | J Vis Exp\nTitle: \"Adaptive NLI-Driven Claim Verification with Statistical Decision Modeling for Low-Latency Hallucination Reduction in Large Language Models\". This is directly about hallucination reduction. Keep.\n\n12. pubmed:42676370 | Benchmarking retrieval augmented generation LLMs for Arabic noise robustness. | Front Big Data\nNot about hallucinations. Drop.\n\n13. pubmed:42644472 | Interoperable Web Platform Based on Large Language Models for Medical Data Analysis: A Protocol for Clinical Decision Support. | J Vis Exp\nNot about hallucinations. Drop.\n\n14. europe_pmc:MED:42682590 | Knowledge-enhanced large language model construction for garlic cultivation using GraphRAG.\nNot about hallucinations. Drop.\n\n15. europe_pmc:PMC:PMC13600821 | Toward an integrated animal–human nutrition intelligence via agentic retrieval-augmented language models\nNot about hallucinations. Drop.\n\n16. europe_pmc:MED:42382850 | Resource-efficient retrieval-augmented question answering for the Indian Lok Sabha dataset.\nNot about hallucinations. Drop.\n\n17. europe_pmc:MED:42297857 | Fine grained reranking via caption bridging for knowledge augmented visual question answering.\nNot about hallucinations. Drop.\n\n18. europe_pmc:MED:42251377 | Mitigating hallucinations in healthcare AI: a systematic review of evidence-based strategies.\nTitle: \"Mitigating hallucinations in healthcare AI: a systematic review of evidence-based strategies\". This is about hallucinations but not specifically RAG. But could be relevant as it covers strategies including RAG. Might keep.\n\n19. europe_pmc:MED:42270954 | Does ChatGPT need a psychiatrist? Similarities between human psychopathology and errors in large language models.\nNot about hallucinations. Drop.\n\n20. europe_pmc:MED:42591399 | Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications.\nNot about hallucinations. Drop.\n\n21. europe_pmc:MED:42658861 | CLIN-LLM: A safety-constrained hybrid framework for clinical diagnosis and treatment generation.\nNot about hallucinations. Drop.\n\n22. huggingface_papers:2412.11919 | RetroLLM: Empowering Large Language Models to Retrieve Fine-grained Evidence within Generation\nTitle: \"RetroLLM: Empowering Large Language Models to Retrieve Fine-grained Evidence within Generation\". Might discuss hallucination reduction. Keep.\n\n23. huggingface_papers:2512.19134 | QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791361856,
+    "id": "chatcmpl-3f10ce65-194f-4088-9da2-b425e796ccd6",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_37c9245f64",
+    "usage": {
+      "completion_time": 1.557181982,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.052133809,
+      "prompt_tokens": 1050,
+      "prompt_tokens_details": null,
+      "queue_time": 0.206978101,
+      "total_time": 1.609315791,
+      "total_tokens": 2550
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4aqsaspem2ahwjg0s8bna2k",
+      "seed": 910432304
+    }
+  },
+  "usage": {
+    "completion_time": 1.557181982,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.052133809,
+    "prompt_tokens": 1050,
+    "prompt_tokens_details": null,
+    "queue_time": 0.206978101,
+    "total_time": 1.609315791,
+    "total_tokens": 2550
+  },
+  "wall_s": 2.585
+}

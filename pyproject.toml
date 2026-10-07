@@ -27,15 +27,22 @@ dependencies = [
 [project.optional-dependencies]
 scrape = ["crawl4ai>=0.9,<0.10", "trafilatura>=2.2,<3", "playwright>=1.62,<2"]
 browser = ["playwright>=1.62,<2", "selenium>=4.20,<5"]
+store = ["psycopg[binary,pool]>=3.1,<4", "langgraph-checkpoint-postgres>=3,<4"]  # Supabase Postgres checkpointer + store (opt-in)
+evals = ["deepeval>=4.2,<5"]  # DeepEval metrics (opt-in; default eval path stays cassette-only)
 providers = ["groq>=1.7,<2", "openai>=2.20,<3", "google-genai"]
 dev = [
     "pytest>=8",
     "pytest-asyncio>=0.24",
     "pytest-cov>=5",
+    "hypothesis>=6.100,<7",
     "ruff>=0.6",
     "mypy>=1.11",
     "pre-commit>=3.7",
     "pydoclint>=0.3,<1",
+    "tach>=0.30",
+    # NOTE: semgrep is intentionally NOT a venv dependency (it pins
+    # conflicting opentelemetry/mcp versions). It runs isolated via
+    # `uvx semgrep`, the pre-commit hook, and CI (pipx). See Makefile `semgrep`.
 ]
 
 [project.hatch.build.targets.wheel]
@@ -112,7 +119,8 @@ module = [
     "playwright.*",
     "selenium.*",
     "letta.*",
-    "qdrant_client.*",
+    "psycopg.*",
+
     "google.*",
     "groq.*",
     "redis.*",

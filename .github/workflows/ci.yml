@@ -1,19 +1,21 @@
 name: CI
 
+# Fast gate: runs on EVERY push and every merge request. Unit tests + lint +
+# static checks only — no network, no heavy deps. The long suite
+# (integration, e2e, types, evals) additionally runs on main + merge requests
+# via ci-full.yml.
 on:
   push:
-    branches: [main]
   pull_request:
 
 jobs:
-  test:
-    name: Test (Python ${{ matrix.python-version }})
+  unit:
+    name: Unit tests (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ["3.11", "3.12"]
     env:
-      # No external telemetry/collector in CI; keep instrumentation a no-op.
       OTEL_TRACES_EXPORTER: ""
       OTEL_METRICS_EXPORTER: "none"
       PYTHONPATH: src
@@ -27,19 +29,25 @@ jobs:
       - name: Install test-critical deps
         run: |
           python -m pip install --upgrade pip
-          pip install pydantic redis tenacity httpx opentelemetry-sdk \
-            opentelemetry-exporter-otlp-proto-http pytest pytest-asyncio
+          pip install pydantic tenacity httpx opentelemetry-sdk \
+            opentelemetry-exporter-otlp-proto-http pytest pytest-asyncio \
+            langgraph pyyaml hypothesis
 
-      - name: Run unit tests
-        run: python -m pytest -p no:cacheprovider
+      - name: Unit tests (pure logic, offline)
+        run: python -m pytest tests/unit -q -p no:cacheprovider
 
   lint:
-    name: Lint (ruff)
+    name: Lint + arch (ruff, tach, semgrep)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install ruff
+      - run: pip install ruff tach
       - run: ruff check src tests
+      - run: ruff format --check src tests
+      - name: Module boundaries
+        run: tach check
+      - name: Custom security/correctness rules
+        run: pipx run semgrep --config .semgrep/rules/ --metrics=off --error src tests

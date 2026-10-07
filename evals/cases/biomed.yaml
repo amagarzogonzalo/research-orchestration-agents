@@ -1,0 +1,46 @@
+# Biomedical end-to-end run: exercises PubMed/Europe PMC/bioRxiv paths (abstracts,
+# venues, MeSH-heavy sources) that the tech queries never touch. Same harness
+# contract as research.yaml.
+id: biomed
+description: >
+  A biomedical research() run stays structurally sound with provenance,
+  cited quantitative claims, valid footnote links, and bounded cost.
+
+entrypoint: "evals.adapters:research_run"
+input:
+  query: "CRISPR off-target detection methods and safety advances"
+  max_sources: 8
+
+samples: 1
+pass_at_k: 1
+
+invariants:
+  frontmatter_keys: ["@id", type, title, provenance, citations, tldr_llm]
+  min_sections: 2
+  # Calibrated: free-model citation counts vary 4-8 run to run; 0-2 means the
+  # model wrote an uncited essay (must fail), >=3 is a working run.
+  min_citations: 3
+  must_cite: []
+  no_uncited_claims: true
+  valid_links: true
+  forbidden_patterns: ["as an ai", "\\bTODO\\b", "as of my (last )?(knowledge|training)"]
+  max_chars: 40000
+
+budget:
+  # Calibrated 2026-10-03 against first record (~22k tok, ~30 calls).
+  max_total_tokens: 35000
+  max_model_calls: 40
+  max_wall_s: 1200
+
+judge:
+  rubric: rubrics/default.md
+  min_score: 6
+  samples: 1
+  # Advisory: free-tier judges are noisy signal, not a gate (repo policy, see
+  # research.yaml). Deterministic layers above block merges.
+  advisory: true
+
+deepeval:
+  # Opt-in DeepEval pass (--deep only; default replay skips it). Advisory
+  # until thresholds are calibrated against live runs — same policy as judge.
+  metrics: [answer_relevancy, faithfulness]

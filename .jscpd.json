@@ -1,0 +1,9 @@
+{
+  "$schema": "https://github.com/kucherenko/jscpd/raw/master/apps/jscpd/schemas/config.json",
+  "threshold": 5,
+  "reporters": ["consoleFull"],
+  "ignore": ["**/__pycache__/**", "**/.venv/**", "**/research_store/**", "**/uv.lock"],
+  "formats": ["python"],
+  "min-tokens": 60,
+  "max-lines": 500
+}

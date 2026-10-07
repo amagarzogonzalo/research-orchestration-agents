@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:34:48Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What is retrieval-augmented generation and how does it reduce hallucinations?\nPapers:\ncrossref:10.31979/etd.hn7u-hp8x | LOOM-RAG\ncrossref:10.21203/rs.3.rs-10186581/v1 | Retrieval-Augmented Generation for Reducing Hallucinations in Drug-Related Question Answering Systems\ncrossref:10.18653/v1/2025.findings-emnlp.218 | How Does Knowledge Selection Help Retrieval Augmented Generation? | Findings of the Association for Computational Linguistics: EMNLP 2025\ncrossref:10.2139/ssrn.5199254 | Lrp4rag: Detecting Hallucinations in Retrieval-Augmented Generation Via Layer-Wise Relevance Propagation\ncrossref:10.1145/3805712.3809882 | Numerical Hallucinations in Retrieval-Augmented Generation: Detection and Analysis | Proceedings of the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval\ncrossref:10.1109/icomet69771.2026.11591943 | A Retrieval-Augmented Generation (RAG) Approach to Eliminate Hallucinations in Workflow Generation | 2026 5th International Conference on Computing, Mathematics and Engineering Technologies (iCoMET)\ncrossref:10.38124/ijisrt/26may1714 | LegalMind: A Multi-Agent Legal Reasoning Framework Leveraging Fine-Tuning of Large Language Models and Retrieval-Augmented Generation to Reduce Hallucinations | International Journal of Innovative Science and Research Technology\ncrossref:10.1115/detc2025-169730 | Reducing Hallucinations in Large Language Models Through Integrated Self-Verification and Retrieval-Augmented Generation | Volume 2B: 45th Computers and Information in Engineering Conference (CIE)\npubmed:42819897 | In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins. | Mach Learn Eng\npubmed:42770666 | Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study. | J Med Internet Res\npubmed:42735403 | Locally Deployed Large Language Models for AI-Assisted Outpatient Prescription Review: Crossover Study. | JMIR Med Inform\npubmed:42719386 | Dynamic alignment of large language models for evidence-grounded heart failure decision support. | Digit Health\npubmed:42712418 | Large language model enhanced framework for systematic reviews and meta-analyses. | BMJ Digit Health Ai\npubmed:42695570 | Adaptive NLI-Driven Claim Verification with Statistical Decision Modeling for Low-Latency Hallucination Reduction in Large Language Models. | J Vis Exp\npubmed:42676370 | Benchmarking retrieval augmented generation LLMs for Arabic noise robustness. | Front Big Data\npubmed:42644472 | Interoperable Web Platform Based on Large Language Models for Medical Data Analysis: A Protocol for Clinical Decision Support. | J Vis Exp\neurope_pmc:MED:42682590 | Knowledge-enhanced large language model construction for garlic cultivation using GraphRAG.\neurope_pmc:MED:42552095 | AI-Empowered Nuclear Medicine Education, Part 1: Theoretical and Ethical Foundation.\neurope_pmc:PMC:PMC13575674 | Agentic artificial intelligence in radiology workflow: from image interpretation to report quality control\neurope_pmc:MED:42536636 | Case-matched retrieval improves textual alignment of LLM-generated radiology impressions.\neurope_pmc:MED:42382850 | Resource-efficient retrieval-augmented question answering for the Indian Lok Sabha dataset.\neurope_pmc:MED:42591399 | Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications.\nhuggingface_papers:2411.02959 | HtmlRAG: HTML is Better Than Plain Text for Modeling Retrieved Knowledge\n  in RAG Systems\nhuggingface_papers:2412.11919 | RetroLLM: Empowering Large Language Models to Retrieve Fine-grained\n  Evidence within Generation\nhuggingface_papers:2512.19134 | QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"What is retrieval-augmented generation and how does it reduce hallucinations?\" So we need papers that explain RAG concept and its effect on hallucinations. We should include peer-reviewed primary sources, but also practitioner sources if relevant. We should drop items whose title shares only generic words with query, especially if venue off-domain. Also drop items that are not directly about RAG or hallucinations.\n\nLet's examine each:\n\n1. crossref:10.31979/etd.hn7u-hp8x | LOOM-RAG. Likely a thesis (etd). Might be relevant. It's about RAG. Probably relevant.\n\n2. crossref:10.21203/rs.3.rs-10186581/v1 | Retrieval-Augmented Generation for Reducing Hallucinations in Drug-Related Question Answering Systems. Relevant.\n\n3. crossref:10.18653/v1/2025.findings-emnlp.218 | How Does Knowledge Selection Help Retrieval Augmented Generation? Findings of the Association for Computational Linguistics: EMNLP 2025. Relevant.\n\n4. crossref:10.2139/ssrn.5199254 | Lrp4rag: Detecting Hallucinations in Retrieval-Augmented Generation Via Layer-Wise Relevance Propagation. Relevant.\n\n5. crossref:10.1145/3805712.3809882 | Numerical Hallucinations in Retrieval-Augmented Generation: Detection and Analysis | Proceedings of the 49th International ACM SIGIR Conference on Research and Development in Information Retrieval. Relevant.\n\n6. crossref:10.1109/icomet69771.2026.11591943 | A Retrieval-Augmented Generation (RAG) Approach to Eliminate Hallucinations in Workflow Generation | 2026 5th International Conference on Computing, Mathematics and Engineering Technologies (iCoMET). Venue is computing, engineering. Might be relevant. But it's about workflow generation. Still RAG and hallucinations. Could be relevant.\n\n7. crossref:10.38124/ijisrt/26may1714 | LegalMind: A Multi-Agent Legal Reasoning Framework Leveraging Fine-Tuning of Large Language Models and Retrieval-Augmented Generation to Reduce Hallucinations | International Journal of Innovative Science and Research Technology. Venue is innovative science and research tech. Might be relevant but legal domain. But still RAG and hallucinations. Might be okay.\n\n8. crossref:10.1115/detc2025-169730 | Reducing Hallucinations in Large Language Models Through Integrated Self-Verification and Retrieval-Augmented Generation | Volume 2B: 45th Computers and Information in Engineering Conference (CIE). Relevant.\n\n9. pubmed:42819897 | In-process large language model requesting through knowledge graphs for interfacing with manufacturing digital twins. | Mach Learn Eng. Not about hallucinations. Might not be relevant.\n\n10. pubmed:42770666 | Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study. | J Med Internet Res. This is about medical QA, but includes RAG and hallucinations? It mentions fact-checking. Might be relevant.\n\n11. pubmed:42735403 | Locally Deployed Large Language Models for AI-Assisted Outpatient Prescription Review: Crossover Study. | JMIR Med Inform. Not about hallucinations.\n\n12. pubmed:42719386 | Dynamic alignment of large language models for evidence-grounded heart failure decision support. | Digit Health. Not about hallucinations.\n\n13. pubmed:42712418 | Large language model enhanced framework for systematic reviews and meta-analyses. | BMJ Digit Health Ai. Not about hallucinations.\n\n14. pubmed:42695570 | Adaptive NLI-Driven Claim Verification with Statistical Decision Modeling for Low-Latency Hallucination Reduction in Large Language Models. | J Vis Exp. Relevant.\n\n15. pubmed:42676370 | Benchmarking retrieval augmented generation LLMs for Arabic noise robustness. | Front Big Data. Might be about RAG but not hallucinations. Could be relevant but not directly about hallucinations.\n\n16. pubmed:42644472 | Interoperable Web Platform Based on Large Language Models for Medical Data Analysis: A Protocol for Clinical Decision Support. | J Vis Exp. Not about hallucinations.\n\n17. europe_pmc:MED:42682590 | Knowledge-enhanced large language model construction for garlic cultivation using GraphRAG. Not about hallucinations.\n\n18. europe_pmc:MED:42552095 | AI-Empowered Nuclear Medicine Education, Part 1: Theoretical and Ethical Foundation. Not about hallucinations.\n\n19. europe_pmc:PMC:PMC13575674 | Agentic artificial intelligence in radiology workflow: from image interpretation to report quality control. Not about hallucinations.\n\n20. europe_pmc:MED:42536636 | Case-matched retrieval improves textual alignment of LLM-generated radiology impressions. Not about hallucinations.\n\n21. europe_pmc:MED:42382850 | Resource-efficient retrieval-augmented question answering for the Indian Lok Sabha dataset. Not about hallucinations.\n\n22. europe_pmc:MED:42591399 | Overview of RAG-based and LLM-based approaches to personalization in healthcare AI applications. Not about hallucinations.\n\n23. huggingface_papers:2411.02959 | HtmlRAG: HTML is Better Than Plain Text for Modeling Retrieved Knowledge in RAG Systems. Relevant to RAG but not hallucinations.\n\n24. huggingface_papers:2412.11919 | RetroLLM: Empowering Large Language Models to Retrieve Fine-grained Evidence within Generation. Relevant to RAG.\n\n25. huggingface_papers:2512.19134 | QuCo-RAG: Quantifying Uncertainty from the Pre-training Corpus for Dynamic Retrieval-Augmented Generation. Relevant to RAG.\n\nWe need to decide which are directly relevant. The topic: \"What is retrieval-augmented generation and how does it reduce hallucinations?\" So we need papers that explain RAG concept and its effect on hallucinations. So include those that discuss RAG and hallucinations. Also include those that discuss RAG in general (definition) maybe. But the question is about RAG and hallucinations. So we should include papers that cover both.\n\nThus relevant IDs:\n\n- 10.31979/etd.hn7u-hp8x (LOOM-RAG) - likely a thesis on RAG. Might not mention hallucinations but it's about RAG. Might be relevant.\n\n- 10.21203/rs.3.rs-10186581/v1 (Retrieval-Augmented Generation for Reducing Hallucinations in Drug-Related Question Answering Systems) - definitely relevant.\n\n- 10.18653/v1/2025.findings-emnlp.218 (How Does Knowledge Selection Help Retrieval Augmented Generation?) - relevant to RAG and hallucinations.\n\n- 10.2139/ssrn.5199254 (Lrp4rag: Detecting Hallucinations in Retrieval-Augmented Generation) - relevant.\n\n- 10.1145/3805712.3809882 (Numerical Hallucinations in Retrieval",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362087,
+    "id": "chatcmpl-4631ea3e-d13f-4ef8-8ded-f4e75f88ceb7",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_f102a3179c",
+    "usage": {
+      "completion_time": 1.7769615220000001,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.068193828,
+      "prompt_tokens": 1154,
+      "prompt_tokens_details": null,
+      "queue_time": 0.203276262,
+      "total_time": 1.84515535,
+      "total_tokens": 2654
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4ar0cq0ee4v6zan4wrkxxmm",
+      "seed": 155685100
+    }
+  },
+  "usage": {
+    "completion_time": 1.7769615220000001,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.068193828,
+    "prompt_tokens": 1154,
+    "prompt_tokens_details": null,
+    "queue_time": 0.203276262,
+    "total_time": 1.84515535,
+    "total_tokens": 2654
+  },
+  "wall_s": 3.161
+}

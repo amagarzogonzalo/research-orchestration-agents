@@ -19,13 +19,31 @@ _BASE = "https://api.semanticscholar.org/graph/v1"
 
 
 class SemanticScholarAdapter(SearchPort, FetchPort):
+    """SemanticScholarAdapter.
+
+    Attributes:
+        name: Attribute description."""
+
     name = "semantic_scholar"
 
     def __init__(self, api_key: str | None = None, *, timeout: float = 15.0) -> None:
+        """Create a SemanticScholarAdapter.
+
+        Args:
+            api_key: API key.
+            timeout: Request timeout in seconds.
+        """
         self.api_key = api_key
         self._timeout = timeout
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         headers = {"User-Agent": "knowledge-engine"}
         if self.api_key:
             headers["x-api-key"] = self.api_key
@@ -33,6 +51,16 @@ class SemanticScholarAdapter(SearchPort, FetchPort):
 
     @staticmethod
     def _to_record(item: dict) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            item: Item.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         authors = [a.get("name", "") for a in item.get("authors", []) if a.get("name")]
         return SourceRecord(
             id=f"semantic_scholar:{item.get('paperId', '')}",
@@ -44,14 +72,26 @@ class SemanticScholarAdapter(SearchPort, FetchPort):
             abstract=item.get("abstract"),
             pdf_url=item.get("openAccessPdf", {}).get("url"),
             citation_count=item.get("citationCount", 0),
+            venue=item.get("venue") or None,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 
     async def fetch(self, doi: str) -> SourceRecord | None:
+        """Fetch a record.
+
+        Args:
+            doi: Digital object identifier.
+
+        Returns:
+            SourceRecord | None: Record or None when unknown.
+
+        Raises:
+            SearchError: When the operation fails.
+            ProviderUnavailable: When the operation fails.
+
+        """
         url = f"{_BASE}/paper/DOI:{doi}"
-        params = {
-            "fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf"
-        }
+        params = {"fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf,venue"}
         try:
             async with self._client() as client:
                 resp = await client.get(url, params=params)
@@ -65,11 +105,25 @@ class SemanticScholarAdapter(SearchPort, FetchPort):
             raise SearchError(f"Semantic Scholar fetch failed for {doi}: {exc}") from exc
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
+        """Search scholarly sources.
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            list[SourceRecord]: Resolved sources.
+
+        Raises:
+            SearchError: When the operation fails.
+            ProviderUnavailable: When the operation fails.
+
+        """
         url = f"{_BASE}/paper/search"
         params = {
             "query": query,
             "limit": limit,
-            "fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf",
+            "fields": "paperId,title,year,authors,abstract,citationCount,externalIds,openAccessPdf,venue",
         }
         try:
             async with self._client() as client:

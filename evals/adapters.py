@@ -1,44 +1,17 @@
 """Wiring the real research engine into the eval suite.
 
-To make `make evals` test the actual LangGraph research workflow (not just the
-`_demo` self-test), point an eval case's `entrypoint` here and give the engine's
-model calls a way to route through the cassette.
+Runs the actual LangGraph research workflow (ingest → relevance → bodies →
+synthesize → judge → review → render) with every network boundary recorded:
 
-Two facts drive how you wire it:
+* provider LLM calls route through ``cassette.achat`` (see the ``cassette``
+  hook on ``LiteLLMProviderAdapter``),
+* federated search + scrape route through ``cassette.acall`` with
+  Pydantic encode/decode.
 
-1. The engine synthesizes through `infrastructure/providers.py`, which calls
-   `litellm.acompletion`. For OFFLINE replay (the free, deterministic `make evals`
-   on every PR) to work, every model call must go through `Cassette.chat`, exactly
-   like the judge does. That means the provider has to accept an injectable
-   client/cassette. That is the one real code change required — nothing else.
-
-2. Until that interception exists, this adapter can only run in RECORD mode
-   (`make evals-live`), which costs tokens and needs free-tier keys. It is not
-   used by the default offline suite. The `_demo` case stays the CI-green check.
-
-Recommended shape once the provider is cassette-aware:
-
-    def research_run(query, max_sources=8, cassette=None, **_):
-        from knowledge_engine.engine import ResearchEngine
-
-        async def go():
-            engine = ResearchEngine(store_root="research_store")
-            # Route provider LLM calls through cassette.chat here (see providers.py).
-            engine.provider.client = cassette.chat if cassette else None
-            result = await engine.research(query, workflow="research")
-            s = result.state
-            return {
-                "artifact": _read(s.output_path),   # article.md
-                "sources": s.sources,
-                "events": [],
-            }
-
-        return asyncio.run(go())
-
-Then copy evals/cases/example.yaml.template to evals/cases/research.yaml with
-`entrypoint: "evals.adapters:research_run"` and real invariants/budget. Use
-`make evals-live` to record, review the cassette, `make evals-accept` for the
-snapshot, and verify the case can fail before trusting it.
+So ``make evals`` (replay) is fully offline and deterministic, while
+``make evals-live`` re-records against live APIs. ``extract()`` (Instructor
+path, MCP toolkit only) is out of scope — the research graph uses
+``complete()`` exclusively.
 """
 
 from __future__ import annotations
@@ -49,33 +22,170 @@ from typing import Any
 
 
 def _read(path: str | Path | None) -> str:
+    """Read an artifact file, tolerating a missing path.
+
+    Args:
+        path: Artifact path.
+
+    Returns:
+        str: File text, or empty string when absent.
+    """
     if not path:
         return ""
     p = Path(path)
     return p.read_text() if p.exists() else ""
 
 
-def research_run(
-    query: str, max_sources: int = 8, cassette: Any | None = None, **_: Any
-) -> dict[str, Any]:
-    """Adapter contract: (**input, cassette=) -> {artifact, sources, events}.
+class _RecordingSearch:
+    """SearchPort proxy recording through a cassette.
 
-    NOTE: currently only suitable for RECORD/live mode. Offline replay requires
-    the engine's provider to route model calls through `cassette.chat` (see the
-    module docstring). Keep using the `_demo` case for the offline CI gate until
-    that interception is wired.
+    Args:
+        inner: Real search adapter.
+        cassette: Eval cassette.
     """
+
+    def __init__(self, inner: Any, cassette: Any) -> None:
+        self.inner = inner
+        self.cassette = cassette
+        self.name = getattr(inner, "name", "search")
+
+    async def search(self, query: str, *, limit: int = 10) -> Any:
+        """Recorded federated search.
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            Any: Resolved scholarly sources.
+        """
+        from knowledge_engine.schemas.source import SourceRecord
+
+        return await self.cassette.acall(
+            f"search:{self.name}",
+            self.inner.search,
+            {"query": query, "limit": limit},
+            encode=lambda records: [r.model_dump(mode="json") for r in records],
+            decode=lambda data: [SourceRecord.model_validate(d) for d in data],
+        )
+
+
+class _RecordingScrape:
+    """ScrapePort proxy recording through a cassette.
+
+    Args:
+        inner: Real scrape adapter.
+        cassette: Eval cassette.
+    """
+
+    def __init__(self, inner: Any, cassette: Any) -> None:
+        self.inner = inner
+        self.cassette = cassette
+
+    async def to_markdown(self, url: str) -> Any:
+        """Recorded URL fetch.
+
+        Args:
+            url: Target URL.
+
+        Returns:
+            Any: Markdown body.
+        """
+        from knowledge_engine.schemas.source import DocumentBody
+
+        return await self.cassette.acall(
+            "scrape",
+            self.inner.to_markdown,
+            {"url": url},
+            encode=lambda body: body.model_dump(mode="json"),
+            decode=DocumentBody.model_validate,
+        )
+
+
+def research_run(query: str, max_sources: int = 8, cassette: Any | None = None, **_: Any) -> dict[str, Any]:
+    """Run the real research workflow with cassette-routed network calls.
+
+    Uses a FIXED thread id and a dedicated store root, wiped on every run:
+    replay must reproduce the exact artifact (judge cassette keys hash the
+    full text, so any per-run identifier breaks replay). Single sample only.
+
+    Args:
+        query: Scholarly query string.
+        max_sources: Maximum sources.
+        cassette: Eval cassette (record/replay); ``None`` runs fully live.
+        **_: Ignored extra inputs.
+
+    Returns:
+        dict[str, Any]: Artifact, sources, and events for the harness.
+    """
+    import shutil
+
     from knowledge_engine.engine import ResearchEngine
 
+    root = Path("research_store/evals")
+    shutil.rmtree(root / "eval-research", ignore_errors=True)
+    shutil.rmtree(root / "checkpoints" / "eval-research", ignore_errors=True)
+
     async def go() -> dict[str, Any]:
-        engine = ResearchEngine(store_root="research_store", search_limit=max_sources)
-        # TODO: thread cassette into engine's provider so replay works offline.
-        result = await engine.research(query, workflow="research")
+        engine = ResearchEngine(store_root=str(root), search_limit=max_sources)
+        if cassette is not None:
+            provider = getattr(engine, "_provider", None)
+            for adapter in getattr(provider, "adapters", {}).values():
+                adapter.cassette = cassette
+            # Eval-glue privilege: reach into the engine to route network
+            # calls through the cassette. Production code uses the facade.
+            engine._search = _RecordingSearch(engine._search, cassette)
+            engine._scrape = _RecordingScrape(engine._scrape, cassette)
+        result = await engine.research(query, workflow="research", thread_id="eval-research")
         s = result.state
         return {
             "artifact": _read(s.output_path),
             "sources": s.sources,
             "events": [],
+            "bodies": len(s.bodies or []),
+        }
+
+    return asyncio.run(go())
+
+
+def deep_run(query: str, max_sources: int = 8, cassette: Any | None = None, **_: Any) -> dict[str, Any]:
+    """Run the recursive deep workflow with cassette-routed network calls.
+
+    Fixed thread id + dedicated store root (same replay-stability contract as
+    :func:`research_run`): judge cassette keys hash the full artifact text.
+
+    Args:
+        query: Scholarly query string.
+        max_sources: Maximum sources.
+        cassette: Eval cassette (record/replay); ``None`` runs fully live.
+        **_: Ignored extra inputs.
+
+    Returns:
+        dict[str, Any]: Artifact, sources, events, and deep-loop metadata.
+    """
+    import shutil
+
+    from knowledge_engine.engine import ResearchEngine
+
+    root = Path("research_store/evals")
+    shutil.rmtree(root / "eval-deep", ignore_errors=True)
+    shutil.rmtree(root / "checkpoints" / "eval-deep", ignore_errors=True)
+
+    async def go() -> dict[str, Any]:
+        engine = ResearchEngine(store_root=str(root), search_limit=max_sources)
+        if cassette is not None:
+            provider = getattr(engine, "_provider", None)
+            for adapter in getattr(provider, "adapters", {}).values():
+                adapter.cassette = cassette
+            engine._search = _RecordingSearch(engine._search, cassette)
+            engine._scrape = _RecordingScrape(engine._scrape, cassette)
+        result = await engine.research(query, workflow="deep", thread_id="eval-deep")
+        s = result.state
+        return {
+            "artifact": _read(s.output_path),
+            "sources": s.sources,
+            "events": [],
+            "bodies": len(s.bodies or []),
         }
 
     return asyncio.run(go())

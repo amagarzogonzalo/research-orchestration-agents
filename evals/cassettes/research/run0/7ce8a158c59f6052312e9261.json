@@ -1,0 +1,92 @@
+{
+  "recorded_at": "2026-10-07T12:20:45Z",
+  "request": {
+    "messages": [
+      {
+        "content": "Given the text, breakdown and generate a list of statements presented. Ambiguous statements and single words can be considered as statements, but only if outside of a coherent statement.\n\nExample:\nExample text: \nOur new laptop model features a high-resolution Retina display for crystal-clear visuals. It also includes a fast-charging battery, giving you up to 12 hours of usage on a single charge. For security, we’ve added fingerprint authentication and an encrypted SSD. Plus, every purchase comes with a one-year warranty and 24/7 customer support.\n\n\n\n{\n  \"statements\": [\n    \"The new laptop model has a high-resolution Retina display.\",\n    \"It includes a fast-charging battery with up to 12 hours of usage.\",\n    \"Security features include fingerprint authentication and an encrypted SSD.\",\n    \"Every purchase comes with a one-year warranty.\",\n    \"24/7 customer support is included.\"\n  ]\n}\n===== END OF EXAMPLE ======\n\n**\nIMPORTANT: Please make sure to only return in valid and parseable JSON format, with the \"statements\" key mapping to a list of strings. No words or explanation are needed. Ensure all strings are closed appropriately. Repair any invalid JSON before you output it.\n**\n\nText:\n## Cooking Pasta\n\nBoil water with salt [^x:1]. Add pasta and stir for nine minutes [^x:1].\n\nJSON:",
+        "role": "user"
+      }
+    ],
+    "model": "google/gemma-3-27b-it",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "annotations": null,
+          "audio": null,
+          "content": "\n```json\n{\n  \"statements\": [\n    \"Boil water with salt.\",\n    \"Add pasta and stir for nine minutes.\"\n  ]\n}\n```",
+          "function_call": null,
+          "reasoning": null,
+          "refusal": null,
+          "role": "assistant",
+          "tool_calls": null
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1791375644,
+    "id": "gen-1791375644-gDTe2NWXtzkVZhVNbqOr",
+    "model": "google/gemma-3-27b-it",
+    "moderation": null,
+    "object": "chat.completion",
+    "provider": "Novita",
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 39,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": 0,
+        "image_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null
+      },
+      "cost": 4.4809e-05,
+      "cost_details": {
+        "upstream_inference_completions_cost": 7.8e-06,
+        "upstream_inference_cost": 4.4809e-05,
+        "upstream_inference_prompt_cost": 3.7009e-05
+      },
+      "is_byok": false,
+      "prompt_tokens": 311,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "total_tokens": 350
+    }
+  },
+  "usage": {
+    "completion_tokens": 39,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "cost": 4.4809e-05,
+    "cost_details": {
+      "upstream_inference_completions_cost": 7.8e-06,
+      "upstream_inference_cost": 4.4809e-05,
+      "upstream_inference_prompt_cost": 3.7009e-05
+    },
+    "is_byok": false,
+    "prompt_tokens": 311,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "video_tokens": 0
+    },
+    "total_tokens": 350
+  },
+  "wall_s": 2.292
+}

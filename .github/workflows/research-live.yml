@@ -1,0 +1,96 @@
+name: Live research run
+
+on:
+  workflow_dispatch:
+    inputs:
+      query:
+        description: Research query to run through the LangGraph research workflow
+        required: true
+        default: "Explain the top 7 relevant papers for attention in LLMs"
+      thread_id:
+        description: "Stable thread id (derived from query when blank)"
+        required: false
+        default: ""
+      search_limit:
+        description: Max scholarly sources to resolve
+        required: false
+        default: "12"
+
+jobs:
+  run:
+    name: Run LangGraph research workflow
+    runs-on: ubuntu-latest
+    env:
+      PYTHONPATH: src
+      RESEARCH_STORE: research_store
+      OTEL_TRACES_EXPORTER: ""
+      OTEL_METRICS_EXPORTER: "none"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps (providers + scrape tier)
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev, providers]"
+          pip install trafilatura playwright
+          python -m playwright install chromium --with-deps
+
+      - name: Run research workflow
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
+        run: |
+          python - <<'PY'
+          import asyncio
+          from knowledge_engine.engine import ResearchEngine
+
+          QUERY = "${{ github.event.inputs.query }}"
+          LIMIT = int("${{ github.event.inputs.search_limit }}")
+
+          async def main():
+              e = ResearchEngine(store_root="research_store", search_limit=LIMIT)
+              thread = "${{ github.event.inputs.thread_id }}" or None
+              result = await e.research(QUERY, workflow="research", thread_id=thread)
+              s = result.state
+              print("status:", s.status)
+              print("sources:", len(s.sources), "filtered:", len(s.filtered), "bodies:", len(s.bodies))
+              print("notes:", len(s.synthetic_notes), "judge_score:", s.judge_score)
+              print("output:", s.output_path)
+              open("run_stdout.txt", "w").write(
+                  f"status={s.status}\nsources={len(s.sources)}\n"
+                  f"bodies={len(s.bodies)}\njudge_score={s.judge_score}\n"
+                  f"output={s.output_path}\n"
+              )
+
+          asyncio.run(main())
+          PY
+
+          # Rebuild graph.svg in case topology changed
+          python -m knowledge_engine.scripts.generate_graph_svg
+
+      - name: Live e2e test (real network + free-tier keys)
+        env:
+          RUN_LIVE_E2E: "1"
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENALEX_MAILTO: ${{ secrets.OPENALEX_MAILTO }}
+        run: |
+          python -m pytest -m live tests/e2e/test_live.py -v
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: research-output
+          path: |
+            research_store/
+            graph.svg
+            run_stdout.txt
+          include-hidden-files: true

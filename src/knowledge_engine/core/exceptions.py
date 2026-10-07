@@ -32,4 +32,29 @@ class SearchError(KnowledgeEngineError):
 
 
 class ScrapeError(KnowledgeEngineError):
-    """Web scraping/extraction failed."""
+    """Web scraping/extraction failed.
+
+    Attributes:
+        transient: Whether a retry may succeed (429/503/timeout).
+    """
+
+    transient: bool = False
+
+    def __init__(self, message: str = "", *, transient: bool = False) -> None:
+        """Create a ScrapeError.
+
+        Args:
+            message: Failure message.
+            transient: Whether a retry may succeed (429/503/timeout).
+        """
+        super().__init__(message)
+        self.transient = transient
+
+
+class ScrapeSkipped(ScrapeError):
+    """URL outside this adapter's remit (not a failure).
+
+    Source-specific adapters (arXiv/Europe PMC full text) raise this before
+    any network call for URLs they will never handle, so the router moves on
+    quietly (debug log) instead of warning on every unrelated URL.
+    """
