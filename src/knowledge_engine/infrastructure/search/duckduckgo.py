@@ -1,8 +1,9 @@
 """DuckDuckGo adapter — general-web search without signup or keys.
 
 The keyless ``html.duckduckgo.com/html`` endpoint returns real web results
-(Google CSE needs keys that are no longer issued; Serper needs signup).
-Result links are redirect-wrapped (``/l/?uddg=<target>``) and unwrapped here.
+without a key or signup. Result links are redirect-wrapped
+(``/l/?uddg=<target>``) and unwrapped here. It is the first provider in the
+general-web fallback chain (Tavily/Exa follow when their keys are set).
 Parsing is stdlib-only so this tier adds no dependency. Polite single-shot
 POST per query; the demux isolates failures like any other source.
 
