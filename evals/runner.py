@@ -32,11 +32,6 @@ from lib import invariants as inv
 from lib import judge as jd
 from lib.cassette import DEFAULT_DIR, Cassette, CassetteMiss
 
-try:
-    import yaml
-except ImportError:
-    sys.exit("pip install pyyaml")
-
 
 def judge_model() -> str:
     """Pinned in harness.toml, deliberately NOT following the active profile."""
@@ -132,7 +127,9 @@ def _deepeval_notes(
                 )
             )
 
-        test_case = dm.build_test_case(query, artifact, sources or [], expected=(case.get("deepeval") or {}).get("expected"))
+        test_case = dm.build_test_case(
+            query, artifact, sources or [], expected=(case.get("deepeval") or {}).get("expected")
+        )
         judge = PinnedJudge(prompt_to_text, model)
         run = measure or dm.run_selected
         results = run(names, test_case, model=judge)
@@ -185,9 +182,7 @@ def run_case(case: dict[str, Any], mode: str, deep: bool = False) -> dict[str, A
                 "cassette": cassette,
                 "bodies": out.get("bodies", 0),
                 "nsources": len(sources or []),
-                "sources": [
-                    s.model_dump(mode="json") if hasattr(s, "model_dump") else s for s in (sources or [])
-                ],
+                "sources": [s.model_dump(mode="json") if hasattr(s, "model_dump") else s for s in (sources or [])],
             }
         )
 
@@ -327,9 +322,7 @@ def find_dirty_record_dirs(cases: list[dict[str, Any]]) -> dict[str, list[str]]:
         cid = str(case["id"])
         runs = int(case.get("samples", 1))
         hit = sorted(
-            f"run{i}"
-            for i in range(runs)
-            if record_dir(cid, i).exists() and any(record_dir(cid, i).iterdir())
+            f"run{i}" for i in range(runs) if record_dir(cid, i).exists() and any(record_dir(cid, i).iterdir())
         )
         if hit:
             dirty[cid] = hit
@@ -337,6 +330,10 @@ def find_dirty_record_dirs(cases: list[dict[str, Any]]) -> dict[str, list[str]]:
 
 
 def main() -> int:
+    try:
+        import yaml
+    except ImportError:
+        sys.exit("pip install pyyaml")
     ap = argparse.ArgumentParser()
     ap.add_argument("--record", action="store_true")
     ap.add_argument("--deep", action="store_true")
