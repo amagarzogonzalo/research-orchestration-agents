@@ -117,7 +117,10 @@ class ModelSelectionPolicy:
             state.selected = result.model_id
             return SelectionDecision(ACTION_PASS, result.model_id, f"model {result.model_id} passed")
         if state.exhausted:
-            return SelectionDecision(ACTION_EXHAUSTED, reason=f"tried all {len(state.candidates)} candidates")
+            return SelectionDecision(
+                ACTION_EXHAUSTED,
+                reason=f"tried all {len(state.candidates)} candidates (tried={sorted(state.tried)})",
+            )
         if state.budget_exceeded:
             return SelectionDecision(ACTION_BUDGET, reason=f"hit max_attempts={state.max_attempts}")
         return SelectionDecision(ACTION_CONTINUE, reason=f"{result.model_id} failed: {result.reason}")
