@@ -194,13 +194,23 @@ class ModelDiscoverer:
     def _in_cooldown(self, model: ModelId) -> bool:
         """In cooldown.
 
+        A model with no recorded failure is never in cooldown. (A previous
+        version defaulted unknown models to epoch 0.0, which reads as
+        "failed 0 seconds after boot" — on a fresh-booted machine with
+        ``time.monotonic()`` under the cooldown window, EVERYTHING looked
+        cooling down and selection collapsed to the preferred model only.
+        This exact failure flaked CI on fresh runners.)
+
         Args:
             model: Model name.
 
         Returns:
             bool: True on success.
         """
-        return time.monotonic() - self._failure_times.get(model, 0.0) < FAILURE_COOLDOWN_SECONDS
+        failed_at = self._failure_times.get(model)
+        if failed_at is None:
+            return False
+        return time.monotonic() - failed_at < FAILURE_COOLDOWN_SECONDS
 
     def _mark_failure(self, model: ModelId) -> None:
         """Mark failure.

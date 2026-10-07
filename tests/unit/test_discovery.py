@@ -70,6 +70,24 @@ async def test_discoverer_preferred_skipped_when_failing() -> None:
     assert model == "big"
 
 
+async def test_fresh_boot_never_reports_cooldown(monkeypatch) -> None:
+    """Regression: with time.monotonic() under the cooldown window (a freshly
+    booted runner/VM), models with no recorded failure must not read as
+    cooling down — otherwise selection collapses to the preferred model and
+    fails with 'tried all 1 candidates' (CI-only failure, unreproducible on
+    long-uptime dev machines)."""
+    import types
+
+    import knowledge_engine.infrastructure.discovery.service as svc
+
+    monkeypatch.setattr(svc, "time", types.SimpleNamespace(monotonic=lambda: 30.0))
+    discoverer = ModelDiscoverer(FakeDiscovery(failing={"mid"}))
+    assert discoverer._in_cooldown("mid") is False
+    assert discoverer._in_cooldown("big") is False
+    model = await discoverer.select(preferred="mid")
+    assert model == "big"
+
+
 async def test_discoverer_raises_when_all_fail() -> None:
     provider = FakeDiscovery(failing={"big", "mid"})
     discoverer = ModelDiscoverer(provider, max_attempts=5)
