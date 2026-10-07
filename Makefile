@@ -1,5 +1,6 @@
 .PHONY: help install test test-fast lint types arch semgrep agents context check dup \
         profile profiles evals evals-deep evals-live evals-accept sessions \
+        bench bench-accept bench-check \
         compress-on compress-off compress-savings compress-help
 
 help:
@@ -38,6 +39,15 @@ dup:                ## copy/paste detection (jscpd, advisory; needs npx network)
 
 context:            ## what the always-on prompt costs, enforced
 	uv run python bin/context_budget.py
+
+bench:              ## offline perf baseline: ram/checkpoint/supersteps (fakes, no network)
+	uv run python -m knowledge_engine.scripts.bench
+
+bench-accept:       ## record bench/baseline.json (review the diff like code)
+	uv run python -m knowledge_engine.scripts.bench --accept
+
+bench-check:        ## fail on >10% ram/checkpoint regression vs baseline
+	uv run python -m knowledge_engine.scripts.bench --check
 
 check: lint types arch semgrep agents context test evals   ## everything. This is the gate.
 	@echo green
