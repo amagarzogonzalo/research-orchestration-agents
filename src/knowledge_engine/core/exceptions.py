@@ -31,6 +31,16 @@ class SearchError(KnowledgeEngineError):
     """A federated search source failed."""
 
 
+class QuotaExhausted(SearchError):
+    """A metered search provider's free quota is spent; skip until it refills.
+
+    Raised by keyed general-web adapters (Tavily/Exa) after an account-level
+    limit is hit, so the fallback chain moves to the next provider instead of
+    retrying or crashing. Distinct from :class:`SearchError` so callers can log
+    quota exhaustion without treating it as an infrastructure failure.
+    """
+
+
 class ScrapeError(KnowledgeEngineError):
     """Web scraping/extraction failed.
 

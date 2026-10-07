@@ -98,7 +98,7 @@ class ResearchEngine:
         self._store = ResearchStore(self.store_root)
         self._checkpointer = self._build_checkpointer()
         self._memory_store = self._build_memory_store()
-        self._search = self.search or _default_search()
+        self._search = self.search or _default_search(self.store_root)
         self._scrape = self.scrape or ScrapeRouter()
         self._provider = self.provider or _default_provider()
         self._discoverer = self.discoverer or _default_discoverer()
@@ -401,8 +401,11 @@ def _derived_thread_id(query: str) -> str:
     return f"t-{digest}"
 
 
-def _default_search() -> SearchPort:
+def _default_search(root: str = "research_store") -> SearchPort:
     """Build the default federated search.
+
+    Args:
+        root: Store root under which the web cache/quota files live.
 
     Returns:
         SearchPort: Search adapter.
@@ -413,9 +416,7 @@ def _default_search() -> SearchPort:
     from knowledge_engine.infrastructure.search.crossref import CrossrefAdapter
     from knowledge_engine.infrastructure.search.dblp import DblpAdapter
     from knowledge_engine.infrastructure.search.doaj import DoajAdapter
-    from knowledge_engine.infrastructure.search.duckduckgo import DuckDuckGoAdapter
     from knowledge_engine.infrastructure.search.europe_pmc import EuropePmcAdapter
-    from knowledge_engine.infrastructure.search.google_cse import GoogleCSEAdapter
     from knowledge_engine.infrastructure.search.huggingface_papers import HuggingFacePapersAdapter
     from knowledge_engine.infrastructure.search.openalex import OpenAlexAdapter
     from knowledge_engine.infrastructure.search.osf import OSFPreprintsAdapter
@@ -443,16 +444,54 @@ def _default_search() -> SearchPort:
     unpaywall_email = os.environ.get("UNPAYWALL_EMAIL", "")
     if is_usable_email(unpaywall_email):
         sources.append(UnpaywallAdapter(unpaywall_email))
-    # General web last: fallback breadth after the scholarly set. Wikipedia
-    # and DuckDuckGo are keyless and always on; Google CSE only when key +
-    # CX engine are set (closed to new customers since 2024, sunset 2027).
+    # General web last: fallback breadth after the scholarly set. Wikipedia is
+    # keyless and stays a parallel demux source; the web chain (DuckDuckGo ->
+    # Tavily -> Exa) is ONE sequential, cached source so a query spends at most
+    # one provider's quota. Tavily/Exa join only when their keys are present.
     sources.append(WikipediaAdapter())
-    sources.append(DuckDuckGoAdapter())
-    google_key = os.environ.get("GOOGLE_API_KEY", "")
-    google_cx = os.environ.get("GOOGLE_CX_ENGINE", "")
-    if google_key and google_cx:
-        sources.append(GoogleCSEAdapter(api_key=google_key, cx=google_cx))
+    sources.append(_default_web_chain(root))
     return DemuxSearchAdapter(sources)
+
+
+def _default_web_chain(root: str) -> SearchPort:
+    """Build the sequential, cached general-web fallback chain.
+
+    DuckDuckGo (keyless) runs first; Tavily and Exa join only when their API
+    keys are set, each guarded by a persisted monthly quota ledger. The whole
+    chain is wrapped in a disk cache so a repeat query costs nothing.
+
+    Args:
+        root: Store root under which cache/quota files live.
+
+    Returns:
+        SearchPort: Cached fallback chain over the configured web providers.
+    """
+    from knowledge_engine.infrastructure.search.cache import CachedSearchAdapter, SearchCache
+    from knowledge_engine.infrastructure.search.duckduckgo import DuckDuckGoAdapter
+    from knowledge_engine.infrastructure.search.exa import EXA_MONTHLY_LIMIT, ExaAdapter
+    from knowledge_engine.infrastructure.search.fallback import FallbackSearchAdapter
+    from knowledge_engine.infrastructure.search.quota import MonthlyQuotaLedger
+    from knowledge_engine.infrastructure.search.tavily import TAVILY_MONTHLY_LIMIT, TavilyAdapter
+
+    usage_root = f"{root}/_usage"
+    providers: list[SearchPort] = [DuckDuckGoAdapter()]
+    tavily_key = os.environ.get("TAVILY_API_KEY", "")
+    if tavily_key:
+        providers.append(
+            TavilyAdapter(
+                tavily_key,
+                ledger=MonthlyQuotaLedger("tavily", limit=TAVILY_MONTHLY_LIMIT, root=usage_root),
+            )
+        )
+    exa_key = os.environ.get("EXA_API_KEY", "")
+    if exa_key:
+        providers.append(
+            ExaAdapter(
+                exa_key,
+                ledger=MonthlyQuotaLedger("exa", limit=EXA_MONTHLY_LIMIT, root=usage_root),
+            )
+        )
+    return CachedSearchAdapter(FallbackSearchAdapter(providers), SearchCache(f"{root}/_cache/search"))
 
 
 def _default_provider() -> Any:
