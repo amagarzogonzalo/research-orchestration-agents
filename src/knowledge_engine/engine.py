@@ -413,6 +413,7 @@ def _default_search() -> SearchPort:
     from knowledge_engine.infrastructure.search.crossref import CrossrefAdapter
     from knowledge_engine.infrastructure.search.dblp import DblpAdapter
     from knowledge_engine.infrastructure.search.doaj import DoajAdapter
+    from knowledge_engine.infrastructure.search.duckduckgo import DuckDuckGoAdapter
     from knowledge_engine.infrastructure.search.europe_pmc import EuropePmcAdapter
     from knowledge_engine.infrastructure.search.google_cse import GoogleCSEAdapter
     from knowledge_engine.infrastructure.search.huggingface_papers import HuggingFacePapersAdapter
@@ -442,9 +443,11 @@ def _default_search() -> SearchPort:
     unpaywall_email = os.environ.get("UNPAYWALL_EMAIL", "")
     if is_usable_email(unpaywall_email):
         sources.append(UnpaywallAdapter(unpaywall_email))
-    # General web last: fallback breadth after the scholarly set. Wikipedia is
-    # keyless and always on; Google CSE only when key + CX engine are set.
+    # General web last: fallback breadth after the scholarly set. Wikipedia
+    # and DuckDuckGo are keyless and always on; Google CSE only when key +
+    # CX engine are set (closed to new customers since 2024, sunset 2027).
     sources.append(WikipediaAdapter())
+    sources.append(DuckDuckGoAdapter())
     google_key = os.environ.get("GOOGLE_API_KEY", "")
     google_cx = os.environ.get("GOOGLE_CX_ENGINE", "")
     if google_key and google_cx:

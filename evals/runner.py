@@ -17,6 +17,7 @@ import argparse
 import importlib
 import json
 import os
+import re
 import sys
 import time
 import tomllib
@@ -138,6 +139,25 @@ def _deepeval_notes(
     except Exception as exc:  # noqa: BLE001 - advisory signal must never fail the gate
         return [f"[{case.get('id')}] deepeval skipped: {type(exc).__name__}: {str(exc)[:120]}"]
     return [f"[{case.get('id')}] deepeval {r['name']}: {r['score']:.2f} (threshold {r['threshold']})" for r in results]
+
+
+def _citation_yield(artifact: str, sources: list[dict[str, Any]] | None) -> str:
+    """Share of retrieved sources actually cited in the artifact footnotes.
+
+    Informational only (precision signal for the relevance loop): junk that
+    passes relevance but never gets cited shows up here, not in the gate.
+
+    Args:
+        artifact: Rendered article text.
+        sources: Source records as plain dicts.
+
+    Returns:
+        str: Human-readable "used/total sources cited" summary.
+    """
+    ids = {s.get("id") for s in (sources or []) if isinstance(s, dict) and s.get("id")}
+    used = set(re.findall(r"\[\^([^\]]+)\]", artifact or "")) & ids
+    total = len(sources or [])
+    return f"{len(used)}/{total} sources cited"
 
 
 def run_case(case: dict[str, Any], mode: str, deep: bool = False) -> dict[str, Any]:
@@ -275,6 +295,9 @@ def run_case(case: dict[str, Any], mode: str, deep: bool = False) -> dict[str, A
             lambda **r: cassette.chat(client, **r),
             model,
         )
+
+    first = runs[0]
+    notes.append(f"[{cid}] citation yield: {_citation_yield(first['artifact'], first.get('sources'))}")
 
     return {
         "id": cid,

@@ -3,9 +3,9 @@
   "payload": {
     "url": "https://doi.org/10.17504/protocols.io.wikfccw"
   },
-  "recorded_at": "2026-10-05T16:06:56Z",
+  "recorded_at": "2026-10-07T08:39:28Z",
   "response": {
-    "captured_at": "2026-10-05T16:06:56.041684+00:00",
+    "captured_at": "2026-10-07T08:39:28.313196+00:00",
     "char_count": 500,
     "crawl_method": "crawl4ai",
     "markdown": "[Skip to main content](https://www.protocols.io/view/guide-seq-simplified-library-preparation-protocol-kxygxmwool8j/v1#main-content)\nProgress\n## Your privacy, your choice\nThe protocols.io website uses cookies.\nBy continuing to browse the site, you accept our use of cookies, [Privacy Policy](https://www.protocols.io/privacy) and [Terms of Service](https://www.protocols.io/terms).\nIf you reject optional cookies, the site may not work as expected.\nCustomizeReject optional cookiesAccept all cookies\n",
@@ -13,5 +13,5 @@
     "url": "https://doi.org/10.17504/protocols.io.wikfccw"
   },
   "usage": {},
-  "wall_s": 2.473
+  "wall_s": 16.217
 }

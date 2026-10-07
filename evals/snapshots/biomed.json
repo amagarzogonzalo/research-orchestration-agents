@@ -4,15 +4,14 @@
     "crossref:10.1007/978-1-0716-0687-2_15",
     "crossref:10.1007/978-1-0716-0822-7_6",
     "crossref:10.1016/j.omtm.2025.101498",
-    "crossref:10.17504/protocols.io.wikfccw",
-    "huggingface_papers:2501.02045",
-    "huggingface_papers:2502.18864",
-    "huggingface_papers:2505.23559"
+    "crossref:10.1038/nmeth.3301",
+    "crossref:10.1101/741322",
+    "crossref:10.17504/protocols.io.wikfccw"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 12,
-    "paragraphs": 12,
+    "list_items": 8,
+    "paragraphs": 11,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -24,12 +23,13 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "b5e232a38d539783",
+  "hash": "83f09decd6960780",
   "headings": [
-    "2:overview-of-crispr-off-target-detection-approaches",
-    "2:methodological-comparison-and-trade-offs",
-    "2:ai-safety-frameworks-and-broader-context-risks",
+    "2:overview-of-crispr-off-target-detection-frameworks",
+    "2:in-vitro-and-integration-based-methods",
+    "2:direct-break-capture-and-high-throughput-sequencing",
+    "2:single-cell-resolution-and-safety-advances",
     "2:open-questions",
-    "2:practical-recommendations-trade-offs"
+    "2:practical-takeaways"
   ]
 }

@@ -1,0 +1,83 @@
+{
+  "recorded_at": "2026-10-07T08:45:42Z",
+  "request": {
+    "max_tokens": 2500,
+    "messages": [
+      {
+        "content": "You are a senior research synthesizer. Produce authoritative, grounded notes that synthesize the sources for the given research question. Structure the notes with ## (level-2) section headings, ending with a ## Open questions section naming evidence gaps and what would settle them. Cite every factual claim with an inline footnote marker using the FULL source ID exactly as given in Sources, e.g. \"RAG grounds generation in retrieved passages [^openalex:W123].\" Every number, percentage, quoted phrase, or named benchmark result MUST carry its footnote in the same sentence — a quantitative claim without a same-sentence citation is a failure. At the end, add one definition line per cited source, e.g. \"[^openalex:W123]: Paper Title Here. Labs preprint servers (arXiv, bioRxiv) are primary; journals are primary; aggregators are secondary — say which is which. Load-bearing claims (mechanisms, effectiveness, numbers) must rest on primary sources: aggregators and encyclopedias supply background only, never the sole support for a load-bearing claim. Every section MUST cite at least two sources; a section with no citations is a failure. Never shorten or invent source IDs, never use bare [Title] brackets, never use (Author, Year) style. When sources cite each other (see 'cited in-set by'), say so: agreement across independent sources is stronger evidence. Cover every distinct option the sources support — competing approaches, vendors, and providers each get their own treatment with head-to-head trade-offs, never just the most popular one. End with a ## Practical takeaways section: concrete recommendations (use X when Y), trade-offs, and what to try first — every recommendation grounded in a cited source.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Synthesize the research findings into structured notes for query:\nWhat are the comparative strengths and weaknesses of RAG versus long-context models in reducing hallucinations?\n\nSources:\n[crossref:10.1037/0000267-002]\nAPA PsycNet\n[Skip to Main Content](https://doi.org/ \"Skip to Main Content\")\n\n[](https://doi.org/)\n\nBy clicking “Accept All Cookies”, you agree to the storing of cookies on your device to enhance site performance and improve your experience.[More information](https://psycnet.apa.org/general/privacy)\n\nConfigure Accept All Cookies\n\n![Image 1: APA PsycNET logo](https://cdn.cookielaw.org/logos/bdf7adfe-0d64-41ba-b592-8b8955e0dc52/f2efb0e9-6e02-4d2c-8062-2dc0888cff08/3d9b3757-ddc0-49a9-9c81-f947b6e08500/pnLogo_(1).jpg)\n\n## Privacy Preference Center\n\nWhen you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences, or your device, and is mostly used to make the site work as you expect. The information does not usually identify you directly, but it can give you a more personalized web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. Click on the different category headings to learn more and change our default settings. Blocking some types of cookies may impact your experience of the site and the services we are able to offer.   \n[Privacy Policy](https://psycnet.apa.org/general/privacy)\n\nAllow All\n### Manage Consent Preferences\n\n#### Strictly Necessary Cookies\n\nAlways Active\n\nThese cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms. You can set your browser to block or alert you about these cookies, but some parts of the site will not then work. These cookies do not store any personally identifiable information.\n\n#### Functional Cookies\n\n- [x] Functional Cookies \n\nThese cookies enable the website to provide enhanced functionality and personalisation. They may be set by us or by third party providers whose services we have added to our pages. If you do not allow these cookies then some or all of these services may not function properly.\n\n#### Performance Cookies\n\n- [x] Performance Cookies \n\nThese cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site. All information these cookies collect is aggregated and therefore anonymous. If you do not allow thes\n---\n[crossref:10.31979/etd.hn7u-hp8x]\netd.hn7u-hp8x\n\"LOOM-RAG: Layered Ontology-Orchestrated Multi-Signal Retrieval-Augment\" by Aldridge Fonseca  [Menu](https://scholarworks.sjsu.edu/etd_projects/1782/)\n  * [Home](https://scholarworks.sjsu.edu \"Home\")\n  * [ Search](https://scholarworks.sjsu.edu/do/search/advanced/ \"Search\")\n  * [Browse Collections](https://scholarworks.sjsu.edu/communities.html \"Browse\")\n  * [My Account](https://scholarworks.sjsu.edu/cgi/myaccount.cgi?context=etd_projects \"My Account\")\n  * [About](https://scholarworks.sjsu.edu/about.html \"About\")\n  * [![DC Network](https://scholarworks.sjsu.edu/assets/md5images/8e240588cf8cd3a028768d4294acd7d3.png) Digital Commons Network™](https://network.bepress.com \"Digital Commons Network\")\n\n\n[Skip to main content](https://scholarworks.sjsu.edu/etd_projects/1782/#main)\n[ ![SJSU ScholarWorks](https://scholarworks.sjsu.edu/assets/md5images/bdff06abf05082b1b13b314ec84fc5a0.png) ](https://scholarworks.sjsu.edu \"SJSU ScholarWorks\")\n  * [Home](https://scholarworks.sjsu.edu%20 \"Home\")\n  * [About](https://scholarworks.sjsu.edu/about.html \"About\")\n  * [FAQ](https://scholarworks.sjsu.edu/faq.html \"FAQ\")\n  * [My Account](https://scholarworks.sjsu.edu/cgi/myaccount.cgi?context=etd_projects \"My Account\")\n\n\n  * < [Previous](https://scholarworks.sjsu.edu/etd_projects/1808)\n  * [Next](https://scholarworks.sjsu.edu/etd_projects/1754) >\n\n\n  1. [Home](https://scholarworks.sjsu.edu)\n>\n  2. [Graduate Research](https://scholarworks.sjsu.edu/etd)\n>\n  3. [Master's Projects](https://scholarworks.sjsu.edu/etd_projects)\n>\n  4. [1782](https://scholarworks.sjsu.edu/etd_projects/1782)\n\n\n## [Master's Projects](https://scholarworks.sjsu.edu/etd_projects)\n# [LOOM-RAG: Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation for Reducing Hallucinations in LLMs](https://scholarworks.sjsu.edu/cgi/viewcontent.cgi?article=2800&context=etd_projects)\n## Author\n  * [**Aldridge Fonseca**](https://scholarworks.sjsu.edu/do/search/?q=author%3A%22Aldridge%20Fonseca%22&start=0&context=1551039)\n\n\n## Publication Date\nSpring 2026\n## Degree Type\nMaster's Project\n## Degree Name\nMaster of Science in Computer Science (MSCS)\n## Department\nComputer Science\n## First Advisor\nMike Wu\n## Second Advisor\nAmith Kamath Belman\n## Third Advisor\nNavrati Saxena\n## Keywords\nGraphRAG, KnowledgeGraphs, LargeLanguageModels, Multi-Hop Question Answering, Query Decomposition, Retrieval-Augmented Generatio\n## Abstract\nMulti-hop questions requiring evidence across multiple documents challenge standard Retrieval\n---\n[crossref:10.5089/9781616353759.022.a004]\nWorld Bank Experience with Rural Development: A long-term evaluation highlights strengths and weaknesses in: Finance & Development Volume 25 Issue 004 (1988)\n[Jump to Content](https://www.elibrary.imf.org/view/journals/022/0025/004/article-A004-en.xml?cid=25605-com-dsp-crossref#mainContent)\nThis site uses _cookies_ , tags, and tracking settings to store information that help give you the very best browsing experience.  [ Dismiss this warning ](https://www.elibrary.imf.org/configurable/content.layout.europeanunioncookiesagreement:dismisseucookies?cid=25605-com-dsp-crossref&t:ac=journals$002f022$002f0025$002f004$002farticle-A004-en.xml)\n[ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/)\n[ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/) [ ![Logo](https://www.elibrary.imf.org/fileasset//fileasset/elibrary_lockup_RGB.png) ](https://www.elibrary.imf.org/)\n[ Sign in ](https://www.elibrary.imf.org/login) IMF Sites \n[BROWSE ](https://www.elibrary.imf.org/browse) TOPICS  COUNTRIES  SERIES  RESOURCES  ABOUT  Search \n  * [ Previous Article ](https://www.elibrary.imf.org/view/journals/022/0025/004/article-A003-en.xml \"The IMF’s Compensatory and Contingency Financing Facility: Helping adjusting countries weather adverse external shocks\")\n  * [ Next Article ](https://www.elibrary.imf.org/view/journals/022/0025/004/article-A005-en.xml \"Issues in Coordination of Fiscal Policies: On the road to effective global demand management\")\n\n\n[ ![Cover Finance & De",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "gemini/gemini-flash-lite-latest",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "## Overview of Retrieved Sources\n\nThe provided source text snippets consist entirely of web page boilerplate, cookie preference banners, academic repository landing pages (e.g., SJSU ScholarWorks for Fonseca), and unrelated metadata (such as IMF and APA PsycNet content banners) [crossref:10.1037/0000267-002, crossref:10.31979/etd.hn7u-hp8x, crossref:10.5089/9781616353759.022.a004]. None of the provided sources contain substantive academic body text, data, performance metrics, or analytical comparisons concerning Retrieval-Augmented Generation (RAG) versus long-context models for hallucination reduction [crossref:10.1037/0000267-002, crossref:10.31979/etd.hn7u-hp8x, crossref:10.5089/9781616353759.022.a004]. \n\n## Open Questions\n\n- What are the empirical error rates and hallucination frequencies of standard RAG versus long-context large language models across multi-hop reasoning tasks? What evidence would settle this? Controlled benchmark evaluations comparing retriever-based architectures against million-token context windows on domain-specific question answering datasets.\n- How do retrieval bottlenecks (e.g., missed passages, chunking errors) compare to long-context attention degradation (e.g., lost-in-the-middle phenomena) in terms of inducing factual inaccuracies? What evidence would settle this? Mechanistic interpretability studies and faithfulness probes measuring exact-match token generation accuracy against known reference corpora.\n- What are the comparative operational costs, latency profiles, and throughput trade-offs between dynamic multi-signal retrieval pipelines and full-context prompt ingestion? What evidence would settle this? Standardized benchmarking of time-to-first-token, memory footprints, and compute infrastructure expenses under production workloads.\n\n## Practical Takeaways\n\n- No concrete, source-grounded recommendations or architectural trade-offs can be provided at this time, as the supplied source materials lack technical content, experimental findings, or methodological descriptions [crossref:10.1037/0000267-002, crossref:10.31979/etd.hn7u-hp8x, crossref:10.5089/9781616353759.022.a004].\n- Practitioners should consult primary literature repositories, technical system cards, and peer-reviewed benchmark evaluations directly to assess the suitability of RAG versus long-context windows for production hallucination mitigation.\n\n[^crossref:10.1037/0000267-002]: APA PsycNet Privacy Preference Center and Cookie Consent Banner. Aggregator/publisher interface background only; supplies no primary evidence for technical claims.\n[^crossref:10.31979/etd.hn7u-hp8x]: LOOM-RAG: Layered Ontology-Orchestrated Multi-Signal Retrieval-Augmented Generation for Reducing Hallucinations in LLMs (Master's Project abstract metadata landing page by Aldridge Fonseca). Institutional repository landing page background only; supplies no primary body text or performance metrics.\n[^crossref:10.5089/9781616353759.022.a004]: World Bank Experience with Rural Development / Finance & Development Volume 25 Issue 004. Aggregator website metadata background only; supplies no evidence regarding large language models or hallucination reduction.",
+          "function_call": null,
+          "images": [],
+          "provider_specific_fields": {
+            "thought_signatures": [
+              "EmAKXgFpFH0TVAVNUlDxq5B+dq2R5UUw4iBh1n9bH45o7PcGcvl6CMdzzcxJ0JFqwPCk9az1SaX896+WObmXusj5MuDe8aNKGOnBinZeSANUqljBFazEwCaPQKJ36v3whDw="
+            ]
+          },
+          "role": "assistant",
+          "thinking_blocks": [],
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362739,
+    "id": "swbGarv4F9yaxN8PqaOVmQY",
+    "model": "gemini-flash-lite-latest",
+    "object": "chat.completion",
+    "system_fingerprint": null,
+    "usage": {
+      "cache_read_input_tokens": null,
+      "completion_tokens": 821,
+      "completion_tokens_details": {
+        "text_tokens": 821
+      },
+      "prompt_tokens": 2963,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": null,
+        "image_tokens": null,
+        "text_tokens": 2963
+      },
+      "total_tokens": 3784
+    },
+    "vertex_ai_citation_metadata": [],
+    "vertex_ai_grounding_metadata": [],
+    "vertex_ai_safety_results": [],
+    "vertex_ai_url_context_metadata": []
+  },
+  "usage": {
+    "cache_read_input_tokens": null,
+    "completion_tokens": 821,
+    "completion_tokens_details": {
+      "text_tokens": 821
+    },
+    "prompt_tokens": 2963,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": null,
+      "image_tokens": null,
+      "text_tokens": 2963
+    },
+    "total_tokens": 3784
+  },
+  "wall_s": 3.35
+}

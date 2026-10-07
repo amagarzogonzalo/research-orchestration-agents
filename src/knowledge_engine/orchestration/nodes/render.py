@@ -170,10 +170,14 @@ def _complete_footnotes(notes: str, provenance: list[SourceRecord]) -> str:
     for marker in missing:
         sid = _resolve_marker(marker, titles)
         if sid is not None:
-            additions.append(f"[^{marker}]: {_full_citation(provenance, sid)}")
+            if sid != marker:
+                # Canonicalize merged-away duplicate IDs to the surviving
+                # provenance ID so every marker matches its definition.
+                notes = re.sub(r"\[\^" + re.escape(marker) + r"\]", f"[^{sid}]", notes)
+            additions.append(f"[^{sid}]: {_full_citation(provenance, sid)}")
     if not additions:
         return notes
-    return notes.rstrip() + "\n\n" + "\n".join(additions) + "\n"
+    return notes.rstrip() + "\n\n" + "\n".join(dict.fromkeys(additions)) + "\n"
 
 
 def _full_citation(provenance: list[SourceRecord], sid: str) -> str:
@@ -234,6 +238,20 @@ def _resolve_marker(marker: str, titles: dict[str, str]) -> str | None:
         bare = re.sub(r"[^a-z0-9]", "", re.split(r"[:/]", sid)[-1].lower())
         if len(bare) >= 8 and norm.endswith(bare):
             return sid
+    # Match URL-embedded IDs from merged-away duplicates: a general-web record
+    # like "duckduckgo:https://arxiv.org/html/2504.06214v1" shares its paper
+    # with the surviving "arxiv:2504.06214" but never matches textually.
+    # Compare version-stripped alphanumeric tails instead.
+    marker_tail = re.sub(r"v\d+$", "", re.split(r"[:/]", low)[-1])
+    marker_tail = re.sub(r"[^a-z0-9]", "", marker_tail)
+    if len(marker_tail) >= 8:
+        for sid in titles:
+            sid_tail = re.sub(r"v\d+$", "", re.split(r"[:/]", sid.lower())[-1])
+            sid_tail = re.sub(r"[^a-z0-9]", "", sid_tail)
+            if len(sid_tail) < 8:
+                continue
+            if marker_tail == sid_tail or marker_tail.endswith(sid_tail) or sid_tail.endswith(marker_tail):
+                return sid
     return None
 
 

@@ -1,9 +1,7 @@
 {
   "citations": [
+    "crossref:10.1007/979-8-8688-2733-4_6",
     "crossref:10.1016/j.clinimag.2024.110382",
-    "crossref:10.1075/ts.25064.gut",
-    "crossref:10.1515/9783112226780-009",
-    "crossref:10.21203/rs.3.rs-10186581/v1",
     "crossref:10.21437/interspeech.2025-324",
     "crossref:10.28998/2317-9945.202483.384-399",
     "crossref:10.36227/techrxiv.177272838.89432844/v1",
@@ -11,8 +9,8 @@
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 6,
-    "paragraphs": 13,
+    "list_items": 9,
+    "paragraphs": 16,
     "tables": 0,
     "words_bucket": "<1000"
   },
@@ -24,14 +22,14 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "5e7d79448e075fc7",
+  "hash": "bd4f09f688e81ff0",
   "headings": [
-    "1:research-summary-comparing-retrieval-augmented-generation-rag-with-long-context-models-for-reducing-hallucinations",
-    "2:1-overview-of-hallucinations-in-large-language-models",
-    "2:2-comparative-analysis-retrieval-augmented-generation-rag-vs-long-context-models",
-    "3:retrieval-augmented-generation-rag",
-    "3:long-context-models",
-    "2:3-complementary-mitigation-strategies",
-    "2:4-summary-of-open-research-questions"
+    "1:comparative-summary-rag-vs-long-context-models-for-reducing-hallucinations",
+    "2:1-overview-of-long-context-large-language-models",
+    "2:2-definition-and-manifestation-of-hallucinations",
+    "3:impact-on-reliability",
+    "2:3-comparative-context-rag-vs-long-context-models",
+    "2:4-open-research-questions",
+    "2:5-practical-takeaways"
   ]
 }

@@ -71,12 +71,17 @@ class FakeProvider(ProviderPort):
         self.calls.append(req.affinity.value)
         user = req.messages[-1].content
         if req.affinity == Affinity.MICRO and "Research topic" in user:
-            # batched relevance: keep every source id present in the ledger
+            # batched relevance: keep every source id present in the ledger.
+            # Ledger lines are "sid | title ..." (IDs only, no numeric
+            # indices); a legacy "[i] sid | ..." shape is tolerated too.
             ids = []
             for line in user.splitlines():
-                if " | " in line and line.strip().startswith("["):
-                    left = line.split(" | ")[0].strip()  # "[0] openalex:W1"
-                    ids.append(left.rsplit(" ", 1)[-1])
+                if " | " in line:
+                    first = line.split(" | ")[0].strip()
+                    if first.startswith("["):
+                        first = first.rsplit(" ", 1)[-1].rstrip("]")
+                    if first:
+                        ids.append(first)
             text = json.dumps({"relevant_ids": ids})
         elif "classify intent" in user.lower():
             text = "deep"

@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:44:59Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What are the computational and resource trade-offs (e.g., inference latency, memory usage, cost) between RAG and long-context models?\nPapers:\ncrossref:10.21203/rs.3.rs-9843910/v1 | Resource-Aware Memory Lifecycle Management for Long-Term RAG Inference with Compact Language Models\ncrossref:10.1109/meco70748.2026.11579073 | A Practical Study of Accuracy-Latency-Robustness Trade-offs between Text-RAG and GraphRAG | 2026 15th Mediterranean Conference on Embedded Computing (MECO)\ncrossref:10.7717/peerj-cs.3004/table-9 | Table 9: Computational efficiency (Inference time and memory usage).\ncrossref:10.7717/peerj-cs.4079/table-10 | Table 10: Inference latency and RAG overhead measured per admission.\ncrossref:10.2139/ssrn.5297342 | Parametric Macroscopic Cross-Section Generation: Trade-Offs between Accuracy and Computational Cost\neurope_pmc:MED:42581210 | Domain-specific versus general large language models: a review and empirical benchmark in real medical texts.\neurope_pmc:MED:41676168 | Bayesian RAG: uncertainty-aware retrieval for reliable financial question answering.\neurope_pmc:MED:42222656 | The Rise of Small Language Models in Healthcare: A Comprehensive Survey.\neurope_pmc:MED:42115269 | SENSEYE: a resource-aware visionary framework for assisting individuals with visual disabilities.\neurope_pmc:MED:42009701 | Designing metaverse interaction systems for the Turkish language enhanced by fine-tuning and retrieval-augmented generation (RAG).\nhuggingface_papers:2401.08406 | RAG vs Fine-tuning: Pipelines, Tradeoffs, and a Case Study on\n  Agriculture\nhuggingface_papers:2406.15319 | LongRAG: Enhancing Retrieval-Augmented Generation with Long-context LLMs\nhuggingface_papers:2603.23516 | MSA: Memory Sparse Attention for Efficient End-to-End Memory Model Scaling to 100M Tokens\nhuggingface_papers:2607.26497 | BM25 Wins at Scale: A Scaling Study of Retrieval-Augmented Generation Paradigms\nhuggingface_papers:2409.12181 | A Controlled Study on Long Context Extension and Generalization in LLMs\nosf:2e58a_v4 | Biased processing of multiple outcomes in human reinforcement learning: evidence from computational modeling and eye-tracking\nosf:xq82m_v1 | Latent visual mechanisms as computational phenotypes: Toward a precision science of vision\nosf:6vk3h_v2 | Artificial observers and real individual differences: A roadmap for a computational psychometrics of vision\nosf:98pfs_v1 | A transdiagnostic computational account linking mental fatigue and cognitive effort\nosf:yjvm5_v3 | Pre-deployment Computational Audit for Adaptive Mathematics Games: Item-Bank Circumvention Affordances, Scheduling Diversity, and Session-Parameter Checks in a Fraction Addition and Subtraction Case\nduckduckgo:https://arxiv.org/abs/2407.16833 | [2407.16833] Retrieval Augmented Generation or Long-Context LLMs? A ...\nduckduckgo:https://intuitionlabs.ai/articles/long-context-ai-vs-retrieval-rag | Long-Context AI vs. RAG for Document Analysis Compared\nduckduckgo:https://redis.io/blog/rag-vs-large-context-window-ai-apps/ | RAG vs Large Context Window: Real Trade-offs for AI Apps - Redis\nduckduckgo:https://www.meilisearch.com/blog/rag-vs-long-context-llms | RAG vs. long-context LLMs: A side-by-side comparison\nduckduckgo:https://arxiv.org/html/2501.01880v1 | Long Context vs. RAG for LLMs: An Evaluation and Revisits\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: computational and resource trade-offs between RAG and long-context models. We must consider topical overlap, drop generic ones. Also consider venue domain: computing/engineering. Practitioner sources are okay. We need to list relevant ids.\n\nList of papers with ids:\n\n1. crossref:10.21203/rs.3.rs-9843910/v1 | Resource-Aware Memory Lifecycle Management for Long-Term RAG Inference with Compact Language Models\n2. crossref:10.1109/meco70748.2026.11579073 | A Practical Study of Accuracy-Latency-Robustness Trade-offs between Text-RAG and GraphRAG | 2026 15th Mediterranean Conference on Embedded Computing (MECO)\n3. crossref:10.7717/peerj-cs.3004/table-9 | Table 9: Computational efficiency (Inference time and memory usage).\n4. crossref:10.7717/peerj-cs.4079/table-10 | Table 10: Inference latency and RAG overhead measured per admission.\n5. crossref:10.2139/ssrn.5297342 | Parametric Macroscopic Cross-Section Generation: Trade-Offs between Accuracy and Computational Cost\n6. europe_pmc:MED:42581210 | Domain-specific versus general large language models: a review and empirical benchmark in real medical texts.\n7. europe_pmc:MED:41676168 | Bayesian RAG: uncertainty-aware retrieval for reliable financial question answering.\n8. europe_pmc:MED:42222656 | The Rise of Small Language Models in Healthcare: A Comprehensive Survey.\n9. europe_pmc:MED:42115269 | SENSEYE: a resource-aware visionary framework for assisting individuals with visual disabilities.\n10. europe_pmc:MED:42009701 | Designing metaverse interaction systems for the Turkish language enhanced by fine-tuning and retrieval-augmented generation (RAG).\n11. huggingface_papers:2401.08406 | RAG vs Fine-tuning: Pipelines, Tradeoffs, and a Case Study on Agriculture\n12. huggingface_papers:2406.15319 | LongRAG: Enhancing Retrieval-Augmented Generation with Long-context LLMs\n13. huggingface_papers:2603.23516 | MSA: Memory Sparse Attention for Efficient End-to-End Memory Model Scaling to 100M Tokens\n14. huggingface_papers:2607.26497 | BM25 Wins at Scale: A Scaling Study of Retrieval-Augmented Generation Paradigms\n15. huggingface_papers:2409.12181 | A Controlled Study on Long Context Extension and Generalization in LLMs\n16. osf:2e58a_v4 | Biased processing of multiple outcomes in human reinforcement learning: evidence from computational modeling and eye-tracking\n17. osf:xq82m_v1 | Latent visual mechanisms as computational phenotypes: Toward a precision science of vision\n18. osf:6vk3h_v2 | Artificial observers and real individual differences: A roadmap for a computational psychometrics of vision\n19. osf:98pfs_v1 | A transdiagnostic computational account linking mental fatigue and cognitive effort\n20. osf:yjvm5_v3 | Pre-deployment Computational Audit for Adaptive Mathematics Games: Item-Bank Circumvention Affordances, scheduling diversity...\n21. duckduckgo:https://arxiv.org/abs/2407.16833 | [2407.16833] Retrieval Augmented Generation or Long-Context LLMs? A ...\n22. duckduckgo:https://intuitionlabs.ai/articles/long-context-ai-vs-retrieval-rag | Long-Context AI vs. RAG for Document Analysis Compared\n23. duckduckgo:https://redis.io/blog/rag-vs-large-context window-ai apps/ | RAG vs Large Context Window: Real Trade-offs for AI Apps - Redis\n24. duckduckgo:https://www.meilisearch.com/blog/rag-vs-long-context-llms | RAG vs. long-context LLMs: A side‑byside comparison\n25. duckduckgo:https://arxiv.org/html/2501.01880v1 | Long Context vs. RAG for LLMs: An Evaluation and Revisits\n\nWe need to filter.\n\nTopic: computational and resource trade-offs between RAG and long-context models. So we need papers that discuss inference latency, memory usage, cost, etc. Also comparisons between RAG and long-context LLMs.\n\nWe should include peer-reviewed and practitioner sources. Exclude generic ones that only mention generic words. Also exclude off-domain venues like medicine, law, social science. But some medical domain papers might still be relevant if they discuss trade-offs. But the instruction says drop items whose title shares only generic words with query, especially when venue is off-domain. So medical domain papers likely off-domain. But if they discuss trade-offs between RAG and long-context, maybe still relevant? But likely not.\n\nLet's evaluate each:\n\n1. Resource-Aware Memory Lifecycle Management for Long-Term RAG Inference with Compact Language Models. This is about RAG inference, memory lifecycle. Likely relevant. Venue: crossref, maybe a conference? It's a research article. Good.\n\n2. A Practical Study of Accuracy-Latency-Robustness Trade-offs between Text-RAG and GraphRAG. This is about trade-offs between RAG variants. Relevant. Venue: MECO (embedded computing). Off-domain? It's computing. Good.\n\n3. Table 9: Computational efficiency (Inference time and memory usage). This is just a table from a paper. Not a full paper. Might be part of a paper. But the ID is crossref:10.7717/peerj-cs.3004/table-9. It's a table, not a paper. Might not be relevant. We should drop.\n\n4. Table 10: Inference latency and RAG overhead measured per admission. Also a table. Likely not relevant.\n\n5. Parametric Macroscopic Cross-Section Generation: Trade-Offs between Accuracy and Computational Cost. This is about cross-section generation, not RAG or long-context. Off-topic. Drop.\n\n6. Domain-specific versus general large language models: a review and empirical benchmark in real medical texts. This is a review of LLMs in medical domain. Might discuss trade-offs but not specifically RAG vs long-context. Off-domain. Drop.\n\n7. Bayesian RAG: uncertainty-aware retrieval for reliable financial question answering. This is about RAG but not trade-offs. Might not discuss computational trade-offs. Off-topic. Drop.\n\n8. The Rise of Small Language Models in Healthcare: A Comprehensive Survey. Off-domain. Drop.\n\n9. SENSEYE: a resource-aware visionary framework for assisting individuals with visual disabilities. Off-domain. Drop.\n\n10. Designing metaverse interaction systems for the Turkish language enhanced by fine-tuning and retrieval-augmented generation (RAG). Might discuss RAG but not trade-offs. Off-domain. Drop.\n\n11. RAG vs Fine-tuning: Pipelines, Tradeoffs, and a Case Study on Agriculture. This is about RAG vs",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362698,
+    "id": "chatcmpl-b9fd6861-b677-46fa-bca6-0d2079e85dde",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_996f667773",
+    "usage": {
+      "completion_time": 1.613760463,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.06486151,
+      "prompt_tokens": 1104,
+      "prompt_tokens_details": null,
+      "queue_time": 0.148451179,
+      "total_time": 1.678621973,
+      "total_tokens": 2604
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4ark1pbebqv3aw3fp7j8cfa",
+      "seed": 811362913
+    }
+  },
+  "usage": {
+    "completion_time": 1.613760463,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.06486151,
+    "prompt_tokens": 1104,
+    "prompt_tokens_details": null,
+    "queue_time": 0.148451179,
+    "total_time": 1.678621973,
+    "total_tokens": 2604
+  },
+  "wall_s": 2.414
+}

@@ -22,7 +22,11 @@ invariants:
   no_uncited_claims: true
   valid_links: true
   forbidden_patterns: ["as an ai", "\\bTODO\\b", "as of my (last )?(knowledge|training)"]
-  max_chars: 40000
+  # Calibrated 2026-10-07 from a complete 10-branch world (43805 chars):
+  # the old 40000 bound was measured on truncated 7-branch artifacts, so it
+  # punished completeness. Cost is still bounded by the budgets below; this
+  # guards readability bloat, not spend. Revisit if padding judge drops.
+  max_chars: 45000
 
 budget:
   max_total_tokens: 300000

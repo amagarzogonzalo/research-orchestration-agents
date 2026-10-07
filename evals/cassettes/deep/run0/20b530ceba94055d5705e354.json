@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:42:57Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What is retrieval-augmented generation (RAG) and how does it work in large language models?\nPapers:\ncrossref:10.5040/bci-0kgi.ch-1 | What Is Retrieval-Augmented Generation (RAG) | Unlocking Data with Generative AI and RAG\ncrossref:10.36227/techrxiv.177272838.89432844/v1 | A Survey of (Deep RAG) Deep Retrieval Augmented Generation and Reasoning in Large Language Models\ncrossref:10.1007/979-8-8688-2733-4_6 | Retrieval-Augmented Generation (RAG) | Mastering Large Language Models\ncrossref:10.1515/9783112226780-009 | 249Chapter 9 Integrating RAG with Large Language Modelslarge language models | RAG Artificial Intelligence\ncrossref:10.21203/rs.3.rs-6551928/v1 | Can Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) Generate New Knowledge for Urban Studies?\npubmed:42834453 | ASAS-NANP SYMPOSIUM: MATHEMATICAL MODELING IN ANIMAL NUTRITION: Retrieval Augmented Generation for Large Language Models. | J Anim Sci\npubmed:42819271 | CDTD-Agent: a retrieval-augmented multi-agent digital health framework for integrated diabetes care: a single-case expert-rated pilot study. | Front Digit Health\npubmed:42787049 | Toward an integrated animal-human nutrition intelligence via agentic retrieval-augmented language models. | Front Nutr\npubmed:42767585 | Knowledge augmented causal discovery through large language models and Knowledge Graphs: Application in chronic low back pain. | J Biomed Inform\npubmed:42752477 | Medical Concept Normalization of German Clinical Expressions to SNOMED CT. | Stud Health Technol Inform\neurope_pmc:MED:42580812 | Benchmarking large language models for question answering on German clinical practice guidelines.\neurope_pmc:PMC:PMC13575674 | Agentic artificial intelligence in radiology workflow: from image interpretation to report quality control\neurope_pmc:MED:42676370 | Benchmarking retrieval augmented generation LLMs for Arabic noise robustness.\neurope_pmc:MED:42770666 | Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study.\nhuggingface_papers:2410.08815 | StructRAG: Boosting Knowledge Intensive Reasoning of LLMs via\n  Inference-time Hybrid Information Structurization\nhuggingface_papers:2410.05779 | LightRAG: Simple and Fast Retrieval-Augmented Generation\nhuggingface_papers:2412.11919 | RetroLLM: Empowering Large Language Models to Retrieve Fine-grained\n  Evidence within Generation\nhuggingface_papers:2510.17354 | Towards Mixed-Modal Retrieval for Universal Retrieval-Augmented\n  Generation\nhuggingface_papers:2409.05591 | MemoRAG: Moving towards Next-Gen RAG Via Memory-Inspired Knowledge\n  Discovery\nosf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\nosf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\nosf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\nosf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\nbiorxiv:10.64898/2026.09.22.753630 | Coevolutionary mining of prokaryotic non-coding elements with a genome language model\nbiorxiv:10.64898/2026.09.22.753604 | Agentic campaign control for high-throughput de novo binder design\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"What is retrieval-augmented generation (RAG) and how does it work in large language models?\" So we want papers that explain RAG concept, mechanisms, architecture, maybe surveys, foundational works. We should include practitioner sources like documentation, engineering blogs, encyclopedia overviews as first-class evidence. But we should drop items whose title shares only generic words with query, especially when venue is off-domain (law, medicine, social science for computing/engineering topic). So we should keep those that are about RAG in LLMs, not specific domain applications unless they also explain RAG mechanism. We should prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover same claim, but keep unique-coverage items.\n\nLet's examine each paper:\n\n1. crossref:10.5040/bci-0kgi.ch-1 | \"What Is Retrieval-Augmented Generation (RAG) | Unlocking Data with Generative AI and RAG\" Venue: Business & Consumer Intelligence? Might be a book chapter or article. It's likely a general overview. It's relevant.\n\n2. crossref:10.36227/techrxiv.177272838.89432844/v1 | \"A Survey of (Deep RAG) Deep Retrieval Augmented Generation and Reasoning in Large Language Models\" Venue: techRxiv preprint. It's a survey. Relevant.\n\n3. crossref:10.1007/979-8-8688-2733-4_6 | \"Retrieval-Augmented Generation (RAG) | Mastering Large Language Models\" Likely a book chapter. Relevant.\n\n4. crossref:10.1515/9783112226780-009 | \"249Chapter 9 Integrating RAG with Large Language Modelslarge language models | RAG Artificial Intelligence\" Another book chapter. Relevant.\n\n5. crossref:10.21203/rs.3.rs-6551928/v1 | \"Can Large Language Models (LLMs) and Retrieval-Augmented Generation (RAG) Generate New Knowledge for Urban Studies?\" Venue: Research Square preprint. Domain: urban studies. Might be about application, but could include RAG mechanism. But it's domain-specific; we might drop if only generic. Title includes RAG but domain is urban studies. Might still be relevant if it explains RAG. But we might drop because off-domain. The instruction: \"drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic).\" This one is a study in urban studies. So likely drop.\n\n6. pubmed:42834453 | \"ASAS-NANP SYMPOSIUM: MATHEMATICAL MODELING IN ANIMAL NUTRITION: Retrieval Augmented Generation for Large Language Models.\" Domain: animal nutrition. Off-domain. Drop.\n\n7. pubmed:42819271 | \"CDTD-Agent: a retrieval-augmented multi-agent digital health framework for integrated diabetes care: a single-case expert-rated pilot study.\" Domain: digital health. Off-domain. Drop.\n\n8. pubmed:42787049 | \"Toward an integrated animal-human nutrition intelligence via agentic retrieval-augmented language models.\" Domain: nutrition. Off-domain. Drop.\n\n9. pubmed:42767585 | \"Knowledge augmented causal discovery through large language models and Knowledge Graphs: Application in chronic low back pain.\" Domain: medical. Off-domain. Drop.\n\n10. pubmed:42752477 | \"Medical Concept Normalization of German Clinical Expressions to SNOMED CT.\" Domain: medical. Off-domain. Drop.\n\n11. europe_pmc:MED:42580812 | \"Benchmarking large language models for question answering on German clinical practice guidelines.\" Domain: medical. Off-domain. Drop.\n\n12. europe_pmc:PMC:PMC13575674 | \"Agentic artificial intelligence in radiology workflow: from image interpretation to report quality control\" Domain: radiology. Off-domain. Drop.\n\n13. europe_pmc:MED:42676370 | \"Benchmarking retrieval augmented generation LLMs for Arabic noise robustness.\" Domain: Arabic language. Might be about RAG but domain is language. Could be relevant if it explains RAG. But it's a benchmarking study. Might be okay but still domain-specific. Might drop.\n\n14. europe_pmc:MED:42770666 | \"Improving Reliability and Explainability of Medical Question Answering Through Atomic Fact-Checking in Retrieval-Augmented Large Language Models: Creation and Validation Study.\" Domain: medical QA. Off-domain. Drop.\n\n15. huggingface_papers:2410.08815 | \"StructRAG: Boosting Knowledge Intensive Reasoning of LLMs via Inference-time Hybrid Information Structurization\" This is a paper about a specific RAG variant. Relevant.\n\n16. huggingface_papers:2410.05779 | \"LightRAG: Simple and Fast Retrieval-Augmented Generation\" Relevant.\n\n17. huggingface_papers:2412.11919 | \"RetroLLM: Empowering Large Language Models to Retrieve Fine-grained Evidence within Generation\" Relevant.\n\n18. huggingface_papers:2510.17354 | \"Towards Mixed-Modal Retrieval for Universal Retrieval-Augmented Generation\" Relevant.\n\n19. huggingface_papers:2409.05591 | \"MemoRAG: Moving towards Next-Gen RAG Via Memory-Inspired Knowledge Discovery\" Relevant.\n\n20. osf:wmc2q_v1 | \"Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\" Domain: social science. Off-domain. Drop.\n\n21. osf:fghrp_v3 | \"Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\" Domain: mental health. Off-domain. Drop.\n\n22. osf:34agm_v1 | \"JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\" Domain: legal. Off-domain. Drop.\n\n23. osf:b94ng_v1 | \"Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\" Domain: general? Might be about RAG extension. Could be relevant. It's OSF preprint. Might be relevant.\n\n24. biorxiv:10.64898/2026.09.22.753630 | \"Coevolutionary mining of prokaryotic non-coding elements with a genome language model\" Domain: biology. Off-domain. Drop.\n\n25. biorxiv:10.64898/2026.09.22.753604 | \"Agentic campaign control for high-throughput de novo binder design\" Domain: biology. Off-domain. Drop.\n\nThus relevant IDs: 1,2,3,4,15,16,17,18,19,23. Also maybe 13? But it's a benchmarking study in Arabic. Might be less relevant. The question: \"What is retrieval-augmented generation (RAG) and how does it work in large language models?\" So we want conceptual explanation, architecture, mechanisms. The benchmarking study might",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362576,
+    "id": "chatcmpl-9c9d3447-18a9-46e6-a121-993d9fc0b40d",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_ef00694abe",
+    "usage": {
+      "completion_time": 1.6653401909999999,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.058575693,
+      "prompt_tokens": 1107,
+      "prompt_tokens_details": null,
+      "queue_time": 0.016161306,
+      "total_time": 1.723915884,
+      "total_tokens": 2607
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4arfaa0ew2v7j7ska222ttd",
+      "seed": 1807526055
+    }
+  },
+  "usage": {
+    "completion_time": 1.6653401909999999,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.058575693,
+    "prompt_tokens": 1107,
+    "prompt_tokens_details": null,
+    "queue_time": 0.016161306,
+    "total_time": 1.723915884,
+    "total_tokens": 2607
+  },
+  "wall_s": 1.981
+}

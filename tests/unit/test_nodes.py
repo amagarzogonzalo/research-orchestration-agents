@@ -109,7 +109,11 @@ async def test_relevance_ledger_carries_authority_signals() -> None:
     )
     await RelevanceNode(CaptureProvider()).run(await _state(sources=[src]))
     ledger = seen[0]
-    assert "Nature" in ledger and "2024" in ledger and "13235" in ledger
+    # Slim ledger contract: id + title + venue (authority signal). Year and
+    # cite counts are dropped on purpose to keep reasoning-model verdicts
+    # inside the token budget.
+    assert "Nature" in ledger and "s1" in ledger
+    assert "2024" not in ledger and "13235" not in ledger
 
 
 async def test_bodies_fanout_emits_send_per_source() -> None:

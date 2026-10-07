@@ -3,15 +3,15 @@
   "payload": {
     "url": "https://doi.org/10.2139/ssrn.5199254"
   },
-  "recorded_at": "2026-10-05T16:04:33Z",
+  "recorded_at": "2026-10-07T08:35:09Z",
   "response": {
-    "captured_at": "2026-10-05T16:04:33.810014+00:00",
+    "captured_at": "2026-10-07T08:35:09.047502+00:00",
     "char_count": 484,
     "crawl_method": "crawl4ai",
-    "markdown": "[![SSRN Logo](https://www.ssrn.com/abstract=5199254)](https://www.ssrn.com)\n# Content Blocked\n! We have detected that you may be using an automated script or search engine our site does not support. Please retry using an alternate way of accessing our site.   \nContact Content_Protection_Services@Elsevier.com for more information.  \n\n  * Reference Number: a45da9a48d10c89b\n  * IP Address: 217.102.66.155\n  * Timestamp: Mon, 05 Oct 2026 16:04:33 GMT \n\n\n::CLOUDFLARE_ERROR_1000S_BOX::\n",
+    "markdown": "[![SSRN Logo](https://www.ssrn.com/abstract=5199254)](https://www.ssrn.com)\n# Content Blocked\n! We have detected that you may be using an automated script or search engine our site does not support. Please retry using an alternate way of accessing our site.   \nContact Content_Protection_Services@Elsevier.com for more information.  \n\n  * Reference Number: a46b91fa8922cbb9\n  * IP Address: 217.102.66.155\n  * Timestamp: Wed, 07 Oct 2026 08:35:04 GMT \n\n\n::CLOUDFLARE_ERROR_1000S_BOX::\n",
     "title": "Content Blocked",
     "url": "https://doi.org/10.2139/ssrn.5199254"
   },
   "usage": {},
-  "wall_s": 1.857
+  "wall_s": 12.549
 }

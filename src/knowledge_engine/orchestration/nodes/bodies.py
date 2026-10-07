@@ -22,12 +22,64 @@ from langgraph.types import Command, Send
 
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState
-from knowledge_engine.schemas.source import SourceRecord
+from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 logger = logging.getLogger(__name__)
 
 FETCH_NODE = "fetch_body"
 JOIN_NODE = "synthesize"
+
+# Cost bound on the scrape fan-out: every filtered source would otherwise be
+# fetched (63-source federated unions blew both the call and token budgets).
+# Scholarly records keep source-priority order up to the cap; general-web
+# records (Wikipedia/DuckDuckGo/Google) get a reserved quota so the fallback
+# tier is always represented in evals, regardless of scholarly volume.
+_MAX_SCHOLARLY_BODIES = 16
+_MAX_GENERAL_BODIES = 4
+_GENERAL_SOURCES = frozenset({SearchSource.WIKIPEDIA, SearchSource.DUCKDUCKGO, SearchSource.GOOGLE})
+
+
+def _is_general_web(src: object) -> bool:
+    """Whether a record belongs to the general-web fallback tier.
+
+    Args:
+        src: Source record (Pydantic or dict snapshot).
+
+    Returns:
+        bool: True for Wikipedia/DuckDuckGo/Google records.
+    """
+    source = src.get("source") if isinstance(src, dict) else getattr(src, "source", None)
+    if not isinstance(source, str):
+        return False
+    try:
+        return SearchSource(source) in _GENERAL_SOURCES
+    except ValueError:
+        return False
+
+
+def select_scrape_pool(pool: list[Any]) -> list[Any]:
+    """Bound the scrape fan-out, preserving pool order and the web tier.
+
+    Args:
+        pool: Relevance-filtered sources (or all sources when unfiltered).
+
+    Returns:
+        list[Any]: At most ``_MAX_SCHOLARLY_BODIES`` scholarly plus
+            ``_MAX_GENERAL_BODIES`` general-web records, in pool order.
+    """
+    scholarly_taken = general_taken = 0
+    chosen: list[Any] = []
+    for src in pool:
+        if _is_general_web(src):
+            if general_taken < _MAX_GENERAL_BODIES:
+                chosen.append(src)
+                general_taken += 1
+        elif scholarly_taken < _MAX_SCHOLARLY_BODIES:
+            chosen.append(src)
+            scholarly_taken += 1
+    if len(chosen) < len(pool):
+        logger.info("scrape pool capped: %d of %d sources fetched", len(chosen), len(pool))
+    return chosen
 
 
 class BodiesNode(WorkflowNode):
@@ -48,7 +100,7 @@ class BodiesNode(WorkflowNode):
 
         """
         pool = state.get("filtered") or state.get("sources", [])
-        sends = [Send(FETCH_NODE, {"source": src}) for src in pool]
+        sends = [Send(FETCH_NODE, {"source": src}) for src in select_scrape_pool(list(pool))]
         if sends:
             return self.command(goto=sends)
         logger.info("no sources to fetch; skipping body fan-out")

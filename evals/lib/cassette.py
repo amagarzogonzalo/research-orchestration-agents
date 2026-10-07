@@ -78,7 +78,8 @@ class Cassette:
         t0 = time.time()
         if self.mode == "record" and k in self.memo:
             response = self.memo[k]
-            self.calls.append({"key": k, "replayed": False, "usage": {}, "memo_hit": True})
+            usage = response.get("usage", {}) if isinstance(response, dict) else {}
+            self.calls.append({"key": k, "replayed": False, "usage": usage, "memo_hit": True})
             return response
         response = client(**request)
         elapsed = time.time() - t0
@@ -135,7 +136,8 @@ class Cassette:
         t0 = time.time()
         if self.mode == "record" and k in self.memo:
             response = copy.deepcopy(self.memo[k])
-            self.calls.append({"key": k, "replayed": False, "usage": {}, "memo_hit": True})
+            usage = response.get("usage", {}) if isinstance(response, dict) else {}
+            self.calls.append({"key": k, "replayed": False, "usage": usage, "memo_hit": True})
             return response
         response = await client(**request)
         elapsed = time.time() - t0

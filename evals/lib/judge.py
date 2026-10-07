@@ -93,6 +93,17 @@ def score(
         if parsed and isinstance(parsed.get("overall"), (int, float)):
             res.scores.append(float(parsed["overall"]))
             res.detail.append(parsed)
+        elif parsed:
+            # Some judges return criteria but omit "overall": fall back to
+            # the criteria mean rather than discarding a valid verdict.
+            crit = [
+                float(c.get("score"))
+                for c in parsed.get("criteria", [])
+                if isinstance(c, dict) and isinstance(c.get("score"), (int, float))
+            ]
+            if crit:
+                res.scores.append(sum(crit) / len(crit))
+                res.detail.append(parsed)
     return res
 
 
