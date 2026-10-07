@@ -10,8 +10,10 @@ from __future__ import annotations
 import asyncio
 import time
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-import redis.asyncio as aioredis
+if TYPE_CHECKING:
+    import redis.asyncio as aioredis
 
 from knowledge_engine.core.exceptions import RateLimitTimeout
 
@@ -49,6 +51,12 @@ return {0, tokens}
 
 @dataclass
 class TokenBucketConfig:
+    """TokenBucketConfig.
+
+    Attributes:
+        capacity: Attribute description.
+        refill_per_second: Attribute description."""
+
     capacity: int
     refill_per_second: float
 
@@ -57,6 +65,12 @@ class AsyncTokenBucket:
     """In-process fallback bucket (no Redis). Thread/loop-safe within one process."""
 
     def __init__(self, key: str, config: TokenBucketConfig) -> None:
+        """Create a AsyncTokenBucket.
+
+        Args:
+            key: Storage key.
+            config: Runnable configuration.
+        """
         self.key = key
         self.capacity = config.capacity
         self.refill = config.refill_per_second
@@ -65,11 +79,28 @@ class AsyncTokenBucket:
         self._lock = asyncio.Lock()
 
     async def _tokens_now(self) -> float:
+        """Tokens now.
+
+        Returns:
+            float: Computed value.
+        """
         now = time.monotonic()
         dt = max(now - self._ts, 0.0)
         return min(self.capacity, self._tokens + dt * self.refill)
 
     async def acquire(self, cost: int = 1, timeout: float = 30.0) -> float:
+        """Acquire.
+
+        Args:
+            cost: Tokens to consume.
+            timeout: Request timeout in seconds.
+
+        Returns:
+            float: Computed value.
+
+        Raises:
+            RateLimitTimeout: When the operation fails.
+        """
         async with self._lock:
             deadline = asyncio.get_event_loop().time() + timeout
             while True:
@@ -87,23 +118,61 @@ class TokenBucketLimiter:
     """Facade: Redis-backed if available, else in-process. Keyed per provider."""
 
     def __init__(self, rc: aioredis.Redis | None = None, budgets: dict[str, tuple[int, float]] | None = None) -> None:
+        """Create a TokenBucketLimiter.
+
+        Args:
+            rc: Redis client.
+            budgets: Per-provider token budgets.
+
+        """
         self._budgets = {k: TokenBucketConfig(cap, refill) for k, (cap, refill) in (budgets or TOKEN_BUDGETS).items()}
         self._rc = rc
         self._local: dict[str, AsyncTokenBucket] = {}
         self._scripts = {}
 
     def _bucket_for(self, provider: str) -> AsyncTokenBucket:
+        """Bucket for.
+
+        Args:
+            provider: Provider key for rate limiting.
+
+        Returns:
+            AsyncTokenBucket: Token bucket.
+
+        """
         cfg = self._config_for(provider)
         if provider not in self._local:
             self._local[provider] = AsyncTokenBucket(provider, cfg)
         return self._local[provider]
 
     def _config_for(self, provider: str) -> TokenBucketConfig:
+        """Config for.
+
+        Args:
+            provider: Provider key for rate limiting.
+
+        Returns:
+            TokenBucketConfig: Bucket configuration.
+
+        """
         default = TokenBucketConfig(capacity=20, refill_per_second=0.0)
         return self._budgets.get(provider, default)
 
     async def acquire(self, provider: str, cost: int = 1, timeout: float = 30.0) -> float:
-        """Consume `cost` tokens from `provider`'s bucket, waiting up to `timeout`."""
+        """Consume `cost` tokens from `provider`'s bucket, waiting up to `timeout`.
+
+        Args:
+            provider: Provider key for rate limiting.
+            cost: Tokens to consume.
+            timeout: Request timeout in seconds.
+
+        Returns:
+            float: Computed value.
+
+        Raises:
+            RateLimitTimeout: When the wait exceeds the timeout.
+
+        """
         cfg = self._config_for(provider)
         if self._rc is not None:
             try:

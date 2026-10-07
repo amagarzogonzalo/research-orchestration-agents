@@ -1,0 +1,68 @@
+# tach — module boundary enforcement for the hexagonal architecture.
+#
+# Intended layering (AGENTS.md layout):
+#   schemas   : leaf types, depends on nothing internal
+#   core      : ports, depends on schemas only
+#   store     : files-only persistence, depends on schemas (+ core where needed)
+#   observability: leaf instrumentation
+#   infrastructure: adapters, depends on core + schemas + observability
+#   orchestration : LangGraph core, depends on core + schemas + store
+#   top-level (engine/config/scripts): composition, may use all
+
+source_roots = ["src"]
+
+[[modules]]
+path = "knowledge_engine.schemas"
+depends_on = []
+
+[[modules]]
+path = "knowledge_engine.core"
+depends_on = [{ path = "knowledge_engine.schemas" }]
+
+[[modules]]
+path = "knowledge_engine.observability"
+depends_on = []
+
+[[modules]]
+path = "knowledge_engine.store"
+depends_on = [{ path = "knowledge_engine.schemas" }, { path = "knowledge_engine.core" }]
+
+[[modules]]
+path = "knowledge_engine.infrastructure"
+depends_on = [
+    { path = "knowledge_engine.core" },
+    { path = "knowledge_engine.schemas" },
+    { path = "knowledge_engine.observability" },
+]
+
+# Adapter families are mutually isolated: a search adapter must never import
+# scrape/browser/discovery/mcp internals (and vice versa). Cross-cutting needs
+# go through core ports. Verified clean 2026-10-01 (only providers→router and
+# router→{circuit, rate_limit} exist, all inside the parent module).
+[[modules]]
+path = "knowledge_engine.infrastructure.search"
+depends_on = [{ path = "knowledge_engine.core" }, { path = "knowledge_engine.schemas" }]
+
+[[modules]]
+path = "knowledge_engine.infrastructure.scrape"
+depends_on = [{ path = "knowledge_engine.core" }, { path = "knowledge_engine.schemas" }]
+
+[[modules]]
+path = "knowledge_engine.infrastructure.browser"
+depends_on = [{ path = "knowledge_engine.core" }, { path = "knowledge_engine.schemas" }]
+
+[[modules]]
+path = "knowledge_engine.infrastructure.discovery"
+depends_on = [{ path = "knowledge_engine.core" }, { path = "knowledge_engine.schemas" }]
+
+[[modules]]
+path = "knowledge_engine.infrastructure.mcp"
+depends_on = [{ path = "knowledge_engine.core" }, { path = "knowledge_engine.schemas" }]
+
+[[modules]]
+path = "knowledge_engine.orchestration"
+depends_on = [
+    { path = "knowledge_engine.core" },
+    { path = "knowledge_engine.schemas" },
+    { path = "knowledge_engine.store" },
+]

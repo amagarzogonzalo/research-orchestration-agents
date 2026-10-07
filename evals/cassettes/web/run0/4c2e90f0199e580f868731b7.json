@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1145/3805712.3809882"
+  },
+  "recorded_at": "2026-10-07T08:35:05Z",
+  "response": {
+    "captured_at": "2026-10-07T08:35:05.658897+00:00",
+    "char_count": 491,
+    "crawl_method": "crawl4ai",
+    "markdown": "![Icon for dl.acm.org](https://dl.acm.org/favicon.ico)\n# dl.acm.org\n## Performing security verification\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n## Verification successful. Waiting for dl.acm.org to respond\nRay ID: `a46b91eaba0e5c43`\nPerformance and Security by [Cloudflare](https://www.cloudflare.com?utm_source=challenge&utm_campaign=m)[Privacy](https://www.cloudflare.com/privacypolicy/)\n",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.1145/3805712.3809882"
+  },
+  "usage": {},
+  "wall_s": 8.959
+}

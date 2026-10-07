@@ -1,0 +1,92 @@
+{
+  "recorded_at": "2026-10-07T12:22:55Z",
+  "request": {
+    "messages": [
+      {
+        "content": "Based on the given claims, which is a list of strings, generate a list of JSON objects to indicate whether EACH claim contradicts any facts in the retrieval context. The JSON will have 2 fields: 'verdict' and 'reason'.\nThe 'verdict' key should STRICTLY be either 'yes', 'no', or 'borderline', which states whether the given claim agrees with the context. \nProvide a 'reason' ONLY if the answer is 'no' or 'borderline'. \nThe provided claim is drawn from the actual output. Try to provide a correction in the reason using the facts in the retrieval context.\n\n\nExpected JSON format:\n{\n\"verdicts\": [\n{\n\"verdict\": \"yes\"\n},\n{\n\"reason\": <explanation_for_contradiction>,\n\"verdict\": \"no\"\n},\n{\n\"reason\": <explanation_for_uncertainty>,\n\"verdict\": \"borderline\"\n}\n]  \n}\n\n\n**\nIMPORTANT: Please make sure to only return in JSON format, with the 'verdicts' key as a list of JSON objects.\n\nGenerate ONE verdict per claim - length of 'verdicts' MUST equal number of claims.\nNo 'reason' needed for 'yes' verdicts.\nOnly use 'no' if retrieval context DIRECTLY CONTRADICTS the claim - never use prior knowledge.\nUse 'borderline' for claims not backed up by context OR factually incorrect but non-contradictory - do not assume your knowledge.\nVague/speculative language in claims (e.g. 'may have', 'possibility') does NOT count as contradiction.\n\n**\n\nRetrieval Contexts:\nA RAG survey was conducted.\n\nRetrieval grounding reduces hallucination.\n\nClaims:\n['Boil water with salt [^x:1].', 'Add pasta and stir for nine minutes [^x:1].']\n\nJSON:",
+        "role": "user"
+      }
+    ],
+    "model": "google/gemma-3-27b-it",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "logprobs": null,
+        "message": {
+          "annotations": null,
+          "audio": null,
+          "content": "\n```json\n{\n\"verdicts\": [\n{\n\"verdict\": \"borderline\"\n},\n{\n\"verdict\": \"borderline\"\n}\n]\n}\n```",
+          "function_call": null,
+          "reasoning": null,
+          "refusal": null,
+          "role": "assistant",
+          "tool_calls": null
+        },
+        "native_finish_reason": "stop"
+      }
+    ],
+    "created": 1791375774,
+    "id": "gen-1791375774-2FyweGKq81qvbn23I7fT",
+    "model": "google/gemma-3-27b-it",
+    "moderation": null,
+    "object": "chat.completion",
+    "provider": "Novita",
+    "service_tier": null,
+    "system_fingerprint": null,
+    "usage": {
+      "completion_tokens": 44,
+      "completion_tokens_details": {
+        "accepted_prediction_tokens": null,
+        "audio_tokens": 0,
+        "image_tokens": 0,
+        "reasoning_tokens": 0,
+        "rejected_prediction_tokens": null
+      },
+      "cost": 5.8542e-05,
+      "cost_details": {
+        "upstream_inference_completions_cost": 8.8e-06,
+        "upstream_inference_cost": 5.8542e-05,
+        "upstream_inference_prompt_cost": 4.9742e-05
+      },
+      "is_byok": false,
+      "prompt_tokens": 418,
+      "prompt_tokens_details": {
+        "audio_tokens": 0,
+        "cache_write_tokens": 0,
+        "cached_tokens": 0,
+        "video_tokens": 0
+      },
+      "total_tokens": 462
+    }
+  },
+  "usage": {
+    "completion_tokens": 44,
+    "completion_tokens_details": {
+      "accepted_prediction_tokens": null,
+      "audio_tokens": 0,
+      "image_tokens": 0,
+      "reasoning_tokens": 0,
+      "rejected_prediction_tokens": null
+    },
+    "cost": 5.8542e-05,
+    "cost_details": {
+      "upstream_inference_completions_cost": 8.8e-06,
+      "upstream_inference_cost": 5.8542e-05,
+      "upstream_inference_prompt_cost": 4.9742e-05
+    },
+    "is_byok": false,
+    "prompt_tokens": 418,
+    "prompt_tokens_details": {
+      "audio_tokens": 0,
+      "cache_write_tokens": 0,
+      "cached_tokens": 0,
+      "video_tokens": 0
+    },
+    "total_tokens": 462
+  },
+  "wall_s": 2.041
+}

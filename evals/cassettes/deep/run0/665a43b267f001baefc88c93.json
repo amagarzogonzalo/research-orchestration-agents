@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1075/ts.25064.gut"
+  },
+  "recorded_at": "2026-10-07T08:43:20Z",
+  "response": {
+    "captured_at": "2026-10-07T08:43:20.869658+00:00",
+    "char_count": 530,
+    "crawl_method": "crawl4ai",
+    "markdown": "![Icon for www.jbe-platform.com](http://www.jbe-platform.com/favicon.ico)\n# www.jbe-platform.com\n## Performing security verification\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n## Verification successful. Waiting for www.jbe-platform.com to respond\nRay ID: `a46b9e1339fa796f`\nPerformance and Security by [Cloudflare](https://www.cloudflare.com?utm_source=challenge&utm_campaign=m)[Privacy](https://www.cloudflare.com/privacypolicy/)\n",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.1075/ts.25064.gut"
+  },
+  "usage": {},
+  "wall_s": 5.618
+}

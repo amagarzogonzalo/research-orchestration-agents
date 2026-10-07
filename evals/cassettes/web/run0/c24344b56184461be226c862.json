@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:34:50Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What is retrieval-augmented generation and how does it reduce hallucinations?\nPapers:\nhuggingface_papers:2603.20309 | BubbleRAG: Evidence-Driven Retrieval-Augmented Generation for Black-Box Knowledge Graphs\nhuggingface_papers:2312.05708 | Context Tuning for Retrieval Augmented Generation\nhuggingface_papers:2505.04253 | LLM-Independent Adaptive RAG: Let the Question Speak for Itself\nhuggingface_papers:2502.17125 | LettuceDetect: A Hallucination Detection Framework for RAG Applications\nhuggingface_papers:2312.10997 | Retrieval-Augmented Generation for Large Language Models: A Survey\nosf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\nosf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\nosf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\nosf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\nosf:qfkbv_v1 | Semi-Structured Data Parsing and Vectorization Using Retrieval-Augmented Generation\nosf:ns2v3_v1 | Implementing Retrieval-Augmented Generation (RAG) for Large Language Models to Build Confidence in Traditional Chinese Medicine\nosf:pv7r5_v1 | Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\nbiorxiv:10.64898/2026.09.22.753398 | Angiogenin activity regulates RNA remodeling during the maternal-to-zygotic transition in early mouse embryogenesis\nbiorxiv:10.64898/2026.09.21.753339 | Ghrelin inhibits courtship ultrasonic vocalization in male mice\nbiorxiv:10.64898/2026.09.22.753145 | Multimodal 3D imaging reveals a central role for lysosomes indissolution of cholesterol crystals by macrophages\nbiorxiv:10.64898/2026.09.21.753355 | Loss of TCA cycle turning promotes stem cell function\nbiorxiv:10.64898/2026.09.22.753420 | Expanding N-terminomics Coverage by Extending N-terminal Peptide Length\nbiorxiv:10.64898/2026.09.21.753293 | Central lipid sensing tunes accumbal D2R-neuron activity in appetitive behaviours\nbiorxiv:10.64898/2026.09.22.753364 | Spatiotemporal atlas resolves the mesenchymal-epithelial stem cell axis governing human hair follicle aging and pathology\nbiorxiv:10.64898/2026.03.08.710341 | Division of labor between ERK and Notch signaling coordinates distinct stem cell populations during jellyfish tentacle regeneration\nmedrxiv:10.64898/2026.09.21.26361499 | Test-Retest Reliability of an Isometric Trunk Flexor and Extensor Test in Community-Dwelling Adults\nmedrxiv:10.64898/2026.09.21.26363600 | Schizophrenia-associated polygenic liability and structural genomic risk demonstrate broadly distributed neuropsychiatric associations in the All of Us Research Program\nmedrxiv:10.64898/2026.09.22.26363642 | Mind the gap: emergent clinical risk at the interface of two individually safe AI systems in a multilingual ambient scribe\nmedrxiv:10.64898/2026.09.16.26363186 | A national-scale digital atlas of recorded care patterns across more than 1000 diagnostic categories using real-world health data: a retrospective observational study\nmedrxiv:10.64898/2026.09.22.26363548 | Immunophenotyping of B- and T-cell alterations in patients with autoimmune premature ovarian insufficiency following rituximab treatment\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"What is retrieval-augmented generation and how does it reduce hallucinations?\" So we need papers that discuss RAG and hallucination reduction. We should include peer-reviewed and practitioner sources. We should drop items whose title shares only generic words with query, especially when venue off-domain. So we need to filter.\n\nList of papers:\n\n1. huggingface_papers:2603.20309 | BubbleRAG: Evidence-Driven Retrieval-Augmented Generation for Black-Box Knowledge Graphs\n2. huggingface_papers:2312.05708 | Context Tuning for Retrieval Augmented Generation\n3. huggingface_papers:2505.04253 | LLM-Independent Adaptive RAG: Let the Question Speak for Itself\n4. huggingface_papers:2502.17125 | LettuceDetect: A Hallucination Detection Framework for RAG Applications\n5. huggingface_papers:2312.10997 | Retrieval-Augmented Generation for Large Language Models: A Survey\n6. osf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\n7. osf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\n8. osf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\n9. osf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\n10. osf:qfkbv_v1 | Semi-Structured Data Parsing and Vectorization Using Retrieval-Augmented Generation\n11. osf:ns2v3_v1 | Implementing Retrieval-Augmented Generation (RAG) for Large Language Models to Build Confidence in Traditional Chinese Medicine\n12. osf:pv7r5_v1 | Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\n13-... biorxiv and medrxiv are biology/medicine, likely off-domain. They are not relevant.\n\nWe need to decide which of the above are relevant. The topic: \"What is retrieval-augmented generation and how does it reduce hallucinations?\" So we need papers that explain RAG concept and hallucination reduction. So:\n\n- BubbleRAG: evidence-driven RAG for knowledge graphs. Might discuss hallucination? Not sure. But it's about RAG. Could be relevant.\n\n- Context Tuning for Retrieval Augmented Generation: likely about RAG. Might discuss hallucination? Possibly.\n\n- LLM-Independent Adaptive RAG: Let the Question Speak for Itself: about RAG. Might discuss hallucination? Not sure.\n\n- LettuceDetect: A Hallucination Detection Framework for RAG Applications: definitely about hallucination detection, but not necessarily reduction. But still relevant.\n\n- Retrieval-Augmented Generation for Large Language Models: A Survey: definitely relevant.\n\n- Social-RAG: pipeline for social science. Might not discuss hallucination reduction. But still about RAG. But maybe less relevant.\n\n- Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: RAG approach. Might discuss hallucination? Not sure.\n\n- JusticeNetBD: RAG-based legal AI assistant. Might not discuss hallucination.\n\n- Long Text Language Ensemble Models: Extension of RAG. Might not discuss hallucination.\n\n- Semi-Structured Data Parsing and Vectorization Using RAG: not about hallucination.\n\n- Implementing RAG for LLM to Build Confidence in Traditional Chinese Medicine: might discuss hallucination? Possibly.\n\n- Hallucination Reduction in LLM with RAG Using Wikipedia Knowledge: definitely relevant.\n\nThus relevant IDs: 2603.20309, 2312.05708, 2505.04253, 2502.17125, 2312.10997, pv7r5_v1. Also maybe 2502.17125 is detection framework, but still relevant to hallucination. Also 2312.05708 maybe not about hallucination but about RAG. The question: \"What is retrieval-augmented generation and how does it reduce hallucinations?\" So we need both conceptual and reduction. So include survey, detection, reduction. Also maybe include 2505.04253? It's about LLM-Independent Adaptive RAG. Might not discuss hallucination. But still concept. But we can include.\n\nAlso 2603.20309: evidence-driven RAG. Might discuss hallucination? Not sure. But it's about RAG. Might be relevant.\n\nAlso 2312.10997: survey. Definitely relevant.\n\nAlso 2502.17125: detection framework. Relevant.\n\nAlso pv7r5_v1: hallucination reduction. Relevant.\n\nAlso 2505.04253: maybe not about hallucination but concept. Might include.\n\nAlso 2312.05708: context tuning. Might not discuss hallucination. But concept. Might include.\n\nWe need to decide if we drop generic ones. The instruction: \"Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic).\" So we should drop items that only share generic words. Titles like \"Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\" shares generic words but is off-domain (social science). So drop. \"JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\" is legal domain, drop. \"Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\" maybe generic, but still about RAG. But it's about long text language ensemble models. Might be off-domain? It's still computing. But maybe drop if generic. But it's about RAG. But the title includes \"Extension of Retrieval-Augmented Generation (RAG)\" which is specific. So maybe keep.\n\n\"Implementing Retrieval-Augmented Generation (RAG) for Large Language Models to Build Confidence in Traditional Chinese Medicine\" is about Chinese medicine, off-domain. Might drop.\n\n\"Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\" is about psychosis-like thinking, off-domain. Might drop.\n\n\"Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\" is relevant.\n\n\"BubbleRAG: Evidence-Driven Retrieval-Augmented Generation for Black-Box Knowledge Graphs\" is about knowledge graphs, but still computing. Might keep.\n\n\"Context Tuning for Retrieval Augmented Generation\" is about RAG. Might keep.\n\n\"LLM-Independent Adaptive RAG: Let the Question Speak for Itself\" is about RAG. Might keep.\n\n\"LettuceDetect: A Hallucination Detection Framework for RAG Applications\" is about hallucination detection. Might keep.\n\n\"Retrieval-Augmented Generation for Large Language Models: A Survey\" is survey. Keep.\n\nThus relevant IDs: 2603.20309, 2312.05708, 2505.04253, ",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362089,
+    "id": "chatcmpl-940df3bb-6c5d-40d5-b54f-3aba18f72c05",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_37c9245f64",
+    "usage": {
+      "completion_time": 1.695953071,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.066435695,
+      "prompt_tokens": 1133,
+      "prompt_tokens_details": null,
+      "queue_time": 0.192838273,
+      "total_time": 1.762388766,
+      "total_tokens": 2633
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4ar0ezrehjs8p4ydc47qfsr",
+      "seed": 69530589
+    }
+  },
+  "usage": {
+    "completion_time": 1.695953071,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.066435695,
+    "prompt_tokens": 1133,
+    "prompt_tokens_details": null,
+    "queue_time": 0.192838273,
+    "total_time": 1.762388766,
+    "total_tokens": 2633
+  },
+  "wall_s": 2.205
+}

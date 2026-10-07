@@ -16,8 +16,8 @@ _FM = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 _HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 _FENCE = re.compile(r"^```([A-Za-z0-9_+-]*)", re.MULTILINE)
 _LINK = re.compile(r"\[[^\]]*\]\((https?://[^)\s]+)\)")
-_FOOTNOTE = re.compile(r"\[\^([A-Za-z0-9_.:-]+)\]")
-_INLINE_CITE = re.compile(r"\((?:src|source|cite):([A-Za-z0-9_.:-]+)\)")
+_FOOTNOTE = re.compile(r"\[\^([A-Za-z0-9_.:/-]+)\]")
+_INLINE_CITE = re.compile(r"\((?:src|source|cite):([A-Za-z0-9_.:/-]+)\)")
 _NUM = re.compile(r"\d[\d,._]*")
 
 
@@ -33,6 +33,8 @@ def _parse_frontmatter(text: str) -> dict[str, str]:
         if ":" not in line or line.startswith((" ", "\t", "-")):
             continue
         key, _, raw = line.partition(":")
+        # YAML dumps quote special keys ("@id": ...); quotes are syntax.
+        key = key.strip().strip("\"'")
         raw = raw.strip()
         kind = (
             "list"

@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.36227/techrxiv.177162116.61215374/v1"
+  },
+  "recorded_at": "2026-10-07T08:44:52Z",
+  "response": {
+    "captured_at": "2026-10-07T08:44:52.039262+00:00",
+    "char_count": 515,
+    "crawl_method": "crawl4ai",
+    "markdown": "![Icon for www.techrxiv.org](https://www.techrxiv.org/favicon.ico)\n# www.techrxiv.org\n## Performing security verification\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n## Verification successful. Waiting for www.techrxiv.org to respond\nRay ID: `a46ba0100997fea0`\nPerformance and Security by [Cloudflare](https://www.cloudflare.com?utm_source=challenge&utm_campaign=m)[Privacy](https://www.cloudflare.com/privacypolicy/)\n",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.36227/techrxiv.177162116.61215374/v1"
+  },
+  "usage": {},
+  "wall_s": 19.77
+}

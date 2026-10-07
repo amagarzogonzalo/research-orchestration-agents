@@ -8,18 +8,30 @@ ever sees the content (which is the whole point on rate-limited free tiers).
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from typing import Any
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
+from knowledge_engine.infrastructure.scrape.common import fallback_title
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 
 class Crawl4aiAdapter(ScrapePort):
     def __init__(self, *, timeout: int = 30) -> None:
+        """Create a Crawl4aiAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self.timeout = timeout
         self._async_webcrawler = None
 
-    def _crawler(self):
+    def _crawler(self) -> Any:
+        """Return the lazy crawler class.
+
+        Returns:
+            Any: AsyncWebCrawler class.
+        """
         if self._async_webcrawler is None:  # lazy import keeps heavy dep optional
             from crawl4ai import AsyncWebCrawler
 
@@ -27,14 +39,27 @@ class Crawl4aiAdapter(ScrapePort):
         return self._async_webcrawler
 
     async def to_markdown(self, url: str) -> DocumentBody:
-        AsyncWebCrawler = self._crawler()
+        """Convert a URL to Markdown.
+
+        Args:
+            url: Target URL.
+
+        Returns:
+            DocumentBody: Fetched Markdown body.
+
+        Raises:
+            ScrapeError: When the operation fails.
+
+        """
         try:
+            AsyncWebCrawler = self._crawler()
             async with AsyncWebCrawler() as crawler:
                 result = await crawler.arun(url=url, cache_mode="bypass")
         except Exception as exc:  # noqa: BLE001 - wrap crawl4ai/Playwright failures
-            raise ScrapeError(f"Crawl4AI failed for {url}: {exc}") from exc
+            transient = not isinstance(exc, (ImportError, ModuleNotFoundError))
+            raise ScrapeError(f"Crawl4AI failed for {url}: {exc}", transient=transient) from exc
         markdown = (result.markdown or "") if result else ""
-        title = (result.metadata.get("title") if result and result.metadata else "") or _fallback_title(url)
+        title = (result.metadata.get("title") if result and result.metadata else "") or fallback_title(url)
         return DocumentBody(
             url=url,
             title=title,
@@ -43,7 +68,3 @@ class Crawl4aiAdapter(ScrapePort):
             crawl_method=FetchMethod.CRAWL4AI,
             captured_at=datetime.now(UTC).isoformat(),
         )
-
-
-def _fallback_title(url: str) -> str:
-    return url.rstrip("/").rsplit("/", 1)[-1] or url

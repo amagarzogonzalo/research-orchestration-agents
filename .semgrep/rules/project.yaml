@@ -1,0 +1,148 @@
+# Project-specific Semgrep rules — things ruff/mypy do NOT cover.
+#
+# Run:  uvx semgrep --config .semgrep/rules/ src tests
+# Every rule below was verified to fire on a positive case and stay silent
+# on the repo's legitimate patterns (lazy optional imports, noqa-justified
+# broad catches, fake creds in tests).
+rules:
+  - id: no-hardcoded-secrets
+    languages: [python]
+    severity: ERROR
+    message: >
+      Possible hardcoded credential. Keys must come from the environment
+      (.env locally, secrets in CI) — never commit credential values.
+      Test fakes must use obvious placeholders (fake/xxx/test/example).
+    patterns:
+      - pattern-either:
+          - pattern: $KEY = "..."
+          - pattern: $KEY = '...'
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i).*(api[_-]?key|token|secret|password|passwd|pwd).*
+    exclude:
+      - /tests/
+    # placeholders are fine (docs, .env.example, fakes)
+
+  - id: no-known-key-prefixes
+    languages: [python, yaml, json]
+    severity: ERROR
+    message: >
+      A string with a real vendor key prefix (sk-or-, gsk_, ghp_, AQ.) looks
+      like a committed credential. Use env vars / secrets instead.
+    pattern-regex: (?i)(sk-or-v1-[A-Za-z0-9]{8,}|gsk_[A-Za-z0-9]{8,}|ghp_[A-Za-z0-9]{8,}|AQ\.Ab8RN6[A-Za-z0-9]+)
+
+  - id: no-bare-except
+    languages: [python]
+    severity: ERROR
+    message: >
+      Bare `except:` is forbidden (AGENTS.md). Catch a typed exception from
+      errors.py, or justify a broad catch with `# noqa: BLE001 - <reason>`.
+    pattern: |
+      try:
+        ...
+      except:
+        ...
+
+  - id: no-print-in-library
+    languages: [python]
+    severity: WARNING
+    message: >
+      `print()` in library code — use the logging module. (CLI output in
+      scripts/ and worker entrypoints is exempt.)
+    pattern: print(...)
+    paths:
+      include:
+        - /src/
+      exclude:
+        - /src/knowledge_engine/scripts/*
+
+  - id: no-vendor-imports-in-core
+    languages: [python]
+    severity: ERROR
+    message: >
+      Core ports must never import a vendor SDK (hexagonal boundary). Depend
+      on ports/schemas only; adapters live in infrastructure/.
+    pattern-regex: ^(?:from|import)\s+(litellm|groq|openai|crawl4ai|trafilatura|playwright|selenium|letta|qdrant_client|redis)(?:[\s.]|$)
+    paths:
+      include:
+        - /src/knowledge_engine/core/
+        - /src/knowledge_engine/orchestration/nodes/
+        - /src/knowledge_engine/schemas/
+
+  - id: no-blocking-sleep-in-async
+    languages: [python]
+    severity: ERROR
+    message: >
+      `time.sleep()` inside `async def` blocks the event loop; use
+      `await asyncio.sleep(...)`. (Sync fallbacks in selenium_browser are
+      exempt — WebDriver is blocking by design.)
+    pattern-inside: |
+      async def $F(...):
+        ...
+    pattern: time.sleep(...)
+    paths:
+      exclude:
+        - /src/knowledge_engine/infrastructure/browser/selenium_browser.py
+
+  - id: no-requests-library
+    languages: [python]
+    severity: ERROR
+    message: >
+      Use httpx AsyncClient (the repo standard), not requests — sync HTTP
+      blocks the loop and bypasses timeout/rate-limit plumbing.
+    pattern-regex: ^(?:from|import)\s+requests(?:[\s.]|$)
+
+  - id: no-hash-thread-id
+    languages: [python]
+    severity: ERROR
+    message: >
+      `hash()` is seeded per-process: never derive stable ids (e.g. thread_id)
+      from it. Use hashlib.sha1 (see engine._derived_thread_id).
+    pattern-either:
+      - pattern: abs(hash(...))
+      - pattern: hash($X)
+
+  - id: no-eval-exec
+    languages: [python]
+    severity: ERROR
+    message: "eval()/exec() on dynamic input is forbidden — parse, don't execute."
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: exec(...)
+
+  - id: no-adapter-instantiation-in-nodes
+    languages: [python]
+    severity: ERROR
+    message: >
+      Nodes must receive adapters via constructor injection, never instantiate
+      them (SOLID/DIP). Pass ports through NodeSet from the composition root.
+    patterns:
+      - pattern: $ADAPTER(...)
+      - metavariable-regex:
+          metavariable: $ADAPTER
+          regex: .*(Adapter|Router|Browser|Crawler)$
+    paths:
+      include:
+        - /src/knowledge_engine/orchestration/nodes/
+
+  - id: require-httpx-timeout
+    languages: [python]
+    severity: ERROR
+    message: >
+      Every httpx.AsyncClient needs an explicit timeout — unbounded network
+      calls hang workers and defeat the rate-limit discipline (ADR 0003).
+    patterns:
+      - pattern: httpx.AsyncClient(...)
+      - pattern-not: httpx.AsyncClient(..., timeout=..., ...)
+
+  - id: no-sync-httpx
+    languages: [python]
+    severity: ERROR
+    message: >
+      Module-level httpx.get/post is blocking — use an httpx.AsyncClient
+      (the repo standard) so timeouts and rate limiting apply.
+    pattern-either:
+      - pattern: httpx.get(...)
+      - pattern: httpx.post(...)
+      - pattern: httpx.put(...)
+      - pattern: httpx.delete(...)

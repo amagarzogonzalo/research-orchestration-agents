@@ -1,0 +1,34 @@
+{
+  "citations": [
+    "crossref:10.1002/9781394374717.ch03",
+    "crossref:10.1002/9781394374717.fmatter",
+    "crossref:10.1115/detc2025-169730",
+    "crossref:10.2139/ssrn.7357178",
+    "crossref:10.59350/pn1ra-vpc97",
+    "europe_pmc:MED:42382850",
+    "europe_pmc:MED:42682590",
+    "europe_pmc:PMC:PMC13600821"
+  ],
+  "code_langs": [],
+  "counts": {
+    "list_items": 5,
+    "paragraphs": 5,
+    "tables": 0,
+    "words_bucket": "<500"
+  },
+  "frontmatter": {
+    "@id": "str",
+    "citations": "empty",
+    "provenance": "empty",
+    "title": "str",
+    "tldr_llm": "str",
+    "type": "str"
+  },
+  "hash": "8ef6c68a87e3cc12",
+  "headings": [
+    "2:mechanism-of-knowledge-grounding-in-retrieval-augmented-generation",
+    "2:architectural-variations-vector-search-versus-graph-based-rag",
+    "2:open-questions",
+    "2:practical-takeaways"
+  ]
+}

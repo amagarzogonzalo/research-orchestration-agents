@@ -7,6 +7,7 @@ back to search, and always pass `mailto` for polite-pool quota.
 
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 
 import httpx
@@ -17,19 +18,56 @@ from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 _BASE = "https://api.openalex.org"
 
+# OpenAlex rejects filter punctuation (?, !, :, parens, commas) with HTTP
+# 400 anywhere in the value, not just trailing. Keep word chars, spaces and
+# hyphens (hyphenated model names like GPT-4 stay intact); everything else
+# becomes a space. Verified live 2026-10-05 against the deep-case queries
+# that 400'd with parenthesized "(e.g., ...)" clauses.
+_FILTER_KEEP = re.compile(r"[^\w\s-]", re.UNICODE)
+_FILTER_WS = re.compile(r"\s+")
+
 
 class OpenAlexAdapter(SearchPort, FetchPort):
+    """OpenAlexAdapter.
+
+    Attributes:
+        name: Attribute description."""
+
     name = "openalex"
 
     def __init__(self, mailto: str, *, timeout: float = 15.0) -> None:
+        """Create a OpenAlexAdapter.
+
+        Args:
+            mailto: Contact email for API etiquette.
+            timeout: Request timeout in seconds.
+
+        """
         self.mailto = mailto
         self._timeout = timeout
 
     def _client(self) -> httpx.AsyncClient:
+        """Return the client.
+
+        Returns:
+            httpx.AsyncClient: HTTP client.
+
+
+        """
         return httpx.AsyncClient(timeout=self._timeout, headers={"User-Agent": f"knowledge-engine/{self.mailto}"})
 
     @staticmethod
     def _to_record(item: dict) -> SourceRecord:
+        """Convert an item to a record.
+
+        Args:
+            item: Item.
+
+        Returns:
+            SourceRecord: Resolved source record.
+
+
+        """
         authors = [
             a.get("author", {}).get("display_name", "")
             for a in item.get("authorships", [])
@@ -38,6 +76,13 @@ class OpenAlexAdapter(SearchPort, FetchPort):
         best_oa = item.get("best_oa_location") or {}
         abstract = item.get("abstract_inverted_index")
         abstract_text = _inverted_to_text(abstract) if abstract else None
+        venue = (item.get("primary_location") or {}).get("source", {}) or {}
+        venue_name = venue.get("display_name") or None
+        references = [
+            f"openalex:{str(ref).rsplit('/', 1)[-1]}"
+            for ref in item.get("referenced_works", []) or []
+            if str(ref).rsplit("/", 1)[-1]
+        ]
         return SourceRecord(
             id=f"openalex:{item.get('id', '').rsplit('/', 1)[-1]}",
             doi=(item.get("doi") or "").replace("https://doi.org/", "") or None,
@@ -48,11 +93,24 @@ class OpenAlexAdapter(SearchPort, FetchPort):
             abstract=abstract_text,
             pdf_url=best_oa.get("pdf_url"),
             citation_count=item.get("cited_by_count", 0),
+            venue=venue_name,
+            references=references,
             fetched_at=datetime.now(UTC).isoformat(),
         )
 
     async def fetch(self, doi: str) -> SourceRecord | None:
-        """Free single-record DOI lookup (does not consume daily credits)."""
+        """Free single-record DOI lookup (does not consume daily credits).
+
+        Args:
+            doi: Digital object identifier.
+
+        Returns:
+            SourceRecord | None: Record or None when unknown.
+
+        Raises:
+            SearchError: When the operation fails.
+
+        """
         url = f"{_BASE}/works/doi:{doi}"
         try:
             async with self._client() as client:
@@ -65,9 +123,23 @@ class OpenAlexAdapter(SearchPort, FetchPort):
             raise SearchError(f"OpenAlex fetch failed for {doi}: {exc}") from exc
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
+        """Search scholarly sources.
+
+        Args:
+            query: Scholarly query string.
+            limit: Maximum records to return.
+
+        Returns:
+            list[SourceRecord]: Resolved sources.
+
+        Raises:
+            SearchError: When the operation fails.
+
+        """
         url = f"{_BASE}/works"
+        clean = _FILTER_WS.sub(" ", _FILTER_KEEP.sub(" ", query)).strip()
         params = {
-            "filter": f"title.search:{query}",
+            "filter": f"title.search:{clean}",
             "per-page": limit,
             "mailto": self.mailto,
         }
@@ -81,12 +153,27 @@ class OpenAlexAdapter(SearchPort, FetchPort):
 
 
 def _inverted_to_text(inverted: dict) -> str:
-    """Rebuild an abstract from OpenAlex's inverted-position index."""
+    """Rebuild an abstract from OpenAlex's inverted-position index.
+
+    Args:
+        inverted: Whether the index is inverted.
+
+    Returns:
+        str: Result text.
+
+
+    """
     if not inverted:
         return ""
-    length = max(inverted.values())
-    words: list[str] = [""] * (length + 1)
-    for word, positions in inverted.items():
-        for pos in positions:
-            words[pos] = word
+    # Values are lists of integer positions (e.g. {"Deep": [0, 98]}); max()
+    # over the raw values would compare lists, not positions (TypeError
+    # downstream when sizing the word buffer).
+    positions = [pos for locs in inverted.values() if isinstance(locs, list) for pos in locs if isinstance(pos, int)]
+    words: list[str] = [""] * (max(positions, default=-1) + 1)
+    for word, locs in inverted.items():
+        if not isinstance(locs, list):
+            continue
+        for pos in locs:
+            if isinstance(pos, int) and 0 <= pos < len(words):
+                words[pos] = word
     return " ".join(words).strip()

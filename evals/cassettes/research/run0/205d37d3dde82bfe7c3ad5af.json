@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1115/detc2025-169730"
+  },
+  "recorded_at": "2026-10-07T08:31:18Z",
+  "response": {
+    "captured_at": "2026-10-07T08:31:18.138542+00:00",
+    "char_count": 571,
+    "crawl_method": "crawl4ai",
+    "markdown": "![Icon for asmedigitalcollection.asme.org](https://asmedigitalcollection.asme.org/favicon.ico)\n# asmedigitalcollection.asme.org\n## Performing security verification\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n## Verification successful. Waiting for asmedigitalcollection.asme.org to respond\nRay ID: `a46b8c43be293441`\nPerformance and Security by [Cloudflare](https://www.cloudflare.com?utm_source=challenge&utm_campaign=m)[Privacy](https://www.cloudflare.com/privacypolicy/)\n",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.1115/detc2025-169730"
+  },
+  "usage": {},
+  "wall_s": 14.638
+}

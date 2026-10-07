@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:45:27Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What are the comparative strengths and weaknesses of RAG versus long-context models in reducing hallucinations?\nPapers:\nduckduckgo:https://dasroot.net/posts/2026/01/rag-vs-long-context-llms-comparison/ | RAG vs Long-Context LLMs: A Comprehensive Comparison\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "{\"relevant_ids\": [\"duckduckgo\"]}",
+          "function_call": null,
+          "reasoning": "We need to decide if the paper is relevant. The topic: comparative strengths and weaknesses of Retrieval Augmented Generation (RAG) versus long-context models in reducing hallucinations. The paper is a blog post from dasroot.net, titled \"RAG vs Long-Context LLMs: A Comprehensive Comparison\". It's a blog post, not peer-reviewed. But the instructions say: For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. The question is about comparative strengths and weaknesses, which is a practical comparison. So the blog post is relevant. The ID is \"duckduckgo\". So we output {\"relevant_ids\": [\"duckduckgo\"]}.",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362726,
+    "id": "chatcmpl-554f1841-1573-4d89-9966-bf6923bc83c2",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_8e23cedc90",
+    "usage": {
+      "completion_time": 0.18779265,
+      "completion_tokens": 182,
+      "completion_tokens_details": {
+        "reasoning_tokens": 162
+      },
+      "prompt_time": 0.019533239,
+      "prompt_tokens": 319,
+      "prompt_tokens_details": null,
+      "queue_time": 0.714201545,
+      "total_time": 0.207325889,
+      "total_tokens": 501
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4arky24eqs8ykay0g0t5xka",
+      "seed": 192690943
+    }
+  },
+  "usage": {
+    "completion_time": 0.18779265,
+    "completion_tokens": 182,
+    "completion_tokens_details": {
+      "reasoning_tokens": 162
+    },
+    "prompt_time": 0.019533239,
+    "prompt_tokens": 319,
+    "prompt_tokens_details": null,
+    "queue_time": 0.714201545,
+    "total_time": 0.207325889,
+    "total_tokens": 501
+  },
+  "wall_s": 1.123
+}

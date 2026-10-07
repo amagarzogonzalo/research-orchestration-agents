@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:43:15Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What are long-context models (e.g., GPT‑4 with extended context, LLaMA‑2‑Chat‑70B, etc.) and how do they handle longer input sequences?\nPapers:\ncrossref:10.1075/ts.25064.gut | How well do Large Language Models handle Machine Translation? | Translation Spaces\ncrossref:10.28998/2317-9945.202483.384-399 | Devir algoritmo: usos do CHAT-GPT em aulas de argumentação | Revista Leitura\ncrossref:10.1016/j.clinimag.2024.110382 | Comparative diagnostic accuracy of GPT-4o and LLaMA 3-70b: Proprietary vs. open-source large language models in radiology | Clinical Imaging\ncrossref:10.1145/3677052.3698675 | Is Small Really Beautiful for Central Bank Communication? Evaluating Language Models for Finance: Llama-3-70B, GPT-4, FinBERT-FOMC, FinBERT, and VADER | Proceedings of the 5th ACM International Conference on AI in Finance\ncrossref:10.7717/peerj-cs.3862/table-3 | Table 3: Comparison of BERTScore and ROUGE scores for GPT-4 Turbo, GPT-4o, Gemini, GPT-3.5 Turbo, Mistral-8x22B, Llama-3.1, Llama-4 on English and Russian languages.\neurope_pmc:PMC:PMC13323440 | ECR 2026 Book of Abstracts\neurope_pmc:MED:40676363 | Abstracts from the 2025 Annual Meeting of the Society of General Internal Medicine.\neurope_pmc:PMC:PMC11688754 | Full GSA 2024 Abstract Book PDF\nhuggingface_papers:2402.13753 | LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens\nhuggingface_papers:2605.13831 | Training Long-Context Vision-Language Models Effectively with Generalization Beyond 128K Context\nhuggingface_papers:2309.00071 | YaRN: Efficient Context Window Extension of Large Language Models\nhuggingface_papers:2502.17129 | Thus Spake Long-Context Large Language Model\nhuggingface_papers:2408.07055 | LongWriter: Unleashing 10,000+ Word Generation from Long Context LLMs\nosf:efw56_v1 | ACCT: Enabling Long-Context Transformer Reasoning Under Memory Constraints\nosf:e4mvn_v1 | Mental health consequences of extremely vivid mental imagery: A qualitative investigation of managing anxiety with hyperphantasia\nosf:kv3ry_v1 | Emotional and Well-being Consequences of Discrimination and Collective Action Engagement\nosf:8ku96_v1 | Delegating Knowledge: Belief in AI Sufficiency and its Consequences for How People Process Information\nosf:8gny5_v2 | The broken brain? Prevalence and consequences of brain framing of mental disorders\nduckduckgo:https://arxiv.org/pdf/2309.16039 | Effective Long-Context Scaling of Foundation Models\nduckduckgo:https://arxiv.org/html/2504.06214v1 | From 128K to 4M: Efficient Training of Ultra-Long Context\nduckduckgo:https://huggingface.co/blog/wenbopan/long-context-fine-tuning | Everything About Long Context Fine-tuning - Hugging Face\nduckduckgo:https://towardsdatascience.com/extending-context-length-in-large-language-models-74e59201b51f/ | Extending Context Length in Large Language Models\nduckduckgo:https://stackviv.ai/blog/long-context-models-guide | Long Context Models: When You Need More Than RAG\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"What are long-context models (e.g., GPT‑4 with extended context, LLaMA‑2‑Chat‑70B, etc.) and how do they handle longer input sequences?\" So we need papers that discuss long-context models, their mechanisms, scaling, handling longer input sequences. We should include peer-reviewed primary sources, but also practitioner sources like documentation, engineering blogs, etc. We should drop items whose title shares only generic words with query, especially if venue off-domain. So we need to filter.\n\nList of papers:\n\n1. crossref:10.1075/ts.25064.gut | How well do Large Language Models handle Machine Translation? | Translation Spaces\n2. crossref:10.28998/2317-9945.202483.384-399 | Devir algoritmo: usos do CHAT-GPT em aulas de argumentação | Revista Leitura\n3. crossref:10.1016/j.clinimag.2024.110382 | Comparative diagnostic accuracy of GPT-4o and LLaMA 3-70b: Proprietary vs. open-source large language models in radiology | Clinical Imaging\n4. crossref:10.1145/3677052.3698675 | Is Small Really Beautiful for Central Bank Communication? Evaluating Language Models for Finance: Llama-3-70B, GPT-4, FinBERT-FOMC, FinBERT, and VADER | Proceedings of the 5th ACM International Conference on AI in Finance\n5. crossref:10.7717/peerj-cs.3862/table-3 | Table 3: Comparison of BERTScore and ROUGE scores for GPT-4 Turbo, GPT-4o, Gemini, GPT-3.5 Turbo, Mistral-8x22B, Llama-3.1, Llama-4 on English and Russian languages.\n6. europe_pmc:PMC:PMC13323440 | ECR 2026 Book of Abstracts\n7. europe_pmc:MED:40676363 | Abstracts from the 2025 Annual Meeting of the Society of General Internal Medicine.\n8. europe_pmc:PMC:PMC11688754 | Full GSA 2024 Abstract Book PDF\n9. huggingface_papers:2402.13753 | LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens\n10. huggingface_papers:2605.13831 | Training Long-Context Vision-Language Models Effectively with Generalization Beyond 128K Context\n11. huggingface_papers:2309.00071 | YaRN: Efficient Context Window Extension of Large Language Models\n12. huggingface_papers:2502.17129 | Thus Spake Long-Context Large Language Model\n13. huggingface_papers:2408.07055 | LongWriter: Unleashing 10,000+ Word Generation from Long Context LLMs\n14. osf:efw56_v1 | ACCT: Enabling Long-Context Transformer Reasoning Under Memory Constraints\n15. osf:e4mvn_v1 | Mental health consequences of extremely vivid mental imagery...\n16. osf:kv3ry_v1 | Emotional and Well-being Consequences...\n17. osf:8ku96_v1 | Delegating Knowledge...\n18. osf:8gny5_v2 | The broken brain?...\n19. duckduckgo:https://arxiv.org/pdf/2309.16039 | Effective Long-Context Scaling of Foundation Models\n20. duckduckgo:https://arxiv.org/html/250406214v1 | From 128K to 4M: Efficient Training of Ultra-Long Context\n21. duckduckgo:https://huggingface.co/blog/wenbopan/long-context-fine-tuning | Everything About Long Context Fine-tuning - Hugging Face\n22. duckduckgo:https://towardsdatascience.com/extending-context-length-in-large-language-models-74e59201b51f/ | Extending Context Length in Large Language Models\n23. duckduckgo:https://stackviv.ai/blog/long-context-models-guide | Long Context Models: When You Need More Than RAG\n\nWe need to decide which are relevant. The topic is about long-context models and how they handle longer input sequences. So we want papers that discuss long-context models, their mechanisms, scaling, training, etc. So items 9,10,11,12,13,14,19,20,21,22,23 are relevant. Also maybe 1? No, it's about machine translation, not specifically long context. 3 is about radiology, not about long context. 4 is finance, not about long context. 5 is about evaluation metrics, not about long context. 6-8 are abstracts, not relevant. 14 is about enabling long-context transformer reasoning under memory constraints, relevant. 19 and 20 are arXiv papers about scaling and training ultra-long context, relevant. 21 is a Hugging Face blog about fine-tuning long context, relevant. 22 is a TDS article about extending context length, relevant. 23 is a blog about long context models guide, relevant. 12 \"Thus Spake Long-Context Large Language Model\" maybe a paper about a long-context LLM, relevant. 13 \"LongWriter: Unleashing 10,000+ Word Generation from Long Context LLMs\" relevant. 10 \"Training Long-Context Vision-Language Models Effectively with Generalization Beyond 128K Context\" relevant. 11 \"YaRN: Efficient Context Window Extension of Large Language Models\" relevant. 9 \"LongRoPE: Extending LLM Context Window Beyond 2 Million Tokens\" relevant. 14 \"ACCT: Enabling Long-Context Transformer Reasoning Under Memory Constraints\" relevant. 19 \"Effective Long-Context Scaling of Foundation Models\" relevant. 20 \"From 128K to 4M: Efficient Training of Ultra-Long Context\" relevant. 21 \"Everything About Long Context Fine-tuning\" relevant. 22 \"Extending Context Length in Large Language Models\" relevant. 23 \"Long Context Models: When You Need More Than RAG\" relevant.\n\nWe should also consider if any of these are not peer-reviewed but are still relevant. The instruction says for practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. So blogs and engineering blogs are fine. So we include them.\n\nWe should drop items that are not relevant: 1-8, 15-18. Also maybe 5? It's about evaluation metrics, not about long context. So drop.\n\nThus relevant ids: 9,10,11,12,13,14,19,20,21,22,23.\n\nCheck if any other items: 19 arxiv pdf, 20 arxiv html, 21 huggingface blog, 22 TDS article, 23 stackviv blog. All relevant.\n\nThus output JSON with relevant_ids array.\n\nWe need to use the IDs as given: huggingface_papers:2402.13753 etc. So list them exactly",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362594,
+    "id": "chatcmpl-3185f4ce-f927-482e-954f-f96fd8ad1c6c",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_66891002f6",
+    "usage": {
+      "completion_time": 1.891280773,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.053538584,
+      "prompt_tokens": 1069,
+      "prompt_tokens_details": null,
+      "queue_time": 0.193990824,
+      "total_time": 1.944819357,
+      "total_tokens": 2569
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4arfvpre0xr3gmfryej3v4j",
+      "seed": 622462348
+    }
+  },
+  "usage": {
+    "completion_time": 1.891280773,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.053538584,
+    "prompt_tokens": 1069,
+    "prompt_tokens_details": null,
+    "queue_time": 0.193990824,
+    "total_time": 1.944819357,
+    "total_tokens": 2569
+  },
+  "wall_s": 2.295
+}

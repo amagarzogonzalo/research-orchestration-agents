@@ -22,7 +22,7 @@ make test        # pytest tests/ -q
 make lint        # ruff check+format src tests
 make types       # mypy src  (strict; adapter glue exempt)
 make context     # what the always-on prompt costs
-make check       # lint + types + context + test + evals   <- the gate
+make check       # lint + types + arch + semgrep + agents + context + test + evals   <- the gate
 ```
 
 ## Hard rules
@@ -46,8 +46,10 @@ make check       # lint + types + context + test + evals   <- the gate
 ## Conventions
 - Python 3.11/3.12, uv. Ruff line length **119**; `select = E,F,I,W,UP,B`.
 - mypy strict on the new architecture; adapter glue is documented as relaxed
-  (`pyproject.toml` overrides). pydoclint Google docstrings required.
-- pre-commit: ruff, ruff-format, mypy, pydoclint, trailing-whitespace, eof-fixer.
+  (`pyproject.toml` overrides). Google docstrings required on ALL
+  modules/classes/methods/functions (public + private): `Args/Returns/Raises/Attributes`,
+  no type hints in docstring (signatures carry types). See `skills/documenting-python/SKILL.md`.
+- pre-commit: ruff, ruff-format, mypy, pydoclint (strict Google, all functions), trailing-whitespace, eof-fixer.
 - Nodes stay pure `(State) -> State`; I/O goes through `infrastructure/`.
 - Commits: `area: imperative summary`.
 - Errors: typed exceptions from `errors.py`. Never bare `except:`.

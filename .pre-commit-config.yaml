@@ -1,0 +1,44 @@
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.6
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        files: ^(src|tests)/
+      - id: ruff-format
+        files: ^(src|tests)/
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy (strict)
+        entry: ./.venv/Scripts/python.exe -m mypy src
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: pydoclint
+        name: pydoclint (Google docstrings)
+        entry: ./.venv/Scripts/pydoclint.exe --style google --arg-type-hints-in-docstring 0 --skip-checking-raises 0 --skip-checking-short-docstrings 0 --skip-checking-private-functions 0 --allow-init-docstring 1 --check-arg-order 1 --check-return-types 1 --check-class-attributes 1
+        language: system
+        files: ^src/knowledge_engine/.*\.py$
+      - id: tach
+        name: tach (module boundaries)
+        entry: ./.venv/Scripts/tach.exe check
+        language: system
+        pass_filenames: false
+        always_run: true
+      - id: semgrep
+        name: semgrep (custom rules)
+        entry: uvx --quiet semgrep --config .semgrep/rules/ --metrics=off --error src tests
+        language: system
+        pass_filenames: false
+        always_run: true
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+        args: [--maxkb=1024]

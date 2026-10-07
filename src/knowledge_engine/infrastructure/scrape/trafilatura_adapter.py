@@ -9,14 +9,32 @@ import httpx
 
 from knowledge_engine.core.exceptions import ScrapeError
 from knowledge_engine.core.ports import ScrapePort
+from knowledge_engine.infrastructure.scrape.common import fallback_title, is_transient_http
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
 
 
 class TrafilaturaAdapter(ScrapePort):
     def __init__(self, *, timeout: float = 15.0) -> None:
+        """Create a TrafilaturaAdapter.
+
+        Args:
+            timeout: Request timeout in seconds.
+        """
         self.timeout = timeout
 
     async def to_markdown(self, url: str) -> DocumentBody:
+        """Convert a URL to Markdown.
+
+        Args:
+            url: Target URL.
+
+        Returns:
+            DocumentBody: Fetched Markdown body.
+
+        Raises:
+            ScrapeError: When the operation fails.
+
+        """
         try:
             import trafilatura  # lazy import keeps heavy dep optional
 
@@ -26,27 +44,25 @@ class TrafilaturaAdapter(ScrapePort):
                 resp = await client.get(url)
                 resp.raise_for_status()
             html = resp.text
-        except Exception as exc:  # noqa: BLE001 - network + trafilatura import
+        except ImportError as exc:
+            raise ScrapeError(f"trafilatura not installed for {url}: {exc}") from exc
+        except httpx.HTTPError as exc:
+            raise ScrapeError(f"Trafilatura fetch failed for {url}: {exc}", transient=is_transient_http(exc)) from exc
+        except Exception as exc:  # noqa: BLE001 - unexpected fetch failure
             raise ScrapeError(f"Trafilatura fetch failed for {url}: {exc}") from exc
 
         try:
             markdown = (
-                trafilatura.extract(
-                    html, url=url, include_links=False, include_images=False, output_format="markdown"
-                )
+                trafilatura.extract(html, url=url, include_links=False, include_images=False, output_format="markdown")
                 or ""
             )
         except Exception as exc:  # noqa: BLE001
             raise ScrapeError(f"Trafilatura extraction failed for {url}: {exc}") from exc
         return DocumentBody(
             url=url,
-            title=_fallback_title(url),
+            title=fallback_title(url),
             markdown=markdown,
             char_count=len(markdown),
             crawl_method=FetchMethod.TRAFILATURA,
             captured_at=datetime.now(UTC).isoformat(),
         )
-
-
-def _fallback_title(url: str) -> str:
-    return url.rstrip("/").rsplit("/", 1)[-1] or url

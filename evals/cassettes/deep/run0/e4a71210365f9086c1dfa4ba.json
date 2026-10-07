@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:42:58Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: What is retrieval-augmented generation (RAG) and how does it work in large language models?\nPapers:\nbiorxiv:10.64898/2026.09.04.749355 | BOTANIC-1: a series of long-context plant genomic foundation models in the agentic era\nmedrxiv:10.64898/2026.09.22.26363642 | Mind the gap: emergent clinical risk at the interface of two individually safe AI systems in a multilingual ambient scribe\nmedrxiv:10.64898/2026.09.22.26363693 | RoB2-Evaluator: Development and Technical Evaluation of a Rule-Constrained Large Language Model System for Cochrane Risk of Bias 2 Assessment\nmedrxiv:10.64898/2026.09.22.26360316 | Leveraging Large Language Models for Temporal PHI De-identification in Real-World Clinical Notes\nmedrxiv:10.64898/2026.09.18.26363369 | Errors, Hallucinations, and Clinical Impact of General-Purpose Multimodal Large Language Models in Histopathology\nwikipedia:73248112 | Large language model\nwikipedia:69071767 | Prompt engineering\nwikipedia:1167455 | Recursive self-improvement\nwikipedia:73291755 | Generative AI\nwikipedia:74020014 | Vector database\nduckduckgo:https://en.wikipedia.org/wiki/Retrieval-augmented_generation | Retrieval-augmented generation - Wikipedia\nduckduckgo:https://www.geeksforgeeks.org/nlp/what-is-retrieval-augmented-generation-rag/ | What is Retrieval-Augmented Generation (RAG) - GeeksforGeeks\nduckduckgo:https://www.ibm.com/think/topics/retrieval-augmented-generation | What is retrieval augmented generation (RAG)? - IBM\nduckduckgo:https://aws.amazon.com/what-is/retrieval-augmented-generation/ | What is RAG? - Retrieval-Augmented Generation AI Explained - AWS\nduckduckgo:https://research.ibm.com/blog/retrieval-augmented-generation-RAG | What is retrieval-augmented generation (RAG)? - IBM Research\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "{\"relevant_ids\":[\"duckduckgo:https://en.wikipedia.org/wiki/Retrieval-augmented_generation\",\"duckduckgo:https://www.geeksforgeeks.org/nlp/what-is-retrieval-augmented-generation-rag/\",\"duckduckgo:https://www.ibm.com/think/topics/retrieval-augmented-generation\",\"duckduckgo:https://aws.amazon.com/what-is/retrieval-augmented-generation/\",\"duckduckgo:https://research.ibm.com/blog/retrieval-augmented-generation-RAG\"]}",
+          "function_call": null,
+          "reasoning": "We need to decide which items are directly relevant to the research topic: \"What is retrieval-augmented generation (RAG) and how does it work in large language models?\" We have a list of papers and other sources: some are preprints from biorxiv, medrxiv, etc. Many are unrelated to RAG. We also have Wikipedia entries, GeeksforGeeks, IBM, AWS, IBM Research blog. We need to decide which are relevant. The instruction: \"Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items.\"\n\nSo we need to include items that are relevant. The topic is RAG. Which items are relevant? The Wikipedia entry on Retrieval-augmented generation is obviously relevant. The GeeksforGeeks article is relevant. IBM's page, AWS page, IBM Research blog are relevant. The other Wikipedia entries (Large language model, Prompt engineering, etc.) are not directly about RAG, but they might provide context. But the question is \"What is retrieval-augmented generation (RAG) and how does it work in large language models?\" So we need sources that explain RAG. The Wikipedia entry on RAG is directly relevant. The GeeksforGeeks article is a how-to. The IBM page is a how-to. AWS page is a how-to. IBM Research blog is a how-to. So all those are relevant. The other Wikipedia entries are not directly about RAG, but they might be considered relevant for background. But the instruction says \"drop items whose title shares only generic words with the query, especially when their venue is off-domain.\" The other Wikipedia entries are generic. They are not about RAG. So we should drop them. The biorxiv and medrxiv preprints are not about RAG. So drop them. So relevant ids: the Wikipedia id for RAG, the GeeksforGeeks link, IBM page, AWS page, IBM Research blog. Also maybe the Wikipedia entry on \"Vector database\" might be relevant because RAG uses vector databases. But the question is specifically about RAG. The vector database is a component but not the main concept. The instruction says drop items whose title shares only generic words. \"Vector database\" is generic. So drop it. So final relevant ids: \"duckduckgo:https://en.wikipedia.org/wiki/Retrieval-augmented_generation\", \"duckduckgo:https://www.geeksforgeeks.org/nlp/what-is-retrieval-augmented-generation-rag/\", \"duckduckgo:https://www.ibm.com/think/topics/retrieval-augmented-generation\", \"duckduckgo:https://aws.amazon.com/what-is/retrieval-augmented-generation/\", \"duckduckgo:https://research.ibm.com/blog/retrieval-augmented-generation-RAG\".\n\nWe need to output JSON: {\"relevant_ids\": [\"id1\", ...]}. Use the exact ids as given. Ensure order maybe. Provide only JSON.",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362577,
+    "id": "chatcmpl-963999f3-3039-418f-921e-da282cc0b59f",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_37c9245f64",
+    "usage": {
+      "completion_time": 0.945470113,
+      "completion_tokens": 831,
+      "completion_tokens_details": {
+        "reasoning_tokens": 714
+      },
+      "prompt_time": 0.062332415,
+      "prompt_tokens": 720,
+      "prompt_tokens_details": null,
+      "queue_time": 0.220864201,
+      "total_time": 1.007802528,
+      "total_tokens": 1551
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4arfc7vezhb61a7esm6nwqt",
+      "seed": 1773194364
+    }
+  },
+  "usage": {
+    "completion_time": 0.945470113,
+    "completion_tokens": 831,
+    "completion_tokens_details": {
+      "reasoning_tokens": 714
+    },
+    "prompt_time": 0.062332415,
+    "prompt_tokens": 720,
+    "prompt_tokens_details": null,
+    "queue_time": 0.220864201,
+    "total_time": 1.007802528,
+    "total_tokens": 1551
+  },
+  "wall_s": 1.429
+}

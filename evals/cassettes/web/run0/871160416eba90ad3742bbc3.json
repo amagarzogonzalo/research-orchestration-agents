@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1109/icomet69771.2026.11591943"
+  },
+  "recorded_at": "2026-10-07T08:35:10Z",
+  "response": {
+    "captured_at": "2026-10-07T08:35:10.075571+00:00",
+    "char_count": 2978,
+    "crawl_method": "crawl4ai",
+    "markdown": "Opens in a new window Opens an external website Opens an external website in a new window\nClose this consent banner\nThis website utilizes technologies such as cookies to enable essential site functionality, as well as for analytics, personalization, and targeted advertising. You may change your settings at any time or accept the default settings. You may close this banner to continue with only essential cookies.  [Privacy Policy](https://www.ieee.org/security-privacy.html)\n[Storage Preferences](/document/#63fdf04a-2e7b-4cf5-b517-c94475238817)\n  * Targeted Advertising\n  * Personalization\n  * Analytics\n\n\nSave  Accept All  Reject Non-Essential \nStorage Preferences \nLoading [MathJax]/extensions/TeX/noUndefined.js\nA Retrieval-Augmented Generation (RAG) Approach to Eliminate Hallucinations in Workflow Generation | IEEE Conference Publication | IEEE Xplore\n[](/document/)\n[](/rest/api/hpdata)\n### IEEE Account\n  * [Change Username/Password](https://www.ieee.org/profile/changeusrpwd/showChangeUsrPwdPage.html?refSite=https://ieeexplore.ieee.org&refSiteName=IEEE%20Xplore)\n  * [Update Address](https://www.ieee.org/profile/address/getAddrInfoPage.html?refSite=https://ieeexplore.ieee.org&refSiteName=IEEE%20Xplore)\n\n\n### Purchase Details\n  * [Payment Options](https://www.ieee.org/profile/payment/showPaymentHome.html?refSite=https://ieeexplore.ieee.org&refSiteName=IEEE%20Xplore)\n  * [Order History](https://www.ieee.org/profile/vieworder/showOrderHistory.html?refSite=https://ieeexplore.ieee.org&refSiteName=IEEE%20Xplore)\n  * [View Purchased Documents](/articleSale/purchaseHistory.jsp)\n\n\n### Profile Information\n  * [Communications Preferences](https://www.ieee.org/ieee-privacyportal/app/ibp?refSite=https://ieeexplore.ieee.org&refSiteName=IEEE%20Xplore)\n  * [Profession and Education](https://www.ieee.org/profile/profedu/getProfEduInformation.html?refSite=https://ieeexplore.ieee.org&refSiteName=IEEE%20Xplore)\n  * [Technical Interests](https://www.ieee.org/profile/tips/getTipsInfo.html?refSite=https://ieeexplore.ieee.org&refSiteName=IEEE%20Xplore)\n\n\n### Need Help?\n  * **US & Canada:** +1 800 678 4333\n  * **Worldwide:** +1 732 981 0060  \n\n  * [Contact & Support](/xpl/contact)\n\n\n  * [About IEEE _Xplore_](/Xplorehelp/overview-of-ieee-xplore/about-ieee-xplore)\n  * [Contact Us](/xpl/contact)\n  * [Help](/Xplorehelp)\n  * [Accessibility](/Xplorehelp/overview-of-ieee-xplore/accessibility-statement)\n  * [Terms of Use](/Xplorehelp/overview-of-ieee-xplore/terms-of-use)\n  * [Nondiscrimination Policy](http://www.ieee.org/web/aboutus/whatis/policies/p9-26.html)\n  * [Sitemap](/xpl/sitemap.jsp)\n  * [Privacy & Opting Out of Cookies](http://www.ieee.org/about/help/security_privacy.html)\n\n\nA not-for-profit organization, IEEE is the world's largest technical professional organization dedicated to advancing technology for the benefit of humanity.  \n© Copyright 2026 IEEE - All rights reserved. Use of this web site signifies your agreement to the terms and conditions. \n",
+    "title": "A Retrieval-Augmented Generation (RAG) Approach to Eliminate Hallucinations in Workflow Generation",
+    "url": "https://doi.org/10.1109/icomet69771.2026.11591943"
+  },
+  "usage": {},
+  "wall_s": 13.197
+}

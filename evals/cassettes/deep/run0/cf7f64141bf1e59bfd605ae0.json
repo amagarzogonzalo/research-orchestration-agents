@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1037/0000267-002"
+  },
+  "recorded_at": "2026-10-07T08:45:39Z",
+  "response": {
+    "captured_at": "2026-10-07T08:45:39.627307+00:00",
+    "char_count": 2995,
+    "crawl_method": "jina",
+    "markdown": "[Skip to Main Content](https://doi.org/ \"Skip to Main Content\")\n\n[](https://doi.org/)\n\nBy clicking “Accept All Cookies”, you agree to the storing of cookies on your device to enhance site performance and improve your experience.[More information](https://psycnet.apa.org/general/privacy)\n\nConfigure Accept All Cookies\n\n![Image 1: APA PsycNET logo](https://cdn.cookielaw.org/logos/bdf7adfe-0d64-41ba-b592-8b8955e0dc52/f2efb0e9-6e02-4d2c-8062-2dc0888cff08/3d9b3757-ddc0-49a9-9c81-f947b6e08500/pnLogo_(1).jpg)\n\n## Privacy Preference Center\n\nWhen you visit any website, it may store or retrieve information on your browser, mostly in the form of cookies. This information might be about you, your preferences, or your device, and is mostly used to make the site work as you expect. The information does not usually identify you directly, but it can give you a more personalized web experience. Because we respect your right to privacy, you can choose not to allow some types of cookies. Click on the different category headings to learn more and change our default settings. Blocking some types of cookies may impact your experience of the site and the services we are able to offer.   \n[Privacy Policy](https://psycnet.apa.org/general/privacy)\n\nAllow All\n### Manage Consent Preferences\n\n#### Strictly Necessary Cookies\n\nAlways Active\n\nThese cookies are necessary for the website to function and cannot be switched off in our systems. They are usually only set in response to actions made by you which amount to a request for services, such as setting your privacy preferences, logging in or filling in forms. You can set your browser to block or alert you about these cookies, but some parts of the site will not then work. These cookies do not store any personally identifiable information.\n\n#### Functional Cookies\n\n- [x] Functional Cookies \n\nThese cookies enable the website to provide enhanced functionality and personalisation. They may be set by us or by third party providers whose services we have added to our pages. If you do not allow these cookies then some or all of these services may not function properly.\n\n#### Performance Cookies\n\n- [x] Performance Cookies \n\nThese cookies allow us to count visits and traffic sources so we can measure and improve the performance of our site. They help us to know which pages are the most and least popular and see how visitors move around the site. All information these cookies collect is aggregated and therefore anonymous. If you do not allow these cookies we will not know when you have visited our site, and will not be able to monitor its performance.\n\n### Cookie List\n\nClear\n*   - [x] checkbox label label \n\nApply Cancel\n\nConsent Leg.Interest\n\n- [x] checkbox label label\n\n- [x] checkbox label label\n\n- [x] checkbox label label\n\nConfirm My Choices\n\n[![Image 2: Powered by Onetrust](https://cdn.cookielaw.org/logos/static/powered_by_logo.svg)](https://www.onetrust.com/solutions/consent-and-preferences/?utm_source=cmp&utm_medium=cmpbanner)",
+    "title": "APA PsycNet",
+    "url": "https://doi.org/10.1037/0000267-002"
+  },
+  "usage": {},
+  "wall_s": 12.081
+}
