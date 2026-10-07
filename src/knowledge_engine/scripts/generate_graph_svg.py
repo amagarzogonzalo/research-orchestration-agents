@@ -137,7 +137,7 @@ def render_svg() -> str:
         "Knowledge Engine research workflow (StateGraph · Send fan-out · "
         "evaluator-optimizer · review interrupt)</text>"
     )
-    out.append("</svg>")
+    out.append("</svg>\n")
     return "\n".join(out)
 
 
@@ -786,7 +786,7 @@ def render_professional_svg(workflow: str) -> str:
         "Send / Command routes curated from the builder · regenerate: "
         "python -m knowledge_engine.scripts.generate_graph_svg</text>"
     )
-    out.append("</svg>")
+    out.append("</svg>\n")
     return "\n".join(out)
 
 
@@ -1020,7 +1020,7 @@ def render_workflow_svg(workflow: str) -> str:
     out.append(
         f"<text class='legend' x='20' y='{height - 12}'>Knowledge Engine {workflow} workflow (live topology)</text>"
     )
-    out.append("</svg>")
+    out.append("</svg>\n")
     return "\n".join(out)
 
 

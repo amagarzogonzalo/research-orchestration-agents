@@ -26,7 +26,8 @@ class SearchSource(StrEnum):
         OSF_PREPRINTS: Attribute description.
         WIKIPEDIA: Attribute description.
         DUCKDUCKGO: Attribute description.
-        GOOGLE: Attribute description."""
+        TAVILY: Attribute description.
+        EXA: Attribute description."""
 
     OPENALEX = "openalex"
     SEMANTIC_SCHOLAR = "semantic_scholar"
@@ -43,7 +44,8 @@ class SearchSource(StrEnum):
     OSF_PREPRINTS = "osf_preprints"
     WIKIPEDIA = "wikipedia"
     DUCKDUCKGO = "duckduckgo"
-    GOOGLE = "google"
+    TAVILY = "tavily"
+    EXA = "exa"
 
 
 class SourceRecord(BaseModel):

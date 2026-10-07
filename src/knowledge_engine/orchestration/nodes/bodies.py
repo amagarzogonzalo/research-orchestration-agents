@@ -32,11 +32,11 @@ JOIN_NODE = "synthesize"
 # Cost bound on the scrape fan-out: every filtered source would otherwise be
 # fetched (63-source federated unions blew both the call and token budgets).
 # Scholarly records keep source-priority order up to the cap; general-web
-# records (Wikipedia/DuckDuckGo/Google) get a reserved quota so the fallback
-# tier is always represented in evals, regardless of scholarly volume.
+# records (Wikipedia/DuckDuckGo/Tavily/Exa) get a reserved quota so the
+# fallback tier is always represented in evals, regardless of scholarly volume.
 _MAX_SCHOLARLY_BODIES = 16
 _MAX_GENERAL_BODIES = 4
-_GENERAL_SOURCES = frozenset({SearchSource.WIKIPEDIA, SearchSource.DUCKDUCKGO, SearchSource.GOOGLE})
+_GENERAL_SOURCES = frozenset({SearchSource.WIKIPEDIA, SearchSource.DUCKDUCKGO, SearchSource.TAVILY, SearchSource.EXA})
 
 
 def _is_general_web(src: object) -> bool:
@@ -46,7 +46,7 @@ def _is_general_web(src: object) -> bool:
         src: Source record (Pydantic or dict snapshot).
 
     Returns:
-        bool: True for Wikipedia/DuckDuckGo/Google records.
+        bool: True for Wikipedia/DuckDuckGo/Tavily/Exa records.
     """
     source = src.get("source") if isinstance(src, dict) else getattr(src, "source", None)
     if not isinstance(source, str):

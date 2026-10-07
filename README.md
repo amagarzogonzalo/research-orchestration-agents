@@ -116,8 +116,15 @@ OA-full-text layer on top:
 | OSF Preprints | Preprint discovery across disciplines | keyless |
 | Unpaywall | Legal OA PDF resolution by DOI (fetch only) | real `UNPAYWALL_EMAIL` required |
 | Wikipedia | General-knowledge fallback (MediaWiki API) | keyless, always on |
-| DuckDuckGo | General-web fallback (HTML results, no signup) | keyless, always on |
-| Google CSE | General-web fallback (Custom Search JSON API) | key + CX required; skipped when absent (closed to new customers, sunset 2027) |
+| DuckDuckGo | General-web chain, first provider (HTML results, no signup) | keyless, always on |
+| Tavily | General-web chain, agent-search fallback | `TAVILY_API_KEY`; 1,000 free credits/month, no card; skipped when absent |
+| Exa | General-web chain, neural/semantic fallback | `EXA_API_KEY`; $10/month free credit, no card; skipped when absent |
+
+The general-web tier is a single sequential fallback chain
+(DuckDuckGo → Tavily → Exa) wrapped in a disk cache, so a query spends at most
+one provider's quota and repeat queries spend none. Each keyed provider keeps a
+persisted monthly ledger; an exhausted or rate-limited provider is skipped
+until it refills rather than retried.
 
 Scrape tier: arXiv/ar5iv + Europe PMC fullTextXML first (source-specific full
 text), then crawl4ai → trafilatura (local, free) → Jina Reader (remote last
