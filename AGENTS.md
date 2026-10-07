@@ -36,6 +36,8 @@ make check       # lint + types + arch + semgrep + agents + context + test + eva
 5. **If a read or fetch fails, say so and stop.** Never substitute recalled knowledge
    for a lookup that failed.
 6. **Do not raise a budget to make a check pass.** Fix the thing, or say why.
+7. **Evals record into clean dirs only** (`--force` overrides); replay must
+   reproduce bit-identically before `--accept` adopts new snapshots.
 
 ## Definition of done
 `make check` is green, and you have stated in one line each:
