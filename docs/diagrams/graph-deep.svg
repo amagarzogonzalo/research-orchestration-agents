@@ -1,0 +1,153 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='2768' height='578' viewBox='0 0 2768 578' role='img'>
+<title>Deep workflow — Knowledge Engine (deep workflow)</title>
+<style> text{font-family:Inter,Helvetica,Arial,sans-serif} .lane{font-size:10px;fill:#64748b;letter-spacing:1.5px} .legend{font-size:10.5px;fill:#334155} .caption{font-size:10px;fill:#64748b}</style>
+<defs>
+<marker id='arr-2563eb' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#2563eb'/></marker>
+<marker id='arr-475569' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#475569'/></marker>
+<marker id='arr-b45309' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#b45309'/></marker>
+<marker id='arr-dc2626' viewBox='0 0 10 10' refX='8' refY='5' markerWidth='7' markerHeight='7' orient='auto-start-reverse'><path d='M0,0 L10,5 L0,10 z' fill='#dc2626'/></marker>
+</defs>
+<rect x='0' y='0' width='2768' height='578' rx='12' fill='#ffffff' stroke='#e2e8f0'/>
+<rect x='0' y='0' width='2768' height='86' rx='12' fill='#0f172a'/>
+<rect x='0' y='74' width='2768' height='12' fill='#0f172a'/>
+<text x='32' y='36' font-size='18' font-weight='700' fill='#f8fafc'>Deep workflow</text>
+<text x='32' y='60' font-size='12' fill='#94a3b8'>Recursive planner · Send fan-out over branch workers · aggregate → critic → judge → render</text>
+<text x='2736' y='36' font-size='10.5' fill='#94a3b8' text-anchor='end' font-family='ui-monospace,Consolas,monospace'>orchestration/graphs.py :: _build_deep</text>
+<text class='lane' x='124.0' y='122' text-anchor='middle'>ENTER</text>
+<text class='lane' x='404.0' y='122' text-anchor='middle'>ROUTE</text>
+<text class='lane' x='684.0' y='122' text-anchor='middle'>PLAN</text>
+<text class='lane' x='964.0' y='122' text-anchor='middle'>WORK</text>
+<text class='lane' x='1244.0' y='122' text-anchor='middle'>MERGE</text>
+<text class='lane' x='1524.0' y='122' text-anchor='middle'>CRITIQUE</text>
+<text class='lane' x='1804.0' y='122' text-anchor='middle'>ASSURE</text>
+<text class='lane' x='2084.0' y='122' text-anchor='middle'>DECIDE</text>
+<text class='lane' x='2364.0' y='122' text-anchor='middle'>PUBLISH</text>
+<text class='lane' x='2644.0' y='122' text-anchor='middle'>EXIT</text>
+<path d='M404.0,190.0 L404.0,346.0 Q404.0,358.0 416.0,358.0 L1792.0,358.0 Q1804.0,358.0 1804.0,346.0 L1804.0,318.0' fill='none' stroke='#b45309' stroke-width='1.8' stroke-dasharray='5,4' marker-end='url(#arr-b45309)'/>
+<path d='M684.0,190.0 L684.0,372.0 Q684.0,384.0 696.0,384.0 L1792.0,384.0 Q1804.0,384.0 1804.0,372.0 L1804.0,190.0' fill='none' stroke='#b45309' stroke-width='1.8' stroke-dasharray='5,4' marker-end='url(#arr-b45309)'/>
+<path d='M1244.0,190.0 L1244.0,398.0 Q1244.0,410.0 1232.0,410.0 L696.0,410.0 Q684.0,410.0 684.0,398.0 L684.0,190.0' fill='none' stroke='#dc2626' stroke-width='2.0' stroke-dasharray='7,4' marker-end='url(#arr-dc2626)'/>
+<path d='M1804.0,318.0 L1804.0,424.0 Q1804.0,436.0 1816.0,436.0 L2352.0,436.0 Q2364.0,436.0 2364.0,424.0 L2364.0,190.0' fill='none' stroke='#b45309' stroke-width='1.8' stroke-dasharray='5,4' marker-end='url(#arr-b45309)'/>
+<path d='M2084.0,190.0 L2084.0,450.0 Q2084.0,462.0 2096.0,462.0 L2632.0,462.0 Q2644.0,462.0 2644.0,450.0 L2644.0,190.0' fill='none' stroke='#b45309' stroke-width='1.8' stroke-dasharray='5,4' marker-end='url(#arr-b45309)'/>
+<path d='M216.0,160.0 C264.0,160.0 264.0,160.0 312.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M496.0,160.0 C544.0,160.0 544.0,160.0 592.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M776.0,160.0 C824.0,160.0 824.0,160.0 872.0,160.0' fill='none' stroke='#2563eb' stroke-width='2.0' marker-end='url(#arr-2563eb)'/>
+<path d='M1056.0,160.0 C1104.0,160.0 1104.0,160.0 1152.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M1336.0,160.0 C1384.0,160.0 1384.0,160.0 1432.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M1616.0,160.0 C1664.0,160.0 1664.0,160.0 1712.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M1804.0,190.0 C1834.0,190.0 1834.0,258.0 1804.0,258.0' fill='none' stroke='#dc2626' stroke-width='2.0' stroke-dasharray='7,4' marker-end='url(#arr-dc2626)'/>
+<path d='M1804.0,258.0 C1850.0,258.0 1850.0,190.0 1804.0,190.0' fill='none' stroke='#dc2626' stroke-width='2.0' stroke-dasharray='7,4' marker-end='url(#arr-dc2626)'/>
+<path d='M1896.0,160.0 C1944.0,160.0 1944.0,160.0 1992.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M2176.0,160.0 C2224.0,160.0 2224.0,160.0 2272.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<path d='M2456.0,160.0 C2504.0,160.0 2504.0,160.0 2552.0,160.0' fill='none' stroke='#475569' stroke-width='2.0' marker-end='url(#arr-475569)'/>
+<rect x='32' y='138' width='184' height='44' rx='22' fill='#0f172a' stroke='#0f172a'/>
+<text x='124.0' y='158' text-anchor='middle' font-size='12.5' font-weight='700' fill='#f8fafc'>START</text>
+<text x='124.0' y='173' text-anchor='middle' font-size='10' fill='#94a3b8'>entry</text>
+<rect x='312' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#86d3a3' stroke-width='1.5'/>
+<rect x='312' y='130' width='5' height='60' rx='2.5' fill='#16a34a'/>
+<text x='328' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>intent</text>
+<text x='328' y='172' font-size='10' fill='#475569'>router · deep question or cheap?</text>
+<circle cx='330' cy='130' r='11' fill='#15803d' stroke='#ffffff' stroke-width='2'/>
+<text x='330' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>1</text>
+<rect x='592' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#86d3a3' stroke-width='1.5'/>
+<rect x='592' y='130' width='5' height='60' rx='2.5' fill='#16a34a'/>
+<text x='608' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>decompose</text>
+<text x='608' y='172' font-size='10' fill='#475569'>planner · 7–10 sub-queries</text>
+<circle cx='610' cy='130' r='11' fill='#15803d' stroke='#ffffff' stroke-width='2'/>
+<text x='610' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>2</text>
+<rect x='884' y='142' width='184' height='60' rx='10' fill='#f1f5f9' stroke='#cbd5e1' stroke-width='1.2'/>
+<rect x='878' y='136' width='184' height='60' rx='10' fill='#f1f5f9' stroke='#cbd5e1' stroke-width='1.2'/>
+<rect x='872' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#86d3a3' stroke-width='1.5'/>
+<rect x='872' y='130' width='5' height='60' rx='2.5' fill='#16a34a'/>
+<text x='888' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>branch ×N</text>
+<text x='888' y='172' font-size='10' fill='#475569'>leaf worker per sub-query</text>
+<circle cx='890' cy='130' r='11' fill='#15803d' stroke='#ffffff' stroke-width='2'/>
+<text x='890' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>3</text>
+<line x1='964.0' y1='190' x2='964.0' y2='200' stroke='#94a3b8' stroke-width='1.4' stroke-dasharray='3,3'/>
+<rect x='872' y='200' width='184' height='76' rx='10' fill='#f8fafc' stroke='#94a3b8' stroke-width='1.2' stroke-dasharray='6,4'/>
+<text x='882' y='216' font-size='9.5' font-style='italic' fill='#64748b'>each branch runs:</text>
+<rect x='880' y='224' width='81' height='18' rx='9' fill='#ffffff' stroke='#86d3a3' stroke-width='1.2'/>
+<text x='920.5' y='237' text-anchor='middle' font-size='9' fill='#15803d'>ingest</text>
+<rect x='967' y='224' width='81' height='18' rx='9' fill='#ffffff' stroke='#86d3a3' stroke-width='1.2'/>
+<text x='1007.5' y='237' text-anchor='middle' font-size='9' fill='#15803d'>relevance</text>
+<rect x='880' y='248' width='81' height='18' rx='9' fill='#ffffff' stroke='#86d3a3' stroke-width='1.2'/>
+<text x='920.5' y='261' text-anchor='middle' font-size='9' fill='#15803d'>fetch ≤3</text>
+<rect x='967' y='248' width='81' height='18' rx='9' fill='#ffffff' stroke='#86d3a3' stroke-width='1.2'/>
+<text x='1007.5' y='261' text-anchor='middle' font-size='9' fill='#15803d'>synthesize</text>
+<rect x='1152' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#86d3a3' stroke-width='1.5'/>
+<rect x='1152' y='130' width='5' height='60' rx='2.5' fill='#16a34a'/>
+<text x='1168' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>aggregate</text>
+<text x='1168' y='172' font-size='10' fill='#475569'>merge notes · flag gaps</text>
+<circle cx='1170' cy='130' r='11' fill='#15803d' stroke='#ffffff' stroke-width='2'/>
+<text x='1170' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>4</text>
+<rect x='1432' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#f2c078' stroke-width='1.5'/>
+<rect x='1432' y='130' width='5' height='60' rx='2.5' fill='#d97706'/>
+<text x='1448' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>critic</text>
+<text x='1448' y='172' font-size='10' fill='#475569'>adversarial review of merged draft</text>
+<circle cx='1450' cy='130' r='11' fill='#b45309' stroke='#ffffff' stroke-width='2'/>
+<text x='1450' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>5</text>
+<rect x='1712' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#f2c078' stroke-width='1.5'/>
+<rect x='1712' y='130' width='5' height='60' rx='2.5' fill='#d97706'/>
+<text x='1728' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>judge</text>
+<text x='1728' y='172' font-size='10' fill='#475569'>LLM-as-judge · groundedness 0–1</text>
+<circle cx='1730' cy='130' r='11' fill='#b45309' stroke='#ffffff' stroke-width='2'/>
+<text x='1730' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>6</text>
+<rect x='1712' y='258' width='184' height='60' rx='10' fill='#ffffff' stroke='#86d3a3' stroke-width='1.5'/>
+<rect x='1712' y='258' width='5' height='60' rx='2.5' fill='#16a34a'/>
+<text x='1728' y='282' font-size='12.5' font-weight='700' fill='#0f172a'>synthesize</text>
+<text x='1728' y='300' font-size='10' fill='#475569'>Macro synthesis / refinement</text>
+<circle cx='1730' cy='258' r='11' fill='#15803d' stroke='#ffffff' stroke-width='2'/>
+<text x='1730' y='262' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>7</text>
+<rect x='1992' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#f2c078' stroke-width='1.5'/>
+<rect x='1992' y='130' width='5' height='60' rx='2.5' fill='#d97706'/>
+<text x='2008' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>review</text>
+<text x='2008' y='172' font-size='10' fill='#475569'>HITL gate · auto-approve or interrupt</text>
+<circle cx='2010' cy='130' r='11' fill='#b45309' stroke='#ffffff' stroke-width='2'/>
+<text x='2010' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>8</text>
+<rect x='2272' y='130' width='184' height='60' rx='10' fill='#ffffff' stroke='#c9a8f5' stroke-width='1.5'/>
+<rect x='2272' y='130' width='5' height='60' rx='2.5' fill='#9333ea'/>
+<text x='2288' y='154' font-size='12.5' font-weight='700' fill='#0f172a'>render</text>
+<text x='2288' y='172' font-size='10' fill='#475569'>article.md · frontmatter + citations</text>
+<circle cx='2290' cy='130' r='11' fill='#7e22ce' stroke='#ffffff' stroke-width='2'/>
+<text x='2290' y='134' text-anchor='middle' font-size='10.5' font-weight='700' fill='#ffffff'>9</text>
+<rect x='2552' y='138' width='184' height='44' rx='22' fill='#0f172a' stroke='#0f172a'/>
+<text x='2644.0' y='158' text-anchor='middle' font-size='12.5' font-weight='700' fill='#f8fafc'>END</text>
+<text x='2644.0' y='173' text-anchor='middle' font-size='10' fill='#94a3b8'>exit</text>
+<g><rect x='1043.8' y='335.0' width='120.4' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1104.0' y='348.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>cheap → one pass</text></g>
+<g><rect x='1164.6' y='361.0' width='158.8' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1244.0' y='374.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>empty plan → fail-safe</text></g>
+<g><rect x='891.0' y='387.0' width='146.0' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='964.0' y='400.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>gaps remain · replan</text></g>
+<g><rect x='2030.2' y='413.0' width='107.6' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='2084.0' y='426.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>cheap → render</text></g>
+<g><rect x='2329.4' y='439.0' width='69.2' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='2364.0' y='452.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>rejected</text></g>
+<g><rect x='522.2' y='136.0' width='43.6' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='544.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>deep</text></g>
+<g><rect x='792.6' y='136.0' width='62.8' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='824.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>Send ×N</text></g>
+<g><rect x='1079.0' y='136.0' width='50.0' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1104.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>notes</text></g>
+<g><rect x='1349.4' y='136.0' width='69.2' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1384.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>complete</text></g>
+<g><rect x='1629.4' y='136.0' width='69.2' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1664.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>critique</text></g>
+<g><rect x='1701.6' y='214.0' width='88.4' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1745.8' y='227.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>revise · ≤N</text></g>
+<g><rect x='1864.0' y='214.0' width='69.2' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1898.6' y='227.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>re-check</text></g>
+<g><rect x='1922.2' y='136.0' width='43.6' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='1944.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>pass</text></g>
+<g><rect x='2189.4' y='136.0' width='69.2' height='20' rx='10' fill='#ffffff' stroke='#cbd5e1' stroke-width='1'/><text x='2224.0' y='149.5' text-anchor='middle' font-size='10' fill='#334155' font-style='italic'>approved</text></g>
+<line x1='32' y1='492' x2='2736' y2='492' stroke='#e2e8f0'/>
+<text class='legend' x='32' y='514' font-weight='700'>Nodes</text>
+<rect x='84' y='503' width='34' height='12' rx='3' fill='#ffffff' stroke='#2563eb'/>
+<rect x='84' y='503' width='5' height='12' rx='2' fill='#2563eb'/>
+<text class='legend' x='124' y='514'>Data</text>
+<rect x='186' y='503' width='34' height='12' rx='3' fill='#ffffff' stroke='#16a34a'/>
+<rect x='186' y='503' width='5' height='12' rx='2' fill='#16a34a'/>
+<text class='legend' x='226' y='514'>Generate</text>
+<rect x='316' y='503' width='34' height='12' rx='3' fill='#ffffff' stroke='#d97706'/>
+<rect x='316' y='503' width='5' height='12' rx='2' fill='#d97706'/>
+<text class='legend' x='356' y='514'>Assure</text>
+<rect x='432' y='503' width='34' height='12' rx='3' fill='#ffffff' stroke='#9333ea'/>
+<rect x='432' y='503' width='5' height='12' rx='2' fill='#9333ea'/>
+<text class='legend' x='472' y='514'>Publish</text>
+<text class='legend' x='32' y='536' font-weight='700'>Edges</text>
+<line x1='84' y1='532' x2='118' y2='532' stroke='#475569' stroke-width='2.0'/>
+<text class='legend' x='124' y='536'>sequential</text>
+<line x1='224' y1='532' x2='258' y2='532' stroke='#2563eb' stroke-width='2.0'/>
+<text class='legend' x='264' y='536'>Send fan-out</text>
+<line x1='378' y1='532' x2='412' y2='532' stroke='#dc2626' stroke-width='2.0' stroke-dasharray='7,4'/>
+<text class='legend' x='418' y='536'>revise loop ≤N</text>
+<line x1='546' y1='532' x2='580' y2='532' stroke='#b45309' stroke-width='1.8' stroke-dasharray='5,4'/>
+<text class='legend' x='586' y='536'>conditional</text>
+<text class='caption' x='2736' y='566' text-anchor='end'>Send / Command routes curated from the builder · regenerate: python -m knowledge_engine.scripts.generate_graph_svg</text>
+</svg>
