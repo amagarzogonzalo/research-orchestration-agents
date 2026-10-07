@@ -21,7 +21,7 @@ from datetime import UTC, datetime
 
 import httpx
 
-from knowledge_engine.core.exceptions import ScrapeError
+from knowledge_engine.core.exceptions import ScrapeError, ScrapeSkipped
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.infrastructure.scrape.common import fallback_title, is_transient_http
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
@@ -114,12 +114,13 @@ class EuropePmcFullTextAdapter(ScrapePort):
             DocumentBody: Full-text body with the original page URL.
 
         Raises:
-            ScrapeError: When the URL is not a PMC article page, the record
-                is not open access, or the XML holds no usable text.
+            ScrapeSkipped: When the URL is not a PMC article page.
+            ScrapeError: When the record is not open access or the XML
+                holds no usable text.
         """
         rest_url = self._rest_url(url)
         if rest_url is None:
-            raise ScrapeError(f"not a Europe PMC PMC article URL: {url}")
+            raise ScrapeSkipped(f"not a Europe PMC PMC article URL: {url}")
         try:
             async with self._client() as client:
                 resp = await client.get(rest_url)

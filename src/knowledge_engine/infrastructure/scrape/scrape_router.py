@@ -17,7 +17,7 @@ import logging
 
 from tenacity import retry, retry_if_exception, stop_after_attempt, wait_exponential, wait_random
 
-from knowledge_engine.core.exceptions import ScrapeError
+from knowledge_engine.core.exceptions import ScrapeError, ScrapeSkipped
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.infrastructure.scrape.arxiv_fulltext import ArxivFullTextAdapter
 from knowledge_engine.infrastructure.scrape.crawl4ai_adapter import Crawl4aiAdapter
@@ -97,6 +97,9 @@ class ScrapeRouter(ScrapePort):
         for scraper in self.chain:
             try:
                 body = await _fetch_with_retry(scraper, url)
+            except ScrapeSkipped as exc:
+                logger.debug("scraper %s skipped %s (%s)", type(scraper).__name__, url, exc)
+                continue
             except ScrapeError as exc:
                 logger.warning("scraper %s failed for %s (%s)", type(scraper).__name__, url, exc)
                 continue

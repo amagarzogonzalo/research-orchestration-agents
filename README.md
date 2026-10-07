@@ -84,9 +84,14 @@ OA-full-text layer on top:
 | HuggingFace Papers | Community-ranked ML papers, code links | keyless |
 | dblp | CS bibliography, venue metadata | keyless, bot-gated from some networks (degrades gracefully) |
 | DOAJ | OA journals, full-text links | keyless |
+| OSF Preprints | Preprint discovery across disciplines | keyless |
 | Unpaywall | Legal OA PDF resolution by DOI (fetch only) | real `UNPAYWALL_EMAIL` required |
+| Wikipedia | General-knowledge fallback (MediaWiki API) | keyless, always on |
+| DuckDuckGo | General-web fallback (HTML results, no signup) | keyless, always on |
+| Google CSE | General-web fallback (Custom Search JSON API) | key + CX required; skipped when absent (closed to new customers, sunset 2027) |
 
-Scrape tier: crawl4ai → trafilatura (local, free) → Jina Reader (remote last
+Scrape tier: arXiv/ar5iv + Europe PMC fullTextXML first (source-specific full
+text), then crawl4ai → trafilatura (local, free) → Jina Reader (remote last
 resort, keyless ~20 RPM, optional `JINA_API_KEY`). Papers With Code is
 officially sunset; its successor (HuggingFace Papers) is wired above.
 

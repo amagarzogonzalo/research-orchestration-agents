@@ -49,3 +49,12 @@ class ScrapeError(KnowledgeEngineError):
         """
         super().__init__(message)
         self.transient = transient
+
+
+class ScrapeSkipped(ScrapeError):
+    """URL outside this adapter's remit (not a failure).
+
+    Source-specific adapters (arXiv/Europe PMC full text) raise this before
+    any network call for URLs they will never handle, so the router moves on
+    quietly (debug log) instead of warning on every unrelated URL.
+    """

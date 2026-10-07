@@ -15,7 +15,7 @@ import logging
 import re
 from datetime import UTC, datetime
 
-from knowledge_engine.core.exceptions import ScrapeError
+from knowledge_engine.core.exceptions import ScrapeSkipped
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.infrastructure.scrape.trafilatura_adapter import TrafilaturaAdapter
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod
@@ -68,11 +68,12 @@ class ArxivFullTextAdapter(ScrapePort):
             DocumentBody: Full-text body tagged with the original abs URL.
 
         Raises:
-            ScrapeError: When the URL is not an arXiv abs page or extraction fails.
+            ScrapeSkipped: When the URL is not an arXiv abs page.
+                Extraction failures propagate from the delegate extractor.
         """
         target = self._ar5iv_url(url)
         if target is None:
-            raise ScrapeError(f"not an arXiv abs URL: {url}")
+            raise ScrapeSkipped(f"not an arXiv abs URL: {url}")
         body = await self._extractor.to_markdown(target)
         return DocumentBody(
             url=url,

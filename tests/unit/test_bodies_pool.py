@@ -67,3 +67,9 @@ def test_unknown_source_counts_as_scholarly() -> None:
     """Unrecognized source strings fall back to the scholarly bucket."""
     pool = [{"id": "x:1", "source": "something-new"}]
     assert [s["id"] for s in select_scrape_pool(pool)] == ["x:1"]
+
+
+def test_missing_source_counts_as_scholarly() -> None:
+    """Records without any source marker fall back to scholarly, never crash."""
+    pool = [{"id": "x:1"}, {"id": "x:2", "source": None}]
+    assert [s["id"] for s in select_scrape_pool(pool)] == ["x:1", "x:2"]

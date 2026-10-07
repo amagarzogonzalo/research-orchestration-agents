@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from knowledge_engine.core.exceptions import ScrapeError
+from knowledge_engine.core.exceptions import ScrapeError, ScrapeSkipped
 from knowledge_engine.core.ports import ScrapePort
 from knowledge_engine.infrastructure.scrape.playwright_adapter import PlaywrightAdapter
 from knowledge_engine.infrastructure.scrape.scrape_router import ScrapeRouter, looks_clean
@@ -42,6 +42,13 @@ class FakeBinaryScraper(ScrapePort):
         )
 
 
+class FakeSkipScraper(ScrapePort):
+    """URL outside remit: the chain must move on quietly, not warn-fail."""
+
+    async def to_markdown(self, url: str) -> DocumentBody:
+        raise ScrapeSkipped("not mine")
+
+
 async def test_router_uses_first_success() -> None:
     primary = FakeGoodScraper()
     router = ScrapeRouter(chain=[FakeBadScraper(), primary, FakeEmptyScraper()])
@@ -66,6 +73,18 @@ async def test_router_exhausts_chain_and_raises() -> None:
     router = ScrapeRouter(chain=[FakeBadScraper(), FakeBinaryScraper()])
     with pytest.raises(ScrapeError):
         await router.to_markdown("https://c.org")
+
+
+async def test_router_skips_remit_mismatch_quietly() -> None:
+    router = ScrapeRouter(chain=[FakeSkipScraper(), FakeGoodScraper()])
+    body = await router.to_markdown("https://d.org")
+    assert body.markdown == _GOOD
+
+
+async def test_router_all_skipped_still_raises() -> None:
+    router = ScrapeRouter(chain=[FakeSkipScraper()])
+    with pytest.raises(ScrapeError):
+        await router.to_markdown("https://e.org")
 
 
 class FakeJinaScraper(ScrapePort):
