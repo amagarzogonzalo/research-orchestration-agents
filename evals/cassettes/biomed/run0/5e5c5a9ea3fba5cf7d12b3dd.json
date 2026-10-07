@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:39:08Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: CRISPR off-target detection methods and safety advances\nPapers:\nduckduckgo:https://link.springer.com/article/10.1186/s12967-026-08175-1 | Deep learning-driven prediction of on-target activity, off-target risk ...\nduckduckgo:https://www.idtdna.com/page/support-and-education/decoded-plus/how-to-detect-and-minimize-crispr-cas-off-target-effects/ | How to Detect And Minimize CRISPR-Cas Off-Target Effects\nduckduckgo:https://thescienceatlas.com/crispr-off-target-effects-and-safety/ | CRISPR Off-Target Effects and Safety: Complete Guide\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "{\"relevant_ids\": [\"id1\", \"id2\", \"id3\"]}",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the topic: \"CRISPR off-target detection methods and safety advances\". We have three items:\n\n1. https://link.springer.com/article/10.1186/s12967-026-08175-1 | Deep learning-driven prediction of on-target activity, off-target risk ...\n2. https://www.idtdna.com/page/support-and-education/decoded-plus/how-to-detect-and-minimize-crispr-cas-off-target-effects/ | How to Detect And Minimize CRISPR-Cas Off-Target Effects\n3. https://thescienceatlas.com/crispr-off-target-effects-and-safety/ | CRISPR Off-Target Effects and Safety: Complete Guide\n\nWe need to decide which are relevant. The first is a peer-reviewed journal article from Springer, likely relevant. The second is a practitioner source from IDT DNA, a biotech company, but it's a how-to guide. The third is a blog or guide from The Science Atlas, likely a practitioner source. The instructions: For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence — do not demote them for lacking peer review. So all three are relevant. But we need to check if any are generic. The first has \"Deep learning-driven prediction of on-target activity, off-target risk ...\" That is relevant. The second is \"How to Detect And Minimize CRISPR-Cas Off-Target Effects\" relevant. The third is \"CRISPR Off-Target Effects and Safety: Complete Guide\" relevant. So all three are relevant. We need to output JSON with ids. But we don't have ids; we need to assign ids? The input lists each with a URL and title. We need to output JSON with \"relevant_ids\": [\"id1\", \"id2\", ...]. But we don't have ids. The instruction says \"Relevant papers (JSON ids only):\". So maybe we need to output the ids that correspond to the list items. But the list items don't have ids. We might need to generate ids like \"paper1\", \"paper2\", \"paper3\". But the instruction says \"Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.\" So we need to output JSON with relevant ids. We need to decide what ids to use. The input didn't provide ids. Maybe we can use the URLs as ids? But the instruction says \"JSON ids only\". Could be the index numbers. We can assign id1, id2, id3. Let's do that. So output: {\"relevant_ids\": [\"id1\", \"id2\", \"id3\"]}.",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362347,
+    "id": "chatcmpl-9768768e-80f3-4ff2-8202-a8bb9dea7c8c",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_c9afb2bdb4",
+    "usage": {
+      "completion_time": 0.781407321,
+      "completion_tokens": 584,
+      "completion_tokens_details": {
+        "reasoning_tokens": 557
+      },
+      "prompt_time": 0.020112842,
+      "prompt_tokens": 394,
+      "prompt_tokens_details": null,
+      "queue_time": 0.204770147,
+      "total_time": 0.801520163,
+      "total_tokens": 978
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4ar8bvse7d8w4x6b8ks5kef",
+      "seed": 1520360632
+    }
+  },
+  "usage": {
+    "completion_time": 0.781407321,
+    "completion_tokens": 584,
+    "completion_tokens_details": {
+      "reasoning_tokens": 557
+    },
+    "prompt_time": 0.020112842,
+    "prompt_tokens": 394,
+    "prompt_tokens_details": null,
+    "queue_time": 0.204770147,
+    "total_time": 0.801520163,
+    "total_tokens": 978
+  },
+  "wall_s": 1.216
+}

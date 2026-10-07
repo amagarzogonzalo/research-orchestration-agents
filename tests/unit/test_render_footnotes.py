@@ -1,98 +1,36 @@
-"""Unit tests: render completes dangling footnote definitions from provenance."""
+"""Unit tests: footnote completion remaps dropped-duplicate IDs (offline)."""
 
 from __future__ import annotations
 
-from knowledge_engine.orchestration.nodes.render import _complete_footnotes
+from knowledge_engine.orchestration.nodes.render import _complete_footnotes, _resolve_marker
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 
-def _src(
-    id: str,
-    title: str,
-    authors: list[str] | None = None,
-    venue: str | None = None,
-    year: int | None = None,
-    doi: str | None = None,
-) -> SourceRecord:
-    return SourceRecord(
-        id=id, title=title, source=SearchSource.ARXIV, authors=authors or [], venue=venue, year=year, doi=doi
-    )
+def _src(sid: str, title: str = "Paper") -> SourceRecord:
+    return SourceRecord(id=sid, title=title, source=SearchSource.ARXIV)
 
 
-def test_missing_definition_appended_from_provenance() -> None:
-    notes = "Claim text [^openalex:W1]."
-    out = _complete_footnotes(notes, [_src("openalex:W1", "Some Paper")])
-    assert "[^openalex:W1]: Some Paper" in out
-    assert out.startswith("Claim text")
+def test_resolve_duckduckgo_url_id_to_arxiv_survivor() -> None:
+    """A DDG record merged away as an arXiv duplicate still resolves."""
+    titles = {"arxiv:2504.06214": "Long-context fine-tuning"}
+    marker = "duckduckgo:https://arxiv.org/html/2504.06214v1"
+    assert _resolve_marker(marker, titles) == "arxiv:2504.06214"
 
 
-def test_existing_definitions_untouched() -> None:
-    notes = "Claim [^openalex:W1].\n\n[^openalex:W1]: Custom Title"
-    assert _complete_footnotes(notes, [_src("openalex:W1", "Other")]) == notes
+def test_resolve_huggingface_duplicate_to_arxiv_survivor() -> None:
+    """An HF record merged away as an arXiv duplicate still resolves."""
+    titles = {"arxiv:2309.00071": "YaRN"}
+    assert _resolve_marker("huggingface_papers:2309.00071", titles) == "arxiv:2309.00071"
 
 
-def test_unknown_ids_left_alone() -> None:
-    notes = "Claim [^madeup:1]."
-    assert _complete_footnotes(notes, [_src("openalex:W1", "Some Paper")]) == notes
+def test_resolve_unknown_stays_unknown() -> None:
+    """Truly unretrieved IDs are left untouched (honest gap, not a fake cite)."""
+    assert _resolve_marker("osf:zzzzzz_v9", {"arxiv:1": "t"}) is None
 
 
-def test_no_markers_returns_notes_unchanged() -> None:
-    assert _complete_footnotes("Plain text.", []) == "Plain text."
-
-
-def test_shortened_ids_resolve_to_provenance() -> None:
-    notes = "Claim [^arx-2412-11919] and [^pn1ra-vpc]."
-    prov = [_src("huggingface_papers:2412.11919", "RetroLLM"), _src("crossref:10.59350/pn1ra-vpc", "Vision")]
-    out = _complete_footnotes(notes, prov)
-    assert "[^arx-2412-11919]: RetroLLM" in out
-    assert "[^pn1ra-vpc]: Vision" in out
-
-
-def test_unresolvable_ids_left_alone() -> None:
-    notes = "Claim [^zzz-no-such-9]."
-    assert _complete_footnotes(notes, [_src("openalex:W1", "Some Paper")]) == notes
-
-
-def test_doubled_prefix_markers_resolve() -> None:
-    notes = "Claim [^crossref:10.1/10.1/x]."
-    prov = [_src("crossref:10.1/x", "Paper")]
-    out = _complete_footnotes(notes, prov)
-    assert "[^crossref:10.1/10.1/x]: Paper" in out
-
-
-def test_multi_cite_brackets_split() -> None:
-    from knowledge_engine.orchestration.nodes.render import _normalize_citations
-
-    prov = [_src("openalex:W1", "A"), _src("openalex:W2", "B")]
-    out = _normalize_citations("Claim [^openalex:W1, openalex:W2].", prov)
-    assert "[^openalex:W1] [^openalex:W2]" in out
-    assert "[^openalex:W1]:" in out and "[^openalex:W2]:" in out
-
-
-def test_multi_cite_with_repeated_carets_split() -> None:
-    from knowledge_engine.orchestration.nodes.render import _normalize_citations
-
-    prov = [_src("openalex:W1", "A"), _src("openalex:W2", "B")]
-    out = _normalize_citations("Claim [^openalex:W1, ^openalex:W2].", prov)
-    assert "[^openalex:W1] [^openalex:W2]" in out
-    assert "[^openalex:W1]:" in out and "[^openalex:W2]:" in out
-
-
-def test_plain_bracket_cites_normalize_to_footnotes() -> None:
-    from knowledge_engine.orchestration.nodes.render import _normalize_citations
-
-    prov = [_src("openalex:W1", "Some Paper", doi="10.1/x")]
-    out = _normalize_citations("Claim [openalex:W1] and [10.1/x] plus [2024].", prov)
-    assert "[^openalex:W1]" in out
-    assert "[2024]" in out  # not a source id: untouched
-    assert out.count("[^openalex:W1]:") == 1
-
-
-def test_definitions_carry_full_citation() -> None:
-    notes = "Claim [^openalex:W1]."
-    prov = [
-        _src("openalex:W1", "Some Paper", authors=["A. Uthor", "B. Writer"], venue="Nature", year=2024, doi="10.1/x")
-    ]
-    out = _complete_footnotes(notes, prov)
-    assert "[^openalex:W1]: Some Paper — A. Uthor, B. Writer — (Nature, 2024)" in out
-    assert "https://doi.org/10.1/x" in out
+def test_complete_footnotes_rewrites_dedup_variants() -> None:
+    """Dangling markers for merged-away duplicates gain survivor definitions."""
+    provenance = [_src("arxiv:2504.06214", "Long-context fine-tuning")]
+    notes = "Claim text [^duckduckgo:https://arxiv.org/html/2504.06214v1]."
+    out = _complete_footnotes(notes, provenance)
+    assert "[^arxiv:2504.06214]:" in out

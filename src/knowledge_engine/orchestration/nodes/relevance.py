@@ -20,20 +20,37 @@ from knowledge_engine.schemas.provider import Affinity, ChatRequest
 
 logger = logging.getLogger(__name__)
 
+# Maximum sources per relevance call: reasoning-model substitutes burn the
+# token budget deliberating over long ledgers and return truncated-empty
+# verdicts (finish_reason=length), silently degrading to keep-all. Batching
+# keeps every call small enough to answer; a failed batch keeps just its own
+# slice, never the whole corpus.
+_RELEVANCE_BATCH = 25
+
 _RELEVANCE_SYSTEM = (
     "You are a research librarian. Given a research topic and a list of papers, "
-    "decide which papers are directly relevant to the topic. Prefer peer-reviewed "
-    "journal venues and highly-cited primary sources over aggregators, blogs, and "
-    "preprints when both cover the same claim — but keep unique-coverage items. "
+    "decide which papers are directly relevant to the topic. Require topical "
+    "overlap: drop items whose title shares only generic words (requirements, "
+    "development, local, model, analysis, study) with the query, especially "
+    "when their venue is off-domain (law, medicine, social science for a "
+    "computing/engineering topic). For practical how-to, tooling-comparison, or "
+    "framework questions, treat practitioner sources (documentation, "
+    "engineering blogs, encyclopedia overviews) as first-class evidence — do "
+    "not demote them for lacking peer review. For scholarly questions, prefer "
+    "peer-reviewed journals and highly-cited primary sources over aggregators "
+    "when both cover the same claim — but keep unique-coverage items. "
     'Reply ONLY with JSON: {"relevant_ids": ["id1", "id2", ...]}. No prose.'
 )
 
 
-def _ledger_line(index: int, src: object) -> str:
+def _ledger_line(src: object) -> str:
     """Render one ledger line with authority signals.
 
+    Lines carry source IDs only (no numeric indices): models shown ``[8] id``
+    reply with bare indices, which are unresolvable (0- vs 1-based unknown)
+    and silently filter everything out.
+
     Args:
-        index: Ledger position.
         src: Source record.
 
     Returns:
@@ -43,33 +60,34 @@ def _ledger_line(index: int, src: object) -> str:
         sid = str(src.get("id", ""))
         title = str(src.get("title", ""))
         venue = str(src.get("venue") or "")
-        year = str(src.get("year") or "")
-        cites = src.get("citation_count", 0) or 0
     else:
         sid = str(getattr(src, "id", ""))
         title = str(getattr(src, "title", ""))
         venue = str(getattr(src, "venue", "") or "")
-        year = str(getattr(src, "year", "") or "")
-        cites = getattr(src, "citation_count", 0) or 0
-    meta = ", ".join(part for part in (venue, year) if part)
-    line = f"[{index}] {sid} | {title}"
-    if meta:
-        line += f" | {meta}"
-    line += f" | cited by {cites}"
+    # Titles + venue only: years and cite counts bloat the ledger without
+    # helping topicality verdicts, and reasoning-model substitutes burn the
+    # token budget deliberating over long ledgers (empty verdicts).
+    line = f"{sid} | {title}"
+    if venue:
+        line += f" | {venue}"
     return line
 
 
 class RelevanceNode(WorkflowNode):
-    """Filter sources in one batched LLM call (JSON relevant-id list)."""
+    """Filter sources in batched LLM calls (JSON relevant-id lists)."""
 
     __slots__ = ("provider", "_system", "max_tokens")
 
-    def __init__(self, provider: ProviderPort, *, max_tokens: int = 400) -> None:
+    def __init__(self, provider: ProviderPort, *, max_tokens: int = 1500) -> None:
         """Create a RelevanceNode.
 
         Args:
             provider: Provider key for rate limiting.
-            max_tokens: Maximum tokens.
+            max_tokens: Maximum tokens. Sized for reasoning-model
+                substitutes: OpenRouter may route the cheap slot to a
+                reasoning model whose deliberation must fit alongside the
+                JSON verdict — 400 truncated it to empty (finish_reason
+                length), silently degrading to keep-all.
         """
         self.provider = provider
         self._system = _RELEVANCE_SYSTEM
@@ -88,22 +106,56 @@ class RelevanceNode(WorkflowNode):
         sources = state.get("sources", [])
         if not sources:
             return {"filtered": []}
-        ledger = "\n".join(_ledger_line(i, s) for i, s in enumerate(sources))
         query = state.get("query", "")
-        user = f"Research topic: {query}\n\nPapers:\n{ledger}\n\nRelevant papers:"
-        ids: list[str] | None = None
+        kept: list[Any] = []
+        for start in range(0, len(sources), _RELEVANCE_BATCH):
+            batch = list(sources[start : start + _RELEVANCE_BATCH])
+            ids = await self._verdict_ids(query, batch)
+            if ids is None:
+                kept.extend(batch)  # degrade: keep this slice for the judge
+            else:
+                id_set = set(ids)
+                kept.extend(s for s in batch if _src_id(s) in id_set)
+        return {"filtered": kept}
+
+    async def _verdict_ids(self, query: str, batch: list[Any]) -> list[str] | None:
+        """Ask the model which batch members are relevant (single attempt).
+
+        A retry was tried and removed: recorded failures are structural
+        (reasoning models deliberating past the token budget), never
+        transient — retrying doubled the waste without converting once.
+
+        Args:
+            query: Research topic.
+            batch: Source records slice.
+
+        Returns:
+            list[str] | None: Relevant ids, or None on failure (keep batch).
+        """
+        ledger = "\n".join(_ledger_line(s) for s in batch)
+        user = f"Research topic: {query}\nPapers:\n{ledger}\n\nRelevant papers (JSON ids only):"
         try:
             res = await self.provider.complete(
                 ChatRequest.of(self._system, user, affinity=Affinity.MICRO, max_tokens=self.max_tokens)
             )
-            ids = _parse_relevant_ids(res.message.content)
-        except Exception as exc:  # noqa: BLE001 - degrade to keep-all on failure
-            logger.warning("relevance batch failed (%s); keeping all %d sources", exc, len(sources))
+            return _parse_relevant_ids(res.message.content)
+        except Exception as exc:  # noqa: BLE001 - degrade to keep-batch on failure
+            logger.warning("relevance batch failed (%s); keeping %d sources", exc, len(batch))
+            return None
 
-        if ids is None:
-            return {"filtered": list(sources)}  # degrade: keep everything for the judge
-        id_set = set(ids)
-        return {"filtered": [s for s in sources if s.id in id_set]}
+
+def _src_id(src: object) -> str:
+    """Source id from a record or its dict snapshot.
+
+    Args:
+        src: SourceRecord or raw mapping.
+
+    Returns:
+        str: Record id (empty when absent).
+    """
+    if isinstance(src, dict):
+        return str(src.get("id", "") or "")
+    return str(getattr(src, "id", "") or "")
 
 
 def _parse_relevant_ids(content: str) -> list[str] | None:

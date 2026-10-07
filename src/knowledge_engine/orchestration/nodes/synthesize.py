@@ -93,7 +93,10 @@ class SynthesizeNode(WorkflowNode):
             system=_SYNTHESIS_SYSTEM,
             user=prompt,
             affinity=Affinity.MACRO,
-            max_tokens=1500,
+            # 2500: 1500 truncated 5-section artifacts mid-sentence (the
+            # mandated Practical Takeaways never rendered). Measured against
+            # case token budgets, not raised to fit them.
+            max_tokens=2500,
         )
         res = await self.provider.complete(req)
         return {"notes": [res.message.content], "iterations": state.get("iterations", 0) + 1}

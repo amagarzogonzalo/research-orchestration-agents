@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:30:59Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How retrieval-augmented generation reduces hallucinations in large language models\nPapers:\nhuggingface_papers:2505.04253 | LLM-Independent Adaptive RAG: Let the Question Speak for Itself\nhuggingface_papers:2509.17671 | Turk-LettuceDetect: A Hallucination Detection Models for Turkish RAG\n  Applications\nhuggingface_papers:2407.01219 | Searching for Best Practices in Retrieval-Augmented Generation\nhuggingface_papers:2509.21875 | LUMINA: Detecting Hallucinations in RAG System with Context-Knowledge\n  Signals\nosf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\nosf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\nosf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\nosf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\nosf:qfkbv_v1 | Semi-Structured Data Parsing and Vectorization Using Retrieval-Augmented Generation\nosf:ns2v3_v1 | Implementing Retrieval-Augmented Generation (RAG) for Large Language Models to Build Confidence in Traditional Chinese Medicine\nosf:pv7r5_v1 | Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\nbiorxiv:10.64898/2026.09.22.753630 | Coevolutionary mining of prokaryotic non-coding elements with a genome language model\nbiorxiv:10.64898/2026.09.22.753478 | Towards the automation of Species Distribution Modelling: The AutoMaxEnt routine\nbiorxiv:10.64898/2026.09.06.749605 | Capsid-specialized protein language models reveal higher-order viral architecture from sequence\nbiorxiv:10.64898/2026.09.22.753604 | Agentic campaign control for high-throughput de novo binder design\nbiorxiv:10.64898/2026.09.04.749355 | BOTANIC-1: a series of long-context plant genomic foundation models in the agentic era\nmedrxiv:10.64898/2026.09.16.26363276 | Evaluation of an AI-Powered Patient Education Application in Bariatric Surgery: A Prospective Mixed-Methods Feasibility Study\nmedrxiv:10.64898/2026.09.22.26363642 | Mind the gap: emergent clinical risk at the interface of two individually safe AI systems in a multilingual ambient scribe\nmedrxiv:10.64898/2026.09.22.26363693 | RoB2-Evaluator: Development and Technical Evaluation of a Rule-Constrained Large Language Model System for Cochrane Risk of Bias 2 Assessment\nmedrxiv:10.64898/2026.09.22.26360316 | Leveraging Large Language Models for Temporal PHI De-identification in Real-World Clinical Notes\nmedrxiv:10.64898/2026.09.18.26363369 | Errors, Hallucinations, and Clinical Impact of General-Purpose Multimodal Large Language Models in Histopathology\nwikipedia:75229858 | Retrieval-augmented generation\nwikipedia:73248112 | Large language model\nwikipedia:72607666 | Hallucination (artificial intelligence)\nwikipedia:69071767 | Prompt engineering\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"How retrieval-augmented generation reduces hallucinations in large language models\". We have a list of papers with IDs and titles. We need to filter relevant ones. We must consider topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when venue is off-domain (law, medicine, social science for computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover same claim — but keep unique-coverage items.\n\nWe need to output JSON with relevant_ids list.\n\nLet's examine each paper:\n\n1. huggingface_papers:2505.04253 | LLM-Independent Adaptive RAG: Let the Question Speak for Itself\nTitle: \"LLM-Independent Adaptive RAG: Let the Question Speak for Itself\". This is about RAG but not explicitly about hallucinations. Might be relevant? The topic is how RAG reduces hallucinations. This paper might discuss RAG but not hallucination reduction. Might be less relevant. But could still be relevant if it addresses hallucinations? Title doesn't mention hallucinations. So likely not directly relevant.\n\n2. huggingface_papers:2509.17671 | Turk-LettuceDetect: A Hallucination Detection Models for Turkish RAG Applications\nTitle: \"Turk-LettuceDetect: A Hallucination Detection Models for Turkish RAG Applications\". This is about hallucination detection in RAG, but not about reduction. But detection is related. Might be relevant as it deals with hallucinations in RAG. But the topic is reduction, not detection. However detection is part of addressing hallucinations. Might still be relevant. But we need to decide. The instruction: \"How retrieval-augmented generation reduces hallucinations in large language models\". So we want papers that discuss reduction. Detection is not reduction. So maybe not relevant.\n\n3. huggingface_papers:2407.01219 | Searching for Best Practices in Retrieval-Augmented Generation\nTitle: \"Searching for Best Practices in Retrieval-Augmented Generation\". This might discuss best practices, possibly including hallucination reduction. Could be relevant. But generic. Might include hallucination reduction. But we don't know. Might be relevant.\n\n4. huggingface_papers:2509.21875 | LUMINA: Detecting Hallucinations in RAG System with Context-Knowledge Signals\nTitle: \"LUMINA: Detecting Hallucinations in RAG System with Context-Knowledge Signals\". Again detection, not reduction. Might be less relevant.\n\n5. osf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\nTitle: \"Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\". Off-domain (social science). Not about hallucinations. Not relevant.\n\n6. osf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\nTitle: \"Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\". Off-domain (psychology). Not relevant.\n\n7. osf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\nOff-domain (law). Not relevant.\n\n8. osf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\nTitle: \"Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\". Might be about RAG but not hallucination reduction. Might be relevant? But generic.\n\n9. osf:qfkbv_v1 | Semi-Structured Data Parsing and Vectorization Using Retrieval-Augmented Generation\nNot about hallucinations.\n\n10. osf:ns2v3_v1 | Implementing Retrieval-Augmented Generation (RAG) for Large Language Models to Build Confidence in Traditional Chinese Medicine\nNot about hallucinations.\n\n11. osf:pv7r5_v1 | Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\nTitle explicitly: \"Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\". This is directly relevant. Yes.\n\n12. biorxiv:10.64898/2026.09.22.753630 | Coevolutionary mining of prokaryotic non-coding elements with a genome language model\nNot relevant.\n\n13. biorxiv:10.64898/2026.09.22.753478 | Towards the automation of Species Distribution Modelling: The AutoMaxEnt routine\nNot relevant.\n\n14. biorxiv:10.64898/2026.09.06.749605 | Capsid-specialized protein language models reveal higher-order viral architecture from sequence\nNot relevant.\n\n15. biorxiv:10.64898/2026.09.22.753604 | Agentic campaign control for high-throughput de novo binder design\nNot relevant.\n\n16. biorxiv:10.64898/2026.09.04.749355 | BOTANIC-1: a series of long-context plant genomic foundation models in the agentic era\nNot relevant.\n\n17. medrxiv:10.64898/2026.09.16.26363276 | Evaluation of an AI-Powered Patient Education Application in Bariatric Surgery: A Prospective Mixed-Methods Feasibility Study\nNot relevant.\n\n18. medrxiv:10.64898/2026.09.22.26363642 | Mind the gap: emergent clinical risk at the interface of two individually safe AI systems in a multilingual ambient scribe\nNot relevant.\n\n19. medrxiv:10.64898/2026.09.22.26363693 | RoB2-Evaluator: Development and Technical Evaluation of a Rule-Constrained Large Language Model System for Cochrane Risk of Bias 2 Assessment\nNot relevant.\n\n20. medrxiv:10.64898/2026.09.22.26360316 | Leveraging Large Language Models for Temporal PHI De-identification in Real-World Clinical Notes\nNot relevant.\n\n21. medrxiv:10.64898/2026.09.18.26363369 | Errors, Hallucinations, and Clinical Impact of General-Purpose Multimodal Large Language Models in Histopathology\nThis is about hallucinations but in multimodal LLMs in histopathology. Off-domain (medicine). Might be relevant to hallucinations but not RAG. So not relevant.\n\n22. wikipedia:75229858 | Retrieval-augmented generation\nWikipedia article. Not a paper. But maybe considered a practitioner source? It's an encyclopedia. The instruction: For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. But this is not a paper. The list includes Wikipedia entries. Should we include them? The instruction says \"Reply ONLY",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791361858,
+    "id": "chatcmpl-68a2a535-ee4c-4db3-a3fd-865676519373",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_ed70b23331",
+    "usage": {
+      "completion_time": 1.770731655,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.060894491,
+      "prompt_tokens": 1034,
+      "prompt_tokens_details": null,
+      "queue_time": 0.218306628,
+      "total_time": 1.831626146,
+      "total_tokens": 2534
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4aqscvhebmvv7fd306mhfpw",
+      "seed": 1652938158
+    }
+  },
+  "usage": {
+    "completion_time": 1.770731655,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.060894491,
+    "prompt_tokens": 1034,
+    "prompt_tokens_details": null,
+    "queue_time": 0.218306628,
+    "total_time": 1.831626146,
+    "total_tokens": 2534
+  },
+  "wall_s": 2.222
+}

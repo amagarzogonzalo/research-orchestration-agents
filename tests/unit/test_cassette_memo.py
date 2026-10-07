@@ -29,6 +29,18 @@ def test_record_reuses_duplicate_chat_call(record_tape: Cassette) -> None:
     assert len(calls) == 1
 
 
+def test_memo_hit_counts_original_usage(record_tape: Cassette) -> None:
+    """Memo hits log the original usage so record/replay accounting matches."""
+
+    def client(**request):
+        return {"response": "live", "usage": {"total_tokens": 5}}
+
+    record_tape.chat(client, model="m", messages=[])
+    record_tape.chat(client, model="m", messages=[])
+    assert record_tape.usage["total_tokens"] == 10
+    assert record_tape.usage["calls"] == 2
+
+
 async def test_record_reuses_duplicate_acall(record_tape: Cassette) -> None:
     """Duplicate search/scrape payloads fetch once; both callers decode a copy."""
     calls = []

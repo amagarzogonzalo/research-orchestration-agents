@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -60,6 +61,25 @@ class GraphStatus(StrEnum):
     FAILED = "failed"
 
 
+def _last_wins(current: Any, update: Any) -> Any:
+    """Last-writer-wins reducer for concurrently written scalar channels.
+
+    Parallel branches (and their error handlers) may write ``status`` and
+    ``judge_critique`` in the same step; LastValue channels reject that with
+    ``InvalidUpdateError`` and crash the run. Concurrent failure writes agree
+    on the outcome, so keeping the latest is both safe and deterministic
+    enough for a terminal signal.
+
+    Args:
+        current: Existing channel value (ignored).
+        update: Incoming channel value.
+
+    Returns:
+        Any: The incoming value.
+    """
+    return update
+
+
 MAX_SYNTHESIS_ITERATIONS = 2
 """Bound on judge→synthesize optimizer loops (evaluator-optimizer discipline)."""
 
@@ -91,7 +111,7 @@ class GraphState(BaseModel):
     filtered: list[SourceRecord] = Field(default_factory=list)
     synthetic_notes: list[str] = Field(default_factory=list)
     judge_score: float | None = None
-    judge_critique: str | None = None
+    judge_critique: Annotated[str | None, _last_wins] = None
     output_path: str | None = None
-    status: GraphStatus = GraphStatus.RUNNING
+    status: Annotated[GraphStatus, _last_wins] = GraphStatus.RUNNING
     iterations: int = Field(default=0, ge=0)

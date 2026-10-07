@@ -1,0 +1,83 @@
+{
+  "recorded_at": "2026-10-07T08:40:55Z",
+  "request": {
+    "max_tokens": 300,
+    "messages": [
+      {
+        "content": "Score groundedness and citation integrity 0-1 on the synthesis. Reply as JSON {\"score\": float, \"pass\": bool, \"critique\": str}.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "## Overview of CRISPR Off-Target Detection Frameworks\n\nIdentifying unintended DNA modifications is critical for therapeutic translation, prompting the development of diverse genome-wide methods [^crossref:10.1007/978-1-0716-0687-2_15]. Assays vary by whether they capture cleavage events *in vitro* using cell-free genomic DNA or *in cellulo* within living cellular environments [^crossref:10.1007/978-1-0716-0687-2_15]. \n\n## *In Vitro* and Integration-Based Methods\n\nSeveral established assays rely on tag integration or cell-free cleavage to mark double-strand breaks (DSBs). Integration-defective lentiviral vector (IDLV) capture maps off-target integrations in treated cells, providing a direct metric of cellular DNA damage events [^crossref:10.1007/978-1-0716-0687-2_14]. Similarly, the GUIDE-seq framework employs tag integration via non-homologous end joining to sequence cleavage sites, with simplified library preparation protocols facilitating robust experimental deployment [^crossref:10.17504/protocols.io.wikfccw]. \n\n## Direct Break-Capture and High-Throughput Sequencing\n\nDirect biochemical capture of breaks offers high sensitivity across complex genomes. The BLISS (Breaks Labeling In Situ and Sequencing) method enables genome-wide profiling of CRISPR/Cas9-generated DNA breaks directly in fixed cells or tissues [^crossref:10.1007/978-1-0716-0687-2_15]. Concurrently, the iGUIDE method provides an optimized workflow for targeted genomic insertion mapping and off-target identification [^crossref:10.1007/978-1-0716-0822-7_6]. To overcome short-read sequencing limitations, Oxford Nanopore long-read sequencing has been applied to CRISPR-Cas off-target detection, raising important toxicological questions regarding whether specific genomic compartments—such as the mitochondrial genome—exhibit heightened vulnerability to unintended Cas-mediated targeting [^crossref:10.1101/741322].\n\n## Single-Cell Resolution and Safety Advances\n\nTraditional bulk populations obscure rare editing events; recent technological shifts target single-cell resolution to dissect heterogeneous CRISPR off-target profiles [^crossref:10.1016/j.omtm.2025.101498]. Achieving single-cell detection improves the analytical resolution of rare off-target cleavage and stochastic cellular responses, directly advancing pre-clinical safety assessments [^crossref:10.1016/j.omtm.2025.101498].\n\n## Open questions\n- What are the relative false-positive and false-negative rates of *in vitro* break-capture assays (such as BLISS and iGUIDE) versus *in cellulo* integration-based methods (such as IDLV and GUIDE-seq)?\n- To what extent are mitochondrial off-target breaks detected by long-read Oxford Nanopore sequencing functional drivers of cellular toxicity or artifacts of sequencing coverage?\n- How do single-cell detection methods scale to clinical safety auditing where rare off-target events reside below standard sequencing thresholds?\n- Head-to-head benchmarking studies across identical cell lines and guide RNAs are required to definitively establish which assay provides the optimal balance of sensitivity and specificity for regulatory filings.\n\n[^crossref:10.1007/978-1-0716-0687-2_14]: Detection of CRISPR/Cas9-Generated Off-Target Effect by Integration-Defective Lentiviral Vector. Springer Nature protocol (primary source).\n[^crossref:10.1007/978-1-0716-0687-2_15]: Genome-Wide CRISPR Off-Target DNA Break Detection by the BLISS Method. Springer Nature protocol (primary source).\n[^crossref:10.1007/978-1-0716-0822-7_6]: iGUIDE Method for CRISPR Off-Target Detection. Springer Nature protocol (primary source).\n[^crossref:10.1016/j.omtm.2025.101498]: Improving resolution with single-cell detection of CRISPR off-target events: Molecular Therapy Methods & Clinical Development. Journal article (primary source).\n[^crossref:10.1038/nmeth.3301]: CRISPR off-target detection. Nature Methods journal article (primary source).\n[^crossref:10.1101/741322]: CRISPR-Cas off-target detection using Oxford Nanopore sequencing - is the mitochondrial genome more vulnerable to off-targets? bioRxiv preprint (primary source).\n[^crossref:10.17504/protocols.io.wikfccw]: GUIDE-seq simplified library preparation protocol (CRISPR/Cas9 off-target cleavage detection). Protocols.io repository method (primary source).\n\n## Practical takeaways\n- **Choose the assay matching your biological context:** Use cell-free and direct *in situ* break-capture assays like BLISS or iGUIDE to screen genome-wide susceptibility comprehensively [^crossref:10.1007/978-1-0716-0687-2_15, crossref:10.1007/978-1-0716-0822-7_6].\n- **Capture living-cell integration events:** Employ IDLV or GUIDE-seq frameworks when you need to evaluate functional, end-joined repair outcomes natively within living cells [^crossref:10.1007/978-1-0716-0687-2_14, crossref:10.17504/protocols.io.wikfccw].\n- **Leverage long reads for complex regions:** Implement Oxford Nanopore sequencing workflows when investigating structural variants or examining organellar targets like the mitochondrial genome for unexpected vulnerability [^crossref:10.1101/741322].\n- **Resolve cellular heterogeneity:** Apply emerging single-cell detection protocols when bulk sequencing obscures rare off-target events or heterogeneous clonal responses in preclinical safety evaluations [^crossref:10.1016/j.omtm.2025.101498].",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "gemini/gemini-flash-lite-latest",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "stop",
+        "index": 0,
+        "message": {
+          "content": "```json\n{\"score\": 1.0, \"pass\": true, \"critique\": \"The text provided is a well-structured summary with accurate citations mapped to the correct source list. Every referenced claim correctly points to the appropriate supporting reference.\"}\n```",
+          "function_call": null,
+          "images": [],
+          "provider_specific_fields": {
+            "thought_signatures": [
+              "EmAKXgFpFH0TTom3ytYkq0SHNHgF1EX6EjhtGvfrs/TxFsGN7x4e7YT+WVeUG4wR0TO9dfIQI0/lk96gaWG9X5PdrFqcl8CZu+AWxA27ZqG7C0+WkOAkJ6jRVlC+IzIkJcY="
+            ]
+          },
+          "role": "assistant",
+          "thinking_blocks": [],
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362454,
+    "id": "lgXGaoOfApu2vdIP6LyssAQ",
+    "model": "gemini-flash-lite-latest",
+    "object": "chat.completion",
+    "system_fingerprint": null,
+    "usage": {
+      "cache_read_input_tokens": null,
+      "completion_tokens": 54,
+      "completion_tokens_details": {
+        "text_tokens": 54
+      },
+      "prompt_tokens": 1491,
+      "prompt_tokens_details": {
+        "audio_tokens": null,
+        "cache_write_tokens": null,
+        "cached_tokens": null,
+        "image_tokens": null,
+        "text_tokens": 1491
+      },
+      "total_tokens": 1545
+    },
+    "vertex_ai_citation_metadata": [],
+    "vertex_ai_grounding_metadata": [],
+    "vertex_ai_safety_results": [],
+    "vertex_ai_url_context_metadata": []
+  },
+  "usage": {
+    "cache_read_input_tokens": null,
+    "completion_tokens": 54,
+    "completion_tokens_details": {
+      "text_tokens": 54
+    },
+    "prompt_tokens": 1491,
+    "prompt_tokens_details": {
+      "audio_tokens": null,
+      "cache_write_tokens": null,
+      "cached_tokens": null,
+      "image_tokens": null,
+      "text_tokens": 1491
+    },
+    "total_tokens": 1545
+  },
+  "wall_s": 0.989
+}

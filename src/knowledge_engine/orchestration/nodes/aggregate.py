@@ -55,7 +55,8 @@ class AggregateNode(WorkflowNode):
                 _AGGREGATE_SYSTEM,
                 f"Merge these branch findings for: {state.get('query', '')}\n\n{fused}"[:6000],
                 affinity=Affinity.MACRO,
-                max_tokens=1500,
+                # 2500: deep merges of 7+ branch notes truncated at 1500.
+                max_tokens=2500,
             )
         )
         score, gaps = rubric_assess(state.get("sources", []), state.get("bodies", []), branch_notes)

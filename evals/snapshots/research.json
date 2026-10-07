@@ -1,21 +1,20 @@
 {
   "citations": [
-    "doaj:5c3e3ea8e8b2469e8706f069570090a8",
-    "huggingface_papers:2407.01219",
-    "huggingface_papers:2412.11919",
-    "huggingface_papers:2501.08292",
-    "huggingface_papers:2505.04253",
-    "huggingface_papers:2509.17671",
-    "huggingface_papers:2509.21875",
-    "huggingface_papers:2512.19134",
-    "huggingface_papers:2603.20309"
+    "crossref:10.1002/9781394374717.ch03",
+    "crossref:10.1002/9781394374717.fmatter",
+    "crossref:10.1115/detc2025-169730",
+    "crossref:10.2139/ssrn.7357178",
+    "crossref:10.59350/pn1ra-vpc97",
+    "europe_pmc:MED:42382850",
+    "europe_pmc:MED:42682590",
+    "europe_pmc:PMC:PMC13600821"
   ],
   "code_langs": [],
   "counts": {
-    "list_items": 6,
-    "paragraphs": 14,
+    "list_items": 5,
+    "paragraphs": 5,
     "tables": 0,
-    "words_bucket": "<1000"
+    "words_bucket": "<500"
   },
   "frontmatter": {
     "@id": "str",
@@ -25,12 +24,11 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "98935185abfd4ca5",
+  "hash": "8ef6c68a87e3cc12",
   "headings": [
-    "2:mechanisms-of-hallucination-in-large-language-models",
-    "2:role-of-retrieval-augmented-generation-rag-in-mitigation",
-    "2:advanced-retrieval-strategies-and-dynamic-rag",
-    "2:hallucination-detection-and-context-knowledge-verification",
-    "2:open-questions"
+    "2:mechanism-of-knowledge-grounding-in-retrieval-augmented-generation",
+    "2:architectural-variations-vector-search-versus-graph-based-rag",
+    "2:open-questions",
+    "2:practical-takeaways"
   ]
 }

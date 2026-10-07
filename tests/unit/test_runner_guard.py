@@ -51,3 +51,16 @@ def test_only_listed_samples_checked(cassettes: Path) -> None:
     run3.mkdir(parents=True)
     (run3 / "x.json").write_text("{}")
     assert runner.find_dirty_record_dirs([{"id": "web", "samples": 1}]) == {}
+
+
+def test_citation_yield_counts_used_footnotes() -> None:
+    """Yield = footnoted source ids over retrieved sources (precision signal)."""
+    sources = [{"id": "a:1"}, {"id": "b:2"}, {"id": "c:3"}]
+    artifact = "Claim one [^a:1] and claim two [^b:2]. Uncited: [^zzz]."
+    assert runner._citation_yield(artifact, sources) == "2/3 sources cited"
+
+
+def test_citation_yield_empty_inputs() -> None:
+    """Empty artifacts and source lists yield zero without crashing."""
+    assert runner._citation_yield("", []) == "0/0 sources cited"
+    assert runner._citation_yield("no footnotes", None) == "0/0 sources cited"

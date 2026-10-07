@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:39:07Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: CRISPR off-target detection methods and safety advances\nPapers:\nhuggingface_papers:2501.02045 | METAGENE-1: Metagenomic Foundation Model for Pandemic Monitoring\nhuggingface_papers:2508.13650 | CRISP: Persistent Concept Unlearning via Sparse Autoencoders\nhuggingface_papers:2509.26495 | OffTopicEval: When Large Language Models Enter the Wrong Chat, Almost\n  Always!\nhuggingface_papers:2608.09900 | Decoding-Level Taboo: A Diagnostic Stress Test for LLM Robustness\nhuggingface_papers:2505.23559 | SafeScientist: Toward Risk-Aware Scientific Discoveries by LLM Agents\nosf:nt8jh_v1 | Ribosomal frameshifting and misreading of mRNA in COVID-19 vaccines produces “off-target” proteins and immune responses eliciting safety concerns: Comment on UK study by Mulroney et al.\nosf:bxwcr_v1 | Target-based Drug Discovery Is Inefficient: Discovery and “Off-target” Mechanisms of All Drugs\nosf:2xur7_v1 | An off-target scale limits the utility of SWEMWBS as a measure of well-being in public health surveys\nosf:hystx_v1 | Off-targets in ZFN/TALEN would be potentially very large, similar to CRISPR, if monomeric FokI has endonuclease activity\nosf:kuf3z_v1 | Unreported off-target integration of beta-lactamase from plasmid in gene-edited hornless cows\nosf:u5zj6_v2 | Assessing the Impact of Language on Visual Threat Detection:  cTBS over the anterior temporal lobe impairs semantic processing but not visual threat detection\nosf:y2szg_v3 | Cruelty Across Substrates: From Animal Cruelty to Embodied AI and the Coming Detection Gap\nosf:6gzkw_v1 | Mere co-presence and evaluative observation differentially shape motor response execution and inhibition: Behavioral, signal-detection, and ERP evidence\nwikipedia:59990826 | CRISPR gene editing\nwikipedia:56710049 | Off-target genome editing\nwikipedia:8053588 | Food safety\nwikipedia:34930586 | Genome editing\nwikipedia:37319629 | Genetic engineering techniques\nwikipedia:531611 | Foodborne illness\nwikipedia:63478457 | Pandemic prevention\nwikipedia:8381628 | Timeline of biotechnology\nduckduckgo:https://www.sciencedirect.com/science/article/pii/S0734975025002368 | Methods for detecting off-target effects of CRISPR/Cas9\nduckduckgo:https://www.nature.com/articles/s41588-025-02428-3 | Measurement and clinical interpretation of CRISPR off-targets\nduckduckgo:https://www.nature.com/articles/s41588-025-02428-3.pdf | PDF Measurement and clinical interpretation of CRISPR off-targets\nduckduckgo:https://www.sciencedirect.com/science/article/pii/S2162253125001908 | Off-target effects in CRISPR-Cas genome editing for human therapeutics ...\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the topic: \"CRISPR off-target detection methods and safety advances\". We have a list of papers with IDs. We need to output JSON with relevant_ids array.\n\nWe must consider topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when venue is off-domain (law, medicine, social science for computing/engineering topic). But we have a computing/engineering topic: CRISPR off-target detection methods and safety advances. So we want papers that are about CRISPR off-target detection methods and safety advances. We should include peer-reviewed journals and highly-cited primary sources over aggregators when both cover same claim, but keep unique-coverage items. Practitioner sources (documentation, engineering blogs, encyclopedia overviews) are first-class evidence for practical how-to, tooling-comparison, or framework questions. But we need to decide.\n\nList of papers:\n\n- huggingface_papers:2501.02045 | METAGENE-1: Metagenomic Foundation Model for Pandemic Monitoring\n- huggingface_papers:2508.13650 | CRISP: Persistent Concept Unlearning via Sparse Autoencoders\n- huggingface_papers:2509.26495 | OffTopicEval: When Large Language Models Enter the Wrong Chat, Almost Always!\n- huggingface_papers:2608.09900 | Decoding-Level Taboo: A Diagnostic Stress Test for LLM Robustness\n- huggingface_papers:2505.23559 | SafeScientist: Toward Risk-Aware Scientific Discoveries by LLM Agents\n- osf:nt8jh_v1 | Ribosomal frameshifting and misreading of mRNA in COVID-19 vaccines produces “off-target” proteins and immune responses eliciting safety concerns: Comment on UK study by Mulroney et al.\n- osf:bxwcr_v1 | Target-based Drug Discovery Is Inefficient: Discovery and “Off-target” Mechanisms of All Drugs\n- osf:2xur7_v1 | An off-target scale limits the utility of SWEMWBS as a measure of well-being in public health surveys\n- osf:hystx_v1 | Off-targets in ZFN/TALEN would be potentially very large, similar to CRISPR, if monomeric FokI has endonuclease activity\n- osf:kuf3z_v1 | Unreported off-target integration of beta-lactamase from plasmid in gene-edited hornless cows\n- osf:u5zj6_v2 | Assessing the Impact of Language ... (irrelevant)\n- osf:y2szg_v3 | Cruelty Across Substrates: ... (irrelevant)\n- osf:6gzkw_v1 | Mere co-presence ... (irrelevant)\n- wikipedia:59990826 | CRISPR gene editing\n- wikipedia:56710049 | Off-target genome editing\n- wikipedia:8053588 | Food safety\n- wikipedia:34930586 | Genome editing\n- wikipedia:37319629 | Genetic engineering techniques\n- wikipedia:531611 | Foodborne illness\n- wikipedia:63478457 | Pandemic prevention\n- wikipedia:8381628 | Timeline of biotechnology\n- duckduckgo:https://www.sciencedirect.com/science/article/pii/S0734975025002368 | Methods for detecting off-target effects of CRISPR/Cas9\n- duckduckgo:https://www.nature.com/articles/s41588-025-02428-3 | Measurement and clinical interpretation of CRISPR off-targets\n- duckduckgo:https://www.nature.com/articles/s41588-025-02428-3.pdf | PDF Measurement and clinical interpretation of CRISPR off-targets\n- duckduckgo:https://www.sciencedirect.com/science/article/pii/S2162253125001908 | Off-target effects in CRISPR-Cas genome editing for human therapeutics ...\n\nWe need to decide which are relevant. The topic is CRISPR off-target detection methods and safety advances. So we want papers that discuss detection methods and safety. The relevant ones are:\n\n- duckduckgo: Methods for detecting off-target effects of CRISPR/Cas9 (likely a review or methods paper)\n- duckduckgo: Measurement and clinical interpretation of CRISPR off-targets (likely a review or clinical paper)\n- duckduckgo: Off-target effects in CRISPR-Cas genome editing for human therapeutics (likely a review or study)\n- Possibly osf:hystx_v1: Off-targets in ZFN/TALEN would be potentially very large, similar to CRISPR, if monomeric FokI has endonuclease activity. This is about off-targets in ZFN/TALEN, but not specifically CRISPR. Might be relevant for safety advances? But it's about off-targets in other genome editing tools. Might be less relevant. But could be considered relevant because it discusses off-targets in genome editing. But the topic is specifically CRISPR off-target detection methods and safety advances. So maybe not.\n\n- osf:kuf3z_v1: Unreported off-target integration of beta-lactamase from plasmid in gene-edited hornless cows. This is about off-target integration in gene editing. Might be relevant for safety. But it's about gene-edited cows, not CRISPR specifically. But could be relevant for safety advances. But the topic is CRISPR off-target detection methods and safety advances. So maybe not.\n\n- osf:nt8jh_v1: Ribosomal frameshifting and misreading of mRNA in COVID-19 vaccines produces “off-target” proteins and immune responses eliciting safety concerns: Comment on UK study by Mulroney et al. This is about off-target proteins in vaccines, not CRISPR. Not relevant.\n\n- osf:bxwcr_v1: Target-based Drug Discovery Is Inefficient: Discovery and “Off-target” Mechanisms of All Drugs. Not relevant.\n\n- osf:2xur7_v1: An off-target scale limits the utility of SWEMWBS as a measure of well-being in public health surveys. Not relevant.\n\n- osf:u5zj6_v2: Assessing the Impact of Language on Visual Threat Detection. Not relevant.\n\n- osf:y2szg_v3: Cruelty Across Substrates. Not relevant.\n\n- osf:6gzkw_v1: Behavioral, signal-detection, and ERP evidence. Not relevant.\n\n- Wikipedia pages: They are general overviews. The question: \"For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review.\" So Wikipedia pages are considered practitioner sources. But the topic is about detection methods and safety advances. Wikipedia pages on CRISPR gene editing, Off-target genome editing, Genome editing, Genetic engineering techniques, etc. They are general overviews. They might be considered relevant as general background. But the question is to decide which papers are directly relevant to the topic. The instruction: \"Given a research topic and",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362346,
+    "id": "chatcmpl-eb503d3c-a901-4d4b-8e68-27182ef53f58",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_f102a3179c",
+    "usage": {
+      "completion_time": 1.994710629,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.048173939,
+      "prompt_tokens": 935,
+      "prompt_tokens_details": null,
+      "queue_time": 0.213240972,
+      "total_time": 2.042884568,
+      "total_tokens": 2435
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4ar89c3eh0by5k6s6mejnqf",
+      "seed": 2078313277
+    }
+  },
+  "usage": {
+    "completion_time": 1.994710629,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.048173939,
+    "prompt_tokens": 935,
+    "prompt_tokens_details": null,
+    "queue_time": 0.213240972,
+    "total_time": 2.042884568,
+    "total_tokens": 2435
+  },
+  "wall_s": 2.538
+}

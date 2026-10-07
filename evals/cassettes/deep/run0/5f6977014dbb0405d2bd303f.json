@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-07T08:44:18Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How do long-context models reduce hallucinations? Identify research or experiments that show improvements in factual consistency with extended context.\nPapers:\ncrossref:10.36227/techrxiv.177162116.61215374/v1 | Ghost Context: Cross-Context Hallucination in Long-Context Language Models\ncrossref:10.37191/mapsci-jocr-1(1)-005 | How Do Lay People Identify Knee Swelling and What Would They Do About It: Survey Results in the Context of an Event on the Topic of Knee Osteoarthritis | Journal of Orthopaedics and Clinical Research\ncrossref:10.1523/eneuro.0304-22.2023.f5-1 | \ncrossref:10.1109/icaide65466.2025.11189340 | Detecting Factual Hallucinations in LLMs: A Cross-Domain Dynamic Validation Framework for Fact-Consistency | 2025 International Conference on Artificial Intelligence and Digital Ethics (ICAIDE)\ncrossref:10.1097/scs.0000000000012355 | Active Knowledge Retrieval to Reduce Hallucinations and Enhance Factual Accuracy in Large Medical Reasoning Models | Journal of Craniofacial Surgery\npubmed:33640650 | Mass Image Synthesis in Mammogram with Contextual Information Based on GANs. | Comput Methods Programs Biomed\neurope_pmc:MED:42020757 | Evaluating large language models for accuracy incentivizes hallucinations.\neurope_pmc:MED:41969732 | Human-AI co-research on design and evaluation of Embodied Conversational Agent in rehabilitation contexts.\neurope_pmc:MED:42388248 | A roadmap for medical large language models: a review of foundations, applications, and challenges.\neurope_pmc:MED:42106551 | A study on question answering in the ceramics domain using large language models with retrieved triples and generated textual knowledge prompts.\neurope_pmc:MED:42185547 | Semantic architectures for domain-specific programming AI agents: lessons from a JavaScript semantic assistant.\nhuggingface_papers:2511.03506 | HaluMem: Evaluating Hallucinations in Memory Systems of Agents\nhuggingface_papers:2410.16251 | Can Knowledge Editing Really Correct Hallucinations?\nhuggingface_papers:2309.11495 | Chain-of-Verification Reduces Hallucination in Large Language Models\nhuggingface_papers:2309.03883 | DoLa: Decoding by Contrasting Layers Improves Factuality in Large\n  Language Models\nhuggingface_papers:2503.19622 | Exploring Hallucination of Large Multimodal Models in Video\n  Understanding: Benchmark, Analysis and Mitigation\nosf:dt7gn_v1 | The Functional Connectivity of Hallucinations in Psychiatric Disorders and Neurodegenerative Disorders: A Systematic Review\nosf:u57xs_v2 | Impaired functional double dissociation in motor-to-sensory transformation mediates aberrant predictive coding in auditory verbal hallucinations\nosf:f6pd8_v1 | Reducing Hallucinations in Educational Large Language Models: The AI Token Pond Reasoning Framework with T0TTL Lifecycle Management\nosf:nszgk_v1 | Body mapping, embodiment and emotional responses to an experimental simulation of auditory hallucinations in a VR environment\nwikipedia:78730954 | List of common misconceptions about science, technology, and mathematics\nwikipedia:44093 | Electroconvulsive therapy\nduckduckgo:https://aclanthology.org/2025.findings-naacl.436/ | Towards Long Context Hallucination Detection - ACL Anthology\nduckduckgo:https://arxiv.org/html/2504.19457v1 | Towards Long Context Hallucination Detection - arXiv.org\nduckduckgo:https://pmc.ncbi.nlm.nih.gov/articles/PMC12518350/ | Survey and analysis of hallucinations in large language models ...\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"How do long-context models reduce hallucinations? Identify research or experiments that show improvements in factual consistency with extended context.\"\n\nWe have a list of papers with identifiers. We need to filter relevant ones. We should consider domain: computing/engineering. We should drop items whose title shares only generic words with query, especially when venue is off-domain (law, medicine, social science). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover same claim, but keep unique-coverage items.\n\nWe need to output JSON with relevant_ids.\n\nLet's examine each paper:\n\n1. crossref:10.36227/techrxiv.177162116.61215374/v1 | Ghost Context: Cross-Context Hallucination in Long-Context Language Models\n\nTechRxiv preprint. Title indicates cross-context hallucination in long-context LLMs. Relevant. Venue: techrxiv (preprint). Acceptable as practitioner? It's a research preprint. Should be relevant.\n\n2. crossref:10.37191/mapsci-jocr-1(1)-005 | How Do Lay People Identify Knee Swelling and What Would They Do About It: Survey Results in the Context of an Event on the Topic of Knee Osteoarthritis | Journal of Orthopaedics and Clinical Research\n\nMedical domain, not relevant.\n\n3. crossref:10.1523/eneuro.0304-22.2023.f5-1 | (no title provided). It's in eNeuro, neuroscience. Likely not relevant.\n\n4. crossref:10.1109/icaide65466.2025.11189340 | Detecting Factual Hallucinations in LLMs: A Cross-Domain Dynamic Validation Framework for Fact-Consistency | 2025 International Conference on Artificial Intelligence and Digital Ethics (ICAIDE)\n\nThis is about detecting hallucinations, cross-domain dynamic validation. Might be relevant but not specifically about long-context models reducing hallucinations. But could be relevant if it includes experiments with extended context? Title doesn't mention long context. Might be less relevant. But still about hallucinations. The question: \"How do long-context models reduce hallucinations? Identify research or experiments that show improvements in factual consistency with extended context.\" So we need papers that show improvements with extended context. This one is about detection, not necessarily improvement. So maybe not relevant.\n\n5. crossref:10.1097/scs.0000000000012355 | Active Knowledge Retrieval to Reduce Hallucinations and Enhance Factual Accuracy in Large Medical Reasoning Models | Journal of Craniofacial Surgery\n\nMedical domain, not relevant.\n\n6. pubmed:33640650 | Mass Image Synthesis in Mammogram with Contextual Information Based on GANs. | Comput Methods Programs Biomed\n\nNot relevant.\n\n7. europe_pmc:MED:42020757 | Evaluating large language models for accuracy incentivizes hallucinations.\n\nTitle: Evaluating large language models for accuracy incentivizes hallucinations. Might be relevant but not about long context. Also venue: MED (medicine). Might be off-domain. But could be relevant if it includes experiments. But likely not.\n\n8. europe_pmc:MED:41969732 | Human-AI co-research on design and evaluation of Embodied Conversational Agent in rehabilitation contexts.\n\nNot relevant.\n\n9. europe_pmc:MED:42388248 | A roadmap for medical large language models: a review of foundations, applications, and challenges.\n\nNot relevant.\n\n10. europe_pmc:MED:42106551 | A study on question answering in the ceramics domain using large language models with retrieved triples and generated textual knowledge prompts.\n\nDomain ceramics, not relevant.\n\n11. europe_pmc:MED:42185547 | Semantic architectures for domain-specific programming AI agents: lessons from a JavaScript semantic assistant.\n\nNot relevant.\n\n12. huggingface_papers:2511.03506 | HaluMem: Evaluating Hallucinations in Memory Systems of Agents\n\nThis is about memory systems of agents. Might be relevant if it includes long context. Title: Evaluating Hallucinations in Memory Systems of Agents. Could be relevant.\n\n13. huggingface_papers:2410.16251 | Can Knowledge Editing Really Correct Hallucinations?\n\nNot about long context.\n\n14. huggingface_papers:2309.11495 | Chain-of-Verification Reduces Hallucination in Large Language Models\n\nChain-of-Verification reduces hallucination. Might involve extended context? Not necessarily. But could be relevant.\n\n15. huggingface_papers:2309.03883 | DoLa: Decoding by Contrasting Layers Improves Factuality in Large Language Models\n\nNot about long context.\n\n16. huggingface_papers:2503.19622 | Exploring Hallucination of Large Multimodal Models in Video Understanding: Benchmark, Analysis and Mitigation\n\nNot about long context.\n\n17. osf:dt7gn_v1 | The Functional Connectivity of Hallucinations in Psychiatric Disorders and Neurodegenerative Disorders: A Systematic Review\n\nNot relevant.\n\n18. osf:u57xs_v2 | Impaired functional double dissociation in motor-to-sensory transformation mediates aberrant predictive coding in auditory verbal hallucinations\n\nNot relevant.\n\n19. osf:f6pd8_v1 | Reducing Hallucinations in Educational Large Language Models: The AI Token Pond Reasoning Framework with T0TTL Lifecycle Management\n\nThis is about reducing hallucinations in educational LLMs. Might involve extended context? Not sure. Title: AI Token Pond Reasoning Framework with T0TTL Lifecycle Management. Could be relevant.\n\n20. osf:nszgk_v1 | Body mapping, embodiment and emotional responses to an experimental simulation of auditory hallucinations in a VR environment\n\nNot relevant.\n\n21. wikipedia:78730954 | List of common misconceptions about science, technology, and mathematics\n\nNot relevant.\n\n22. wikipedia:44093 | Electroconvulsive therapy\n\nNot relevant.\n\n23. duckduckgo:https://aclanthology.org/2025.findings-naacl.436/ | Towards Long Context Hallucination Detection - ACL Anthology\n\nThis is a paper titled \"Towards Long Context Hallucination Detection\". Likely relevant. Venue: ACL Findings 2025. Good.\n\n24. duckduckgo:https://arxiv.org/html/2504.19457v1 | Towards Long Context Hallucination Detection - arXiv.org\n\nSame as above, arXiv preprint. Relevant.\n\n25. duckduckgo:https://pmc.ncbi.nlm.nih.gov/articles/PMC12518350/ | Survey and analysis of hallucinations in large language models ...\n\nTitle: Survey and analysis of hallucinations in large language models. Might be relevant but not specifically about long context. But could include discussion. But maybe not.\n\nWe need to decide which are directly relevant. The question: \"How do long-context models reduce hallucinations? Identify research or experiments that show improvements in factual consistency with extended context.\" So we need papers that show improvements in factual consistency with extended context. So we need to pick those that specifically evaluate long context and show improvements.\n\nCandidates:\n\n- Ghost Context",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791362658,
+    "id": "chatcmpl-445809df-b477-4c16-a693-b2b607c5d454",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_e594c51153",
+    "usage": {
+      "completion_time": 1.557691353,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.062236353,
+      "prompt_tokens": 1076,
+      "prompt_tokens_details": null,
+      "queue_time": 0.195041317,
+      "total_time": 1.619927706,
+      "total_tokens": 2576
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4arht32eh8axtqeks5b5km0",
+      "seed": 1211656189
+    }
+  },
+  "usage": {
+    "completion_time": 1.557691353,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.062236353,
+    "prompt_tokens": 1076,
+    "prompt_tokens_details": null,
+    "queue_time": 0.195041317,
+    "total_time": 1.619927706,
+    "total_tokens": 2576
+  },
+  "wall_s": 1.887
+}

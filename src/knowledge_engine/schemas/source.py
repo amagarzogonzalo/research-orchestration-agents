@@ -25,6 +25,7 @@ class SearchSource(StrEnum):
         DOAJ: Attribute description.
         OSF_PREPRINTS: Attribute description.
         WIKIPEDIA: Attribute description.
+        DUCKDUCKGO: Attribute description.
         GOOGLE: Attribute description."""
 
     OPENALEX = "openalex"
@@ -41,6 +42,7 @@ class SearchSource(StrEnum):
     DOAJ = "doaj"
     OSF_PREPRINTS = "osf_preprints"
     WIKIPEDIA = "wikipedia"
+    DUCKDUCKGO = "duckduckgo"
     GOOGLE = "google"
 
 
