@@ -30,6 +30,7 @@ class SupabaseArtifactStore(ArtifactStorePort):
 
     def __init__(self, client: Any) -> None:
         self._client = client
+        self._mime_types: dict[str, str] = {}
 
     @classmethod
     def from_env(cls) -> SupabaseArtifactStore:
@@ -56,12 +57,28 @@ class SupabaseArtifactStore(ArtifactStorePort):
         return cls(create_client(url, key))
 
     def _ensure_buckets(self) -> None:
-        """Create the articles/sources buckets when missing (idempotent)."""
-        for bucket in (_ARTICLES_BUCKET, _SOURCES_BUCKET):
-            try:
-                self._client.storage.create_bucket(bucket)
-            except Exception:  # noqa: BLE001 - duplicate-bucket errors are benign upserts
-                pass
+        """Create missing buckets as PUBLIC; heal pre-existing private ones.
+
+        Published artifacts must be browser-viewable at the public URL —
+        the locator is the read surface (no download tooling needed).
+        Idempotent: normal steady state is one list call, zero writes.
+        """
+        existing = {b.name: b.public for b in self._client.storage.list_buckets()}
+        for bucket, mime in (
+            (_ARTICLES_BUCKET, "text/markdown; charset=utf-8"),
+            (_SOURCES_BUCKET, "application/json"),
+        ):
+            if bucket not in existing:
+                try:
+                    self._client.storage.create_bucket(bucket, options={"public": True})
+                except Exception:  # noqa: BLE001 - duplicate-bucket races are benign
+                    pass
+            elif not existing[bucket]:
+                try:
+                    self._client.storage.update_bucket(bucket, {"public": True})
+                except Exception:  # noqa: BLE001 - heal attempt is best-effort
+                    pass
+            self._mime_types[bucket] = mime
 
     def put_article(self, thread_id: str, artifact: KnowledgeArtifact) -> str:
         """Upsert the article to Storage; return its public URL.
@@ -79,7 +96,7 @@ class SupabaseArtifactStore(ArtifactStorePort):
         self._client.storage.from_(_ARTICLES_BUCKET).upload(
             path,
             text.encode("utf-8"),  # supabase-py: bytes = content, str = file path
-            {"upsert": "true"},
+            {"upsert": "true", "content-type": self._mime_types[_ARTICLES_BUCKET]},
         )
         return str(self._client.storage.from_(_ARTICLES_BUCKET).get_public_url(path))
 
@@ -99,7 +116,7 @@ class SupabaseArtifactStore(ArtifactStorePort):
         self._client.storage.from_(_SOURCES_BUCKET).upload(
             path,
             payload.encode("utf-8"),  # supabase-py: bytes = content, str = file path
-            {"upsert": "true"},
+            {"upsert": "true", "content-type": self._mime_types[_SOURCES_BUCKET]},
         )
         return str(self._client.storage.from_(_SOURCES_BUCKET).get_public_url(path))
 

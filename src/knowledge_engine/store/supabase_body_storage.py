@@ -63,11 +63,21 @@ class SupabaseBodyStorage(BodyStoragePort):
         return f"{hashlib.sha256(url.encode('utf-8')).hexdigest()[:16]}.md"
 
     def _ensure_bucket(self) -> None:
-        """Create the bodies bucket when missing (idempotent)."""
-        try:
-            self._client.storage.create_bucket(_BUCKET)
-        except Exception:  # noqa: BLE001 - duplicate-bucket errors are benign
-            pass
+        """Create the bodies bucket as PUBLIC; heal a pre-existing private one.
+
+        Idempotent: steady state is one list call, zero writes.
+        """
+        existing = {b.name: b.public for b in self._client.storage.list_buckets()}
+        if _BUCKET not in existing:
+            try:
+                self._client.storage.create_bucket(_BUCKET, options={"public": True})
+            except Exception:  # noqa: BLE001 - duplicate-bucket races are benign
+                pass
+        elif not existing[_BUCKET]:
+            try:
+                self._client.storage.update_bucket(_BUCKET, {"public": True})
+            except Exception:  # noqa: BLE001 - heal attempt is best-effort
+                pass
 
     async def save(self, body: DocumentBody) -> BodyRef:
         """Upsert body bytes; return the ref (Cloud key in ``path``).
@@ -83,7 +93,7 @@ class SupabaseBodyStorage(BodyStoragePort):
         self._client.storage.from_(_BUCKET).upload(
             key,
             body.markdown.encode("utf-8"),  # supabase-py: bytes = content
-            {"upsert": "true"},
+            {"upsert": "true", "content-type": "text/markdown; charset=utf-8"},
         )
         return BodyRef(
             url=body.url,
