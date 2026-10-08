@@ -83,7 +83,7 @@ strict = true
 pretty = true
 show_error_codes = true
 warn_unreachable = true
-exclude = ["tests", "src/knowledge_engine/infrastructure/mcp/model.py"]
+exclude = ["tests"]
 
 [[tool.mypy.overrides]]
 # Legacy vendor-glue adapters (pre-refactor). They wrap third-party SDKs whose
