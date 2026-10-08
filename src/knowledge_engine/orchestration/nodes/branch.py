@@ -23,7 +23,7 @@ from knowledge_engine.orchestration.nodes.relevance import RelevanceNode
 from knowledge_engine.orchestration.nodes.synthesize import SynthesizeNode
 from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState
 from knowledge_engine.schemas.decomposition import SourceKind, SubQuery
-from knowledge_engine.schemas.source import DocumentBody
+from knowledge_engine.schemas.source import BodyRef, DocumentBody
 
 logger = logging.getLogger(__name__)
 
@@ -107,17 +107,17 @@ class BranchNode(WorkflowNode):
         resolved: list[Any] = update.get("sources", [])
         return resolved
 
-    async def _fetch_all(self, sources: list[Any]) -> list[DocumentBody]:
+    async def _fetch_all(self, sources: list[Any]) -> list[BodyRef | DocumentBody]:
         """Fetch bodies concurrently (bounded by the worker semaphore).
 
         Args:
             sources: Filtered sources to fetch.
 
         Returns:
-            list[DocumentBody]: Fetched bodies (failures skipped).
+            list[BodyRef | DocumentBody]: Fetched bodies as refs (failures skipped).
         """
         results = await asyncio.gather(*[self.fetch_body.run({"source": src}) for src in sources])
-        bodies: list[DocumentBody] = []
+        bodies: list[BodyRef | DocumentBody] = []
         for update in results:
             bodies.extend(update.get("bodies", []))
         return bodies

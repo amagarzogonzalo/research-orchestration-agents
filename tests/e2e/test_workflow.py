@@ -16,17 +16,19 @@ from knowledge_engine.orchestration.nodes import (
     SynthesizeNode,
 )
 from knowledge_engine.orchestration.runtime import GraphRuntime
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 from tests.conftest import FakeProvider, FakeScrape, FakeSearch
 
 
 def _runtime(*, interactive_review: bool = False, root: str = "knowledge_base") -> GraphRuntime:
     search, scrape, provider = FakeSearch(), FakeScrape(), FakeProvider(judge_pass=True)
+    storage = LocalBodyStorage(root=f"{root}/bodies")
     nodes = NodeSet(
         ingest=IngestNode(search),
         relevance=RelevanceNode(provider),
         bodies=BodiesNode(),
-        fetch_body=FetchBodyNode(scrape),
-        synthesize=SynthesizeNode(provider),
+        fetch_body=FetchBodyNode(scrape, storage=storage),
+        synthesize=SynthesizeNode(provider, storage=storage),
         judge=JudgeNode(provider),
         review=ReviewNode(interactive=interactive_review),
         render=RenderNode(root=root),

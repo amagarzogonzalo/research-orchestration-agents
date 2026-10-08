@@ -123,3 +123,30 @@ class DocumentBody(BaseModel):
     char_count: int = 0
     crawl_method: FetchMethod = FetchMethod.CRAWL4AI
     captured_at: str | None = None
+
+
+class BodyRef(BaseModel):
+    """Lightweight pointer to a persisted body (ADR 0010, state v2).
+
+    Checkpoints copy the whole state at every superstep, so channels carry
+    ~150-byte refs instead of 10-50KB markdown blobs. ``url`` is retained so
+    the synthesize URL->source-id reverse map keeps working without loading.
+
+    Attributes:
+        model_config: Attribute description.
+        url: Attribute description.
+        title: Attribute description.
+        path: Attribute description.
+        char_count: Attribute description.
+        crawl_method: Attribute description.
+        captured_at: Attribute description.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    url: str
+    title: str
+    path: str
+    char_count: int = 0
+    crawl_method: FetchMethod = FetchMethod.CRAWL4AI
+    captured_at: str | None = None

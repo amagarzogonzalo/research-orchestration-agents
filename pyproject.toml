@@ -43,6 +43,7 @@ dev = [
     # NOTE: semgrep is intentionally NOT a venv dependency (it pins
     # conflicting opentelemetry/mcp versions). It runs isolated via
     # `uvx semgrep`, the pre-commit hook, and CI (pipx). See Makefile `semgrep`.
+    "langgraph-checkpoint-conformance>=0.0.2",
 ]
 
 [project.hatch.build.targets.wheel]
