@@ -20,7 +20,7 @@ from typing import Any
 
 from langgraph.types import Command, Send
 
-from knowledge_engine.core.ports import ScrapePort
+from knowledge_engine.core.ports import BodyStoragePort, ScrapePort
 from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
@@ -32,11 +32,13 @@ JOIN_NODE = "synthesize"
 # Cost bound on the scrape fan-out: every filtered source would otherwise be
 # fetched (63-source federated unions blew both the call and token budgets).
 # Scholarly records keep source-priority order up to the cap; general-web
-# records (Wikipedia/DuckDuckGo/Google) get a reserved quota so the fallback
-# tier is always represented in evals, regardless of scholarly volume.
+# records (Wikipedia/DuckDuckGo/Tavily/Exa) get a reserved quota so the
+# fallback tier is always represented in evals, regardless of scholarly volume.
 _MAX_SCHOLARLY_BODIES = 16
 _MAX_GENERAL_BODIES = 4
-_GENERAL_SOURCES = frozenset({SearchSource.WIKIPEDIA, SearchSource.DUCKDUCKGO, SearchSource.GOOGLE})
+_GENERAL_SOURCES = frozenset(
+    {SearchSource.WIKIPEDIA, SearchSource.DUCKDUCKGO, SearchSource.TAVILY, SearchSource.EXA, SearchSource.SERPER}
+)
 
 
 def _is_general_web(src: object) -> bool:
@@ -46,7 +48,7 @@ def _is_general_web(src: object) -> bool:
         src: Source record (Pydantic or dict snapshot).
 
     Returns:
-        bool: True for Wikipedia/DuckDuckGo/Google records.
+        bool: True for Wikipedia/DuckDuckGo/Tavily/Exa records.
     """
     source = src.get("source") if isinstance(src, dict) else getattr(src, "source", None)
     if not isinstance(source, str):
@@ -108,18 +110,20 @@ class BodiesNode(WorkflowNode):
 
 
 class FetchBodyNode(WorkflowNode):
-    """Worker: scrape one source to LLM-ready Markdown (bounded fan-out)."""
+    """Worker: scrape one source, persist via storage, write a BodyRef (ADR 0013)."""
 
-    __slots__ = ("scrape", "_sem")
+    __slots__ = ("scrape", "storage", "_sem")
 
-    def __init__(self, scrape: ScrapePort, *, concurrency: int = 6) -> None:
+    def __init__(self, scrape: ScrapePort, *, storage: BodyStoragePort, concurrency: int = 6) -> None:
         """Create a FetchBodyNode.
 
         Args:
             scrape: Scrape-to-markdown port.
+            storage: Body persistence; state carries refs, not markdown.
             concurrency: Fetch concurrency.
         """
         self.scrape = scrape
+        self.storage = storage
         self._sem = asyncio.Semaphore(concurrency)
 
     async def run(self, state: WorkflowState | dict[str, Any]) -> dict[str, Any]:
@@ -129,7 +133,7 @@ class FetchBodyNode(WorkflowNode):
             state: Current workflow state.
 
         Returns:
-            dict[str, Any]: Result mapping.
+            dict[str, Any]: Result mapping (``bodies`` carries a single BodyRef).
 
         """
         src = _source_of(state)
@@ -142,7 +146,8 @@ class FetchBodyNode(WorkflowNode):
                 body = await self.scrape.to_markdown(url)
                 body.markdown = _strip_references(body.markdown)
                 body.char_count = len(body.markdown)
-                return {"bodies": [body]}
+                ref = await self.storage.save(body)
+                return {"bodies": [ref]}
             except Exception as exc:  # noqa: BLE001 - partial fan-out tolerated
                 logger.warning("scrape failed for %s: %s", src.id, exc)
                 return {"bodies": []}

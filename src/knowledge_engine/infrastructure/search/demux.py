@@ -11,6 +11,7 @@ import logging
 import re
 
 from knowledge_engine.core.ports import FetchPort, SearchPort
+from knowledge_engine.observability import telemetry
 from knowledge_engine.schemas.source import SourceRecord
 
 logger = logging.getLogger(__name__)
@@ -57,8 +58,11 @@ class DemuxSearchAdapter(SearchPort, FetchPort):
                     logger.warning("search source %s failed: %s", getattr(src, "name", src), exc)
                     return []
 
-        results = await asyncio.gather(*(run(s) for s in self.sources))
-        return _merge(results)
+        with telemetry.span("search.federated", query=query) as current:
+            results = await asyncio.gather(*(run(s) for s in self.sources))
+            merged = _merge(results)
+            current.set_attribute("sources_found", len(merged))
+            return merged
 
     async def fetch(self, doi: str) -> SourceRecord | None:
         """Fetch a record.

@@ -176,13 +176,29 @@ def test_professional_svg_rejects_unknown_workflow() -> None:
         render_professional_svg("nonexistent")
 
 
+def _canonical_svg(text: str) -> str:
+    """Normalize environment line-ending/EOF noise out of an SVG document.
+
+    Line endings (autocrlf) and the EOF newline (pre-commit end-of-file-fixer)
+    are environment artifacts, not diagram drift; compare canonically.
+
+    Args:
+        text: Raw SVG text (from disk or renderer).
+
+    Returns:
+        str: CRLF-folded text ending with exactly one newline.
+    """
+    normalized = text.replace("\r\n", "\n")
+    return normalized if normalized.endswith("\n") else normalized + "\n"
+
+
 @pytest.mark.parametrize("workflow", sorted(WORKFLOWS))
 def test_committed_diagrams_are_current(workflow: str) -> None:
     """Committed docs/diagrams SVGs match the renderer (refresh on change)."""
     from knowledge_engine.scripts.generate_graph_svg import DIAGRAM_DIR
 
     committed = (DIAGRAM_DIR / f"graph-{workflow}.svg").read_text(encoding="utf-8")
-    assert committed == render_professional_svg(workflow)
+    assert _canonical_svg(committed) == _canonical_svg(render_professional_svg(workflow))
 
 
 def test_diagram_alias_matches_research() -> None:
@@ -190,4 +206,5 @@ def test_diagram_alias_matches_research() -> None:
 
     root = Path(__file__).resolve().parents[2]
     assert (root / "docs" / "diagrams").resolve() == DIAGRAM_DIR.resolve()
-    assert (DIAGRAM_DIR / "graph.svg").read_text(encoding="utf-8") == render_professional_svg("research")
+    committed = (DIAGRAM_DIR / "graph.svg").read_text(encoding="utf-8")
+    assert _canonical_svg(committed) == _canonical_svg(render_professional_svg("research"))

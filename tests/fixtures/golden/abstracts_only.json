@@ -1,0 +1,43 @@
+{
+  "name": "abstracts_only",
+  "query": "How does retrieval-augmented generation reduce hallucinations",
+  "critique": null,
+  "use_object_sources": true,
+  "state": {
+    "query": "How does retrieval-augmented generation reduce hallucinations",
+    "sources": [
+      {
+        "id": "openalex:W1",
+        "doi": "10.1234/rag-survey",
+        "title": "Retrieval-Augmented Generation Survey",
+        "source": "openalex",
+        "authors": [
+          "A. Author",
+          "B. Author"
+        ],
+        "year": 2026,
+        "abstract": "A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. ",
+        "venue": "Journal of AI Research",
+        "references": [
+          "10.5678/hyper-rag"
+        ]
+      },
+      {
+        "id": "openalex:W2",
+        "doi": "10.5678/hyper-rag",
+        "title": "Hyper-RAG: combating hallucinations",
+        "source": "openalex",
+        "authors": [
+          "C. Researcher"
+        ],
+        "year": 2026,
+        "abstract": "Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. ",
+        "venue": "Nature Communications",
+        "references": []
+      }
+    ],
+    "filtered": [],
+    "bodies": []
+  },
+  "expected_prompt": "Synthesize the research findings into structured notes for query:\nHow does retrieval-augmented generation reduce hallucinations\n\nSources:\n[openalex:W1] Retrieval-Augmented Generation Survey — Journal of AI Research, 2026\nA survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. A survey of grounding mechanisms for reducing hallucination in LLMs. \n---\n[openalex:W2] Hyper-RAG: combating hallucinations — Nature Communications, 2026\nHypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. Hypergraph-driven retrieval combatting hallucination in production systems. "
+}

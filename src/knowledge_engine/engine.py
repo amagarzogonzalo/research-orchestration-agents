@@ -45,7 +45,9 @@ from knowledge_engine.orchestration.nodes import (
 )
 from knowledge_engine.orchestration.runtime import GraphRuntime, RunResult
 from knowledge_engine.schemas.browser import BrowserActionResult
+from knowledge_engine.schemas.settings import RunSettings
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 from knowledge_engine.store.file_checkpointer import FileCheckpointer
 from knowledge_engine.store.research_store import ResearchStore
 
@@ -98,7 +100,7 @@ class ResearchEngine:
         self._store = ResearchStore(self.store_root)
         self._checkpointer = self._build_checkpointer()
         self._memory_store = self._build_memory_store()
-        self._search = self.search or _default_search()
+        self._search = self.search or _default_search(self.store_root)
         self._scrape = self.scrape or ScrapeRouter()
         self._provider = self.provider or _default_provider()
         self._discoverer = self.discoverer or _default_discoverer()
@@ -224,8 +226,9 @@ class ResearchEngine:
         )
         ingest = IngestNode(self._search, limit=self.search_limit)
         relevance = RelevanceNode(self._provider)
-        fetch_body = FetchBodyNode(self._scrape)
-        synthesize = SynthesizeNode(self._provider)
+        storage = LocalBodyStorage(root=f"{self.store_root}/bodies")
+        fetch_body = FetchBodyNode(self._scrape, storage=storage)
+        synthesize = SynthesizeNode(self._provider, storage=storage)
         return NodeSet(
             ingest=ingest,
             relevance=relevance,
@@ -282,7 +285,13 @@ class ResearchEngine:
         return runtime
 
     async def research(
-        self, query: str, *, workflow: str = "research", thread_id: str | None = None, unique: bool = False
+        self,
+        query: str,
+        *,
+        workflow: str = "research",
+        thread_id: str | None = None,
+        unique: bool = False,
+        settings: RunSettings | None = None,
     ) -> RunResult:
         """Run a research workflow and return + persist its durable state.
 
@@ -293,6 +302,7 @@ class ResearchEngine:
             unique: When True, append a random suffix so parallel duplicate
                 submissions of the same query land on separate LangGraph
                 threads instead of colliding on one.
+            settings: Per-run overrides (ADR 0016); validated here once.
 
         Returns:
             RunResult: The run's durable state + any pending review interrupt.
@@ -300,12 +310,19 @@ class ResearchEngine:
         tid = thread_id or _derived_thread_id(query)
         if unique:
             tid = f"{tid}-{uuid.uuid4().hex[:8]}"
+        settings_dump = settings.model_dump() if settings else None
         runtime = self._runtime_for(workflow)
         self._store.write_metadata(
             tid,
-            {"query": query, "workflow": workflow, "status": "running", "provider": "discovery"},
+            {
+                "query": query,
+                "workflow": workflow,
+                "status": "running",
+                "provider": "discovery",
+                **({"settings": settings_dump} if settings_dump else {}),
+            },
         )
-        result = await runtime.run(workflow, tid, query)
+        result = await runtime.run(workflow, tid, query, settings=settings_dump)
         self._store.write_metadata(tid, result.state.model_dump(mode="json") | {"query": query})
         self._store.write_sources(tid, result.state.sources)
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})
@@ -401,8 +418,11 @@ def _derived_thread_id(query: str) -> str:
     return f"t-{digest}"
 
 
-def _default_search() -> SearchPort:
+def _default_search(root: str = "research_store") -> SearchPort:
     """Build the default federated search.
+
+    Args:
+        root: Store root under which the web cache/quota files live.
 
     Returns:
         SearchPort: Search adapter.
@@ -413,9 +433,7 @@ def _default_search() -> SearchPort:
     from knowledge_engine.infrastructure.search.crossref import CrossrefAdapter
     from knowledge_engine.infrastructure.search.dblp import DblpAdapter
     from knowledge_engine.infrastructure.search.doaj import DoajAdapter
-    from knowledge_engine.infrastructure.search.duckduckgo import DuckDuckGoAdapter
     from knowledge_engine.infrastructure.search.europe_pmc import EuropePmcAdapter
-    from knowledge_engine.infrastructure.search.google_cse import GoogleCSEAdapter
     from knowledge_engine.infrastructure.search.huggingface_papers import HuggingFacePapersAdapter
     from knowledge_engine.infrastructure.search.openalex import OpenAlexAdapter
     from knowledge_engine.infrastructure.search.osf import OSFPreprintsAdapter
@@ -443,16 +461,63 @@ def _default_search() -> SearchPort:
     unpaywall_email = os.environ.get("UNPAYWALL_EMAIL", "")
     if is_usable_email(unpaywall_email):
         sources.append(UnpaywallAdapter(unpaywall_email))
-    # General web last: fallback breadth after the scholarly set. Wikipedia
-    # and DuckDuckGo are keyless and always on; Google CSE only when key +
-    # CX engine are set (closed to new customers since 2024, sunset 2027).
+    # General web last: fallback breadth after the scholarly set. Wikipedia is
+    # keyless and stays a parallel demux source; the web chain (DuckDuckGo ->
+    # Tavily -> Exa) is ONE sequential, cached source so a query spends at most
+    # one provider's quota. Tavily/Exa join only when their keys are present.
     sources.append(WikipediaAdapter())
-    sources.append(DuckDuckGoAdapter())
-    google_key = os.environ.get("GOOGLE_API_KEY", "")
-    google_cx = os.environ.get("GOOGLE_CX_ENGINE", "")
-    if google_key and google_cx:
-        sources.append(GoogleCSEAdapter(api_key=google_key, cx=google_cx))
+    sources.append(_default_web_chain(root))
     return DemuxSearchAdapter(sources)
+
+
+def _default_web_chain(root: str) -> SearchPort:
+    """Build the sequential, cached general-web fallback chain.
+
+    DuckDuckGo (keyless) runs first; Tavily and Exa join only when their API
+    keys are set, each guarded by a persisted monthly quota ledger. The whole
+    chain is wrapped in a disk cache so a repeat query costs nothing.
+
+    Args:
+        root: Store root under which cache/quota files live.
+
+    Returns:
+        SearchPort: Cached fallback chain over the configured web providers.
+    """
+    from knowledge_engine.infrastructure.search.cache import CachedSearchAdapter, SearchCache
+    from knowledge_engine.infrastructure.search.duckduckgo import DuckDuckGoAdapter
+    from knowledge_engine.infrastructure.search.exa import EXA_MONTHLY_LIMIT, ExaAdapter
+    from knowledge_engine.infrastructure.search.fallback import FallbackSearchAdapter
+    from knowledge_engine.infrastructure.search.quota import MonthlyQuotaLedger
+    from knowledge_engine.infrastructure.search.serper import SERPER_MONTHLY_LIMIT, SerperAdapter
+    from knowledge_engine.infrastructure.search.tavily import TAVILY_MONTHLY_LIMIT, TavilyAdapter
+
+    usage_root = f"{root}/_usage"
+    providers: list[SearchPort] = [DuckDuckGoAdapter()]
+    tavily_key = os.environ.get("TAVILY_API_KEY", "")
+    if tavily_key:
+        providers.append(
+            TavilyAdapter(
+                tavily_key,
+                ledger=MonthlyQuotaLedger("tavily", limit=TAVILY_MONTHLY_LIMIT, root=usage_root),
+            )
+        )
+    exa_key = os.environ.get("EXA_API_KEY", "")
+    if exa_key:
+        providers.append(
+            ExaAdapter(
+                exa_key,
+                ledger=MonthlyQuotaLedger("exa", limit=EXA_MONTHLY_LIMIT, root=usage_root),
+            )
+        )
+    serper_key = os.environ.get("SERPER_API_KEY", "")
+    if serper_key:
+        providers.append(
+            SerperAdapter(
+                serper_key,
+                ledger=MonthlyQuotaLedger("serper", limit=SERPER_MONTHLY_LIMIT, root=usage_root),
+            )
+        )
+    return CachedSearchAdapter(FallbackSearchAdapter(providers), SearchCache(f"{root}/_cache/search"))
 
 
 def _default_provider() -> Any:

@@ -43,6 +43,7 @@ dev = [
     # NOTE: semgrep is intentionally NOT a venv dependency (it pins
     # conflicting opentelemetry/mcp versions). It runs isolated via
     # `uvx semgrep`, the pre-commit hook, and CI (pipx). See Makefile `semgrep`.
+    "langgraph-checkpoint-conformance>=0.0.2",
 ]
 
 [project.hatch.build.targets.wheel]
@@ -82,7 +83,7 @@ strict = true
 pretty = true
 show_error_codes = true
 warn_unreachable = true
-exclude = ["tests", "src/knowledge_engine/infrastructure/mcp/model.py"]
+exclude = ["tests"]
 
 [[tool.mypy.overrides]]
 # Legacy vendor-glue adapters (pre-refactor). They wrap third-party SDKs whose

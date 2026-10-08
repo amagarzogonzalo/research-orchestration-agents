@@ -14,7 +14,7 @@ import logging
 from typing import Any
 
 from knowledge_engine.core.ports import ProviderPort
-from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState
+from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState, read_setting
 from knowledge_engine.schemas.decomposition import MAX_DECOMPOSE_DEPTH, MAX_SUBQUERIES, SourceKind, SubQuery
 from knowledge_engine.schemas.provider import Affinity, ChatRequest
 
@@ -60,7 +60,9 @@ class DecomposeNode(WorkflowNode):
         query = state.get("query", "")
         depth = state.get("depth", 0)
         rounds = state.get("rounds", 0)
-        if depth >= self.max_depth:
+        max_subqueries = read_setting(state, "max_subqueries", self.max_subqueries)
+        max_depth = read_setting(state, "max_depth", self.max_depth)
+        if depth >= max_depth:
             logger.info("depth cap reached (%d); stopping decomposition", depth)
             return {"sub_queries": [], "rounds": rounds + 1, "llm_calls": 0}
         gaps = state.get("gaps", [])
@@ -78,7 +80,7 @@ class DecomposeNode(WorkflowNode):
             logger.warning("decompose failed (%s); falling back to single branch", exc)
             items = [_fallback(query, depth + 1)]
         return {
-            "sub_queries": [item.model_dump(mode="json") for item in items[: self.max_subqueries]],
+            "sub_queries": [item.model_dump(mode="json") for item in items[:max_subqueries]],
             "depth": depth + 1,
             "rounds": rounds + 1,
             "llm_calls": 1,
