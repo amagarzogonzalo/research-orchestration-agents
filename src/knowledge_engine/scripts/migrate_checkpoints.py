@@ -19,6 +19,10 @@ import os
 from pathlib import Path
 from typing import cast
 
+if os.name == "nt":
+    # psycopg async on Windows needs the selector loop; Linux prod unaffected.
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+
 DEFAULT_ROOT = Path("research_store/checkpoints")
 
 
@@ -85,6 +89,7 @@ async def migrate(root: Path, dsn: str, *, dry_run: bool) -> int:
                     {
                         "configurable": {
                             "thread_id": thread_id,
+                            "checkpoint_ns": str(payload.get("checkpoint_ns", "")),
                             "checkpoint_id": payload.get("parent_checkpoint_id"),
                         }
                     },
@@ -112,6 +117,9 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--dry-run", action="store_true", help="print the plan without writing")
     args = parser.parse_args(argv)
 
+    from knowledge_engine.config import load_dotenv
+
+    load_dotenv()
     dsn = os.environ.get("DATABASE_URL", "")
     if not dsn and not args.dry_run:
         print("DATABASE_URL not set; exporting a DSN is required for a real migration")
