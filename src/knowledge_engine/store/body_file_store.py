@@ -65,7 +65,7 @@ class LocalBodyStorage(BodyStoragePort):
         """
         resolved = Path(ref.path).resolve()
         if not resolved.is_relative_to(self.root.resolve()):
-            raise KnowledgeEngineError(f"body ref escapes storage root: {ref.path}")
+            raise KnowledgeEngineError(f"body ref escapes storage root: {ref.path!r} root={self.root.resolve()!s}")
         if not resolved.is_file():
             raise KnowledgeEngineError(f"body ref is missing: {ref.path}")
         return resolved.read_text(encoding="utf-8")
