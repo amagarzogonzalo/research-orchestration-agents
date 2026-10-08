@@ -156,7 +156,7 @@ async def _materialize_bodies(state: WorkflowState, storage: BodyStoragePort | N
     their markdown through the storage port; inline DocumentBody records and
     legacy dict snapshots pass through untouched. The prompt formatter sees
     one canonical shape, so prompt bytes are identical across both state eras
-    (ADR 0010 — the replay-neutrality contract).
+    (ADR 0013 — the replay-neutrality contract).
 
     Args:
         state: Current workflow state.
@@ -197,7 +197,7 @@ async def _ref_to_body(ref: BodyRef, storage: BodyStoragePort | None) -> Documen
         KnowledgeEngineError: When storage is None.
     """
     if storage is None:
-        raise KnowledgeEngineError("body refs present but no BodyStoragePort wired (ADR 0010)")
+        raise KnowledgeEngineError("body refs present but no BodyStoragePort wired (ADR 0013)")
     return DocumentBody(
         url=ref.url,
         title=ref.title,

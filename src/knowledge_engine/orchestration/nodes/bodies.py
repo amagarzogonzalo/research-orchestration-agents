@@ -108,7 +108,7 @@ class BodiesNode(WorkflowNode):
 
 
 class FetchBodyNode(WorkflowNode):
-    """Worker: scrape one source, persist via storage, write a BodyRef (ADR 0010)."""
+    """Worker: scrape one source, persist via storage, write a BodyRef (ADR 0013)."""
 
     __slots__ = ("scrape", "storage", "_sem")
 

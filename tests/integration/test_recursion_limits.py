@@ -1,4 +1,4 @@
-"""Recursion-limit plumbing (ADR 0011): runtime injects the derived bound.
+"""Recursion-limit plumbing (ADR 0014): runtime injects the derived bound.
 
 Two guarantees: ``GraphRuntime.run`` passes the derived workflow limit into
 ``ainvoke``'s config, and LangGraph actually enforces that key (a looping

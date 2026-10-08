@@ -1,5 +1,5 @@
----
-@id: "plans/0011"
+﻿---
+@id: "plans/0014"
 type: ADR
 status: ACCEPTED
 date: 2026-10-07
@@ -8,7 +8,7 @@ related:
   - 0009   # portable research library
 ---
 
-# 0011 — Derived run limits: recursion bounds computed from budget constants
+# 0014 — Derived run limits: recursion bounds computed from budget constants
 
 ## Context
 

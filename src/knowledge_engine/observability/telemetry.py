@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
 
 from opentelemetry import metrics, trace
@@ -105,6 +107,30 @@ def _init_meter() -> metrics.Meter:
 
 tracer = _init_trace()
 meter = _init_meter()
+
+
+@contextmanager
+def span(name: str, **attributes: Any) -> Iterator[Any]:
+    """Open a named span with scalar-or-stringified attributes.
+
+    Cost is a no-op when no exporter is configured (the env-gated default
+    tracer); callers never import an exporter — only this helper (DIP).
+
+    Args:
+        name: Span name (e.g. ``node.IngestNode``, ``search.federated``).
+        **attributes: Span attributes; ``None`` values are dropped, non-scalar
+            values are stringified (OTEL accepts str/bool/int/float).
+
+    Yields:
+        Any: The active span (for post-hoc ``set_attribute`` / status).
+    """
+    with tracer.start_as_current_span(name) as current:
+        for key, value in attributes.items():
+            if value is None:
+                continue
+            current.set_attribute(key, value if isinstance(value, (str, bool, int, float)) else str(value))
+        yield current
+
 
 # Metric instruments, lazily bound in callers.
 token_usage = meter.create_counter(

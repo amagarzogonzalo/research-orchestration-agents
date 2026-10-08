@@ -1,4 +1,4 @@
-"""Derived run limits — recursion budgets computed from shared constants (ADR 0011).
+"""Derived run limits — recursion budgets computed from shared constants (ADR 0014).
 
 ``recursion_limit`` is the graph's hard loop bound; the guardrails
 (:mod:`knowledge_engine.orchestration.guardrails`) are the soft bounds honored

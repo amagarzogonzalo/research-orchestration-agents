@@ -1,4 +1,4 @@
-"""BodyStoragePort contract (W4, ADR 0010): deterministic refs, roundtrip, traversal guard.
+"""BodyStoragePort contract (W4, ADR 0013): deterministic refs, roundtrip, traversal guard.
 
 The port is the seam that lets WorkflowState carry lightweight BodyRef pointers
 instead of full DocumentBody markdown (10-50KB per body) — checkpoint blobs

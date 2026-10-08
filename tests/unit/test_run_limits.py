@@ -1,4 +1,4 @@
-"""Derived recursion limits (ADR 0011): derivation linkage + runtime plumbing.
+"""Derived recursion limits (ADR 0014): derivation linkage + runtime plumbing.
 
 The limit is the graph's hard loop bound — it must be *derived* from the same
 budget constants the nodes enforce, never hand-copied, and it must dominate

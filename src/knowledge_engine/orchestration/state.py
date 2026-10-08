@@ -14,10 +14,12 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from operator import add
+from time import perf_counter
 from typing import Annotated, Any, TypedDict
 
 from langgraph.types import Command, Send
 
+from knowledge_engine.observability import telemetry
 from knowledge_engine.schemas.extraction import MAX_SYNTHESIS_ITERATIONS, GraphState, GraphStatus
 from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
 
@@ -151,7 +153,10 @@ class WorkflowNode:
         raise NotImplementedError
 
     async def __call__(self, state: WorkflowState) -> dict[str, Any] | Command[Any]:
-        """Run the node.
+        """Run the node under a thread-correlated tracing span.
+
+        Attributes are counts and identifiers only — never state contents
+        (PII rule). Exceptions are recorded on the span, then re-raised.
 
         Args:
             state: Current workflow state.
@@ -159,8 +164,22 @@ class WorkflowNode:
         Returns:
             dict[str, Any] | Command[Any]: State update or routing command.
 
+        Raises:
+            Exception: Whatever the node raises; recorded on the span first,
+                then re-raised (error handling lives at the graph layer).
         """
-        return await self.run(state)
+        node = type(self).__name__
+        with telemetry.span(f"node.{node}", **{"thread.id": str(state.get("thread_id", ""))}) as current:
+            start = perf_counter()
+            try:
+                result = await self.run(state)
+            except Exception as exc:
+                current.record_exception(exc)
+                raise
+            current.set_attribute("duration_ms", round((perf_counter() - start) * 1000.0, 2))
+            if isinstance(result, dict):
+                current.set_attribute("updated_keys", len(result))
+            return result
 
     def command(self, *, update: dict[str, Any] | None = None, goto: str | Sequence[Send] | Send) -> Command[Any]:
         """SOTA routing: combine a state update with an explicit next node.

@@ -101,7 +101,7 @@ class AgentSynthesizeNode(WorkflowNode):
 def _coerce_bodies(state: WorkflowState) -> list[DocumentBody]:
     """Accept DocumentBody objects or their raw dict snapshots (LangGraph state).
 
-    BodyRef pointers (ADR 0010) are skipped: the agentic node is opt-in, not
+    BodyRef pointers (ADR 0013) are skipped: the agentic node is opt-in, not
     wired in the default graphs, and has no storage to materialize them yet.
 
     Args:

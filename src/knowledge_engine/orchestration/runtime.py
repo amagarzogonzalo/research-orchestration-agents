@@ -91,7 +91,7 @@ class GraphRuntime:
             thread_id: Run thread identifier.
             query: Scholarly query string.
             recursion_limit: Optional hard loop bound; defaults to the derived
-                per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0011).
+                per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
 
         Returns:
             RunResult: Run result.
@@ -118,7 +118,7 @@ class GraphRuntime:
             thread_id: Run thread identifier.
             payload: Event or resume payload.
             recursion_limit: Optional hard loop bound; defaults to the derived
-                per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0011).
+                per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
 
         Returns:
             RunResult: Run result.

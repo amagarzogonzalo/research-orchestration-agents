@@ -1,4 +1,4 @@
-"""State-v2 wiring (W4, ADR 0010): fetch persists bodies, state carries BodyRefs.
+"""State-v2 wiring (W4, ADR 0013): fetch persists bodies, state carries BodyRefs.
 
 Two guarantees: (1) ``FetchBodyNode`` writes refs and never leaks raw markdown
 into state/checkpoints; (2) synthesis from refs is byte-identical to synthesis

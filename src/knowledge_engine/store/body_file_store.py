@@ -1,4 +1,4 @@
-"""LocalBodyStorage — filesystem adapter for :class:`BodyStoragePort` (ADR 0010).
+"""LocalBodyStorage — filesystem adapter for :class:`BodyStoragePort` (ADR 0013).
 
 Bodies land as UTF-8 Markdown files under ``<root>/<sha256(url)[:16]>.md``:
 deterministic (same URL -> same path, idempotent re-fetch), human-inspectable,

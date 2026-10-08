@@ -1,5 +1,5 @@
----
-@id: "plans/0010"
+﻿---
+@id: "plans/0013"
 type: ADR
 status: ACCEPTED
 date: 2026-10-07
@@ -9,7 +9,7 @@ related:
   - 0012   # artifact store port (Supabase Storage is the future BodyStoragePort adapter)
 ---
 
-# 0010 — State v2: body references instead of inline markdown
+# 0013 — State v2: body references instead of inline markdown
 
 ## Context
 
@@ -59,7 +59,7 @@ budget and slow serde on every step.
   store; the legacy dict-snapshot branch in `_materialize_bodies` must be
   kept until a migration sweep confirms no old threads remain.
 - **Zero-cost:** local files only; Supabase Storage stays an opt-in adapter
-  (ADR 0012 track).
+  (ADR 0015 track).
 
 ## References
 
