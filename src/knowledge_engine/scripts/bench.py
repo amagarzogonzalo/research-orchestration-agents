@@ -62,8 +62,20 @@ class _BenchSearch(SearchPort):
             list[SourceRecord]: Two fixed openalex records.
         """
         return [
-            SourceRecord(id="openalex:W1", title="Paper One", source=SearchSource.OPENALEX, abstract="a" * 400),
-            SourceRecord(id="openalex:W2", title="Paper Two", source=SearchSource.OPENALEX, abstract="b" * 400),
+            SourceRecord(
+                id="openalex:W1",
+                title="Paper One",
+                source=SearchSource.OPENALEX,
+                abstract="a" * 400,
+                doi="10.1000/paper-one",
+            ),
+            SourceRecord(
+                id="openalex:W2",
+                title="Paper Two",
+                source=SearchSource.OPENALEX,
+                abstract="b" * 400,
+                doi="10.1000/paper-two",
+            ),
         ]
 
 

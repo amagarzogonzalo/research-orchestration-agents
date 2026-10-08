@@ -1,14 +1,14 @@
 {
   "deep": {
-    "checkpoint_bytes": 86449,
-    "ram_kb": 693,
-    "supersteps": 16,
-    "wall_s": 0.62
+    "checkpoint_bytes": 69733,
+    "ram_kb": 696,
+    "supersteps": 13,
+    "wall_s": 0.84
   },
   "research": {
-    "checkpoint_bytes": 48679,
-    "ram_kb": 697,
+    "checkpoint_bytes": 54295,
+    "ram_kb": 696,
     "supersteps": 10,
-    "wall_s": 0.35
+    "wall_s": 0.41
   }
 }
