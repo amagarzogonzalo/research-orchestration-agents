@@ -139,3 +139,8 @@ token_usage = meter.create_counter(
 operation_duration = meter.create_histogram(
     "gen_ai.client.operation.duration", unit="ms", description="Latency of provider operations"
 )
+search_provider_calls = meter.create_counter(
+    "knowledge_engine.search_provider.calls",
+    unit="1",
+    description="General-web chain attempts per provider with outcome (success/empty/failure/quota/breaker)",
+)

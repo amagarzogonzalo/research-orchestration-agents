@@ -119,10 +119,13 @@ OA-full-text layer on top:
 | DuckDuckGo | General-web chain, first provider (HTML results, no signup) | keyless, always on |
 | Tavily | General-web chain, agent-search fallback | `TAVILY_API_KEY`; 1,000 free credits/month, no card; skipped when absent |
 | Exa | General-web chain, neural/semantic fallback | `EXA_API_KEY`; $10/month free credit, no card; skipped when absent |
+| Serper | General-web chain, independent Google-grade fallback (disjoint vendor family) | `SERPER_API_KEY`; 2,500 free searches/month, no card; skipped when absent |
 
 The general-web tier is a single sequential fallback chain
-(DuckDuckGo → Tavily → Exa) wrapped in a disk cache, so a query spends at most
-one provider's quota and repeat queries spend none. Each keyed provider keeps a
+(DuckDuckGo → Tavily → Exa → Serper) wrapped in a disk cache, so a query spends at most
+one provider's quota and repeat queries spend none. Each attempt emits an
+observability span + counter (`outcome`: success/empty/failure/quota/breaker) so
+quality gaps localize instantly. Each keyed provider keeps a
 persisted monthly ledger; an exhausted or rate-limited provider is skipped
 until it refills rather than retried.
 

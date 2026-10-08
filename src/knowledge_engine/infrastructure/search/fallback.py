@@ -20,6 +20,7 @@ from typing import Any
 
 from knowledge_engine.core.exceptions import QuotaExhausted
 from knowledge_engine.core.ports import SearchPort
+from knowledge_engine.observability import telemetry
 from knowledge_engine.schemas.source import SourceRecord
 
 logger = logging.getLogger(__name__)
@@ -92,8 +93,10 @@ class FallbackSearchAdapter(SearchPort):
 
         A provider that is quota-exhausted is skipped without a network call
         (the adapter checks its own ledger). Any other failure trips that
-        provider's breaker and moves on. Returns ``[]`` when every provider
-        fails or returns nothing.
+        provider's breaker and moves on. Every attempt emits a span +
+        counter with the outcome, so quality gaps localize instantly
+        (issue #21). Returns ``[]`` when every provider fails or returns
+        nothing.
 
         Args:
             query: Search terms.
@@ -105,22 +108,36 @@ class FallbackSearchAdapter(SearchPort):
         for provider in self.providers:
             name = getattr(provider, "name", type(provider).__name__)
             breaker = self._breakers.get(name)
-            if breaker is not None and not await breaker.allow():
-                logger.info("general-web: skipping %s (breaker open)", name)
-                continue
-            try:
-                records = await provider.search(query, limit=limit)
-            except QuotaExhausted as exc:
-                logger.info("general-web: skipping %s (quota): %s", name, exc)
-                continue
-            except Exception as exc:  # noqa: BLE001 - isolate one provider from the chain
-                logger.warning("general-web: %s failed: %s", name, exc)
-                if breaker is not None:
-                    await breaker.record_failure()
-                continue
-            if records:
+            with telemetry.span(f"search.{name}", query=query) as current:
+                if breaker is not None and not await breaker.allow():
+                    logger.info("general-web: skipping %s (breaker open)", name)
+                    current.set_attribute("outcome", "breaker_open")
+                    telemetry.search_provider_calls.add(1, {"provider": name, "outcome": "breaker_open"})
+                    continue
+                try:
+                    records = await provider.search(query, limit=limit)
+                except QuotaExhausted as exc:
+                    logger.info("general-web: skipping %s (quota): %s", name, exc)
+                    current.set_attribute("outcome", "quota")
+                    telemetry.search_provider_calls.add(1, {"provider": name, "outcome": "quota"})
+                    continue
+                except Exception as exc:  # noqa: BLE001 - isolate one provider from the chain
+                    logger.warning("general-web: %s failed: %s", name, exc)
+                    if breaker is not None:
+                        await breaker.record_failure()
+                    current.record_exception(exc)
+                    current.set_attribute("outcome", "failure")
+                    telemetry.search_provider_calls.add(1, {"provider": name, "outcome": "failure"})
+                    continue
+                if not records:
+                    logger.info("general-web: %s returned no results; trying next", name)
+                    current.set_attribute("outcome", "empty")
+                    telemetry.search_provider_calls.add(1, {"provider": name, "outcome": "empty"})
+                    continue
                 if breaker is not None:
                     await breaker.record_success()
+                current.set_attribute("outcome", "success")
+                current.set_attribute("results", len(records))
+                telemetry.search_provider_calls.add(1, {"provider": name, "outcome": "success"})
                 return records
-            logger.info("general-web: %s returned no results; trying next", name)
         return []
