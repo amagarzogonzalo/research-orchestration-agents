@@ -45,6 +45,9 @@ dev = [
     # `uvx semgrep`, the pre-commit hook, and CI (pipx). See Makefile `semgrep`.
     "langgraph-checkpoint-conformance>=0.0.2",
 ]
+supabase = [
+    "supabase>=2.32.0",
+]
 
 [project.hatch.build.targets.wheel]
 packages = ["src/knowledge_engine"]
@@ -121,6 +124,8 @@ module = [
     "selenium.*",
     "letta.*",
     "psycopg.*",
+    "supabase.*",
+    "storage3.*",
 
     "google.*",
     "groq.*",
