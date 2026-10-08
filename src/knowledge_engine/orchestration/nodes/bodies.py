@@ -36,7 +36,9 @@ JOIN_NODE = "synthesize"
 # fallback tier is always represented in evals, regardless of scholarly volume.
 _MAX_SCHOLARLY_BODIES = 16
 _MAX_GENERAL_BODIES = 4
-_GENERAL_SOURCES = frozenset({SearchSource.WIKIPEDIA, SearchSource.DUCKDUCKGO, SearchSource.TAVILY, SearchSource.EXA})
+_GENERAL_SOURCES = frozenset(
+    {SearchSource.WIKIPEDIA, SearchSource.DUCKDUCKGO, SearchSource.TAVILY, SearchSource.EXA, SearchSource.SERPER}
+)
 
 
 def _is_general_web(src: object) -> bool:
