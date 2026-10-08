@@ -39,3 +39,28 @@ async def test_concurrent_status_writes_do_not_raise() -> None:
     final = await app.ainvoke(GraphState(thread_id="t", query="q"))
     assert final["status"] == GraphStatus.FAILED.value
     assert final["judge_critique"] in {"boom-a", "boom-b"}
+
+
+async def test_concurrent_status_writes_on_workflow_state_do_not_raise() -> None:
+    """The REAL graph state (WorkflowState) must merge concurrent failure writes.
+
+    The production graphs compile over WorkflowState; only GraphState's
+    reducers were covered before, so two branches failing in the same
+    superstep still crashed the run with InvalidUpdateError.
+    """
+    from knowledge_engine.orchestration.state import WorkflowState
+
+    async def _sel(state: dict) -> dict:
+        return {"status": GraphStatus.FAILED.value, "judge_critique": "boom"}
+
+    graph = StateGraph(WorkflowState)
+    graph.add_node("branch_a", _sel)
+    graph.add_node("branch_b", _sel)
+    graph.add_node("branch_c", _sel)
+    graph.add_node("branch_d", _sel)
+    for name in ("branch_a", "branch_b", "branch_c", "branch_d"):
+        graph.add_edge(START, name)
+        graph.add_edge(name, END)
+    app = graph.compile()
+    final = await app.ainvoke({"thread_id": "t", "query": "q", "status": "running"})
+    assert final["status"] == GraphStatus.FAILED.value
