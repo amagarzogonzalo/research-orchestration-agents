@@ -12,8 +12,72 @@ from collections.abc import AsyncIterator
 import pytest
 
 from knowledge_engine.core.ports import ProviderPort, ScrapePort, SearchPort
+from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.provider import Affinity, ChatRequest, ChatResult, UsageSummary
 from knowledge_engine.schemas.source import DocumentBody, FetchMethod, SearchSource, SourceRecord
+
+
+class FakeArtifactStore:
+    """In-memory artifact store satisfying the ArtifactStorePort contract.
+
+    Attributes:
+        calls: Recorded call log for spy assertions.
+    """
+
+    def __init__(self) -> None:
+        self.calls: list[str] = []
+        self._articles: dict[str, str] = {}
+        self._sources: dict[str, str] = {}
+
+    def put_article(self, thread_id: str, artifact: KnowledgeArtifact) -> str:
+        """Persist article bytes in memory.
+
+        Args:
+            thread_id: Run thread identifier.
+            artifact: Final artifact.
+
+        Returns:
+            str: Locator.
+        """
+        self.calls.append(f"{thread_id}:article")
+        self._articles[thread_id] = f"---{artifact.frontmatter_yaml}---{artifact.body_markdown}"
+        return f"memory://articles/{thread_id}"
+
+    def put_sources(self, thread_id: str, sources: list[SourceRecord]) -> str:
+        """Persist sources in memory.
+
+        Args:
+            thread_id: Run thread identifier.
+            sources: Resolved sources.
+
+        Returns:
+            str: Locator.
+        """
+        self.calls.append(f"{thread_id}:sources")
+        self._sources[thread_id] = json.dumps([s.model_dump(mode="json") for s in sources])
+        return f"memory://sources/{thread_id}"
+
+    def get_article(self, thread_id: str) -> str | None:
+        """Load in-memory article.
+
+        Args:
+            thread_id: Run thread identifier.
+
+        Returns:
+            str | None: Article text or None.
+        """
+        return self._articles.get(thread_id)
+
+    def get_sources(self, thread_id: str) -> list[SourceRecord]:
+        """Load in-memory sources.
+
+        Args:
+            thread_id: Run thread identifier.
+
+        Returns:
+            list[SourceRecord]: Sources.
+        """
+        return [SourceRecord.model_validate(x) for x in json.loads(self._sources.get(thread_id, "[]"))]
 
 
 class FakeSearch(SearchPort):

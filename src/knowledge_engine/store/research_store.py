@@ -26,6 +26,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from knowledge_engine.core.ports import ArtifactStorePort
 from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.source import SourceRecord
 
@@ -35,12 +36,23 @@ logger = logging.getLogger(__name__)
 class ResearchStore:
     """Create, append to, and read run folders under a root directory.
 
+    Published-artifact persistence routes through an injected
+    :class:`ArtifactStorePort` (ADR-0012); ``None`` builds the portable
+    :class:`~knowledge_engine.store.artifact_store.LocalArtifactStore`,
+    byte-identical to the legacy behavior so evals stay green.
+
     Args:
         root: Store root directory.
+        artifacts: Optional artifact store override (composition-root only).
     """
 
-    def __init__(self, root: str | Path) -> None:
+    def __init__(self, root: str | Path, artifacts: ArtifactStorePort | None = None) -> None:
         self.root = Path(root)
+        if artifacts is None:
+            from knowledge_engine.store.artifact_store import LocalArtifactStore
+
+            artifacts = LocalArtifactStore(self.root)
+        self.artifacts: ArtifactStorePort = artifacts
 
     # -- paths ----------------------------------------------------------------
     def run_dir(self, thread_id: str) -> Path:
@@ -148,7 +160,9 @@ class ResearchStore:
             thread_id: Run thread identifier.
             sources: Resolved source records.
         """
-        payload = [s.model_dump(mode="json") for s in sources]
+        records = list(sources)
+        self.artifacts.put_sources(thread_id, records)
+        payload = [s.model_dump(mode="json") for s in records]
         self.sources_path(thread_id).write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
 
     def write_article(self, artifact: KnowledgeArtifact, thread_id: str) -> None:
@@ -159,6 +173,7 @@ class ResearchStore:
             thread_id: Run thread identifier.
         """
         text = f"---\n{artifact.frontmatter_yaml}---\n\n{artifact.body_markdown}\n"
+        self.artifacts.put_article(thread_id, artifact)
         self.article_path(thread_id).write_text(text, encoding="utf-8")
         logger.info("wrote article for thread=%s -> %s", thread_id, _rel(self.article_path(thread_id)))
 
