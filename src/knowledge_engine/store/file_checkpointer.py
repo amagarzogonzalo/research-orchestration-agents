@@ -29,10 +29,24 @@ from langgraph.checkpoint.base import (
     CheckpointMetadata,
     CheckpointTuple,
 )
+from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+
+from knowledge_engine.schemas.source import BodyRef, DocumentBody, FetchMethod, SearchSource, SourceRecord
 
 logger = logging.getLogger(__name__)
 
 _B64 = "base64"
+
+#: Channel types that serialize as msgpack ext types LangGraph does not know
+#: natively; allow-listed explicitly so the "unregistered type" warning can
+#: never harden into a silent block on a future langgraph release.
+ALLOWED_CHANNEL_SERDE_TYPES: tuple[type, ...] = (
+    BodyRef,
+    DocumentBody,
+    FetchMethod,
+    SearchSource,
+    SourceRecord,
+)
 
 
 def _thread_id(config: RunnableConfig) -> str:
@@ -103,6 +117,7 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
     def __init__(self, root: str = "research_store/checkpoints") -> None:
         super().__init__()
         self.root = Path(root)
+        self.serde = JsonPlusSerializer(allowed_msgpack_modules=ALLOWED_CHANNEL_SERDE_TYPES)
         self._locks: dict[str, asyncio.Lock] = {}
         self._locks_guard = asyncio.Lock()
 
@@ -193,6 +208,7 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
             "metadata_type": mtype,
             "metadata": _b64_encode(mblob),
             "parent_checkpoint_id": _checkpoint_id(config),
+            "checkpoint_ns": str(config.get("configurable", {}).get("checkpoint_ns", "") or ""),
         }
         async with await self._lock_for(thread):
             self._checkpoint_file(thread, ckpt_id).write_text(
@@ -213,7 +229,7 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         task_id: str,
         task_path: str = "",
     ) -> None:
-        """Aput writes.
+        """Store node-level writes (idempotent: re-putting a task replaces its entries).
 
         Args:
             config: Runnable configuration.
@@ -229,9 +245,15 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         payload = {"task_id": task_id, "task_path": task_path, "writes": serialized}
         async with await self._lock_for(thread):
             path = self._writes_file(thread, ckpt_id)
-            existing: list[dict[str, Any]] = []
             if path.exists():
-                existing = json.loads(path.read_text(encoding="utf-8"))
+                existing: list[dict[str, Any]] = json.loads(path.read_text(encoding="utf-8"))
+            else:
+                existing = []
+            existing = [
+                entry
+                for entry in existing
+                if not (entry.get("task_id") == task_id and entry.get("task_path", "") == task_path)
+            ]
             existing.append(payload)
             path.write_text(json.dumps(existing, ensure_ascii=False), encoding="utf-8")
 
@@ -246,6 +268,7 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         """
         thread = _thread_id(config)
         ckpt_id = _checkpoint_id(config)
+        wanted_ns = str(config.get("configurable", {}).get("checkpoint_ns", "") or "")
         async with await self._lock_for(thread):
             if ckpt_id:
                 path = self._checkpoint_file(thread, ckpt_id)
@@ -256,6 +279,8 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
                 if path.name.endswith(".writes.json"):
                     continue
                 payload = json.loads(path.read_text(encoding="utf-8"))
+                if str(payload.get("checkpoint_ns", "") or "") != wanted_ns:
+                    continue
                 checkpoint = self.serde.loads_typed((payload["type"], _b64_decode(payload["checkpoint"])))
                 metadata = self.serde.loads_typed((payload["metadata_type"], _b64_decode(payload["metadata"])))
                 pending = self._load_writes(self._writes_file(thread, path.stem))
@@ -263,7 +288,7 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
                     config={
                         "configurable": {
                             "thread_id": thread,
-                            "checkpoint_ns": config.get("configurable", {}).get("checkpoint_ns", ""),
+                            "checkpoint_ns": wanted_ns,
                             "checkpoint_id": path.stem,
                         }
                     },
@@ -315,6 +340,7 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
             CheckpointTuple: Checkpoint entries.
         """
         thread = _thread_id(config or {})
+        wanted_ns = str((config or {}).get("configurable", {}).get("checkpoint_ns", "") or "")
         before_id = _checkpoint_id(before) if before else None
         files = sorted(self._thread_dir(thread).glob("*.json"), reverse=True)
         yielded = 0
@@ -324,10 +350,20 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
             if before_id and path.stem >= before_id:
                 continue
             payload = json.loads(path.read_text(encoding="utf-8"))
+            if str(payload.get("checkpoint_ns", "") or "") != wanted_ns:
+                continue
             checkpoint = self.serde.loads_typed((payload["type"], _b64_decode(payload["checkpoint"])))
             metadata = self.serde.loads_typed((payload["metadata_type"], _b64_decode(payload["metadata"])))
+            if filter and not _filter_matches(metadata, filter):
+                continue
             yield CheckpointTuple(
-                config={"configurable": {"thread_id": thread, "checkpoint_id": path.stem}},
+                config={
+                    "configurable": {
+                        "thread_id": thread,
+                        "checkpoint_ns": wanted_ns,
+                        "checkpoint_id": path.stem,
+                    }
+                },
                 checkpoint=checkpoint,
                 metadata=metadata,
                 parent_config=_parent_config(thread, payload),
@@ -351,6 +387,21 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
                 shutil.rmtree(path)
         async with self._locks_guard:
             self._locks.pop(thread_id, None)
+
+
+def _filter_matches(metadata: object, wanted: dict[str, Any]) -> bool:
+    """Metadata subset-match for ``alist``'s ``filter`` (exact on given keys only).
+
+    Args:
+        metadata: Deserialized checkpoint metadata (dict from serde).
+        wanted: The filter mapping to satisfy.
+
+    Returns:
+        bool: True when every wanted key matches exactly.
+    """
+    if not isinstance(metadata, dict):
+        return not wanted
+    return all(metadata.get(key) == value for key, value in wanted.items())
 
 
 def _parent_config(thread: str, payload: dict[str, Any]) -> RunnableConfig | None:

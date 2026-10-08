@@ -18,7 +18,7 @@ from typing import Any
 from langgraph.checkpoint.memory import InMemorySaver
 
 from knowledge_engine.core.exceptions import ConfigurationError
-from knowledge_engine.store.file_checkpointer import FileCheckpointer
+from knowledge_engine.store.file_checkpointer import ALLOWED_CHANNEL_SERDE_TYPES, FileCheckpointer
 
 
 def _postgres_dsn(**kwargs: Any) -> str:
@@ -63,7 +63,9 @@ def build_checkpointer(kind: str = "memory", **kwargs: Any) -> Any:
             ``langgraph-checkpoint-postgres`` install.
     """
     if kind == "memory":
-        return InMemorySaver()
+        from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
+
+        return InMemorySaver(serde=JsonPlusSerializer(allowed_msgpack_modules=ALLOWED_CHANNEL_SERDE_TYPES))
     if kind == "file":
         return FileCheckpointer(root=kwargs.get("root", "research_store/checkpoints"))
     if kind == "postgres":
