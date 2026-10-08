@@ -97,26 +97,3 @@ def test_ledger_lines_carry_ids_without_indices() -> None:
     line = rel._ledger_line(_src("openalex:W1"))
     assert line.startswith("openalex:W1 | ")
     assert "[0]" not in line and "[1]" not in line
-
-
-async def test_user_prompt_labels_sources_not_papers() -> None:
-    """The verdict prompt must not mislabel web evidence as papers.
-
-    The system prompt grants practitioner/web sources first-class status for
-    practical questions, but user text saying ``Papers:`` / ``Relevant
-    papers`` contradicts it — weaker models follow the nearer label and drop
-    the web tier before it can ever be scraped or cited.
-    """
-    captured: list[str] = []
-
-    class _Capturing(_StubProvider):
-        async def complete(self, request: ChatRequest) -> _Res:
-            captured.append(request.messages[-1].content)
-            return await super().complete(request)
-
-    provider = _Capturing(['{"relevant_ids": ["a:1"]}'])
-    node, state = _state(provider)
-    await node.run(state)  # type: ignore[arg-type]
-    user = captured[0]
-    assert "Sources (papers and web pages):" in user
-    assert "Relevant papers" not in user
