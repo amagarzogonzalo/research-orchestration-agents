@@ -24,6 +24,25 @@ from knowledge_engine.schemas.extraction import MAX_SYNTHESIS_ITERATIONS, GraphS
 from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
 
 
+def _last_wins(current: str | None, update: str) -> str:
+    """Last-writer-wins reducer for concurrently written scalar channels.
+
+    Parallel branches (and their error handlers) may write ``status`` and
+    ``judge_critique`` in the same superstep; LastValue channels reject that
+    with :class:`InvalidUpdateError`. Mirrors the reducer already on
+    :class:`~knowledge_engine.schemas.extraction.GraphState` so the production
+    graphs tolerate concurrent failure writes deterministically.
+
+    Args:
+        current: Value the channel currently holds (None before first write).
+        update: The incoming write.
+
+    Returns:
+        str: The incoming value (or the fallback current on a null write).
+    """
+    return update if update is not None else (current or "running")
+
+
 class WorkflowState(TypedDict, total=False):
     """Raw typed channel state shared by all nodes/graphs.
 
@@ -77,11 +96,11 @@ class WorkflowState(TypedDict, total=False):
     bodies: Annotated[list[BodyRef | DocumentBody], add]
     notes: Annotated[list[str], add]
     judge_score: float | None
-    judge_critique: str | None
+    judge_critique: Annotated[str | None, _last_wins]
     iterations: int
     review_dir: str | None
     output_path: str | None
-    status: str
+    status: Annotated[str, _last_wins]
 
 
 def merge_sources(*lists: list[SourceRecord]) -> list[SourceRecord]:
