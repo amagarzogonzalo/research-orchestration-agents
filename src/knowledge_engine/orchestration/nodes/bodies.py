@@ -211,6 +211,14 @@ def _derive_url(src: SourceRecord) -> str | None:
         pmid = src.id.replace("pubmed:", "")
         if pmid:
             return f"https://pubmed.ncbi.nlm.nih.gov/{pmid}/"
+    # General-web records embed the target URL in the canonical id: without
+    # this the scrape tier never fetches them and web hits stay snippet-only.
+    if src.id.startswith(("tavily:", "exa:", "duckduckgo:", "serper:")):
+        url = src.id.partition(":")[2]
+        return url if url.startswith("http") else None
+    if src.id.startswith("wikipedia:"):
+        pageid = src.id.partition(":")[2]
+        return f"https://en.wikipedia.org/wiki/?curid={pageid}" if pageid else None
     if src.pdf_url:
         return src.pdf_url
     if src.doi:

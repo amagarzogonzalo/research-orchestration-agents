@@ -64,3 +64,28 @@ def test_citation_yield_empty_inputs() -> None:
     """Empty artifacts and source lists yield zero without crashing."""
     assert runner._citation_yield("", []) == "0/0 sources cited"
     assert runner._citation_yield("no footnotes", None) == "0/0 sources cited"
+
+
+def test_citation_yield_by_tier_splits_scholarly_and_web() -> None:
+    """Per-tier yield separates retrieval breadth from generation use."""
+    sources = [
+        {"id": "openalex:W1", "source": "openalex"},
+        {"id": "arxiv:123", "source": "arxiv"},
+        {"id": "duckduckgo:https://ex.io/guide", "source": "duckduckgo"},
+        {"id": "tavily:https://ex.io/tiers", "source": "tavily"},
+    ]
+    artifact = "Scholarly claim [^openalex:W1] and web claim [^duckduckgo:https://ex.io/guide]."
+    assert runner._citation_yield_by_tier(artifact, sources) == {
+        "scholarly": "1/2",
+        "web": "1/2",
+        "total": "2/4",
+    }
+
+
+def test_citation_yield_by_tier_empty() -> None:
+    assert runner._citation_yield_by_tier("", []) == {"scholarly": "0/0", "web": "0/0", "total": "0/0"}
+    assert runner._citation_yield_by_tier("no footnotes", None) == {
+        "scholarly": "0/0",
+        "web": "0/0",
+        "total": "0/0",
+    }

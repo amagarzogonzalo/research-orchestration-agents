@@ -17,7 +17,7 @@ import logging
 from typing import Any
 
 from knowledge_engine.core.ports import SearchPort
-from knowledge_engine.orchestration.nodes.bodies import FetchBodyNode
+from knowledge_engine.orchestration.nodes.bodies import FetchBodyNode, _is_general_web
 from knowledge_engine.orchestration.nodes.ingest import IngestNode
 from knowledge_engine.orchestration.nodes.relevance import RelevanceNode
 from knowledge_engine.orchestration.nodes.synthesize import SynthesizeNode
@@ -76,7 +76,7 @@ class BranchNode(WorkflowNode):
         sources = await self._retrieve(query, sub.source)
         sub_state: WorkflowState = {"query": query, "sources": sources}
         filtered = (await self.relevance.run(sub_state)).get("filtered", sources)
-        bodies = await self._fetch_all(filtered[: self.max_sources])
+        bodies = await self._fetch_all(_branch_pool(filtered, self.max_sources))
         leaf: WorkflowState = {
             "query": query,
             "sources": sources,
@@ -123,6 +123,41 @@ class BranchNode(WorkflowNode):
         return bodies
 
 
+def _branch_pool(pool: list[Any], cap: int) -> list[Any]:
+    """Cap the per-branch fetch list, guaranteeing web-tier representation.
+
+    The federated merge lists scholarly records first, so a bare ``pool[:cap]``
+    slice silently starves the general-web tier whenever the cap floods —
+    web hits end up never scraped and never cited, exactly what the deep
+    pipeline needs for practical questions (how-to, tooling, providers).
+
+    Replay-safe by design: the scholarly head (``pool[:cap]``) is always
+    preserved verbatim, so existing cassettes replay bit-identically (a missing
+    web recording degrades to an empty body, just like the old skip). Live,
+    one extra web fetch rides along when both tiers are present.
+
+    Args:
+        pool: Relevance-filtered branch sources, merge order.
+        cap: Body-fetch cap for the branch (scholarly head size).
+
+    Returns:
+        list[Any]: The scholarly head plus one general-web record when both
+            tiers are present and ``cap`` allows it (at most ``cap + 1``).
+    """
+    if cap <= 0:
+        return []
+    general = [src for src in pool if _is_general_web(src)]
+    scholarly = [src for src in pool if not _is_general_web(src)]
+    if not general:
+        return scholarly[:cap]
+    if not scholarly:
+        return general[:cap]
+    if cap < 3:
+        # Tiny caps cannot afford an extra fetch; preserve merge order.
+        return list(pool[:cap])
+    return scholarly[:cap] + general[:1]
+
+
 def _sub_query_of(state: WorkflowState | dict[str, Any]) -> SubQuery:
     """Parse the ``Send`` payload, falling back to the parent query.
 
@@ -142,4 +177,4 @@ def _sub_query_of(state: WorkflowState | dict[str, Any]) -> SubQuery:
     return SubQuery(query=query or "(empty)", depth=int(state.get("depth", 1)) if isinstance(state, dict) else 1)
 
 
-__all__ = ["BRANCH_NODE", "BranchNode"]
+__all__ = ["BRANCH_NODE", "BranchNode", "_branch_pool"]
