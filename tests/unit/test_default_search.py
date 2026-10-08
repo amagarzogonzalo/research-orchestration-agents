@@ -10,7 +10,12 @@ from knowledge_engine.infrastructure.search.fallback import FallbackSearchAdapte
 from knowledge_engine.infrastructure.search.tavily import TavilyAdapter
 
 
-def test_web_chain_is_cached_fallback(tmp_path) -> None:
+def test_web_chain_is_cached_fallback(tmp_path, monkeypatch) -> None:
+    # .env may legitimately carry provider keys (load_dotenv leaks them into
+    # the suite through earlier engine constructions); this case pins the
+    # keyless default, so isolate the env explicitly.
+    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
+    monkeypatch.delenv("EXA_API_KEY", raising=False)
     chain = _default_web_chain(str(tmp_path))
     assert isinstance(chain, CachedSearchAdapter)
     assert isinstance(chain.inner, FallbackSearchAdapter)
