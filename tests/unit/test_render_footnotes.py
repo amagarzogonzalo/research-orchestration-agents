@@ -34,3 +34,19 @@ def test_complete_footnotes_rewrites_dedup_variants() -> None:
     notes = "Claim text [^duckduckgo:https://arxiv.org/html/2504.06214v1]."
     out = _complete_footnotes(notes, provenance)
     assert "[^arxiv:2504.06214]:" in out
+
+
+def test_web_only_citation_def_carries_resolvable_url() -> None:
+    """A general-web source without DOI/PDF gets its URL in the def line."""
+    from knowledge_engine.orchestration.nodes.render import _full_citation
+
+    rec = SourceRecord(id="duckduckgo:https://ex.io/rag", title="RAG blog", source=SearchSource.DUCKDUCKGO)
+    assert _full_citation([rec], "duckduckgo:https://ex.io/rag").endswith("https://ex.io/rag")
+
+
+def test_wikipedia_citation_def_resolves_curid() -> None:
+    """Wikipedia page ids resolve to a canonical curid URL."""
+    from knowledge_engine.orchestration.nodes.render import _full_citation
+
+    rec = SourceRecord(id="wikipedia:59990826", title="RAG", source=SearchSource.WIKIPEDIA)
+    assert "curid=59990826" in _full_citation([rec], "wikipedia:59990826")
