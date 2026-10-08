@@ -71,6 +71,55 @@ async def test_deep_run_short_circuits_non_deep_intent(tmp_path) -> None:
     assert search.calls == 0
 
 
+async def test_deep_explicit_mode_beats_quick_heuristic(tmp_path) -> None:
+    """An explicitly requested deep run must research, not fast-path to answer."""
+    search = FakeSearch()
+    runtime = GraphRuntime(nodes=_deep_nodes(tmp_path, search=search), checkpointer=InMemorySaver())
+    result = await runtime.run("deep", "t-forced", "how to scale a research agent to the cloud free?", mode="deep")
+    assert search.calls > 0
+    assert result.state.synthetic_notes
+
+
+async def test_branch_fetches_web_tier_alongside_scholarly(tmp_path) -> None:
+    """Branch pool fetches the web URL live (offline proof with fakes)."""
+    from knowledge_engine.orchestration.nodes.branch import BranchNode
+    from knowledge_engine.schemas.source import SearchSource, SourceRecord
+
+    search = FakeSearch(
+        sources=[
+            SourceRecord(
+                id="openalex:W0",
+                title="Paper 0",
+                source=SearchSource.OPENALEX,
+                pdf_url="https://example.org/W0.pdf",
+            ),
+            SourceRecord(
+                id="openalex:W1",
+                title="Paper 1",
+                source=SearchSource.OPENALEX,
+                pdf_url="https://example.org/W1.pdf",
+            ),
+            SourceRecord(
+                id="openalex:W2",
+                title="Paper 2",
+                source=SearchSource.OPENALEX,
+                pdf_url="https://example.org/W2.pdf",
+            ),
+            SourceRecord(
+                id="duckduckgo:https://ex.io/guide", title="Practitioner guide", source=SearchSource.DUCKDUCKGO
+            ),
+        ]
+    )
+    scrape, provider = FakeScrape(), FakeProvider()
+    storage = LocalBodyStorage(root=str(Path(tmp_path) / "bodies"))
+    ingest, relevance = IngestNode(search), RelevanceNode(provider)
+    fetch_body, synthesize = FetchBodyNode(scrape, storage=storage), SynthesizeNode(provider, storage=storage)
+    branch = BranchNode(ingest=ingest, relevance=relevance, fetch_body=fetch_body, synthesize=synthesize)
+    out = await branch.run({"query": "how to scale free?", "sub_query": {"query": "how to scale free?"}})
+    assert "https://ex.io/guide" in scrape.calls
+    assert len(out["bodies"]) >= 4
+
+
 class ConcurrentSearch(FakeSearch):
     """Measures peak in-flight search concurrency (parallelism proof)."""
 

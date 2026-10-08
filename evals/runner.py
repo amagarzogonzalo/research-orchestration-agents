@@ -160,6 +160,54 @@ def _citation_yield(artifact: str, sources: list[dict[str, Any]] | None) -> str:
     return f"{len(used)}/{total} sources cited"
 
 
+_WEB_SOURCES = frozenset({"wikipedia", "duckduckgo", "tavily", "exa", "serper"})
+
+
+def _is_web_source(record: dict[str, Any]) -> bool:
+    """Whether an eval source dict belongs to the general-web tier.
+
+    Args:
+        record: Source record as a plain dict.
+
+    Returns:
+        bool: True for Wikipedia/DuckDuckGo/Tavily/Exa/Serper records.
+    """
+    source = str(record.get("source") or "")
+    if source in _WEB_SOURCES:
+        return True
+    sid = str(record.get("id") or "")
+    return sid.startswith(("wikipedia:", "duckduckgo:", "tavily:", "exa:", "serper:"))
+
+
+def _citation_yield_by_tier(
+    artifact: str, sources: list[dict[str, Any]] | None
+) -> dict[str, str]:
+    """Per-tier citation yield: scholarly vs general-web vs total.
+
+    Splits the retrieval-vs-generation signal per production RAG practice:
+    low web yield with web sources retrieved means the synthesis never used
+    the web evidence (the #19 gap), not that retrieval failed.
+
+    Args:
+        artifact: Rendered article text.
+        sources: Source records as plain dicts.
+
+    Returns:
+        dict[str, str]: ``{"scholarly": "u/t", "web": "u/t", "total": "u/t"}``.
+    """
+    seq = [s for s in (sources or []) if isinstance(s, dict) and s.get("id")]
+    used = set(re.findall(r"\[\^([^\]]+)\]", artifact or ""))
+    scholarly = [s for s in seq if not _is_web_source(s)]
+    web = [s for s in seq if _is_web_source(s)]
+    used_scholarly = sum(1 for s in scholarly if str(s.get("id")) in used)
+    used_web = sum(1 for s in web if str(s.get("id")) in used)
+    return {
+        "scholarly": f"{used_scholarly}/{len(scholarly)}",
+        "web": f"{used_web}/{len(web)}",
+        "total": f"{used_scholarly + used_web}/{len(seq)}",
+    }
+
+
 def run_case(case: dict[str, Any], mode: str, deep: bool = False) -> dict[str, Any]:
     cid = case["id"]
     k = int(case.get("samples", 1))
@@ -298,6 +346,11 @@ def run_case(case: dict[str, Any], mode: str, deep: bool = False) -> dict[str, A
 
     first = runs[0]
     notes.append(f"[{cid}] citation yield: {_citation_yield(first['artifact'], first.get('sources'))}")
+    by_tier = _citation_yield_by_tier(first["artifact"], first.get("sources"))
+    notes.append(
+        f"[{cid}] citation yield by tier: scholarly {by_tier['scholarly']}, "
+        f"web {by_tier['web']}, total {by_tier['total']}"
+    )
 
     return {
         "id": cid,

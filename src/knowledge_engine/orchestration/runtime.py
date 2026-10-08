@@ -92,6 +92,7 @@ class GraphRuntime:
         *,
         recursion_limit: int | None = None,
         settings: dict[str, Any] | None = None,
+        mode: str | None = None,
     ) -> RunResult:
         """Start (or resume-if-pending) one run; returns the graph outcome.
 
@@ -103,6 +104,9 @@ class GraphRuntime:
                 per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
             settings: Per-run overrides (validated upstream); land on the
                 ``settings`` channel for node reads (ADR 0016).
+            mode: Explicit intent override (e.g. ``deep``) that beats the
+                intent heuristic — an explicitly requested workflow must not
+                be fast-pathed away by it.
 
         Returns:
             RunResult: Run result.
@@ -118,6 +122,8 @@ class GraphRuntime:
         }
         if settings:
             initial["settings"] = settings
+        if mode:
+            initial["mode"] = mode
         result = await graph.ainvoke(initial, config=self._config(thread_id, recursion_limit=limit))
         return _to_result(result)
 
@@ -129,6 +135,7 @@ class GraphRuntime:
         *,
         recursion_limit: int | None = None,
         settings: dict[str, Any] | None = None,
+        mode: str | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
         """Stream per-superstep state values for progress UX (thin astream passthrough).
 
@@ -144,6 +151,7 @@ class GraphRuntime:
                 per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
             settings: Per-run overrides (validated upstream); land on the
                 ``settings`` channel for node reads (ADR 0016).
+            mode: Explicit intent override (e.g. ``deep``); mirrors :meth:`run`.
 
         Yields:
             dict[str, Any]: State values after each superstep.
@@ -158,6 +166,8 @@ class GraphRuntime:
         }
         if settings:
             initial["settings"] = settings
+        if mode:
+            initial["mode"] = mode
         config = self._config(thread_id, recursion_limit=limit)
         async for _mode, payload in graph.astream(initial, config=config, stream_mode=["values", "updates"]):
             if _mode == "values" and isinstance(payload, dict):
