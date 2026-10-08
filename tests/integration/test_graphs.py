@@ -16,16 +16,18 @@ from knowledge_engine.orchestration.nodes import (
     SynthesizeNode,
 )
 from knowledge_engine.orchestration.runtime import GraphRuntime
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 from tests.conftest import FakeEmptySearch, FakeProvider, FakeScrape, FakeSearch
 
 
 def _nodeset(search, scrape, provider, root: str = "knowledge_base") -> NodeSet:
+    storage = LocalBodyStorage(root=f"{root}/bodies")
     return NodeSet(
         ingest=IngestNode(search),
         relevance=RelevanceNode(provider),
         bodies=BodiesNode(),
-        fetch_body=FetchBodyNode(scrape),
-        synthesize=SynthesizeNode(provider),
+        fetch_body=FetchBodyNode(scrape, storage=storage),
+        synthesize=SynthesizeNode(provider, storage=storage),
         judge=JudgeNode(provider),
         review=ReviewNode(),
         render=RenderNode(root=root),

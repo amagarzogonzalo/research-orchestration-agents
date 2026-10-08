@@ -14,7 +14,7 @@ from __future__ import annotations
 import asyncio
 from typing import Any
 
-from langchain_core.callbacks import CallbackManagerForLLMRun
+from langchain_core.callbacks import AsyncCallbackManagerForLLMRun, CallbackManagerForLLMRun
 from langchain_core.language_models.chat_models import BaseChatModel
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.outputs import ChatGeneration, ChatResult
@@ -35,7 +35,7 @@ class ProviderChatModel(BaseChatModel):
     provider: ProviderPort
     affinity: str = "macro"
     max_tokens: int = 1500
-    _bound_tools: list[dict] = []
+    _bound_tools: list[dict[str, Any]] = []
 
     @property
     def _llm_type(self) -> str:
@@ -64,7 +64,7 @@ class ProviderChatModel(BaseChatModel):
         self,
         messages: list[BaseMessage],
         stop: list[str] | None = None,
-        run_manager: CallbackManagerForLLMRun | None = None,
+        run_manager: AsyncCallbackManagerForLLMRun | CallbackManagerForLLMRun | None = None,
         **kwargs: Any,
     ) -> ChatResult:
         """Generate a response.
@@ -135,11 +135,12 @@ def _to_chat_message(m: Any) -> ChatMessage:
     if isinstance(m, dict):
         role = Role[m.get("role", "user").upper()] if m.get("role", "user").upper() in Role.__members__ else Role.user
         return ChatMessage(role=role, content=m.get("content", "") or "")
-    role = {
+    role_by_type: dict[type[BaseMessage], Role] = {
         HumanMessage: Role.user,
         SystemMessage: Role.system,
         AIMessage: Role.assistant,
-    }.get(type(m), Role.user)
+    }
+    role = role_by_type.get(type(m), Role.user)
     return ChatMessage(role=role, content=m.content or "")
 
 

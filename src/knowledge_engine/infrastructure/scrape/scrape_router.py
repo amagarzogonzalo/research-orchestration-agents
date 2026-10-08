@@ -24,6 +24,7 @@ from knowledge_engine.infrastructure.scrape.crawl4ai_adapter import Crawl4aiAdap
 from knowledge_engine.infrastructure.scrape.europe_pmc_fulltext import EuropePmcFullTextAdapter
 from knowledge_engine.infrastructure.scrape.jina_reader import JinaReaderAdapter
 from knowledge_engine.infrastructure.scrape.trafilatura_adapter import TrafilaturaAdapter
+from knowledge_engine.observability import telemetry
 from knowledge_engine.schemas.source import DocumentBody
 
 logger = logging.getLogger(__name__)
@@ -94,19 +95,22 @@ class ScrapeRouter(ScrapePort):
         Raises:
             ScrapeError: If every scraper in the chain fails or yields unusable text.
         """
-        for scraper in self.chain:
-            try:
-                body = await _fetch_with_retry(scraper, url)
-            except ScrapeSkipped as exc:
-                logger.debug("scraper %s skipped %s (%s)", type(scraper).__name__, url, exc)
-                continue
-            except ScrapeError as exc:
-                logger.warning("scraper %s failed for %s (%s)", type(scraper).__name__, url, exc)
-                continue
-            if looks_clean(body.markdown):
-                return body
-            logger.warning("scraper %s yielded unusable text for %s", type(scraper).__name__, url)
-        raise ScrapeError(f"all scrapers failed for {url}")
+        with telemetry.span("scrape.ScrapeRouter", url=url) as current:
+            for scraper in self.chain:
+                try:
+                    body = await _fetch_with_retry(scraper, url)
+                except ScrapeSkipped as exc:
+                    logger.debug("scraper %s skipped %s (%s)", type(scraper).__name__, url, exc)
+                    continue
+                except ScrapeError as exc:
+                    logger.warning("scraper %s failed for %s (%s)", type(scraper).__name__, url, exc)
+                    continue
+                if looks_clean(body.markdown):
+                    current.set_attribute("chars", len(body.markdown))
+                    current.set_attribute("scraper", type(scraper).__name__)
+                    return body
+                logger.warning("scraper %s yielded unusable text for %s", type(scraper).__name__, url)
+            raise ScrapeError(f"all scrapers failed for {url}")
 
 
 @retry(

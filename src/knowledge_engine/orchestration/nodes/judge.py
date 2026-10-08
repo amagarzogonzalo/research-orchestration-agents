@@ -18,6 +18,7 @@ from knowledge_engine.orchestration.state import (
     MAX_SYNTHESIS_ITERATIONS,
     WorkflowNode,
     WorkflowState,
+    read_setting,
 )
 from knowledge_engine.schemas.provider import Affinity, ChatRequest
 
@@ -89,7 +90,8 @@ def judge_route(state: WorkflowState) -> str:
         str: Result text.
 
     """
-    if state.get("judge_critique") and state.get("iterations", 0) < MAX_SYNTHESIS_ITERATIONS:
+    max_iterations = read_setting(state, "max_iterations", MAX_SYNTHESIS_ITERATIONS)
+    if state.get("judge_critique") and state.get("iterations", 0) < max_iterations:
         return SYNTHESIZE_NODE
     return REVIEW_NODE
 

@@ -41,11 +41,19 @@ depends_on = [
 # router→{circuit, rate_limit} exist, all inside the parent module).
 [[modules]]
 path = "knowledge_engine.infrastructure.search"
-depends_on = [{ path = "knowledge_engine.core" }, { path = "knowledge_engine.schemas" }]
+depends_on = [
+    { path = "knowledge_engine.core" },
+    { path = "knowledge_engine.schemas" },
+    { path = "knowledge_engine.observability" },
+]
 
 [[modules]]
 path = "knowledge_engine.infrastructure.scrape"
-depends_on = [{ path = "knowledge_engine.core" }, { path = "knowledge_engine.schemas" }]
+depends_on = [
+    { path = "knowledge_engine.core" },
+    { path = "knowledge_engine.schemas" },
+    { path = "knowledge_engine.observability" },
+]
 
 [[modules]]
 path = "knowledge_engine.infrastructure.browser"
@@ -65,4 +73,5 @@ depends_on = [
     { path = "knowledge_engine.core" },
     { path = "knowledge_engine.schemas" },
     { path = "knowledge_engine.store" },
+    { path = "knowledge_engine.observability" },
 ]

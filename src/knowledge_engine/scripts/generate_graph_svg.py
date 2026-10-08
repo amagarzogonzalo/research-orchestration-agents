@@ -21,6 +21,7 @@ from knowledge_engine.orchestration import graphs
 from knowledge_engine.schemas.extraction import ExtractionRequest
 from knowledge_engine.schemas.provider import ChatRequest, ChatResult
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -883,8 +884,9 @@ def _stub_nodeset() -> graphs.NodeSet:
     provider = _StubProvider()
     ingest = IngestNode(search)
     relevance = RelevanceNode(provider)
-    fetch_body = FetchBodyNode(scrape)
-    synthesize = SynthesizeNode(provider)
+    storage = LocalBodyStorage(root="research_store/bodies")
+    fetch_body = FetchBodyNode(scrape, storage=storage)
+    synthesize = SynthesizeNode(provider, storage=storage)
     return graphs.NodeSet(
         ingest=ingest,
         relevance=relevance,

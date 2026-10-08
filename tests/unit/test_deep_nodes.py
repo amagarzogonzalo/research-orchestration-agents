@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any
 
 from knowledge_engine.core.ports import ProviderPort
@@ -38,14 +39,18 @@ class ExplodingProvider(ProviderPort):
 
 
 async def _nodeset_branch() -> BranchNode:
+    import tempfile
+
     from knowledge_engine.orchestration.nodes import FetchBodyNode, IngestNode, RelevanceNode, SynthesizeNode
+    from knowledge_engine.store.body_file_store import LocalBodyStorage
 
     provider = FakeProvider()
+    storage = LocalBodyStorage(root=Path(tempfile.mkdtemp()) / "bodies")
     return BranchNode(
         ingest=IngestNode(FakeSearch()),
         relevance=RelevanceNode(provider),
-        fetch_body=FetchBodyNode(FakeScrape()),
-        synthesize=SynthesizeNode(provider),
+        fetch_body=FetchBodyNode(FakeScrape(), storage=storage),
+        synthesize=SynthesizeNode(provider, storage=storage),
     )
 
 
@@ -102,14 +107,18 @@ async def test_branch_node_runs_leaf_pipeline_reducer_keys_only() -> None:
 
 
 async def test_branch_node_mcp_source_uses_mcp_port_with_fallback() -> None:
+    import tempfile
+
     from knowledge_engine.orchestration.nodes import FetchBodyNode, IngestNode, RelevanceNode, SynthesizeNode
+    from knowledge_engine.store.body_file_store import LocalBodyStorage
 
     search, mcp_search, provider = FakeSearch(), FakeSearch(), FakeProvider()
+    storage = LocalBodyStorage(root=Path(tempfile.mkdtemp()) / "bodies")
     branch = BranchNode(
         ingest=IngestNode(search),
         relevance=RelevanceNode(provider),
-        fetch_body=FetchBodyNode(FakeScrape()),
-        synthesize=SynthesizeNode(provider),
+        fetch_body=FetchBodyNode(FakeScrape(), storage=storage),
+        synthesize=SynthesizeNode(provider, storage=storage),
         mcp_search=mcp_search,
     )
     await branch.run({"sub_query": {"query": "q", "source": "mcp", "depth": 1}, "llm_calls": 0})
@@ -118,8 +127,8 @@ async def test_branch_node_mcp_source_uses_mcp_port_with_fallback() -> None:
     branch_no_mcp = BranchNode(
         ingest=IngestNode(search),
         relevance=RelevanceNode(provider),
-        fetch_body=FetchBodyNode(FakeScrape()),
-        synthesize=SynthesizeNode(provider),
+        fetch_body=FetchBodyNode(FakeScrape(), storage=storage),
+        synthesize=SynthesizeNode(provider, storage=storage),
     )
     await branch_no_mcp.run({"sub_query": {"query": "q", "source": "mcp", "depth": 1}, "llm_calls": 0})
     assert search.calls == 1
