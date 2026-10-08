@@ -21,7 +21,9 @@ from typing import cast
 
 if os.name == "nt":
     # psycopg async on Windows needs the selector loop; Linux prod unaffected.
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    policy = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+    if policy is not None:
+        asyncio.set_event_loop_policy(policy())
 
 DEFAULT_ROOT = Path("research_store/checkpoints")
 
