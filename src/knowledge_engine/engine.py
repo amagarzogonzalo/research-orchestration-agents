@@ -64,6 +64,7 @@ class ResearchEngine:
         checkpointer_kind: ``file`` (default, portable) or ``postgres`` (Supabase).
         store_kind: ``memory`` (default) or ``postgres`` (Supabase long-term memory).
         artifact_store_kind: ``local`` (default, portable) or ``supabase`` (cloud storage).
+        body_store_kind: ``local``/``supabase``; None follows the artifact kind.
         artifacts: Optional prebuilt ArtifactStorePort override (tests/composition).
         database_url: Supabase session-pooler DSN; falls back to ``DATABASE_URL`` env.
         cleanup_after_run: Delete the thread's checkpoints after a finished run.
@@ -80,6 +81,7 @@ class ResearchEngine:
     checkpointer_kind: str = "file"
     store_kind: str = "memory"
     artifact_store_kind: str = "local"
+    body_store_kind: str | None = None
     artifacts: Any | None = None
     database_url: str | None = None
     cleanup_after_run: bool = False
@@ -109,6 +111,30 @@ class ResearchEngine:
         self._scrape = self.scrape or ScrapeRouter()
         self._provider = self.provider or _default_provider()
         self._discoverer = self.discoverer or _default_discoverer()
+
+    def _build_body_store(self) -> Any:
+        """Build the body persistence per ``body_store_kind`` (ADR-0013 + cutover).
+
+        ``None`` auto-follows the artifact kind: cloud artifacts imply cloud
+        bodies, because cloud-durable state may resume cross-machine where
+        local ``.md`` files cannot exist.
+
+        Returns:
+            Any: A ``BodyStoragePort`` implementation.
+
+        Raises:
+            ConfigurationError: On an unknown kind or missing cloud keys.
+        """
+        from knowledge_engine.core.exceptions import ConfigurationError
+
+        kind = self.body_store_kind or ("supabase" if self.artifact_store_kind == "supabase" else "local")
+        if kind == "local":
+            return LocalBodyStorage(root=f"{self.store_root}/bodies")
+        if kind == "supabase":
+            from knowledge_engine.store.supabase_body_storage import SupabaseBodyStorage
+
+            return SupabaseBodyStorage.from_env()
+        raise ConfigurationError(f"unknown body_store_kind: {kind!r} (use 'local' or 'supabase')")
 
     def _dsn(self) -> str | None:
         """Return the configured Supabase DSN, if any.
@@ -257,7 +283,7 @@ class ResearchEngine:
         )
         ingest = IngestNode(self._search, limit=self.search_limit)
         relevance = RelevanceNode(self._provider)
-        storage = LocalBodyStorage(root=f"{self.store_root}/bodies")
+        storage = self._build_body_store()
         fetch_body = FetchBodyNode(self._scrape, storage=storage)
         synthesize = SynthesizeNode(self._provider, storage=storage)
         render_save = _artifact_saver(self._store)
