@@ -9,6 +9,7 @@ from __future__ import annotations
 import abc
 from typing import Any
 
+from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.browser import BrowserActionResult
 from knowledge_engine.schemas.extraction import ExtractionRequest
 from knowledge_engine.schemas.provider import ChatRequest, ChatResult
@@ -243,5 +244,65 @@ class BrowserActionPort(abc.ABC):
 
         Returns:
             BrowserActionResult: Action outcome.
+        """
+        ...
+
+
+class ArtifactStorePort(abc.ABC):
+    """Durable store for published artifacts (ADR-0012, issue #17).
+
+    Sync surface (documented trade-off): ``ResearchStore`` writes are already
+    sync and ``supabase-py`` is sync. Adapters decide WHERE published
+    articles + sources live — local files (default, portable) or Supabase
+    Storage (cloud, survives ephemeral hosts).
+    """
+
+    @abc.abstractmethod
+    def put_article(self, thread_id: str, artifact: KnowledgeArtifact) -> str:
+        """Persist the rendered article; return a locator (path or URL).
+
+        Args:
+            thread_id: Run thread identifier.
+            artifact: The final artifact.
+
+        Returns:
+            str: Locator for downstream reads.
+        """
+        ...
+
+    @abc.abstractmethod
+    def put_sources(self, thread_id: str, sources: list[SourceRecord]) -> str:
+        """Persist resolved sources; return a locator (path or URL).
+
+        Args:
+            thread_id: Run thread identifier.
+            sources: Resolved source records.
+
+        Returns:
+            str: Locator for downstream reads.
+        """
+        ...
+
+    @abc.abstractmethod
+    def get_article(self, thread_id: str) -> str | None:
+        """Return the article markdown, or None when absent.
+
+        Args:
+            thread_id: Run thread identifier.
+
+        Returns:
+            str | None: Article text or None.
+        """
+        ...
+
+    @abc.abstractmethod
+    def get_sources(self, thread_id: str) -> list[SourceRecord]:
+        """Return the persisted sources for a thread.
+
+        Args:
+            thread_id: Run thread identifier.
+
+        Returns:
+            list[SourceRecord]: Persisted sources (empty when absent).
         """
         ...
