@@ -35,10 +35,17 @@ def test_check_passes_on_identical_metrics() -> None:
 
 
 def test_check_flags_growth() -> None:
-    """RAM growth beyond tolerance must be flagged, other keys stay silent."""
+    """Checkpoint-bytes growth beyond tolerance must be flagged."""
     baseline = collect()
     current = {workflow: dict(metrics) for workflow, metrics in baseline.items()}
-    current["research"]["ram_kb"] = int(baseline["research"]["ram_kb"] * 2) + 1
+    current["research"]["checkpoint_bytes"] = int(baseline["research"]["checkpoint_bytes"] * 2) + 1
     failures = check(current, baseline)
-    assert any("research.ram_kb" in failure for failure in failures)
-    assert all("deep" not in failure for failure in failures)
+    assert any("research.checkpoint_bytes" in failure for failure in failures)
+
+
+def test_check_ram_is_advisory_not_gated() -> None:
+    """RAM growth alone must NOT fail the gate (environment-dependent metric)."""
+    baseline = collect()
+    current = {workflow: dict(metrics) for workflow, metrics in baseline.items()}
+    current["research"]["ram_kb"] = int(baseline["research"]["ram_kb"] * 3) + 1
+    assert check(current, baseline) == []

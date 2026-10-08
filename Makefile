@@ -49,7 +49,7 @@ bench-accept:       ## record bench/baseline.json (review the diff like code)
 bench-check:        ## fail on >10% ram/checkpoint regression vs baseline
 	uv run python -m knowledge_engine.scripts.bench --check
 
-check: lint types arch semgrep agents context test evals   ## everything. This is the gate.
+check: lint types arch semgrep agents context test evals bench-check   ## everything. This is the gate.
 	@echo green
 
 # ---- models ---------------------------------------------------------------

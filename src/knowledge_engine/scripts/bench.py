@@ -44,7 +44,7 @@ from knowledge_engine.schemas.source import DocumentBody, SearchSource, SourceRe
 BASELINE_PATH = Path("bench/baseline.json")
 _TOLERANCE = 0.10
 _WORKFLOWS = ("research", "deep")
-_GATED_KEYS = ("ram_kb", "checkpoint_bytes", "supersteps")
+_GATED_KEYS = ("checkpoint_bytes", "supersteps")
 
 
 @dataclass(frozen=True)
@@ -214,6 +214,11 @@ def check(
 ) -> list[str]:
     """Compare fresh metrics against the committed baseline.
 
+    Gated metrics are the PORTABLE ones: checkpoint bytes (>10% growth fails)
+    and supersteps (any growth fails). Peak RAM is environment-dependent
+    (interpreter, allocator, GC timing) and is advisory only — a CI job on
+    Python 3.11 must not fail against a 3.13-measured baseline.
+
     Args:
         current: Freshly collected metrics.
         baseline: Committed baseline mapping.
@@ -224,12 +229,15 @@ def check(
     failures: list[str] = []
     for workflow, metrics in current.items():
         base = baseline.get(workflow, {})
-        for key in _GATED_KEYS:
+        for key in ("checkpoint_bytes", "supersteps"):
             base_value = base.get(key)
             if base_value is None:
                 failures.append(f"{workflow}.{key}: no baseline value")
                 continue
-            if metrics[key] > base_value * (1 + _TOLERANCE):
+            if key == "supersteps":
+                if metrics[key] > base_value:
+                    failures.append(f"{workflow}.{key}: {metrics[key]} > {base_value} (+0%)")
+            elif metrics[key] > base_value * (1 + _TOLERANCE):
                 failures.append(f"{workflow}.{key}: {metrics[key]} > {base_value} (+{_TOLERANCE:.0%})")
     return failures
 
