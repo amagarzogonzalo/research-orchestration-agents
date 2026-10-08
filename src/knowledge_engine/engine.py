@@ -380,7 +380,9 @@ class ResearchEngine:
                 **({"settings": settings_dump} if settings_dump else {}),
             },
         )
-        result = await runtime.run(workflow, tid, query, settings=settings_dump)
+        result = await runtime.run(
+            workflow, tid, query, settings=settings_dump, mode=workflow if workflow == "deep" else None
+        )
         self._store.write_metadata(tid, result.state.model_dump(mode="json") | {"query": query})
         self._store.write_sources(tid, result.state.sources)
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})

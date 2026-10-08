@@ -7,6 +7,7 @@ from knowledge_engine.orchestration.nodes.bodies import (
     _MAX_SCHOLARLY_BODIES,
     select_scrape_pool,
 )
+from knowledge_engine.orchestration.nodes.branch import _branch_pool
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 
@@ -26,6 +27,35 @@ def test_small_pool_passes_through_unchanged() -> None:
     """Below both caps, order and content are untouched."""
     pool = [_src("a:1"), _wiki("w:1"), _src("a:2")]
     assert [s.id for s in select_scrape_pool(pool)] == ["a:1", "w:1", "a:2"]
+
+
+def test_branch_pool_reserves_web_slot_flooded_by_scholarly() -> None:
+    """The branch cap never starves the web tier when the merge is scholarly-heavy."""
+    pool = [_src(f"openalex:W{i}") for i in range(6)] + [_ddg("duckduckgo:https://ex.io/guide")]
+    chosen = _branch_pool(pool, cap=3)
+    # Replay-safe: scholarly head preserved verbatim, web rides along (+1).
+    assert [s.id for s in chosen[:3]] == ["openalex:W0", "openalex:W1", "openalex:W2"]
+    assert any(getattr(s, "id", "") == "duckduckgo:https://ex.io/guide" for s in chosen)
+    assert len(chosen) == 4
+
+
+def test_branch_pool_all_scholarly_unchanged() -> None:
+    pool = [_src(f"openalex:W{i}") for i in range(5)]
+    chosen = _branch_pool(pool, cap=2)
+    assert [s.id for s in chosen] == ["openalex:W0", "openalex:W1"]
+
+
+def test_branch_pool_all_web_only_web() -> None:
+    pool = [_ddg(f"duckduckgo:https://ex.io/{i}") for i in range(5)]
+    chosen = _branch_pool(pool, cap=2)
+    assert [s.id for s in chosen] == ["duckduckgo:https://ex.io/0", "duckduckgo:https://ex.io/1"]
+
+
+def test_branch_pool_small_cap_no_reserve() -> None:
+    """Tiny caps cannot afford a reserve; keep head order."""
+    pool = [_src("openalex:W0"), _ddg("duckduckgo:https://ex.io/guide")]
+    assert [s.id for s in _branch_pool(pool, cap=2)] == ["openalex:W0", "duckduckgo:https://ex.io/guide"]
+    assert [s.id for s in _branch_pool(pool, cap=1)] == ["openalex:W0"]
 
 
 def test_scholarly_cap_preserves_order() -> None:

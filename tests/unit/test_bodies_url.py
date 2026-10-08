@@ -26,3 +26,24 @@ def test_doi_falls_back_to_resolver() -> None:
 
 def test_no_url_returns_none() -> None:
     assert _derive_url(_src("doaj:abc")) is None
+
+
+def test_tavily_record_resolves_to_embedded_url() -> None:
+    """General-web records embed the target URL in the canonical id."""
+    assert _derive_url(_src("tavily:https://example.io/free-tiers")) == "https://example.io/free-tiers"
+
+
+def test_exa_record_resolves_to_embedded_url() -> None:
+    assert _derive_url(_src("exa:https://example.io/cloud-scale")) == "https://example.io/cloud-scale"
+
+
+def test_duckduckgo_record_resolves_to_embedded_url() -> None:
+    assert _derive_url(_src("duckduckgo:https://example.io/hf-agent")) == "https://example.io/hf-agent"
+
+
+def test_serper_record_resolves_to_embedded_url() -> None:
+    assert _derive_url(_src("serper:https://example.io/serper-hit")) == "https://example.io/serper-hit"
+
+
+def test_wikipedia_record_resolves_to_page() -> None:
+    assert _derive_url(_src("wikipedia:12345")) == "https://en.wikipedia.org/wiki/?curid=12345"
