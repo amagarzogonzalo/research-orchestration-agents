@@ -19,7 +19,7 @@ from typing import Annotated, Any, TypedDict
 from langgraph.types import Command, Send
 
 from knowledge_engine.schemas.extraction import MAX_SYNTHESIS_ITERATIONS, GraphState, GraphStatus
-from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
 
 
 class WorkflowState(TypedDict, total=False):
@@ -70,7 +70,7 @@ class WorkflowState(TypedDict, total=False):
     gaps: list[str]
     sources: list[SourceRecord]
     filtered: list[SourceRecord]
-    bodies: Annotated[list[DocumentBody], add]
+    bodies: Annotated[list[BodyRef | DocumentBody], add]
     notes: Annotated[list[str], add]
     judge_score: float | None
     judge_critique: str | None

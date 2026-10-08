@@ -23,7 +23,7 @@ from knowledge_engine.orchestration.state import (
     WorkflowState,
 )
 from knowledge_engine.schemas.provider import Affinity, ChatRequest
-from knowledge_engine.schemas.source import DocumentBody
+from knowledge_engine.schemas.source import BodyRef, DocumentBody
 
 logger = logging.getLogger(__name__)
 
@@ -101,6 +101,9 @@ class AgentSynthesizeNode(WorkflowNode):
 def _coerce_bodies(state: WorkflowState) -> list[DocumentBody]:
     """Accept DocumentBody objects or their raw dict snapshots (LangGraph state).
 
+    BodyRef pointers (ADR 0010) are skipped: the agentic node is opt-in, not
+    wired in the default graphs, and has no storage to materialize them yet.
+
     Args:
         state: Current workflow state.
 
@@ -110,7 +113,9 @@ def _coerce_bodies(state: WorkflowState) -> list[DocumentBody]:
     """
     out: list[DocumentBody] = []
     for b in state.get("bodies", []):
-        out.append(b if isinstance(b, DocumentBody) else DocumentBody(**b))
+        if isinstance(b, BodyRef):
+            continue
+        out.append(b if isinstance(b, DocumentBody) else DocumentBody.model_validate(b))
     return out
 
 

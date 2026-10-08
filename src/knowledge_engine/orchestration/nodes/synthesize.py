@@ -13,15 +13,15 @@ import logging
 from collections.abc import Sequence
 from typing import Any
 
-from knowledge_engine.core.exceptions import ProviderExhausted
-from knowledge_engine.core.ports import ProviderPort
+from knowledge_engine.core.exceptions import KnowledgeEngineError, ProviderExhausted
+from knowledge_engine.core.ports import BodyStoragePort, ProviderPort
 from knowledge_engine.orchestration.state import (
     MAX_SYNTHESIS_ITERATIONS,
     WorkflowNode,
     WorkflowState,
 )
 from knowledge_engine.schemas.provider import Affinity, ChatRequest
-from knowledge_engine.schemas.source import DocumentBody
+from knowledge_engine.schemas.source import BodyRef, DocumentBody
 
 logger = logging.getLogger(__name__)
 
@@ -65,16 +65,24 @@ _SYNTHESIS_SYSTEM = (
 class SynthesizeNode(WorkflowNode):
     """Deterministic port-based synthesis (the offline-testable default)."""
 
-    __slots__ = ("provider", "max_iterations")
+    __slots__ = ("provider", "storage", "max_iterations")
 
-    def __init__(self, provider: ProviderPort, *, max_iterations: int = MAX_SYNTHESIS_ITERATIONS) -> None:
+    def __init__(
+        self,
+        provider: ProviderPort,
+        *,
+        storage: BodyStoragePort,
+        max_iterations: int = MAX_SYNTHESIS_ITERATIONS,
+    ) -> None:
         """Create a SynthesizeNode.
 
         Args:
             provider: Provider key for rate limiting.
+            storage: Body persistence used to materialize BodyRef pointers.
             max_iterations: Maximum iterations.
         """
         self.provider = provider
+        self.storage = storage
         self.max_iterations = max_iterations
 
     async def run(self, state: WorkflowState) -> dict[str, Any]:
@@ -88,7 +96,9 @@ class SynthesizeNode(WorkflowNode):
 
         """
         critique = state.get("judge_critique")
-        prompt = self._build_prompt(state, critique)
+        materialized: list[BodyRef | DocumentBody] = await _materialize_bodies(state, self.storage)
+        prompt_state: WorkflowState = {**state, "bodies": materialized}
+        prompt = self._build_prompt(prompt_state, critique)
         req = ChatRequest.of(
             system=_SYNTHESIS_SYSTEM,
             user=prompt,
@@ -137,6 +147,65 @@ class SynthesizeNode(WorkflowNode):
         if critique:
             prompt += f"\n\nReviewer feedback to address:\n{critique}"
         return prompt
+
+
+async def _materialize_bodies(state: WorkflowState, storage: BodyStoragePort | None) -> list[BodyRef | DocumentBody]:
+    """Resolve every body-channel entry into inline DocumentBody records.
+
+    BodyRef objects (and their dict snapshots after a checkpoint resume) load
+    their markdown through the storage port; inline DocumentBody records and
+    legacy dict snapshots pass through untouched. The prompt formatter sees
+    one canonical shape, so prompt bytes are identical across both state eras
+    (ADR 0010 — the replay-neutrality contract).
+
+    Args:
+        state: Current workflow state.
+        storage: Body persistence wired on the node.
+
+    Returns:
+        list[BodyRef | DocumentBody]: Bodies ready for prompt building.
+    """
+    out: list[BodyRef | DocumentBody] = []
+    # Channel values are serde-reconstructed at runtime; treat as Any so the
+    # legacy dict-snapshot branches stay live (checkpoint-era resilience).
+    bodies: list[Any] = list(state.get("bodies", []))
+    for body in bodies:
+        if isinstance(body, BodyRef):
+            out.append(await _ref_to_body(body, storage))
+        elif isinstance(body, DocumentBody):
+            out.append(body)
+        elif isinstance(body, dict) and "path" in body and "markdown" not in body:
+            out.append(await _ref_to_body(BodyRef.model_validate(body), storage))
+        elif isinstance(body, dict):
+            out.append(DocumentBody.model_validate(body))
+        else:
+            out.append(DocumentBody(url="", title="", markdown=""))
+    return out
+
+
+async def _ref_to_body(ref: BodyRef, storage: BodyStoragePort | None) -> DocumentBody:
+    """Load a ref's markdown through storage; loud failure when unwired.
+
+    Args:
+        ref: The body pointer.
+        storage: Body persistence (required for refs).
+
+    Returns:
+        DocumentBody: Inline body with the ref's metadata.
+
+    Raises:
+        KnowledgeEngineError: When storage is None.
+    """
+    if storage is None:
+        raise KnowledgeEngineError("body refs present but no BodyStoragePort wired (ADR 0010)")
+    return DocumentBody(
+        url=ref.url,
+        title=ref.title,
+        markdown=await storage.load(ref),
+        char_count=ref.char_count,
+        crawl_method=ref.crawl_method,
+        captured_at=ref.captured_at,
+    )
 
 
 def _body_sort_key(body: object) -> str:

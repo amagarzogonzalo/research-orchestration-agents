@@ -46,6 +46,7 @@ from knowledge_engine.orchestration.nodes import (
 from knowledge_engine.orchestration.runtime import GraphRuntime, RunResult
 from knowledge_engine.schemas.browser import BrowserActionResult
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 from knowledge_engine.store.file_checkpointer import FileCheckpointer
 from knowledge_engine.store.research_store import ResearchStore
 
@@ -224,8 +225,9 @@ class ResearchEngine:
         )
         ingest = IngestNode(self._search, limit=self.search_limit)
         relevance = RelevanceNode(self._provider)
-        fetch_body = FetchBodyNode(self._scrape)
-        synthesize = SynthesizeNode(self._provider)
+        storage = LocalBodyStorage(root=f"{self.store_root}/bodies")
+        fetch_body = FetchBodyNode(self._scrape, storage=storage)
+        synthesize = SynthesizeNode(self._provider, storage=storage)
         return NodeSet(
             ingest=ingest,
             relevance=relevance,

@@ -7,6 +7,7 @@ graph with a tiny bound raises ``GraphRecursionError`` instead of spinning).
 
 from __future__ import annotations
 
+from pathlib import Path
 from typing import Any, TypedDict
 
 import pytest
@@ -29,28 +30,33 @@ from knowledge_engine.orchestration.nodes import (
     SynthesizeNode,
 )
 from knowledge_engine.orchestration.runtime import GraphRuntime
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 from tests.conftest import FakeProvider, FakeScrape, FakeSearch
 
 
-def _runtime(search=None, scrape=None, provider=None) -> GraphRuntime:
+def _runtime(search=None, scrape=None, provider=None, root=None) -> GraphRuntime:
     """Build a runtime with fakes and an in-memory checkpointer.
 
     Args:
         search: Optional search fake override.
         scrape: Optional scrape fake override.
         provider: Optional provider fake override.
+        root: Optional scratch root for body storage (a temp dir by default).
 
     Returns:
         GraphRuntime: Configured runtime.
     """
+    import tempfile
+
     search, scrape, provider = search or FakeSearch(), scrape or FakeScrape(), provider or FakeProvider()
+    storage = LocalBodyStorage(root=root or Path(tempfile.mkdtemp()) / "bodies")
     return GraphRuntime(
         nodes=NodeSet(
             ingest=IngestNode(search),
             relevance=RelevanceNode(provider),
             bodies=BodiesNode(),
-            fetch_body=FetchBodyNode(scrape),
-            synthesize=SynthesizeNode(provider),
+            fetch_body=FetchBodyNode(scrape, storage=storage),
+            synthesize=SynthesizeNode(provider, storage=storage),
             judge=JudgeNode(provider),
             review=ReviewNode(),
             render=RenderNode(root="knowledge_base"),

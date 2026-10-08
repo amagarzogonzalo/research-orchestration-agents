@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from langgraph.checkpoint.memory import InMemorySaver
 
 from knowledge_engine.orchestration.graphs import NodeSet, build_workflow
@@ -21,14 +23,16 @@ from knowledge_engine.orchestration.nodes.critic import CriticNode
 from knowledge_engine.orchestration.nodes.decompose import DecomposeNode
 from knowledge_engine.orchestration.nodes.intent import IntentNode
 from knowledge_engine.orchestration.runtime import GraphRuntime
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 from tests.conftest import FakeProvider, FakeScrape, FakeSearch
 
 
 def _deep_nodes(tmp_path, *, search=None) -> NodeSet:
     search = search or FakeSearch()
     scrape, provider = FakeScrape(), FakeProvider()
+    storage = LocalBodyStorage(root=str(Path(tmp_path) / "bodies"))
     ingest, relevance = IngestNode(search), RelevanceNode(provider)
-    fetch_body, synthesize = FetchBodyNode(scrape), SynthesizeNode(provider)
+    fetch_body, synthesize = FetchBodyNode(scrape, storage=storage), SynthesizeNode(provider, storage=storage)
     return NodeSet(
         ingest=ingest,
         relevance=relevance,
