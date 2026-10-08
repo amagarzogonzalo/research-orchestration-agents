@@ -83,7 +83,15 @@ class GraphRuntime:
             payload["recursion_limit"] = recursion_limit
         return cast(RunnableConfig, payload)
 
-    async def run(self, workflow: str, thread_id: str, query: str, *, recursion_limit: int | None = None) -> RunResult:
+    async def run(
+        self,
+        workflow: str,
+        thread_id: str,
+        query: str,
+        *,
+        recursion_limit: int | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> RunResult:
         """Start (or resume-if-pending) one run; returns the graph outcome.
 
         Args:
@@ -92,6 +100,8 @@ class GraphRuntime:
             query: Scholarly query string.
             recursion_limit: Optional hard loop bound; defaults to the derived
                 per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
+            settings: Per-run overrides (validated upstream); land on the
+                ``settings`` channel for node reads (ADR 0016).
 
         Returns:
             RunResult: Run result.
@@ -105,6 +115,8 @@ class GraphRuntime:
             "query": query,
             "status": "running",
         }
+        if settings:
+            initial["settings"] = settings
         result = await graph.ainvoke(initial, config=self._config(thread_id, recursion_limit=limit))
         return _to_result(result)
 

@@ -45,6 +45,7 @@ from knowledge_engine.orchestration.nodes import (
 )
 from knowledge_engine.orchestration.runtime import GraphRuntime, RunResult
 from knowledge_engine.schemas.browser import BrowserActionResult
+from knowledge_engine.schemas.settings import RunSettings
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
 from knowledge_engine.store.body_file_store import LocalBodyStorage
 from knowledge_engine.store.file_checkpointer import FileCheckpointer
@@ -284,7 +285,13 @@ class ResearchEngine:
         return runtime
 
     async def research(
-        self, query: str, *, workflow: str = "research", thread_id: str | None = None, unique: bool = False
+        self,
+        query: str,
+        *,
+        workflow: str = "research",
+        thread_id: str | None = None,
+        unique: bool = False,
+        settings: RunSettings | None = None,
     ) -> RunResult:
         """Run a research workflow and return + persist its durable state.
 
@@ -295,6 +302,7 @@ class ResearchEngine:
             unique: When True, append a random suffix so parallel duplicate
                 submissions of the same query land on separate LangGraph
                 threads instead of colliding on one.
+            settings: Per-run overrides (ADR 0016); validated here once.
 
         Returns:
             RunResult: The run's durable state + any pending review interrupt.
@@ -302,12 +310,19 @@ class ResearchEngine:
         tid = thread_id or _derived_thread_id(query)
         if unique:
             tid = f"{tid}-{uuid.uuid4().hex[:8]}"
+        settings_dump = settings.model_dump() if settings else None
         runtime = self._runtime_for(workflow)
         self._store.write_metadata(
             tid,
-            {"query": query, "workflow": workflow, "status": "running", "provider": "discovery"},
+            {
+                "query": query,
+                "workflow": workflow,
+                "status": "running",
+                "provider": "discovery",
+                **({"settings": settings_dump} if settings_dump else {}),
+            },
         )
-        result = await runtime.run(workflow, tid, query)
+        result = await runtime.run(workflow, tid, query, settings=settings_dump)
         self._store.write_metadata(tid, result.state.model_dump(mode="json") | {"query": query})
         self._store.write_sources(tid, result.state.sources)
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})

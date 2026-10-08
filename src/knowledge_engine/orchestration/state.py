@@ -36,6 +36,7 @@ class WorkflowState(TypedDict, total=False):
         workflow: Attribute description.
         query: Attribute description.
         mode: Attribute description.
+        settings: Per-run overrides (ADR 0016), written by the engine facade.
         intent: Attribute description.
         depth: Attribute description.
         rounds: Attribute description.
@@ -61,6 +62,7 @@ class WorkflowState(TypedDict, total=False):
     workflow: str
     query: str
     mode: str | None
+    settings: dict[str, Any] | None
     intent: str
     depth: int
     rounds: int
@@ -124,6 +126,24 @@ def to_graph_state(state: WorkflowState) -> GraphState:
         status=GraphStatus(state.get("status", GraphStatus.RUNNING.value)),
         iterations=state.get("iterations", 0),
     )
+
+
+def read_setting(state: WorkflowState, key: str, default: int) -> int:
+    """Read one per-run setting, falling back to the node's budget default.
+
+    Args:
+        state: Current workflow state.
+        key: Setting name (``max_depth``/``max_subqueries``/``max_iterations``).
+        default: The budget constant the node holds.
+
+    Returns:
+        int: Effective value for this run.
+    """
+    raw = (state.get("settings") or {}).get(key)
+    try:
+        return int(raw) if raw is not None else default
+    except (TypeError, ValueError):
+        return default
 
 
 class WorkflowNode:
@@ -202,5 +222,6 @@ __all__ = [
     "WorkflowState",
     "WorkflowNode",
     "merge_sources",
+    "read_setting",
     "to_graph_state",
 ]
