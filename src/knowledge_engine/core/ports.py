@@ -12,7 +12,7 @@ from typing import Any
 from knowledge_engine.schemas.browser import BrowserActionResult
 from knowledge_engine.schemas.extraction import ExtractionRequest
 from knowledge_engine.schemas.provider import ChatRequest, ChatResult
-from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
 
 
 class ProviderPort(abc.ABC):
@@ -88,6 +88,38 @@ class ScrapePort(abc.ABC):
 
         Returns:
             DocumentBody: Markdown body.
+        """
+        ...
+
+
+class BodyStoragePort(abc.ABC):
+    """Persist scraped bodies durably; workflow state carries BodyRef pointers (ADR 0010).
+
+    Adapters decide WHERE bodies live (local files today, Supabase Storage
+    later) — the port keeps nodes free of storage backends (DIP).
+    """
+
+    @abc.abstractmethod
+    async def save(self, body: DocumentBody) -> BodyRef:
+        """Persist a body; return its deterministic lightweight reference.
+
+        Args:
+            body: The scraped body (markdown + metadata).
+
+        Returns:
+            BodyRef: Reference usable by :meth:`load`.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def load(self, ref: BodyRef) -> str:
+        """Retrieve the markdown a reference points at.
+
+        Args:
+            ref: Reference returned by :meth:`save`.
+
+        Returns:
+            str: Markdown content.
         """
         ...
 

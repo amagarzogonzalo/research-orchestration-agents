@@ -1,8 +1,28 @@
 {
+  "$schema": "https://langgra.ph/schema.json",
+  "python_version": "3.11",
   "dependencies": ["."],
   "graphs": {
-    "deep": "./src/knowledge_engine/studio.py:graph_deep",
-    "research": "./src/knowledge_engine/studio.py:graph_research"
+    "deep": {
+      "path": "./src/knowledge_engine/studio.py:graph_deep",
+      "description": "Recursive deep-research: intent, plan, parallel branches, rubric gate, judge loop"
+    },
+    "research": {
+      "path": "./src/knowledge_engine/studio.py:graph_research",
+      "description": "Single-pass research: ingest, relevance, body fan-out, judge, review"
+    },
+    "qa": {
+      "path": "./src/knowledge_engine/studio.py:graph_qa",
+      "description": "Q&A over abstracts: no body fan-out, no judge loop"
+    },
+    "summary": {
+      "path": "./src/knowledge_engine/studio.py:graph_summary",
+      "description": "Summary: ingest + bodies + synthesize, no relevance gate or judge"
+    }
   },
-  "env": ".env"
+  "env": "./.env",
+  "dockerfile_lines": [
+    "RUN pip install 'crawl4ai>=0.9,<0.10' 'playwright>=1.62,<2' 'trafilatura>=2.2,<3'",
+    "RUN python -m playwright install chromium --with-deps"
+  ]
 }

@@ -8,8 +8,9 @@ stay internal (Pregel); nothing is republished externally.
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from langchain_core.runnables import RunnableConfig
 from langgraph.checkpoint.base import BaseCheckpointSaver
@@ -17,6 +18,7 @@ from langgraph.graph.state import CompiledStateGraph
 from langgraph.types import Command
 
 from knowledge_engine.orchestration.graphs import NodeSet, build_workflow
+from knowledge_engine.orchestration.limits import DEFAULT_LIMITS
 from knowledge_engine.orchestration.state import to_graph_state
 from knowledge_engine.schemas.extraction import GraphState
 
@@ -66,54 +68,120 @@ class GraphRuntime:
             )
         return self._graphs[workflow]
 
-    def _config(self, thread_id: str) -> RunnableConfig:
-        """Config.
+    def _config(self, thread_id: str, *, recursion_limit: int | None = None) -> RunnableConfig:
+        """Build the runnable config: thread identity + optional hard loop bound.
 
         Args:
             thread_id: Run thread identifier.
+            recursion_limit: Hard superstep bound; ``None`` omits the key
+                (LangGraph then applies its own default).
 
         Returns:
-            RunnableConfig: Runnable configuration.
-
+            RunnableConfig: Run configuration.
         """
-        return {"configurable": {"thread_id": thread_id}}
+        payload: dict[str, Any] = {"configurable": {"thread_id": thread_id}}
+        if recursion_limit is not None:
+            payload["recursion_limit"] = recursion_limit
+        return cast(RunnableConfig, payload)
 
-    async def run(self, workflow: str, thread_id: str, query: str) -> RunResult:
+    async def run(
+        self,
+        workflow: str,
+        thread_id: str,
+        query: str,
+        *,
+        recursion_limit: int | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> RunResult:
         """Start (or resume-if-pending) one run; returns the graph outcome.
 
         Args:
             workflow: Workflow name to run.
             thread_id: Run thread identifier.
             query: Scholarly query string.
+            recursion_limit: Optional hard loop bound; defaults to the derived
+                per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
+            settings: Per-run overrides (validated upstream); land on the
+                ``settings`` channel for node reads (ADR 0016).
 
         Returns:
             RunResult: Run result.
 
         """
         graph = self.graph(workflow)
+        limit = recursion_limit if recursion_limit is not None else DEFAULT_LIMITS[workflow]
         initial: dict[str, Any] = {
             "thread_id": thread_id,
             "workflow": workflow,
             "query": query,
             "status": "running",
         }
-        result = await graph.ainvoke(initial, config=self._config(thread_id))
+        if settings:
+            initial["settings"] = settings
+        result = await graph.ainvoke(initial, config=self._config(thread_id, recursion_limit=limit))
         return _to_result(result)
 
-    async def resume(self, workflow: str, thread_id: str, payload: Any) -> RunResult:
+    async def stream(
+        self,
+        workflow: str,
+        thread_id: str,
+        query: str,
+        *,
+        recursion_limit: int | None = None,
+        settings: dict[str, Any] | None = None,
+    ) -> AsyncIterator[dict[str, Any]]:
+        """Stream per-superstep state values for progress UX (thin astream passthrough).
+
+        Workflow events stay internal (ADR 0008): this yields the state VALUES
+        LangGraph emits in ``values`` mode — no event republishing. A pending
+        interrupt surfaces as the final yielded state.
+
+        Args:
+            workflow: Workflow name to run.
+            thread_id: Run thread identifier.
+            query: Scholarly query string.
+            recursion_limit: Optional hard loop bound; defaults to the derived
+                per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
+            settings: Per-run overrides (validated upstream); land on the
+                ``settings`` channel for node reads (ADR 0016).
+
+        Yields:
+            dict[str, Any]: State values after each superstep.
+        """
+        graph = self.graph(workflow)
+        limit = recursion_limit if recursion_limit is not None else DEFAULT_LIMITS[workflow]
+        initial: dict[str, Any] = {
+            "thread_id": thread_id,
+            "workflow": workflow,
+            "query": query,
+            "status": "running",
+        }
+        if settings:
+            initial["settings"] = settings
+        config = self._config(thread_id, recursion_limit=limit)
+        async for _mode, payload in graph.astream(initial, config=config, stream_mode=["values", "updates"]):
+            if _mode == "values" and isinstance(payload, dict):
+                yield payload
+
+    async def resume(
+        self, workflow: str, thread_id: str, payload: Any, *, recursion_limit: int | None = None
+    ) -> RunResult:
         """Resume a run paused at a durable ``interrupt()`` with a human reply.
 
         Args:
             workflow: Workflow name to run.
             thread_id: Run thread identifier.
             payload: Event or resume payload.
+            recursion_limit: Optional hard loop bound; defaults to the derived
+                per-workflow limit (:data:`DEFAULT_LIMITS`, ADR 0014).
 
         Returns:
             RunResult: Run result.
 
         """
         graph = self.graph(workflow)
-        result = await graph.ainvoke(Command(resume=payload), config=self._config(thread_id))
+        limit = recursion_limit if recursion_limit is not None else DEFAULT_LIMITS[workflow]
+        result = await graph.ainvoke(Command(resume=payload), config=self._config(thread_id, recursion_limit=limit))
         return _to_result(result)
 
     async def get_state(self, workflow: str, thread_id: str) -> RunResult:

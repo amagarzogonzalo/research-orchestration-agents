@@ -7,7 +7,7 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
 
 
 class ExtractionKind(StrEnum):
@@ -107,7 +107,7 @@ class GraphState(BaseModel):
     thread_id: str
     query: str
     sources: list[SourceRecord] = Field(default_factory=list)
-    bodies: list[DocumentBody] = Field(default_factory=list)
+    bodies: list[BodyRef | DocumentBody] = Field(default_factory=list)
     filtered: list[SourceRecord] = Field(default_factory=list)
     synthetic_notes: list[str] = Field(default_factory=list)
     judge_score: float | None = None

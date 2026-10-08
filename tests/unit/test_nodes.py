@@ -18,6 +18,7 @@ from knowledge_engine.orchestration.nodes.bodies import FETCH_NODE
 from knowledge_engine.orchestration.nodes.relevance import _parse_relevant_ids
 from knowledge_engine.schemas.provider import ChatResult, UsageSummary
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
+from knowledge_engine.store.body_file_store import LocalBodyStorage
 from tests.conftest import FakeEmptySearch, FakeProvider, FakeScrape, FakeSearch
 
 
@@ -130,24 +131,26 @@ async def test_bodies_empty_filters_routes_to_join() -> None:
     assert getattr(out, "goto", None) == "synthesize"
 
 
-async def test_fetch_body_scrapes_source(fake_scrape) -> None:
+async def test_fetch_body_scrapes_source(fake_scrape, tmp_path) -> None:
     src = SourceRecord(id="arxiv:2301.00001", title="paper", source=SearchSource.ARXIV)
-    node = FetchBodyNode(fake_scrape)
+    node = FetchBodyNode(fake_scrape, storage=LocalBodyStorage(root=tmp_path / "bodies"))
     out = await node.run({"source": src})
-    assert out["bodies"][0].url == "https://arxiv.org/abs/2301.00001"
+    ref = out["bodies"][0]
+    assert ref.url == "https://arxiv.org/abs/2301.00001"
     assert fake_scrape.calls == ["https://arxiv.org/abs/2301.00001"]
+    assert ref.char_count > 0, "the ref points at persisted markdown"
 
 
-async def test_fetch_body_skips_failed_url() -> None:
-    node = FetchBodyNode(FakeScrape(fail_urls={"https://bad"}))
+async def test_fetch_body_skips_failed_url(tmp_path) -> None:
+    node = FetchBodyNode(FakeScrape(fail_urls={"https://bad"}), storage=LocalBodyStorage(root=tmp_path / "bodies"))
     out = await node.run(
         {"source": SourceRecord(id="x", title="t", source=SearchSource.OPENALEX, pdf_url="https://bad")}
     )
     assert out["bodies"] == []
 
 
-async def test_synthesize_appends_notes_and_bumps_iterations(fake_provider) -> None:
-    node = SynthesizeNode(fake_provider)
+async def test_synthesize_appends_notes_and_bumps_iterations(fake_provider, tmp_path) -> None:
+    node = SynthesizeNode(fake_provider, storage=LocalBodyStorage(root=tmp_path / "bodies"))
     out = await node.run(await _state(bodies=[{"url": "u", "title": "t", "markdown": "content"}]))
     assert out["notes"] == ["synthesis v1"]
     assert out["iterations"] == 1

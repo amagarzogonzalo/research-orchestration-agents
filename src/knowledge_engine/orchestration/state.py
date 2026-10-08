@@ -14,12 +14,14 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from operator import add
+from time import perf_counter
 from typing import Annotated, Any, TypedDict
 
 from langgraph.types import Command, Send
 
+from knowledge_engine.observability import telemetry
 from knowledge_engine.schemas.extraction import MAX_SYNTHESIS_ITERATIONS, GraphState, GraphStatus
-from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
 
 
 class WorkflowState(TypedDict, total=False):
@@ -34,6 +36,7 @@ class WorkflowState(TypedDict, total=False):
         workflow: Attribute description.
         query: Attribute description.
         mode: Attribute description.
+        settings: Per-run overrides (ADR 0016), written by the engine facade.
         intent: Attribute description.
         depth: Attribute description.
         rounds: Attribute description.
@@ -59,6 +62,7 @@ class WorkflowState(TypedDict, total=False):
     workflow: str
     query: str
     mode: str | None
+    settings: dict[str, Any] | None
     intent: str
     depth: int
     rounds: int
@@ -70,7 +74,7 @@ class WorkflowState(TypedDict, total=False):
     gaps: list[str]
     sources: list[SourceRecord]
     filtered: list[SourceRecord]
-    bodies: Annotated[list[DocumentBody], add]
+    bodies: Annotated[list[BodyRef | DocumentBody], add]
     notes: Annotated[list[str], add]
     judge_score: float | None
     judge_critique: str | None
@@ -124,6 +128,24 @@ def to_graph_state(state: WorkflowState) -> GraphState:
     )
 
 
+def read_setting(state: WorkflowState, key: str, default: int) -> int:
+    """Read one per-run setting, falling back to the node's budget default.
+
+    Args:
+        state: Current workflow state.
+        key: Setting name (``max_depth``/``max_subqueries``/``max_iterations``).
+        default: The budget constant the node holds.
+
+    Returns:
+        int: Effective value for this run.
+    """
+    raw = (state.get("settings") or {}).get(key)
+    try:
+        return int(raw) if raw is not None else default
+    except (TypeError, ValueError):
+        return default
+
+
 class WorkflowNode:
     """Base for dependency-injected, stateless-per-run LangGraph nodes.
 
@@ -151,7 +173,10 @@ class WorkflowNode:
         raise NotImplementedError
 
     async def __call__(self, state: WorkflowState) -> dict[str, Any] | Command[Any]:
-        """Run the node.
+        """Run the node under a thread-correlated tracing span.
+
+        Attributes are counts and identifiers only — never state contents
+        (PII rule). Exceptions are recorded on the span, then re-raised.
 
         Args:
             state: Current workflow state.
@@ -159,8 +184,22 @@ class WorkflowNode:
         Returns:
             dict[str, Any] | Command[Any]: State update or routing command.
 
+        Raises:
+            Exception: Whatever the node raises; recorded on the span first,
+                then re-raised (error handling lives at the graph layer).
         """
-        return await self.run(state)
+        node = type(self).__name__
+        with telemetry.span(f"node.{node}", **{"thread.id": str(state.get("thread_id", ""))}) as current:
+            start = perf_counter()
+            try:
+                result = await self.run(state)
+            except Exception as exc:
+                current.record_exception(exc)
+                raise
+            current.set_attribute("duration_ms", round((perf_counter() - start) * 1000.0, 2))
+            if isinstance(result, dict):
+                current.set_attribute("updated_keys", len(result))
+            return result
 
     def command(self, *, update: dict[str, Any] | None = None, goto: str | Sequence[Send] | Send) -> Command[Any]:
         """SOTA routing: combine a state update with an explicit next node.
@@ -183,5 +222,6 @@ __all__ = [
     "WorkflowState",
     "WorkflowNode",
     "merge_sources",
+    "read_setting",
     "to_graph_state",
 ]

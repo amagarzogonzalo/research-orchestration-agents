@@ -27,9 +27,9 @@ rules:
     languages: [python, yaml, json]
     severity: ERROR
     message: >
-      A string with a real vendor key prefix (sk-or-, gsk_, ghp_, AQ.) looks
-      like a committed credential. Use env vars / secrets instead.
-    pattern-regex: (?i)(sk-or-v1-[A-Za-z0-9]{8,}|gsk_[A-Za-z0-9]{8,}|ghp_[A-Za-z0-9]{8,}|AQ\.Ab8RN6[A-Za-z0-9]+)
+      A string with a real vendor key prefix (sk-or-, gsk_, ghp_, tvly-,
+      AQ.) looks like a committed credential. Use env vars / secrets instead.
+    pattern-regex: (?i)(sk-or-v1-[A-Za-z0-9]{8,}|gsk_[A-Za-z0-9]{8,}|ghp_[A-Za-z0-9]{8,}|tvly-[A-Za-z0-9-]{8,}|AQ\.Ab8RN6[A-Za-z0-9]+)
 
   - id: no-bare-except
     languages: [python]
