@@ -32,6 +32,8 @@ def _artifact(body: str) -> KnowledgeArtifact:
 
 def test_supabase_artifact_roundtrip_real_storage() -> None:
     _gated()
+    import httpx
+
     from knowledge_engine.store.supabase_artifact_store import SupabaseArtifactStore
 
     store = SupabaseArtifactStore.from_env()
@@ -39,6 +41,9 @@ def test_supabase_artifact_roundtrip_real_storage() -> None:
     assert locator.startswith("http"), "locator is a Storage URL"
     stored = store.get_article("migration-probe") or ""
     assert "probe" in stored, "bytes survive the round-trip"
+    public = httpx.get(locator)
+    assert public.status_code == 200, f"published artifact must be viewable without auth ({locator})"
+    assert "probe" in public.text, "public bytes match the artifact"
 
 
 def test_supabase_sources_roundtrip_real_storage() -> None:
