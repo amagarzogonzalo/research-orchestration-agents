@@ -10,7 +10,11 @@ from knowledge_engine.infrastructure.search.fallback import FallbackSearchAdapte
 from knowledge_engine.infrastructure.search.tavily import TavilyAdapter
 
 
-def test_web_chain_is_cached_fallback(tmp_path) -> None:
+def test_web_chain_is_cached_fallback(tmp_path, monkeypatch) -> None:
+    # The live e2e module loads .env at import; clear search keys so this
+    # test stays order-independent within a session.
+    monkeypatch.delenv("TAVILY_API_KEY", raising=False)
+    monkeypatch.delenv("EXA_API_KEY", raising=False)
     chain = _default_web_chain(str(tmp_path))
     assert isinstance(chain, CachedSearchAdapter)
     assert isinstance(chain.inner, FallbackSearchAdapter)

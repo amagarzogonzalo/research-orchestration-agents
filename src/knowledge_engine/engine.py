@@ -305,7 +305,7 @@ class ResearchEngine:
             tid,
             {"query": query, "workflow": workflow, "status": "running", "provider": "discovery"},
         )
-        result = await runtime.run(workflow, tid, query)
+        result = await runtime.run(workflow, tid, query, mode=workflow if workflow == "deep" else None)
         self._store.write_metadata(tid, result.state.model_dump(mode="json") | {"query": query})
         self._store.write_sources(tid, result.state.sources)
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})

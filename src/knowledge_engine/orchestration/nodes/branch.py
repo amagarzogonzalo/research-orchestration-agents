@@ -17,7 +17,7 @@ import logging
 from typing import Any
 
 from knowledge_engine.core.ports import SearchPort
-from knowledge_engine.orchestration.nodes.bodies import FetchBodyNode
+from knowledge_engine.orchestration.nodes.bodies import FetchBodyNode, _is_general_web
 from knowledge_engine.orchestration.nodes.ingest import IngestNode
 from knowledge_engine.orchestration.nodes.relevance import RelevanceNode
 from knowledge_engine.orchestration.nodes.synthesize import SynthesizeNode
@@ -76,7 +76,7 @@ class BranchNode(WorkflowNode):
         sources = await self._retrieve(query, sub.source)
         sub_state: WorkflowState = {"query": query, "sources": sources}
         filtered = (await self.relevance.run(sub_state)).get("filtered", sources)
-        bodies = await self._fetch_all(filtered[: self.max_sources])
+        bodies = await self._fetch_all(_branch_pool(filtered, self.max_sources))
         leaf: WorkflowState = {
             "query": query,
             "sources": sources,
@@ -121,6 +121,34 @@ class BranchNode(WorkflowNode):
         for update in results:
             bodies.extend(update.get("bodies", []))
         return bodies
+
+
+def _branch_pool(pool: list[Any], cap: int) -> list[Any]:
+    """Cap the per-branch fetch list, reserving one slot for a web record.
+
+    The federated merge lists scholarly records first, so a bare ``pool[:cap]``
+    slice silently starves the general-web tier whenever the cap floods —
+    web hits end up never scraped and never cited, exactly what the deep
+    pipeline needs for practical questions (how-to, tooling, providers).
+
+    Args:
+        pool: Relevance-filtered branch sources, merge order.
+        cap: Body-fetch cap for the branch.
+
+    Returns:
+        list[Any]: At most ``cap`` records with one general-web slot held
+            back when both tiers are present and ``cap`` allows it.
+    """
+    if cap <= 0:
+        return []
+    general = [src for src in pool if _is_general_web(src)]
+    scholarly = [src for src in pool if not _is_general_web(src)]
+    if not general:
+        return scholarly[:cap]
+    if not scholarly:
+        return general[:cap]
+    reserve = 1 if cap >= 3 else 0
+    return scholarly[: cap - reserve] + general[:reserve]
 
 
 def _sub_query_of(state: WorkflowState | dict[str, Any]) -> SubQuery:

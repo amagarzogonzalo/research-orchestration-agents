@@ -203,7 +203,31 @@ def _full_citation(provenance: list[SourceRecord], sid: str) -> str:
         parts.append(rec.pdf_url)
     elif rec.doi:
         parts.append(f"https://doi.org/{rec.doi}")
+    else:
+        # General-web records carry no DOI/PDF; fall back to the URL embedded
+        # in the canonical id so the footnote still resolves to the source.
+        url = _web_url(rec)
+        if url:
+            parts.append(url)
     return " — ".join(parts)
+
+
+def _web_url(rec: SourceRecord) -> str | None:
+    """Extract the target URL from a general-web record's canonical id.
+
+    Args:
+        rec: Source record (tavily/exa/duckduckgo/wikipedia).
+
+    Returns:
+        str | None: Resolvable URL, or None for scholarly-only records.
+    """
+    if rec.id.startswith(("tavily:", "exa:", "duckduckgo:")):
+        url = rec.id.partition(":")[2]
+        return url if url.startswith("http") else None
+    if rec.id.startswith("wikipedia:"):
+        pageid = rec.id.partition(":")[2]
+        return f"https://en.wikipedia.org/wiki/?curid={pageid}" if pageid else None
+    return None
 
 
 def _resolve_marker(marker: str, titles: dict[str, str]) -> str | None:

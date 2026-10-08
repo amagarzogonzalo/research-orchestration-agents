@@ -133,7 +133,9 @@ class RelevanceNode(WorkflowNode):
             list[str] | None: Relevant ids, or None on failure (keep batch).
         """
         ledger = "\n".join(_ledger_line(s) for s in batch)
-        user = f"Research topic: {query}\nPapers:\n{ledger}\n\nRelevant papers (JSON ids only):"
+        user = (
+            f"Research topic: {query}\nSources (papers and web pages):\n{ledger}\n\nRelevant sources (JSON ids only):"
+        )
         try:
             res = await self.provider.complete(
                 ChatRequest.of(self._system, user, affinity=Affinity.MICRO, max_tokens=self.max_tokens)

@@ -7,6 +7,7 @@ from knowledge_engine.orchestration.nodes.bodies import (
     _MAX_SCHOLARLY_BODIES,
     select_scrape_pool,
 )
+from knowledge_engine.orchestration.nodes.branch import _branch_pool
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 
@@ -20,6 +21,26 @@ def _wiki(sid: str) -> SourceRecord:
 
 def _ddg(sid: str) -> SourceRecord:
     return _src(sid, SearchSource.DUCKDUCKGO)
+
+
+def test_branch_pool_reserves_web_slot_flooded_by_scholarly() -> None:
+    """The branch cap never starves the web tier when the merge is scholarly-heavy."""
+    pool = [_src(f"openalex:W{i}") for i in range(6)] + [_ddg("duckduckgo:https://ex.io/guide")]
+    chosen = _branch_pool(pool, cap=3)
+    assert len(chosen) == 3
+    assert any(getattr(s, "id", "") == "duckduckgo:https://ex.io/guide" for s in chosen)
+
+
+def test_branch_pool_all_scholarly_unchanged() -> None:
+    pool = [_src(f"openalex:W{i}") for i in range(5)]
+    chosen = _branch_pool(pool, cap=2)
+    assert [s.id for s in chosen] == ["openalex:W0", "openalex:W1"]
+
+
+def test_branch_pool_all_web_only_web() -> None:
+    pool = [_ddg(f"duckduckgo:https://ex.io/{i}") for i in range(5)]
+    chosen = _branch_pool(pool, cap=2)
+    assert [s.id for s in chosen] == ["duckduckgo:https://ex.io/0", "duckduckgo:https://ex.io/1"]
 
 
 def test_small_pool_passes_through_unchanged() -> None:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from knowledge_engine.orchestration.nodes.render import _complete_footnotes, _resolve_marker
+from knowledge_engine.orchestration.nodes.render import _complete_footnotes, _full_citation, _resolve_marker
 from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 
@@ -34,3 +34,11 @@ def test_complete_footnotes_rewrites_dedup_variants() -> None:
     notes = "Claim text [^duckduckgo:https://arxiv.org/html/2504.06214v1]."
     out = _complete_footnotes(notes, provenance)
     assert "[^arxiv:2504.06214]:" in out
+
+
+def test_full_citation_carries_url_for_web_source() -> None:
+    """General-web records have no DOI/PDF; the footnote must carry the URL."""
+    provenance = [_src("tavily:https://example.io/free-tiers", "Free cloud tiers for agents")]
+    line = _full_citation(provenance, "tavily:https://example.io/free-tiers")
+    assert "https://example.io/free-tiers" in line
+    assert line.startswith("Free cloud tiers for agents")

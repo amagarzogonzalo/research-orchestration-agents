@@ -67,6 +67,15 @@ async def test_deep_run_short_circuits_non_deep_intent(tmp_path) -> None:
     assert search.calls == 0
 
 
+async def test_deep_explicit_mode_beats_quick_heuristic(tmp_path) -> None:
+    """An explicitly requested deep run must research, not fast-path to answer."""
+    search = FakeSearch()
+    runtime = GraphRuntime(nodes=_deep_nodes(tmp_path, search=search), checkpointer=InMemorySaver())
+    result = await runtime.run("deep", "t-forced", "how to scale a research agent to the cloud free?", mode="deep")
+    assert search.calls > 0
+    assert result.state.synthetic_notes
+
+
 class ConcurrentSearch(FakeSearch):
     """Measures peak in-flight search concurrency (parallelism proof)."""
 

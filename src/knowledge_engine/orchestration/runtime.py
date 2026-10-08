@@ -78,13 +78,16 @@ class GraphRuntime:
         """
         return {"configurable": {"thread_id": thread_id}}
 
-    async def run(self, workflow: str, thread_id: str, query: str) -> RunResult:
+    async def run(self, workflow: str, thread_id: str, query: str, *, mode: str | None = None) -> RunResult:
         """Start (or resume-if-pending) one run; returns the graph outcome.
 
         Args:
             workflow: Workflow name to run.
             thread_id: Run thread identifier.
             query: Scholarly query string.
+            mode: Explicit intent override (e.g. ``deep``) that beats the
+                intent heuristic — an explicitly requested workflow must not
+                be fast-pathed away by it.
 
         Returns:
             RunResult: Run result.
@@ -97,6 +100,8 @@ class GraphRuntime:
             "query": query,
             "status": "running",
         }
+        if mode:
+            initial["mode"] = mode
         result = await graph.ainvoke(initial, config=self._config(thread_id))
         return _to_result(result)
 
