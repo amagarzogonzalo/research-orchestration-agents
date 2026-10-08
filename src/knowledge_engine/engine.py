@@ -488,6 +488,7 @@ def _default_web_chain(root: str) -> SearchPort:
     from knowledge_engine.infrastructure.search.exa import EXA_MONTHLY_LIMIT, ExaAdapter
     from knowledge_engine.infrastructure.search.fallback import FallbackSearchAdapter
     from knowledge_engine.infrastructure.search.quota import MonthlyQuotaLedger
+    from knowledge_engine.infrastructure.search.serper import SERPER_MONTHLY_LIMIT, SerperAdapter
     from knowledge_engine.infrastructure.search.tavily import TAVILY_MONTHLY_LIMIT, TavilyAdapter
 
     usage_root = f"{root}/_usage"
@@ -506,6 +507,14 @@ def _default_web_chain(root: str) -> SearchPort:
             ExaAdapter(
                 exa_key,
                 ledger=MonthlyQuotaLedger("exa", limit=EXA_MONTHLY_LIMIT, root=usage_root),
+            )
+        )
+    serper_key = os.environ.get("SERPER_API_KEY", "")
+    if serper_key:
+        providers.append(
+            SerperAdapter(
+                serper_key,
+                ledger=MonthlyQuotaLedger("serper", limit=SERPER_MONTHLY_LIMIT, root=usage_root),
             )
         )
     return CachedSearchAdapter(FallbackSearchAdapter(providers), SearchCache(f"{root}/_cache/search"))

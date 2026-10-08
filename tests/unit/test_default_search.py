@@ -7,6 +7,7 @@ from knowledge_engine.infrastructure.search.cache import CachedSearchAdapter
 from knowledge_engine.infrastructure.search.demux import DemuxSearchAdapter
 from knowledge_engine.infrastructure.search.exa import ExaAdapter
 from knowledge_engine.infrastructure.search.fallback import FallbackSearchAdapter
+from knowledge_engine.infrastructure.search.serper import SerperAdapter
 from knowledge_engine.infrastructure.search.tavily import TavilyAdapter
 
 
@@ -25,10 +26,12 @@ def test_web_chain_is_cached_fallback(tmp_path, monkeypatch) -> None:
 def test_web_chain_adds_keyed_providers_only_with_keys(tmp_path, monkeypatch) -> None:
     monkeypatch.setenv("TAVILY_API_KEY", "tvly-x")
     monkeypatch.setenv("EXA_API_KEY", "exa-y")
+    monkeypatch.setenv("SERPER_API_KEY", "sp-y")
     chain = _default_web_chain(str(tmp_path))
-    assert [p.name for p in chain.inner.providers] == ["duckduckgo", "tavily", "exa"]
+    assert [p.name for p in chain.inner.providers] == ["duckduckgo", "tavily", "exa", "serper"]
     assert isinstance(chain.inner.providers[1], TavilyAdapter)
     assert isinstance(chain.inner.providers[2], ExaAdapter)
+    assert isinstance(chain.inner.providers[3], SerperAdapter)
 
 
 def test_default_search_drops_google_and_appends_one_web_chain(tmp_path, monkeypatch) -> None:

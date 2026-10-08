@@ -27,7 +27,8 @@ class SearchSource(StrEnum):
         WIKIPEDIA: Attribute description.
         DUCKDUCKGO: Attribute description.
         TAVILY: Attribute description.
-        EXA: Attribute description."""
+        EXA: Attribute description.
+        SERPER: Attribute description."""
 
     OPENALEX = "openalex"
     SEMANTIC_SCHOLAR = "semantic_scholar"
@@ -46,6 +47,7 @@ class SearchSource(StrEnum):
     DUCKDUCKGO = "duckduckgo"
     TAVILY = "tavily"
     EXA = "exa"
+    SERPER = "serper"
 
 
 class SourceRecord(BaseModel):
