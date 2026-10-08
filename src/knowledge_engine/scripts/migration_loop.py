@@ -112,9 +112,9 @@ async def main(loop_id: str, root: str) -> dict[str, Any]:
         print("FAIL env missing")
         sys.exit(1)
     if os.name == "nt":
-        import asyncio as _a
-
-        _a.set_event_loop_policy(_a.WindowsSelectorEventLoopPolicy())
+        policy = getattr(asyncio, "WindowsSelectorEventLoopPolicy", None)
+        if policy is not None:
+            asyncio.set_event_loop_policy(policy())
     from knowledge_engine.engine import ResearchEngine
 
     engine = ResearchEngine(
