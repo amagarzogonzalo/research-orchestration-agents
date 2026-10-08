@@ -44,6 +44,7 @@ from knowledge_engine.orchestration.nodes import (
     SynthesizeNode,
 )
 from knowledge_engine.orchestration.runtime import GraphRuntime, RunResult
+from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.browser import BrowserActionResult
 from knowledge_engine.schemas.settings import RunSettings
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
@@ -62,6 +63,8 @@ class ResearchEngine:
         auto_approve_review: Attribute description.
         checkpointer_kind: ``file`` (default, portable) or ``postgres`` (Supabase).
         store_kind: ``memory`` (default) or ``postgres`` (Supabase long-term memory).
+        artifact_store_kind: ``local`` (default, portable) or ``supabase`` (cloud storage).
+        artifacts: Optional prebuilt ArtifactStorePort override (tests/composition).
         database_url: Supabase session-pooler DSN; falls back to ``DATABASE_URL`` env.
         cleanup_after_run: Delete the thread's checkpoints after a finished run.
         search: Attribute description.
@@ -76,6 +79,8 @@ class ResearchEngine:
     auto_approve_review: bool = True
     checkpointer_kind: str = "file"
     store_kind: str = "memory"
+    artifact_store_kind: str = "local"
+    artifacts: Any | None = None
     database_url: str | None = None
     cleanup_after_run: bool = False
     # Optional injection points; defaults are built lazily from env.
@@ -97,7 +102,7 @@ class ResearchEngine:
     def __post_init__(self) -> None:
         """Initialize derived components."""
         load_dotenv()
-        self._store = ResearchStore(self.store_root)
+        self._store = self._build_research_store()
         self._checkpointer = self._build_checkpointer()
         self._memory_store = self._build_memory_store()
         self._search = self.search or _default_search(self.store_root)
@@ -112,6 +117,32 @@ class ResearchEngine:
             str | None: DSN or None.
         """
         return self.database_url or os.environ.get("DATABASE_URL")
+
+    def _build_research_store(self) -> ResearchStore:
+        """Build the files store with the configured artifact persistence (T4).
+
+        Returns:
+            ResearchStore: Files-only run folders over the artifact store.
+
+        Raises:
+            ConfigurationError: When ``artifact_store_kind='supabase'`` lacks keys
+                or the extra.
+        """
+        from knowledge_engine.core.exceptions import ConfigurationError
+
+        if self.artifacts is not None:
+            return ResearchStore(self.store_root, artifacts=self.artifacts)
+        if self.artifact_store_kind == "supabase":
+            from knowledge_engine.store.supabase_artifact_store import SupabaseArtifactStore
+
+            artifacts = SupabaseArtifactStore.from_env()
+        elif self.artifact_store_kind == "local":
+            artifacts = None
+        else:
+            raise ConfigurationError(
+                f"unknown artifact_store_kind: {self.artifact_store_kind!r} (use 'local' or 'supabase')"
+            )
+        return ResearchStore(self.store_root, artifacts=artifacts)
 
     def _build_checkpointer(self) -> Any:
         """Build the LangGraph checkpointer for the configured kind.
@@ -229,6 +260,7 @@ class ResearchEngine:
         storage = LocalBodyStorage(root=f"{self.store_root}/bodies")
         fetch_body = FetchBodyNode(self._scrape, storage=storage)
         synthesize = SynthesizeNode(self._provider, storage=storage)
+        render_save = _artifact_saver(self._store)
         return NodeSet(
             ingest=ingest,
             relevance=relevance,
@@ -237,7 +269,7 @@ class ResearchEngine:
             synthesize=synthesize,
             judge=JudgeNode(self._provider),
             review=review,
-            render=RenderNode(root=self.store_root),
+            render=RenderNode(root=self.store_root, save=render_save),
             intent=IntentNode(provider=self._provider),
             decompose=DecomposeNode(provider=self._provider),
             branch=BranchNode(
@@ -398,6 +430,32 @@ class ResearchEngine:
                     str: The model id of the first free model that passed a cheap health check.
         """
         return await self._discoverer.select(preferred=preferred)
+
+
+def _artifact_saver(store: ResearchStore) -> Any:
+    """Return an async save callable routing RenderNode through the port (ADR-0012).
+
+    Args:
+        store: The files store whose artifact port persists published output.
+
+    Returns:
+        Any: Async callable ``(artifact) -> output_path`` writing through
+            ``ResearchStore.write_article`` (port + local copy).
+    """
+
+    async def _save(artifact: KnowledgeArtifact) -> str:
+        """Persist the artifact via the store and return the local locator.
+
+        Args:
+            artifact: Final knowledge artifact.
+
+        Returns:
+            str: Local article path.
+        """
+        store.write_article(artifact, artifact.id)
+        return str(store.article_path(artifact.id))
+
+    return _save
 
 
 def _derived_thread_id(query: str) -> str:
