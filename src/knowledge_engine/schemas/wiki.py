@@ -9,8 +9,9 @@ re-write. Every type is Pydantic and cross-port safe.
 from __future__ import annotations
 
 from enum import StrEnum
+from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class WikiVerdict(StrEnum):
@@ -112,4 +113,78 @@ class LintReport(BaseModel):
         )
 
 
-__all__ = ["IngestResult", "LintReport", "WikiHit", "WikiVerdict"]
+class WikiExtraction(BaseModel):
+    """Two-step ingest output: concepts + entities distilled from one source.
+
+    The LLM proposes; validation disposes. Placeholder names (``n/a``,
+    ``unknown``, ``todo``, ...) are rejected at the schema so a transient
+    provider outage can never poison the wiki with stand-in structure
+    (fail-closed, per the Karpathy thread's deterministic write gates).
+
+    Attributes:
+        model_config: Forbid extra keys.
+        concepts: Concept names worth their own wiki pages (>= 1 char).
+        entities: Entity names (people/orgs/tools/repos) worth pages.
+        summary: One-paragraph synthesis of the source.
+        contradictions: Claims in the source that tension existing pages.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    concepts: list[str] = Field(default_factory=list)
+    entities: list[str] = Field(default_factory=list)
+    summary: str = ""
+    contradictions: list[str] = Field(default_factory=list)
+
+    @field_validator("concepts", "entities", mode="before")
+    @classmethod
+    def _drop_placeholders(cls, names: Any) -> Any:
+        """Strip whitespace and refuse placeholder names.
+
+        Args:
+            names: Raw name list from the provider.
+
+        Returns:
+            Any: Cleaned list.
+
+        Raises:
+            ValueError: When a name is a placeholder (fail-closed).
+        """
+        if not isinstance(names, list):
+            return names
+        cleaned = []
+        for name in names:
+            text = str(name).strip()
+            if not text:
+                continue
+            if text.lower() in _PLACEHOLDERS:
+                raise ValueError(f"placeholder name rejected by wiki gate: {text!r}")
+            cleaned.append(text)
+        return cleaned
+
+
+class WikiThesis(BaseModel):
+    """Thesis-mode verdict: evidence for + against one claim, then a verdict.
+
+    Attributes:
+        model_config: Forbid extra keys.
+        claim: The investigated claim.
+        for_claims: Evidence lines supporting the claim.
+        against_claims: Evidence lines challenging the claim.
+        verdict: The weighed conclusion (short paragraph).
+        sources: Wiki page slugs the evidence was drawn from.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    claim: str
+    for_claims: list[str] = Field(default_factory=list)
+    against_claims: list[str] = Field(default_factory=list)
+    verdict: str = ""
+    sources: list[str] = Field(default_factory=list)
+
+
+_PLACEHOLDERS = {"n/a", "na", "none", "unknown", "unnamed", "placeholder", "todo", "tbd"}
+
+
+__all__ = ["IngestResult", "LintReport", "WikiExtraction", "WikiHit", "WikiThesis", "WikiVerdict"]

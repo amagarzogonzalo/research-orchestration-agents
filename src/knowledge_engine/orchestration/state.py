@@ -79,6 +79,7 @@ class WorkflowState(TypedDict, total=False):
         wiki_hit: Routing flag — an exact-query wiki hit short-circuits live search.
         clean_stats: Dedup stats from CleanNode (dropped ids -> keepers).
         wiki_ingest: Ingest verdict from WikiIngestNode (verdict/paths/counts).
+        wiki_pages: Locators of draft/synthesis pages written this ingest.
     """
 
     thread_id: str
@@ -111,6 +112,7 @@ class WorkflowState(TypedDict, total=False):
     wiki_hit: bool
     clean_stats: dict[str, Any] | None
     wiki_ingest: dict[str, Any] | None
+    wiki_pages: list[str]
 
 
 def merge_sources(*lists: list[SourceRecord]) -> list[SourceRecord]:

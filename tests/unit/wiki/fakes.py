@@ -23,8 +23,13 @@ class FakeWikiStore:
         self.calls_search = 0
         self.calls_read = 0
         self.calls_ingest = 0
+        self.calls_compile = 0
+        self.calls_thesis = 0
         self.pages: dict[str, str] = dict(pages or {})
         self.filed_query_sha: dict[str, str] = {}
+        self.last_compile: dict[str, Any] | None = None
+        self.last_thesis: dict[str, Any] | None = None
+        self.feedback_store: dict[str, list[str]] = {}
         self._cache: dict[str, str] = {}
 
     async def search_wiki(self, query: str, *, limit: int = 3) -> list[WikiHit]:
@@ -89,6 +94,53 @@ class FakeWikiStore:
         self.filed_query_sha[slug] = hashlib.sha256(query.encode("utf-8")).hexdigest()
         self._cache[thread_id] = digest
         return IngestResult(verdict=verdict, page_path=f"fake://{slug}", pages_touched=1, content_sha256=digest)
+
+    async def compile_extraction(self, thread_id: str, query: str, extraction: Any, feedback: list[str]) -> list[str]:
+        """File fake draft locators for each extracted name.
+
+        Args:
+            thread_id: Thread id (recorded for assertions).
+            query: Query string.
+            extraction: WikiExtraction payload.
+            feedback: Feedback lines.
+
+        Returns:
+            list[str]: Fake draft locators.
+        """
+        self.calls_compile += 1
+        self.last_compile = {
+            "thread_id": thread_id,
+            "query": query,
+            "extraction": extraction,
+            "feedback": list(feedback),
+        }
+        names = list(extraction.concepts) + list(extraction.entities)
+        return [f"fake://drafts/{n.lower().replace(' ', '-')}" for n in names]
+
+    async def file_thesis(self, thread_id: str, thesis: Any) -> str:
+        """Record the thesis payload and return a fake locator.
+
+        Args:
+            thread_id: Thread id.
+            thesis: WikiThesis payload.
+
+        Returns:
+            str: Fake locator.
+        """
+        self.calls_thesis += 1
+        self.last_thesis = {"thread_id": thread_id, "thesis": thesis}
+        return f"fake://synthesis/{thesis.claim.lower().replace(' ', '-')[:40]}"
+
+    async def feedback_for(self, query: str) -> list[str]:
+        """Return recorded feedback lines.
+
+        Args:
+            query: Query string.
+
+        Returns:
+            list[str]: Feedback lines.
+        """
+        return self.feedback_store.get(query, [])
 
 
 def fake_supabase_client(pages: dict[str, str]) -> Any:

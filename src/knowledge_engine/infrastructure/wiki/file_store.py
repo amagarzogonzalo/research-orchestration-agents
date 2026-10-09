@@ -21,7 +21,7 @@ import yaml
 from knowledge_engine.core.exceptions import KnowledgeEngineError
 from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
 from knowledge_engine.infrastructure.wiki import common
-from knowledge_engine.schemas.wiki import IngestResult, WikiHit, WikiVerdict
+from knowledge_engine.schemas.wiki import IngestResult, WikiExtraction, WikiHit, WikiThesis, WikiVerdict
 
 _RELATED_TERMS = 2
 _RELATED_MAX = 3
@@ -168,6 +168,7 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             "date": common.today(),
             "sha256": digest,
             "query_sha256": common.sha256_text(query),
+            "confidence": "EXTRACTED",
             "tldr": common.tldr(text),
         }
         body = [f"## Article\n\n{text.rstrip()}", f"Filed from run `{thread_id}`."]
@@ -185,6 +186,182 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
         cache[thread_id] = {"sha": digest, "page": str(page)}
         common.write_json(self.root / common.CACHE_NAME, cache)
         return IngestResult(verdict=verdict, page_path=str(page), pages_touched=touched, content_sha256=digest)
+
+    # -- compile (LLM extraction, Loop 1) -------------------------------------
+    async def compile_extraction(
+        self, thread_id: str, query: str, extraction: WikiExtraction, feedback: list[str]
+    ) -> list[str]:
+        """File concept/entity pages as reviewable drafts (never live pages).
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            query: Original research query (context for summaries).
+            extraction: Validated extraction payload.
+            feedback: Rejection feedback lines addressed in each draft body.
+
+        Returns:
+            list[str]: Draft page locators.
+        """
+        self._ensure_layout()
+        drafts: list[str] = []
+        source_slug = common.slugify(query)
+        names = [(name, "concept") for name in extraction.concepts] + [
+            (name, "entity") for name in extraction.entities
+        ]
+        for name, kind in names:
+            slug = common.slugify(name)
+            body = [f"Distilled from [[{source_slug}]] (query: {common.page_title(query)})."]
+            if extraction.summary:
+                body.append(f"\n{extraction.summary}")
+            if feedback:
+                body.append("\n## Reviewer feedback to address\n" + "\n".join(f"- {line}" for line in feedback))
+            body_text = "\n\n".join(body) + "\n"
+            fm = {
+                "type": kind,
+                "title": name,
+                "date": common.today(),
+                "thread": thread_id,
+                "status": "draft",
+                "confidence": "INFERRED",
+                "sources": [source_slug],
+                "sha256": common.sha256_text(body_text),
+                "tldr": common.tldr(extraction.summary or name),
+            }
+            text = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + body_text
+            path = self.root / "drafts" / f"{slug}.md"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(text, encoding="utf-8")
+            drafts.append(str(path))
+        self._append_log("compile", f"{len(drafts)} drafts | {common.page_title(query)}")
+        return drafts
+
+    async def file_thesis(self, thread_id: str, thesis: WikiThesis) -> str:
+        """File a thesis verdict page into ``synthesis/`` (published).
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            thesis: Validated thesis payload.
+
+        Returns:
+            str: The synthesis page locator.
+        """
+        self._ensure_layout()
+        slug = common.slugify(thesis.claim)
+        fm = {
+            "type": "synthesis",
+            "title": common.page_title(thesis.claim),
+            "date": common.today(),
+            "thread": thread_id,
+            "confidence": "INFERRED",
+            "tldr": common.tldr(thesis.verdict),
+        }
+        lines = [f"**Claim:** {thesis.claim}", "", "## Evidence for"]
+        lines += [f"- {line}" for line in thesis.for_claims] or ["- (none recorded)"]
+        lines += ["", "## Evidence against"]
+        lines += [f"- {line}" for line in thesis.against_claims] or ["- (none recorded)"]
+        if thesis.sources:
+            lines += ["", "## Sources"] + [f"- [[{s}]]" for s in thesis.sources]
+        if thesis.verdict:
+            lines += ["", "## Verdict", thesis.verdict]
+        page = self.root / "synthesis" / f"{slug}.md"
+        page.write_text(
+            "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + "\n".join(lines) + "\n", encoding="utf-8"
+        )
+        self._upsert_synthesis_index(slug, fm["title"], fm["tldr"])
+        self._append_log("thesis", fm["title"])
+        return str(page)
+
+    async def feedback_for(self, query: str) -> list[str]:
+        """Return rejection feedback recorded against this query's pages.
+
+        Args:
+            query: Research query whose slug pages may have feedback.
+
+        Returns:
+            list[str]: Feedback lines (empty when none).
+        """
+        records = common.load_json(self.root / common.FEEDBACK_NAME)
+        entry = records.get(common.slugify(query))
+        if isinstance(entry, list):
+            return [str(line) for line in entry]
+        return []
+
+    # -- draft review API (human/agent; not part of the graph) ----------------
+    def approve_draft(self, slug: str) -> str:
+        """Publish one draft page after its hand-edit hash guard passes.
+
+        Args:
+            slug: Draft slug (``.drafts/<slug>.md``).
+
+        Returns:
+            str: The published page locator.
+
+        Raises:
+            KnowledgeEngineError: When the draft is missing or was hand-edited
+                after filing (hash mismatch — fail-closed, never overwrite).
+        """
+        draft = self.root / "drafts" / f"{slug}.md"
+        if not draft.is_file():
+            raise KnowledgeEngineError(f"wiki review: draft missing: {slug}")
+        text = draft.read_text(encoding="utf-8")
+        fm, body = common.split_frontmatter(text)
+        recorded = str(fm.get("sha256") or "")
+        if recorded and recorded != common.sha256_text(body):
+            raise KnowledgeEngineError(f"wiki review: hand-edited draft refuses approval (hash mismatch): {slug}")
+        fm.pop("status", None)
+        fm["date"] = common.today()
+        kind = str(fm.get("type", "concept"))
+        target_dir = "entities" if kind == "entity" else "concepts"
+        page = self.root / target_dir / f"{slug}.md"
+        page.parent.mkdir(parents=True, exist_ok=True)
+        page.write_text("---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + body, encoding="utf-8")
+        draft.unlink()
+        self._upsert_index(slug, str(fm.get("title", slug)), str(fm.get("tldr", "")), subdir=target_dir)
+        self._update_overview()
+        self._append_log("publish", str(fm.get("title", slug)))
+        return str(page)
+
+    def reject_draft(self, slug: str, feedback: str, *, query: str | None = None) -> None:
+        """Reject one draft, recording the feedback for the next compile.
+
+        Args:
+            slug: Draft slug.
+            feedback: What the next compile must address.
+            query: The originating research query (feedback is keyed by its
+                slug so :meth:`feedback_for` finds it); falls back to the
+                draft slug when omitted.
+        """
+        draft = self.root / "drafts" / f"{slug}.md"
+        if draft.is_file():
+            draft.unlink()
+        records = common.load_json(self.root / common.FEEDBACK_NAME)
+        key = common.slugify(query) if query else slug
+        lines = [str(line) for line in records.get(key, []) if isinstance(line, str)]
+        if feedback not in lines:
+            lines.append(feedback)
+        records[key] = lines
+        common.write_json(self.root / common.FEEDBACK_NAME, records)
+        self._append_log("reject", f"{slug} | {feedback[:80]}")
+
+    def _upsert_synthesis_index(self, slug: str, title: str, summary: str) -> None:
+        """Add a synthesis entry under the index's Synthesis section.
+
+        Args:
+            slug: Thesis page slug.
+            title: Page title.
+            summary: One-line summary.
+        """
+        index = self.root / common.INDEX_NAME
+        text = index.read_text(encoding="utf-8")
+        if "## Synthesis" not in text:
+            text = text.rstrip() + "\n\n## Synthesis\n"
+        marker = "## Synthesis\n"
+        head, _, tail = text.partition(marker)
+        entry = f"- [{title}](synthesis/{slug}.md) — {summary}"
+        tail_lines = tail.splitlines()
+        if not any(f"](synthesis/{slug}.md)" in line for line in tail_lines):
+            tail = "\n".join([entry] + [line for line in tail_lines if line.strip()]) + "\n"
+        index.write_text(head + marker + tail, encoding="utf-8")
 
     # -- maintenance ----------------------------------------------------------
     def _index_summaries(self) -> dict[str, str]:
@@ -204,21 +381,22 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
                 summaries.setdefault(match.group(1)[: -len(".md")], match.group(2) or "")
         return summaries
 
-    def _upsert_index(self, slug: str, title: str, summary: str) -> int:
+    def _upsert_index(self, slug: str, title: str, summary: str, *, subdir: str = "sources") -> int:
         """Insert or replace the page's index entry.
 
         Args:
             slug: Page slug.
             title: Page title.
             summary: One-line summary.
+            subdir: Page subdirectory (``sources``/``concepts``/``entities``).
 
         Returns:
             int: 1 when the index changed, 0 when the entry was identical.
         """
         index = self.root / common.INDEX_NAME
         lines = index.read_text(encoding="utf-8").splitlines()
-        entry = f"- [{title}](sources/{slug}.md) — {summary}"
-        prefix = f"](sources/{slug}.md)"
+        entry = f"- [{title}]({subdir}/{slug}.md) — {summary}"
+        prefix = f"]({subdir}/{slug}.md)"
         changed = False
         replaced = False
         out: list[str] = []
