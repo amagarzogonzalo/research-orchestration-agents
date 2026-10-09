@@ -19,9 +19,10 @@ from typing import Any
 import yaml
 
 from knowledge_engine.core.exceptions import ConfigurationError, KnowledgeEngineError
-from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
+from knowledge_engine.core.ports import VaultLintPort, WikiIngestPort, WikiQueryPort
 from knowledge_engine.infrastructure.wiki import common
-from knowledge_engine.schemas.wiki import IngestResult, WikiExtraction, WikiHit, WikiThesis, WikiVerdict
+from knowledge_engine.infrastructure.wiki.lint_core import lint_pages
+from knowledge_engine.schemas.wiki import IngestResult, LintReport, WikiExtraction, WikiHit, WikiThesis, WikiVerdict
 
 _PAGES_PREFIX = "pages"
 
@@ -184,21 +185,24 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         slug = common.slugify(query)
         key = f"{_PAGES_PREFIX}/{slug}.md"
 
-        prior = self._cache.get(thread_id)
+        cache = self._load_cloud_cache()
+        prior = cache.get(thread_id)
         if isinstance(prior, dict) and prior.get("sha") == digest:
             self._append_log(self._from(), "ingest", title)
+            self._save_cloud_cache(cache)
             return IngestResult(
                 verdict=WikiVerdict.NO_MATERIAL,
-                page_path=f"{self._bucket}/{key}",
+                page_path=str(prior.get("page") or f"{self._bucket}/{key}"),
                 pages_touched=0,
                 content_sha256=digest,
             )
-        for other_thread, recorded in self._cache.items():
+        for other_thread, recorded in cache.items():
             if isinstance(recorded, dict) and recorded.get("sha") == digest and other_thread != thread_id:
                 self._append_log(self._from(), "ingest", f"{title} (duplicate of {other_thread})")
+                self._save_cloud_cache(cache)
                 return IngestResult(
                     verdict=WikiVerdict.NO_MATERIAL,
-                    page_path=f"{self._bucket}/{key}",
+                    page_path=str(recorded.get("page") or f"{self._bucket}/{key}"),
                     pages_touched=0,
                     content_sha256=digest,
                 )
@@ -222,7 +226,8 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         self._append_log(self._from(), "ingest", title)
         touched += 1
         loc = f"{self._bucket}/{key}"
-        self._cache[thread_id] = {"sha": digest, "page": loc}
+        cache[thread_id] = {"sha": digest, "page": loc}
+        self._save_cloud_cache(cache)
         return IngestResult(verdict=verdict, page_path=loc, pages_touched=touched, content_sha256=digest)
 
     # -- compile (LLM extraction, Loop 1) -------------------------------------
@@ -327,6 +332,63 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         return [str(line) for line in entry] if isinstance(entry, list) else []
 
     # -- bucket object helpers ----------------------------------------------
+    def _load_cloud_cache(self) -> dict[str, dict[str, str]]:
+        """Load the shared cache object (cross-process coherence, Loop 3).
+
+        Merges the bucket ``.cache.json`` with the in-process copy so
+        concurrent processes see each other's filings on the next ingest.
+
+        Returns:
+            dict[str, dict[str, str]]: Merged cache mapping thread -> {sha, page}.
+        """
+        handle = self._from()
+        text = self._download(handle, common.CACHE_NAME)
+        if text is None:
+            return dict(self._cache)
+        try:
+            cloud = json.loads(text)
+        except json.JSONDecodeError:
+            return dict(self._cache)
+        merged = dict(self._cache)
+        if isinstance(cloud, dict):
+            merged.update(cloud)
+        return merged
+
+    def _save_cloud_cache(self, cache: dict[str, dict[str, str]]) -> None:
+        """Persist the cache as the shared bucket object.
+
+        Args:
+            cache: The merged cache mapping.
+        """
+        self._from().upload(
+            common.CACHE_NAME,
+            json.dumps(cache, indent=2, ensure_ascii=False).encode("utf-8"),
+            {"content-type": "application/json", "upsert": "true"},
+        )
+        self._cache = dict(cache)
+
+    def _lint_bucket(self) -> dict[str, str]:
+        """Shared cloud lint: enumerate drafts + pages, return raw page maps.
+
+        Returns:
+            dict[str, str]: locator -> page text for drafts and filed pages.
+        """
+        handle = self._from()
+        pages: dict[str, str] = {}
+        for prefix in ("drafts", "synthesis", "concepts", "entities", "pages"):
+            try:
+                objects = handle.list(prefix) or []
+            except Exception:  # noqa: BLE001 - listing failure skips this area
+                continue
+            for obj in objects:
+                name = getattr(obj, "name", None) or (obj.get("name") if isinstance(obj, dict) else None)
+                if not name or not name.endswith(".md"):
+                    continue
+                text = self._download(handle, f"{prefix}/{name}")
+                if text is not None:
+                    pages[f"{prefix}/{name[: -len('.md')]}"] = text
+        return pages
+
     def _index_summaries(self, handle: Any) -> dict[str, str]:
         """Parse the bucket ``index.md`` into slug -> summary.
 
@@ -402,4 +464,27 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         handle.upload(common.LOG_NAME, updated.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
 
 
-__all__ = ["SupabaseWikiStore"]
+class SupabaseVaultLinter(VaultLintPort):
+    """Scan a Supabase wiki bucket and report structural issues (Loop 3)."""
+
+    def __init__(self, store: SupabaseWikiStore) -> None:
+        """Create a SupabaseVaultLinter.
+
+        Args:
+            store: A :class:`SupabaseWikiStore` (shared bucket handle +
+                error policy; one client, one bucket).
+        """
+        self._store = store
+
+    async def lint(self) -> LintReport:
+        """Scan the bucket's page areas and report findings.
+
+        Returns:
+            LintReport: Findings; ``ok`` is True when the bucket is clean.
+        """
+        pages = self._store._lint_bucket()
+        index_text = self._store._download(self._store._from(), common.INDEX_NAME)
+        return lint_pages(pages, root=str(self._store._bucket), index_text=index_text)
+
+
+__all__ = ["SupabaseVaultLinter", "SupabaseWikiStore"]
