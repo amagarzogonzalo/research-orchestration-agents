@@ -20,10 +20,13 @@ INDEX_NAME = "index.md"
 LOG_NAME = "log.md"
 OVERVIEW_NAME = "overview.md"
 CACHE_NAME = ".cache.json"
+FEEDBACK_NAME = ".feedback.json"
 
 #: Deterministic ingest writes pages under these subdirectories; index/log/
 #: overview live at the wiki root and are exempt from lint's orphan scan.
-PAGE_DIRS = ("sources", "synthesis")
+#: ``drafts/`` is deliberately excluded: drafts are a review area, never
+#: live pages (not searched, not linted, not indexed).
+PAGE_DIRS = ("sources", "synthesis", "concepts", "entities")
 
 WORD_RE = re.compile(r"[a-z0-9]+")
 _FM_BLOCK = re.compile(r"(?ms)\A---\s*\n(.*?)\n---\s*\n?")
@@ -200,6 +203,7 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
 
 __all__ = [
     "CACHE_NAME",
+    "FEEDBACK_NAME",
     "INDEX_NAME",
     "LOG_NAME",
     "OVERVIEW_NAME",

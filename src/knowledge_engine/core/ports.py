@@ -15,7 +15,7 @@ from knowledge_engine.schemas.clean import CleanResult
 from knowledge_engine.schemas.extraction import ExtractionRequest
 from knowledge_engine.schemas.provider import ChatRequest, ChatResult
 from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
-from knowledge_engine.schemas.wiki import IngestResult, LintReport, WikiHit
+from knowledge_engine.schemas.wiki import IngestResult, LintReport, WikiExtraction, WikiHit, WikiThesis
 
 
 class ProviderPort(abc.ABC):
@@ -362,6 +362,52 @@ class WikiIngestPort(abc.ABC):
 
         Returns:
             IngestResult: Verdict + write counts.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def compile_extraction(
+        self, thread_id: str, query: str, extraction: WikiExtraction, feedback: list[str]
+    ) -> list[str]:
+        """File LLM-extracted concept/entity pages as reviewable drafts.
+
+        Drafts land in a review area (never the live page set) with
+        ``status: draft`` frontmatter; a human/agent review step approves or
+        rejects them. Prior rejection feedback is the caller's job to pass in.
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            query: Original research query (context for page summaries).
+            extraction: The validated extraction payload.
+            feedback: Rejection feedback lines to address in page bodies.
+
+        Returns:
+            list[str]: Draft page locators.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def file_thesis(self, thread_id: str, thesis: WikiThesis) -> str:
+        """File a thesis verdict page into ``synthesis/`` (published, not draft).
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            thesis: The validated thesis payload.
+
+        Returns:
+            str: The synthesis page locator.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def feedback_for(self, query: str) -> list[str]:
+        """Return rejection feedback relevant to the given query's pages.
+
+        Args:
+            query: Research query whose slug pages may have feedback.
+
+        Returns:
+            list[str]: Feedback lines (empty when none).
         """
         ...
 

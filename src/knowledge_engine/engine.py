@@ -338,7 +338,7 @@ class ResearchEngine:
             critic=CriticNode(provider=self._provider),
             wiki_query=WikiQueryNode(wiki, limit=3),
             clean=CleanNode(SourceCleaner()),
-            wiki_ingest=WikiIngestNode(wiki),
+            wiki_ingest=WikiIngestNode(wiki, provider=self._provider),
         )
 
     def compiled_graph(self, workflow: str = "deep") -> Any:

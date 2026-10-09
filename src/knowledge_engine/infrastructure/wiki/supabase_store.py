@@ -12,6 +12,7 @@ cloud cache coherence across processes lands in Loop 3.
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from typing import Any
 
@@ -20,7 +21,7 @@ import yaml
 from knowledge_engine.core.exceptions import ConfigurationError, KnowledgeEngineError
 from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
 from knowledge_engine.infrastructure.wiki import common
-from knowledge_engine.schemas.wiki import IngestResult, WikiHit, WikiVerdict
+from knowledge_engine.schemas.wiki import IngestResult, WikiExtraction, WikiHit, WikiThesis, WikiVerdict
 
 _PAGES_PREFIX = "pages"
 
@@ -214,6 +215,107 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         loc = f"{self._bucket}/{key}"
         self._cache[thread_id] = {"sha": digest, "page": loc}
         return IngestResult(verdict=verdict, page_path=loc, pages_touched=touched, content_sha256=digest)
+
+    # -- compile (LLM extraction, Loop 1) -------------------------------------
+    async def compile_extraction(
+        self, thread_id: str, query: str, extraction: WikiExtraction, feedback: list[str]
+    ) -> list[str]:
+        """Upload concept/entity drafts into the bucket's ``drafts/`` area.
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            query: Original research query (context for summaries).
+            extraction: Validated extraction payload.
+            feedback: Rejection feedback lines addressed in each draft body.
+
+        Returns:
+            list[str]: Draft object locators.
+        """
+        handle = self._from()
+        source_slug = common.slugify(query)
+        locs: list[str] = []
+        names = [(name, "concept") for name in extraction.concepts] + [
+            (name, "entity") for name in extraction.entities
+        ]
+        for name, kind in names:
+            slug = common.slugify(name)
+            body = [f"Distilled from [[{source_slug}]] (query: {common.page_title(query)})."]
+            if extraction.summary:
+                body.append(f"\n{extraction.summary}")
+            if feedback:
+                body.append("\n## Reviewer feedback to address\n" + "\n".join(f"- {line}" for line in feedback))
+            body_text = "\n\n".join(body) + "\n"
+            fm = {
+                "type": kind,
+                "title": name,
+                "date": common.today(),
+                "thread": thread_id,
+                "status": "draft",
+                "confidence": "INFERRED",
+                "sources": [source_slug],
+                "sha256": common.sha256_text(body_text),
+                "tldr": common.tldr(extraction.summary or name),
+            }
+            key = f"drafts/{slug}.md"
+            rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + body_text
+            handle.upload(key, rendered.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
+            locs.append(f"{self._bucket}/{key}")
+        self._append_log(handle, "compile", f"{len(locs)} drafts | {common.page_title(query)}")
+        return locs
+
+    async def file_thesis(self, thread_id: str, thesis: WikiThesis) -> str:
+        """Upload a thesis verdict page into the bucket's ``synthesis/`` area.
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            thesis: Validated thesis payload.
+
+        Returns:
+            str: The synthesis object locator.
+        """
+        handle = self._from()
+        slug = common.slugify(thesis.claim)
+        fm = {
+            "type": "synthesis",
+            "title": common.page_title(thesis.claim),
+            "date": common.today(),
+            "thread": thread_id,
+            "confidence": "INFERRED",
+            "tldr": common.tldr(thesis.verdict),
+        }
+        lines = [f"**Claim:** {thesis.claim}", "", "## Evidence for"]
+        lines += [f"- {line}" for line in thesis.for_claims] or ["- (none recorded)"]
+        lines += ["", "## Evidence against"]
+        lines += [f"- {line}" for line in thesis.against_claims] or ["- (none recorded)"]
+        if thesis.sources:
+            lines += ["", "## Sources"] + [f"- [[{s}]]" for s in thesis.sources]
+        if thesis.verdict:
+            lines += ["", "## Verdict", thesis.verdict]
+        key = f"synthesis/{slug}.md"
+        rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + "\n".join(lines) + "\n"
+        handle.upload(key, rendered.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
+        self._append_log(handle, "thesis", fm["title"])
+        return f"{self._bucket}/{key}"
+
+    async def feedback_for(self, query: str) -> list[str]:
+        """Return rejection feedback stored as the bucket ``.feedback.json``.
+
+        Args:
+            query: Research query whose slug pages may have feedback.
+
+        Returns:
+            list[str]: Feedback lines (empty when none).
+        """
+        handle = self._from()
+        text = self._download(handle, common.FEEDBACK_NAME)
+        if text is None:
+            return []
+        try:
+            records = json.loads(text)
+        except json.JSONDecodeError:
+            return []
+        entry = records.get(common.slugify(query)) if isinstance(records, dict) else None
+        return [str(line) for line in entry] if isinstance(entry, list) else []
 
     # -- bucket object helpers ----------------------------------------------
     def _index_summaries(self, handle: Any) -> dict[str, str]:
