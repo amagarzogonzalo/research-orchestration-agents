@@ -445,10 +445,21 @@ def main() -> int:
         print(f"accepted {len(results)} snapshots — commit them with the change that caused them")
         return 0
 
+    failed = []
+    for r in results:
+        if r["ok"]:
+            continue
+        case = next((c for c in cases if c["id"] == r["id"]), {})
+        if case.get("draft"):
+            # Draft cases (e.g. awaiting their first live record + human
+            # snapshot accept) report signal but never fail the offline gate.
+            r["notes"].append(f"[{r['id']}] DRAFT case: findings reported, gate not blocked")
+            continue
+        failed.append(r)
+
     if args.json:
         print(json.dumps(results, indent=2, default=str))
 
-    failed = [r for r in results if not r["ok"]]
     for r in results:
         usage = r.get("usage", {})
         budget = r.get("budget", {})

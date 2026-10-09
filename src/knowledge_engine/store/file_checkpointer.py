@@ -32,6 +32,7 @@ from langgraph.checkpoint.base import (
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
 from knowledge_engine.schemas.source import BodyRef, DocumentBody, FetchMethod, SearchSource, SourceRecord
+from knowledge_engine.schemas.wiki import WikiVerdict
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +47,7 @@ ALLOWED_CHANNEL_SERDE_TYPES: tuple[type, ...] = (
     FetchMethod,
     SearchSource,
     SourceRecord,
+    WikiVerdict,
 )
 
 

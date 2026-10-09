@@ -1,0 +1,42 @@
+# Internal-wiki demo: internal-first answer with dedup + lineage stays sound
+# DRAFT status: this case exercises the NEW wiki-hit path, so replay needs its
+# own recorded cassettes (a first live record) + human `--accept` of the
+# snapshot. Until then it reports signal but never blocks the offline gate
+# (draft cases are exempt from the gate in evals/runner.py).
+id: internal_wiki_demo
+draft: true
+description: >
+  Guards the wiki loop: a repeated query hits the compiled wiki first
+  (fewer live calls), dedup clusters near-copies instead of double-citing,
+  and every claim keeps lineage to raw sources with a consistent index and log.
+entrypoint: "evals.adapters:research_run"
+input:
+  query: "How retrieval-augmented generation reduces hallucinations in large language models"
+  max_sources: 8
+
+samples: 1
+pass_at_k: 1
+
+invariants:
+  frontmatter_keys: ["@id", type, title, provenance, citations, tldr_llm]
+  min_sections: 2
+  min_citations: 3
+  must_cite: []
+  no_uncited_claims: true
+  valid_links: true
+  forbidden_patterns: ["as an ai", "\\bTODO\\b", "as of my (last )?(knowledge|training)"]
+  max_chars: 30000
+
+budget:
+  max_total_tokens: 30000
+  max_model_calls: 32
+  max_wall_s: 1200
+
+judge:
+  rubric: rubrics/default.md
+  min_score: 6
+  samples: 1
+  advisory: true
+
+deepeval:
+  metrics: [answer_relevancy, faithfulness]

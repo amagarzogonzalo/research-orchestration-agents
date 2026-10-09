@@ -65,6 +65,8 @@ class ResearchEngine:
         store_kind: ``memory`` (default) or ``postgres`` (Supabase long-term memory).
         artifact_store_kind: ``local`` (default, portable) or ``supabase`` (cloud storage).
         body_store_kind: ``local``/``supabase``; None follows the artifact kind.
+        wiki_store_kind: ``local`` (default, portable files under
+            ``<store_root>/wiki``) or ``supabase`` (cloud, no-op-until-configured).
         artifacts: Optional prebuilt ArtifactStorePort override (tests/composition).
         database_url: Supabase session-pooler DSN; falls back to ``DATABASE_URL`` env.
         cleanup_after_run: Delete the thread's checkpoints after a finished run.
@@ -82,6 +84,7 @@ class ResearchEngine:
     store_kind: str = "memory"
     artifact_store_kind: str = "local"
     body_store_kind: str | None = None
+    wiki_store_kind: str = "local"
     artifacts: Any | None = None
     database_url: str | None = None
     cleanup_after_run: bool = False
@@ -143,6 +146,27 @@ class ResearchEngine:
             str | None: DSN or None.
         """
         return self.database_url or os.environ.get("DATABASE_URL")
+
+    def _build_wiki_store(self) -> Any:
+        """Build the wiki store per ``wiki_store_kind`` (ADR wiki-loop0).
+
+        Returns:
+            Any: A ``WikiQueryPort`` + ``WikiIngestPort`` implementation.
+
+        Raises:
+            ConfigurationError: On an unknown kind or missing cloud keys.
+        """
+        from knowledge_engine.core.exceptions import ConfigurationError
+
+        if self.wiki_store_kind == "local":
+            from knowledge_engine.infrastructure.wiki.file_store import FileWikiStore
+
+            return FileWikiStore(root=f"{self.store_root}/wiki")
+        if self.wiki_store_kind == "supabase":
+            from knowledge_engine.infrastructure.wiki.supabase_store import SupabaseWikiStore
+
+            return SupabaseWikiStore.from_env()
+        raise ConfigurationError(f"unknown wiki_store_kind: {self.wiki_store_kind!r} (use 'local' or 'supabase')")
 
     def _build_research_store(self) -> ResearchStore:
         """Build the files store with the configured artifact persistence (T4).
@@ -287,6 +311,12 @@ class ResearchEngine:
         fetch_body = FetchBodyNode(self._scrape, storage=storage)
         synthesize = SynthesizeNode(self._provider, storage=storage)
         render_save = _artifact_saver(self._store)
+        wiki = self._build_wiki_store()
+        from knowledge_engine.infrastructure.clean import SourceCleaner
+        from knowledge_engine.orchestration.nodes.clean import CleanNode
+        from knowledge_engine.orchestration.nodes.wiki_ingest import WikiIngestNode
+        from knowledge_engine.orchestration.nodes.wiki_query import WikiQueryNode
+
         return NodeSet(
             ingest=ingest,
             relevance=relevance,
@@ -306,6 +336,9 @@ class ResearchEngine:
             ),
             aggregate=AggregateNode(provider=self._provider),
             critic=CriticNode(provider=self._provider),
+            wiki_query=WikiQueryNode(wiki, limit=3),
+            clean=CleanNode(SourceCleaner()),
+            wiki_ingest=WikiIngestNode(wiki),
         )
 
     def compiled_graph(self, workflow: str = "deep") -> Any:
