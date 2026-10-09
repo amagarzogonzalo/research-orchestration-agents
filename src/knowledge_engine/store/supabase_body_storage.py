@@ -93,7 +93,8 @@ class SupabaseBodyStorage(BodyStoragePort):
         self._client.storage.from_(_BUCKET).upload(
             key,
             body.markdown.encode("utf-8"),  # supabase-py: bytes = content
-            {"upsert": "true", "content-type": "text/markdown; charset=utf-8"},
+            # text/plain renders inline in browsers (text/markdown = download)
+            {"upsert": "true", "content-type": "text/plain; charset=utf-8"},
         )
         return BodyRef(
             url=body.url,
