@@ -184,7 +184,9 @@ def fake_supabase_client(pages: dict[str, str]) -> Any:
     class _Client:
         storage = _Storage()
 
-    return _Client()
+    client = _Client()
+    client._store = store  # test visibility into the fake bucket
+    return client
 
 
 __all__ = ["FakeWikiStore", "fake_supabase_client"]
