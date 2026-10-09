@@ -92,3 +92,36 @@ async def test_close_never_delete_superseded_kept_in_map() -> None:
     assert result.dropped == 2
     assert set(result.superseded_by) == {"a:1"}
     assert [r.id for r in result.kept] == ["a:1"]
+
+
+async def test_similar_topics_never_merge() -> None:
+    """Distinct papers on the same theme must NOT merge (false-merge guard)."""
+    cleaner = SourceCleaner(near_dedup=True)
+    result = await cleaner.clean(
+        [
+            _rec(
+                "a:1",
+                "Attention mechanisms in transformers",
+                "Query key value attention computes contextual token representations "
+                "in transformer layers for machine translation.",
+            ),
+            _rec(
+                "b:2",
+                "Roman aqueduct hydraulics",
+                "Aqueduct gradients channel water through gravity-fed conduits "
+                "across valleys using arches and settling tanks.",
+            ),
+        ]
+    )
+    assert result.dropped == 0, "different topics sharing a few words must both survive"
+
+
+async def test_large_batch_uses_signature_path_deterministically() -> None:
+    """>64 records route through the LSH signature path; duplicates still caught."""
+    cleaner = SourceCleaner(near_dedup=True)
+    records = [_rec(f"p:{i}", f"Paper number {i} on topic {i}", "unique abstract " * 20) for i in range(80)]
+    dup = _rec("dup:10", "Paper number 10 on topic 10", "unique abstract " * 20)
+    records.append(dup)
+    result = await cleaner.clean(records)
+    assert result.near_drops == 1, "duplicate must be caught even on the signature path"
+    assert len(result.kept) == 80

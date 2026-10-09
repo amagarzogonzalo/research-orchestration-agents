@@ -89,6 +89,13 @@ class FakeWikiStore:
         prior = self._cache.get(thread_id)
         if prior == digest:
             return IngestResult(verdict=WikiVerdict.NO_MATERIAL, page_path=f"fake://{slug}", content_sha256=digest)
+        for other_thread, recorded in self._cache.items():
+            if recorded == digest and other_thread != thread_id:
+                return IngestResult(
+                    verdict=WikiVerdict.NO_MATERIAL,
+                    page_path=f"fake://{slug}",
+                    content_sha256=digest,
+                )
         verdict = WikiVerdict.UPDATE if slug in self.pages else WikiVerdict.NEW
         self.pages[slug] = f"---\ntype: source\n---\n\n{slug}"
         self.filed_query_sha[slug] = hashlib.sha256(query.encode("utf-8")).hexdigest()
