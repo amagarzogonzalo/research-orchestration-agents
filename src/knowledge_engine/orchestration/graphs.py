@@ -20,11 +20,14 @@ from langgraph.types import RetryPolicy, Send, TimeoutPolicy
 
 from knowledge_engine.orchestration.guardrails import should_stop
 from knowledge_engine.orchestration.nodes import (
+    CLEAN_NODE,
     FETCH_NODE,
     JUDGE_NODE,
     RENDER_NODE,
     REVIEW_NODE,
     SYNTHESIZE_NODE,
+    WIKI_INGEST_NODE,
+    WIKI_QUERY_NODE,
     judge_route,
     review_route,
 )
@@ -72,6 +75,9 @@ class NodeSet:
         branch: Branch node (deep workflow, optional).
         aggregate: Aggregate node (deep workflow, optional).
         critic: Critic node (deep workflow, optional).
+        wiki_query: Internal-first wiki lookup node (research workflow, optional).
+        clean: Source dedup node (research workflow, optional).
+        wiki_ingest: Compile-into-wiki node (research workflow, optional).
     """
 
     ingest: IngestNode
@@ -87,6 +93,9 @@ class NodeSet:
     branch: BranchNode | None = None
     aggregate: AggregateNode | None = None
     critic: CriticNode | None = None
+    wiki_query: Any | None = None
+    clean: Any | None = None
+    wiki_ingest: Any | None = None
 
 
 async def _error_handler(state: WorkflowState, error: NodeError) -> dict[str, Any]:
@@ -164,6 +173,11 @@ def _build_research(
 ) -> Any:
     """Build the research workflow graph.
 
+    Wiki layer (ADR wiki-loop0) wires only when the composition root built
+    the wiki nodes: ``START -> wiki_query`` (hit routes straight to render,
+    miss proceeds), an optional ``clean`` step between ingest and relevance,
+    and ``render -> wiki_ingest -> END``. QA/summary/deep stay untouched.
+
     Args:
         nodes: Node set.
         checkpointer: Durability checkpointer.
@@ -174,14 +188,29 @@ def _build_research(
     """
     g = _base()
     _register(g, nodes)
-    g.add_edge(START, "ingest")
-    g.add_edge("ingest", "relevance")
+    if nodes.wiki_query is not None:
+        g.add_node(WIKI_QUERY_NODE, nodes.wiki_query)
+        g.add_edge(START, WIKI_QUERY_NODE)
+        g.add_conditional_edges(WIKI_QUERY_NODE, wiki_route, {"ingest": "ingest", RENDER_NODE: RENDER_NODE})
+    else:
+        g.add_edge(START, "ingest")
+    if nodes.clean is not None:
+        g.add_node(CLEAN_NODE, nodes.clean)
+        g.add_edge("ingest", CLEAN_NODE)
+        g.add_edge(CLEAN_NODE, "relevance")
+    else:
+        g.add_edge("ingest", "relevance")
     g.add_edge("relevance", "bodies")
     g.add_edge(FETCH_NODE, SYNTHESIZE_NODE)
     g.add_edge(SYNTHESIZE_NODE, "judge")
     g.add_conditional_edges("judge", judge_route, {SYNTHESIZE_NODE: SYNTHESIZE_NODE, REVIEW_NODE: REVIEW_NODE})
     g.add_conditional_edges("review", review_route, {RENDER_NODE: RENDER_NODE, END: END})
-    g.add_edge(RENDER_NODE, END)
+    if nodes.wiki_ingest is not None:
+        g.add_node(WIKI_INGEST_NODE, nodes.wiki_ingest)
+        g.add_edge(RENDER_NODE, WIKI_INGEST_NODE)
+        g.add_edge(WIKI_INGEST_NODE, END)
+    else:
+        g.add_edge(RENDER_NODE, END)
     return g.compile(checkpointer=checkpointer, store=store)
 
 
@@ -249,6 +278,18 @@ def _require_deep(nodes: NodeSet) -> NodeSet:
     if missing:
         raise ConfigurationError(f"deep workflow needs nodes: {', '.join(missing)}")
     return nodes
+
+
+def wiki_route(state: WorkflowState) -> str:
+    """Route after wiki_query: a hit renders from the wiki, a miss ingests.
+
+    Args:
+        state: Current workflow state.
+
+    Returns:
+        str: Next node name (render on hit, ingest on miss).
+    """
+    return RENDER_NODE if state.get("wiki_hit") else "ingest"
 
 
 def intent_route(state: WorkflowState) -> str:
@@ -368,4 +409,5 @@ __all__ = [
     "dispatch",
     "intent_route",
     "synthesize_route",
+    "wiki_route",
 ]

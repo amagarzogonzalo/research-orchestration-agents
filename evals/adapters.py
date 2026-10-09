@@ -125,6 +125,9 @@ def research_run(query: str, max_sources: int = 8, cassette: Any | None = None, 
     root = Path("research_store/evals")
     shutil.rmtree(root / "eval-research", ignore_errors=True)
     shutil.rmtree(root / "checkpoints" / "eval-research", ignore_errors=True)
+    # Wiki layer is part of the run's store root: wiping keeps replay hermetic
+    # (a prior case must never answer the next case's query).
+    shutil.rmtree(root / "wiki", ignore_errors=True)
 
     async def go() -> dict[str, Any]:
         engine = ResearchEngine(store_root=str(root), search_limit=max_sources)
@@ -170,6 +173,8 @@ def deep_run(query: str, max_sources: int = 8, cassette: Any | None = None, **_:
     root = Path("research_store/evals")
     shutil.rmtree(root / "eval-deep", ignore_errors=True)
     shutil.rmtree(root / "checkpoints" / "eval-deep", ignore_errors=True)
+    # Same wiki-hermeticity contract as research_run.
+    shutil.rmtree(root / "wiki", ignore_errors=True)
 
     async def go() -> dict[str, Any]:
         engine = ResearchEngine(store_root=str(root), search_limit=max_sources)

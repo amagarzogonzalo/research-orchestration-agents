@@ -1,0 +1,294 @@
+"""SupabaseWikiStore — cloud wiki adapter, no-op-until-configured (ADR wiki-loop0).
+
+Pages live in the ``wiki`` Storage bucket under ``pages/<slug>.md``;
+``index.md``/``log.md``/``overview.md`` are bucket-root objects. Requires the
+``supabase`` extra (opt-in per AGENTS rule 4) and ``SUPABASE_URL`` +
+``SUPABASE_SECRET_KEY``; the engine only builds this adapter when
+``wiki_store_kind='supabase'``, so the default local path is untouched.
+
+The SHA ingest cache is in-process (per construction) — documented trade-off:
+cloud cache coherence across processes lands in Loop 3.
+"""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from knowledge_engine.core.exceptions import ConfigurationError, KnowledgeEngineError
+from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
+from knowledge_engine.infrastructure.wiki import common
+from knowledge_engine.schemas.wiki import IngestResult, WikiHit, WikiVerdict
+
+_PAGES_PREFIX = "pages"
+
+
+class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
+    """Supabase Storage-backed wiki (cross-machine safe when configured).
+
+    Args:
+        client: Supabase client (from :meth:`from_env`).
+        bucket: Storage bucket name (created on demand as PUBLIC).
+    """
+
+    def __init__(self, client: Any, bucket: str = "wiki") -> None:
+        self._client = client
+        self._bucket = bucket
+        self._cache: dict[str, dict[str, str]] = {}
+
+    @classmethod
+    def from_env(cls) -> SupabaseWikiStore:
+        """Build the store from ``SUPABASE_URL`` + ``SUPABASE_SECRET_KEY``.
+
+        Returns:
+            SupabaseWikiStore: Configured store.
+
+        Raises:
+            ConfigurationError: When the keys or the ``supabase`` extra are
+                missing (the engine treats this as no-op-until-configured).
+        """
+        import os
+
+        url = os.environ.get("SUPABASE_URL", "")
+        key = os.environ.get("SUPABASE_SECRET_KEY", "")
+        if not url or not key:
+            raise ConfigurationError("wiki_store_kind='supabase' needs SUPABASE_URL and SUPABASE_SECRET_KEY")
+        try:
+            from supabase import create_client
+        except ImportError as exc:
+            raise ConfigurationError(
+                "the supabase wiki adapter needs the 'supabase' extra: uv sync --extra supabase"
+            ) from exc
+        return cls(create_client(url, key))
+
+    def _from(self) -> Any:
+        """Return the bucket handle, creating the bucket when missing.
+
+        Returns:
+            Any: Supabase Storage bucket handle.
+
+        Raises:
+            KnowledgeEngineError: When the bucket cannot be created.
+        """
+        storage = self._client.storage
+        try:
+            existing = {b.name for b in storage.list_buckets()}
+        except Exception as exc:  # noqa: BLE001 - cloud listing failure is a hard stop
+            raise KnowledgeEngineError(f"supabase wiki: cannot list buckets: {exc}") from exc
+        if self._bucket not in existing:
+            try:
+                storage.create_bucket(self._bucket, options={"public": False})
+            except Exception:  # noqa: BLE001 - duplicate-bucket races are benign
+                pass
+        return storage.from_(self._bucket)
+
+    def _download(self, handle: Any, key: str) -> str | None:
+        """Download one object's text, or None when absent.
+
+        Args:
+            handle: Bucket handle.
+            key: Object key.
+
+        Returns:
+            str | None: Object text or None.
+        """
+        try:
+            blob = handle.download(key)
+        except Exception:  # noqa: BLE001 - absent objects are a normal miss
+            return None
+        return blob.decode("utf-8") if isinstance(blob, bytes) else str(blob)
+
+    async def search_wiki(self, query: str, *, limit: int = 3) -> list[WikiHit]:
+        """Return the best-matching wiki pages for a query.
+
+        Args:
+            query: Research query string.
+            limit: Maximum hits to return.
+
+        Returns:
+            list[WikiHit]: Ranked hits (empty when nothing matches or the
+            bucket is unreachable).
+        """
+        query_terms = common.terms(query)
+        if not query_terms:
+            return []
+        handle = self._from()
+        summaries = self._index_summaries(handle)
+        hits: list[WikiHit] = []
+        try:
+            objects = handle.list(_PAGES_PREFIX) or []
+        except Exception:  # noqa: BLE001 - listing failure degrades to no hits
+            return []
+        for obj in objects:
+            name = getattr(obj, "name", None) or (obj.get("name") if isinstance(obj, dict) else None)
+            if not name or not name.endswith(".md"):
+                continue
+            slug = name[: -len(".md")]
+            text = self._download(handle, f"{_PAGES_PREFIX}/{name}")
+            if text is None:
+                continue
+            fm, body = common.split_frontmatter(text)
+            title = common.fm_title(fm, Path(name))
+            value = common.score(query_terms, title, body)
+            if value <= 0.0:
+                continue
+            loc = f"{self._bucket}/{_PAGES_PREFIX}/{name}"
+            qsha = str(fm.get("query_sha256") or "")
+            hits.append(
+                WikiHit(
+                    slug=slug,
+                    title=title,
+                    path=loc,
+                    score=value,
+                    summary=summaries.get(slug, ""),
+                    query_sha256=qsha,
+                )
+            )
+        hits.sort(key=lambda h: (-h.score, h.slug))
+        return hits[:limit]
+
+    async def read_page(self, slug: str) -> str | None:
+        """Read one page's markdown by slug.
+
+        Args:
+            slug: Page slug.
+
+        Returns:
+            str | None: Page text, or None when absent.
+        """
+        return self._download(self._from(), f"{_PAGES_PREFIX}/{slug}.md")
+
+    async def ingest(self, thread_id: str, query: str, article_path: str) -> IngestResult:
+        """Upload one rendered article into the wiki bucket.
+
+        Args:
+            thread_id: Run thread identifier (page provenance).
+            query: Original research query (title + slug source).
+            article_path: Rendered ``article.md`` path.
+
+        Returns:
+            IngestResult: Verdict (new/update/no_material) + write counts.
+
+        Raises:
+            KnowledgeEngineError: When the article file is missing.
+        """
+        src = Path(article_path)
+        if not src.is_file():
+            raise KnowledgeEngineError(f"supabase wiki ingest: article missing: {article_path}")
+        text = src.read_text(encoding="utf-8")
+        digest = common.sha256_text(text)
+        title = common.page_title(query)
+        slug = common.slugify(query)
+        key = f"{_PAGES_PREFIX}/{slug}.md"
+
+        prior = self._cache.get(thread_id)
+        if isinstance(prior, dict) and prior.get("sha") == digest:
+            self._append_log(self._from(), "ingest", title)
+            return IngestResult(
+                verdict=WikiVerdict.NO_MATERIAL,
+                page_path=f"{self._bucket}/{key}",
+                pages_touched=0,
+                content_sha256=digest,
+            )
+
+        existing = self._download(self._from(), key)
+        verdict = WikiVerdict.UPDATE if existing is not None else WikiVerdict.NEW
+        fm = {
+            "type": "source",
+            "title": title,
+            "thread": thread_id,
+            "date": common.today(),
+            "sha256": digest,
+            "query_sha256": common.sha256_text(query),
+            "tldr": common.tldr(text),
+        }
+        trailer = f" Filed from run `{thread_id}`.\n"
+        rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n## Article\n\n" + text.rstrip() + trailer
+        self._from().upload(key, rendered.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
+        touched = 1
+        touched += self._upsert_index(self._from(), slug, title, fm["tldr"])
+        self._append_log(self._from(), "ingest", title)
+        touched += 1
+        loc = f"{self._bucket}/{key}"
+        self._cache[thread_id] = {"sha": digest, "page": loc}
+        return IngestResult(verdict=verdict, page_path=loc, pages_touched=touched, content_sha256=digest)
+
+    # -- bucket object helpers ----------------------------------------------
+    def _index_summaries(self, handle: Any) -> dict[str, str]:
+        """Parse the bucket ``index.md`` into slug -> summary.
+
+        Args:
+            handle: Bucket handle.
+
+        Returns:
+            dict[str, str]: Slug -> summary text.
+        """
+        text = self._download(handle, common.INDEX_NAME)
+        if text is None:
+            return {}
+        summaries: dict[str, str] = {}
+        import re
+
+        pattern = re.compile(r"^- \[[^\]]+\]\(\S*?/?([^/)]+\.md)\)(?: — (.+))?$")
+        for line in text.splitlines():
+            match = pattern.match(line.strip())
+            if match is not None:
+                summaries.setdefault(match.group(1)[: -len(".md")], match.group(2) or "")
+        return summaries
+
+    def _upsert_index(self, handle: Any, slug: str, title: str, summary: str) -> int:
+        """Insert or replace the page's index entry in the bucket.
+
+        Args:
+            handle: Bucket handle.
+            slug: Page slug.
+            title: Page title.
+            summary: One-line summary.
+
+        Returns:
+            int: 1 when the index changed, 0 when identical.
+        """
+        text = self._download(handle, common.INDEX_NAME) or "# Knowledge Base Index\n\n## Sources\n"
+        lines = text.splitlines()
+        entry = f"- [{title}]({_PAGES_PREFIX}/{slug}.md) — {summary}"
+        prefix = f"]({_PAGES_PREFIX}/{slug}.md)"
+        changed = False
+        replaced = False
+        out: list[str] = []
+        for line in lines:
+            if prefix in line and line.startswith("- ["):
+                if not replaced:
+                    out.append(entry)
+                    changed = changed or line != entry
+                    replaced = True
+                else:
+                    changed = True
+                continue
+            out.append(line)
+        if not replaced:
+            out.append(entry)
+            changed = True
+        if changed:
+            handle.upload(
+                common.INDEX_NAME,
+                ("\n".join(out) + "\n").encode("utf-8"),
+                {"content-type": "text/markdown", "upsert": "true"},
+            )
+        return 1 if changed else 0
+
+    def _append_log(self, handle: Any, op: str, title: str) -> None:
+        """Append one entry to the bucket ``log.md``.
+
+        Args:
+            handle: Bucket handle.
+            op: Operation name.
+            title: Page title.
+        """
+        text = self._download(handle, common.LOG_NAME) or "# Wiki Log\n"
+        updated = text.rstrip() + "\n" + common.log_line(op, title) + "\n"
+        handle.upload(common.LOG_NAME, updated.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
+
+
+__all__ = ["SupabaseWikiStore"]
