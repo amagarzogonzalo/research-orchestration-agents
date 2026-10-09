@@ -65,7 +65,9 @@ class SupabaseArtifactStore(ArtifactStorePort):
         """
         existing = {b.name: b.public for b in self._client.storage.list_buckets()}
         for bucket, mime in (
-            (_ARTICLES_BUCKET, "text/markdown; charset=utf-8"),
+            # text/plain (not text/markdown): browsers RENDER text/plain inline;
+            # text/markdown makes Chrome download the file instead of showing it.
+            (_ARTICLES_BUCKET, "text/plain; charset=utf-8"),
             (_SOURCES_BUCKET, "application/json"),
         ):
             if bucket not in existing:
