@@ -158,6 +158,18 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
                 pages_touched=0,
                 content_sha256=digest,
             )
+        for other_thread, record in cache.items():
+            # Cross-thread dedup (measured: duplication is cross-thread, not
+            # intra-run): identical content already compiled -> link, don't
+            # duplicate (close-never-delete, docs/LLM_WIKI.md Loop 2).
+            if isinstance(record, dict) and record.get("sha") == digest and other_thread != thread_id:
+                self._append_log("ingest", f"{title} (duplicate of {other_thread})")
+                return IngestResult(
+                    verdict=WikiVerdict.NO_MATERIAL,
+                    page_path=str(record.get("page") or page),
+                    pages_touched=0,
+                    content_sha256=digest,
+                )
 
         verdict = WikiVerdict.UPDATE if page.exists() else WikiVerdict.NEW
         related = self._related_slugs(slug, title, text)

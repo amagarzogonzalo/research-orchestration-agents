@@ -193,6 +193,15 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
                 pages_touched=0,
                 content_sha256=digest,
             )
+        for other_thread, recorded in self._cache.items():
+            if isinstance(recorded, dict) and recorded.get("sha") == digest and other_thread != thread_id:
+                self._append_log(self._from(), "ingest", f"{title} (duplicate of {other_thread})")
+                return IngestResult(
+                    verdict=WikiVerdict.NO_MATERIAL,
+                    page_path=f"{self._bucket}/{key}",
+                    pages_touched=0,
+                    content_sha256=digest,
+                )
 
         existing = self._download(self._from(), key)
         verdict = WikiVerdict.UPDATE if existing is not None else WikiVerdict.NEW

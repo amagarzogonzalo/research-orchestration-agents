@@ -109,3 +109,20 @@ async def test_read_page_missing_is_none(adapter: Adapter) -> None:
         adapter: Adapter under test.
     """
     assert await adapter.read_page("nope") is None
+
+
+async def test_cross_thread_duplicate_content_links_not_duplicates(adapter: Adapter, tmp_path: Path) -> None:
+    """The same content filed under two threads compiles once (file adapter).
+
+    Args:
+        adapter: Adapter under test.
+        tmp_path: Per-test temp dir.
+    """
+    text = "Identical research bytes across two runs."
+    path = _article(tmp_path, text)
+    first = await adapter.ingest("t1", "topic one", path)
+    second = await adapter.ingest("t2", "topic two", path)
+    assert first.verdict == WikiVerdict.NEW
+    assert second.verdict == WikiVerdict.NO_MATERIAL
+    assert second.pages_touched == 0
+    assert second.content_sha256 == first.content_sha256
