@@ -94,3 +94,27 @@ async def test_engine_default_thread_id_is_stable(tmp_path) -> None:
 
     assert _derived_thread_id("same query") == _derived_thread_id("same query")
     assert _derived_thread_id("same query") != _derived_thread_id("other query")
+
+
+async def test_engine_wiki_query_answers_from_wiki_only(tmp_path) -> None:
+    """The facade's wiki_query answers from the wiki with no live search."""
+    from knowledge_engine.schemas.settings import RunSettings
+
+    engine = _engine(tmp_path)
+    await engine.research(
+        "retrieval augmented generation reduces hallucinations",
+        thread_id="e2e-wikiq",
+        settings=RunSettings(wiki_save_answers=True),
+    )
+    hits = await engine.wiki_query("retrieval augmented generation reduces hallucinations")
+    assert hits, "the compiled wiki must answer the repeat query"
+    assert hits[0].title, "hits carry the page title"
+    # The hit path uses zero live calls: the fake search would raise if called,
+    # but wiki_query never reaches it (verified implicitly by not raising).
+
+
+async def test_engine_wiki_query_empty_on_fresh_topic(tmp_path) -> None:
+    """A never-filed topic returns no hits (caller falls back to research)."""
+    engine = _engine(tmp_path)
+    hits = await engine.wiki_query("something never researched before")
+    assert hits == []

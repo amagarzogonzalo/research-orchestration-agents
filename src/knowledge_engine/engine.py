@@ -48,6 +48,7 @@ from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.browser import BrowserActionResult
 from knowledge_engine.schemas.settings import RunSettings
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
+from knowledge_engine.schemas.wiki import WikiHit
 from knowledge_engine.store.body_file_store import LocalBodyStorage
 from knowledge_engine.store.file_checkpointer import FileCheckpointer
 from knowledge_engine.store.research_store import ResearchStore
@@ -151,7 +152,7 @@ class ResearchEngine:
         """Build the wiki store per ``wiki_store_kind`` (ADR wiki-loop0).
 
         Returns:
-            Any: A ``WikiQueryPort`` + ``WikiIngestPort`` implementation.
+            Any: A wiki store implementing ``WikiQueryPort`` + ``WikiIngestPort``.
 
         Raises:
             ConfigurationError: On an unknown kind or missing cloud keys.
@@ -450,6 +451,25 @@ class ResearchEngine:
             list[SourceRecord]: The resolved scholarly sources.
         """
         return await self._search.search(query, limit=limit or self.search_limit)
+
+    async def wiki_query(self, query: str, *, limit: int = 3) -> list[WikiHit]:
+        """Query the compiled wiki without any live call (Karpathy Query op).
+
+        Read-only and deterministic: returns the best-matching wiki pages
+        (exact-query hit first when present). Use this to answer from the
+        accumulated wiki alone; ``research()`` already does this internally
+        before spending live quota.
+
+        Args:
+            query: Question or topic.
+            limit: Maximum hits.
+
+        Returns:
+            list[WikiHit]: Ranked pages (empty when the wiki has no match).
+        """
+        wiki = self._build_wiki_store()
+        hits: list[WikiHit] = await wiki.search_wiki(query, limit=limit)
+        return hits
 
     async def scrape_run(self, url: str) -> DocumentBody:
         """Fetch a URL to LLM-ready Markdown.
