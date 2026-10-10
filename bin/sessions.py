@@ -85,10 +85,7 @@ def main() -> int:
         return 0
 
     w = max(len(m) for m in by_model)
-    print(
-        f"{'model'.ljust(w)}  {'in':>10} {'out':>10} {'turns':>6} {'sess':>5} "
-        f"{'turns/sess':>10} {'cost':>9}"
-    )
+    print(f"{'model'.ljust(w)}  {'in':>10} {'out':>10} {'turns':>6} {'sess':>5} {'turns/sess':>10} {'cost':>9}")
     for model, m in sorted(by_model.items(), key=lambda kv: -kv[1]["cost"]):
         n = len(sessions_seen[model]) or 1
         print(

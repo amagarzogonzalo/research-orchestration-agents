@@ -1,5 +1,5 @@
 .PHONY: help install test test-fast lint types arch semgrep agents context check dup \
-        profile profiles evals evals-deep evals-live evals-accept sessions \
+        profile profiles evals evals-deep evals-live evals-accept sessions wiki-lint \
         bench bench-accept bench-check \
         compress-on compress-off compress-savings compress-help
 
@@ -48,6 +48,18 @@ bench-accept:       ## record bench/baseline.json (review the diff like code)
 
 bench-check:        ## fail on >10% ram/checkpoint regression vs baseline
 	uv run python -m knowledge_engine.scripts.bench --check
+
+wiki-lint:          ## health gate for the compiled wiki (Loop 5; offline)
+	uv run python bin/wiki_lint.py
+
+wiki-lint-deep:     ## deterministic + optional LLM cross-page contribution/stale/gap lint
+	uv run python bin/wiki_lint_deep.py
+
+wiki-review:        ## draft review loop: list/accept/reject concept+entity drafts
+	uv run python bin/wiki_review.py list
+
+wiki-graph:         ## dump the wiki knowledge graph (nodes/edges/communities) as JSON
+	uv run python bin/wiki_graph.py
 
 check: lint types arch semgrep agents context test evals bench-check   ## everything. This is the gate.
 	@echo green

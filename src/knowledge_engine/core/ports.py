@@ -11,9 +11,11 @@ from typing import Any
 
 from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.browser import BrowserActionResult
+from knowledge_engine.schemas.clean import CleanResult
 from knowledge_engine.schemas.extraction import ExtractionRequest
 from knowledge_engine.schemas.provider import ChatRequest, ChatResult
 from knowledge_engine.schemas.source import BodyRef, DocumentBody, SourceRecord
+from knowledge_engine.schemas.wiki import IngestResult, LintReport, WikiExtraction, WikiHit, WikiThesis
 
 
 class ProviderPort(abc.ABC):
@@ -304,5 +306,160 @@ class ArtifactStorePort(abc.ABC):
 
         Returns:
             list[SourceRecord]: Persisted sources (empty when absent).
+        """
+        ...
+
+
+class WikiQueryPort(abc.ABC):
+    """Search the compiled wiki before live federated search (ADR wiki-loop0).
+
+    Adapters decide where wiki pages live (local markdown, Supabase Storage);
+    hits are deterministic, citation-ready pointers — never synthesized text.
+    """
+
+    @abc.abstractmethod
+    async def search_wiki(self, query: str, *, limit: int = 3) -> list[WikiHit]:
+        """Return the best-matching wiki pages for a query.
+
+        Args:
+            query: Research query string.
+            limit: Maximum hits to return.
+
+        Returns:
+            list[WikiHit]: Ranked hits (empty when the wiki has no match).
+        """
+        ...
+
+    @abc.abstractmethod
+    async def read_page(self, slug: str) -> str | None:
+        """Read one wiki page's markdown by slug.
+
+        Args:
+            slug: Page slug (filename stem or bucket key suffix).
+
+        Returns:
+            str | None: Page text, or None when absent.
+        """
+        ...
+
+
+class WikiIngestPort(abc.ABC):
+    """File rendered research into the wiki (the compile step of the pattern).
+
+    Adapters apply the New/Update/Disputed/No-material verdicts, maintain
+    ``index.md``/``log.md``/``overview.md``, and keep a SHA256 content cache
+    so unchanged sources never rewrite pages.
+    """
+
+    @abc.abstractmethod
+    async def ingest(self, thread_id: str, query: str, article_path: str) -> IngestResult:
+        """File one rendered article into the wiki.
+
+        Args:
+            thread_id: Run thread identifier (provenance for the page).
+            query: Original research query (page title source).
+            article_path: Path of the rendered ``article.md`` to ingest.
+
+        Returns:
+            IngestResult: Verdict + write counts.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def file_answer(self, thread_id: str, query: str, article_path: str) -> str:
+        """File a rendered answer under ``queries/`` (answers are first-class).
+
+        Distinct from :meth:`ingest`: the same article may be filed both as a
+        source page (compiled knowledge) and as a filed answer (the Karpathy
+        "good answers shouldn't disappear" rule). Returns the page locator.
+
+        Args:
+            thread_id: Run thread identifier (provenance).
+            query: Original research query.
+            article_path: Rendered ``article.md`` path.
+
+        Returns:
+            str: The filed query page locator.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def compile_extraction(
+        self, thread_id: str, query: str, extraction: WikiExtraction, feedback: list[str]
+    ) -> list[str]:
+        """File LLM-extracted concept/entity pages as reviewable drafts.
+
+        Drafts land in a review area (never the live page set) with
+        ``status: draft`` frontmatter; a human/agent review step approves or
+        rejects them. Prior rejection feedback is the caller's job to pass in.
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            query: Original research query (context for page summaries).
+            extraction: The validated extraction payload.
+            feedback: Rejection feedback lines to address in page bodies.
+
+        Returns:
+            list[str]: Draft page locators.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def file_thesis(self, thread_id: str, thesis: WikiThesis) -> str:
+        """File a thesis verdict page into ``synthesis/`` (published, not draft).
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            thesis: The validated thesis payload.
+
+        Returns:
+            str: The synthesis page locator.
+        """
+        ...
+
+    @abc.abstractmethod
+    async def feedback_for(self, query: str) -> list[str]:
+        """Return rejection feedback relevant to the given query's pages.
+
+        Args:
+            query: Research query whose slug pages may have feedback.
+
+        Returns:
+            list[str]: Feedback lines (empty when none).
+        """
+        ...
+
+
+class CleanPort(abc.ABC):
+    """Drop duplicate sources before relevance filtering (close-never-delete).
+
+    Adapters implement the tiered pipeline (exact keys -> MinHash near-dup ->
+    containment); the port exposes only the batch operation so nodes stay
+    free of hashing internals (ISP/DIP).
+    """
+
+    @abc.abstractmethod
+    async def clean(self, sources: list[SourceRecord]) -> CleanResult:
+        """Clean one batch of source records.
+
+        Args:
+            sources: Raw federated sources for the run.
+
+        Returns:
+            CleanResult: Kept records plus superseded-by pointers.
+        """
+        ...
+
+
+class VaultLintPort(abc.ABC):
+    """Health-check the wiki vault deterministically (no LLM in Loop 0)."""
+
+    @abc.abstractmethod
+    async def lint(self) -> LintReport:
+        """Scan the vault and report structural issues.
+
+        Returns:
+            LintReport: Findings (broken links, orphans, frontmatter, thin
+            pages, index drift).
         """
         ...

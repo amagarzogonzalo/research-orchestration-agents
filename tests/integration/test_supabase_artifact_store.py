@@ -44,6 +44,9 @@ def test_supabase_artifact_roundtrip_real_storage() -> None:
     public = httpx.get(locator)
     assert public.status_code == 200, f"published artifact must be viewable without auth ({locator})"
     assert "probe" in public.text, "public bytes match the artifact"
+    # Supabase serves public objects with XSS protection (html -> text/plain),
+    # so the .md plain-text IS the cloud read surface; the rendered HTML twin
+    # is published locally by LocalArtifactStore.
 
 
 def test_supabase_sources_roundtrip_real_storage() -> None:

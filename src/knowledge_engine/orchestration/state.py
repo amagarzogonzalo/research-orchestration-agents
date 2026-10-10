@@ -75,6 +75,12 @@ class WorkflowState(TypedDict, total=False):
         review_dir: Attribute description.
         output_path: Attribute description.
         status: Attribute description.
+        wiki_hits: Wiki page hits from WikiQueryNode (list of WikiHit dumps).
+        wiki_hit: Routing flag — an exact-query wiki hit short-circuits live search.
+        clean_stats: Dedup stats from CleanNode (dropped ids -> keepers).
+        wiki_ingest: Ingest verdict from WikiIngestNode (verdict/paths/counts).
+        wiki_pages: Locators of draft/synthesis pages written this ingest.
+        wiki_answer: Filed query-answer locator when wiki_save_answers is set.
     """
 
     thread_id: str
@@ -101,6 +107,14 @@ class WorkflowState(TypedDict, total=False):
     review_dir: str | None
     output_path: str | None
     status: Annotated[str, _last_wins]
+    # Wiki layer (ADR wiki-loop0): hits + routing flag from WikiQueryNode,
+    # dedup stats from CleanNode, ingest verdict from WikiIngestNode.
+    wiki_hits: list[dict[str, Any]]
+    wiki_hit: bool
+    clean_stats: dict[str, Any] | None
+    wiki_ingest: dict[str, Any] | None
+    wiki_pages: list[str]
+    wiki_answer: str | None
 
 
 def merge_sources(*lists: list[SourceRecord]) -> list[SourceRecord]:

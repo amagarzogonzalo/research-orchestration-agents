@@ -100,6 +100,10 @@ class SupabaseArtifactStore(ArtifactStorePort):
             text.encode("utf-8"),  # supabase-py: bytes = content, str = file path
             {"upsert": "true", "content-type": self._mime_types[_ARTICLES_BUCKET]},
         )
+        # NOTE: no article.html twin in the cloud bucket — Supabase serves
+        # text/html from public buckets as text/plain (stored-XSS protection),
+        # which would show raw source. The rendered twin is local-only
+        # (LocalArtifactStore publishes article.html beside article.md).
         return str(self._client.storage.from_(_ARTICLES_BUCKET).get_public_url(path))
 
     def put_sources(self, thread_id: str, sources: list[SourceRecord]) -> str:
