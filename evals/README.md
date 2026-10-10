@@ -14,6 +14,7 @@ snapshots) are the gate.
 | `deep` | RAG vs long-context | Recursive deep workflow, fan-out |
 | `biomed` | CRISPR off-target | Biomedical adapters |
 | `web` | RAG general knowledge | General-web tier (Wikipedia, DuckDuckGo, Tavily, Exa) |
+| `internal_wiki_demo` | RAG/hallucinations | Full pipeline on the canonical wiki query (active; the wiki hit path itself is covered offline by `tests/e2e/test_wiki_hit_path.py`) |
 
 Each case: `entrypoint`, `input`, `samples`/`pass_at_k`, `invariants`
 (frontmatter, sections, citations, no-uncited-claims, valid links, max_chars),

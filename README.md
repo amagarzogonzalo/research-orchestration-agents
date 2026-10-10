@@ -52,7 +52,8 @@ LLM concept/entity compile, filed answers and thesis verdict pages.
 Tooling: `make wiki-lint` (health gate), `make wiki-lint-deep` (opt-in LLM
 contradictions/stale/gaps), `make wiki-review` (draft loop), `make wiki-graph`
 (knowledge graph JSON), `bin/wiki_supabase_provision.py` (cloud mirror).
-Full delivery report: `docs/plans/0027-0029`, plan: `docs/LLM_WIKI.md`.
+Ask the wiki directly (no live call): `await engine.wiki_query("topic")`.
+Full delivery report: `docs/plans/0027-0030`, plan: `docs/LLM_WIKI.md`.
 
 ## Run
 
