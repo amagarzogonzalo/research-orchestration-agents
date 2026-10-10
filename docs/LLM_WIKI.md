@@ -5,6 +5,22 @@
 improvement loops driven by TDD findings and real use-case checks — each ends
 `make check` green.
 
+## The core mapping (read this first)
+
+**The research the orchestrator finds is the content the wiki ingests.**
+
+- **Raw layer = the research output.** `research_store/<thread>/article.md`,
+  `sources.json`, `metadata.json`, `events.jsonl`, plus scraped full-text
+  bodies under `<store_root>/bodies/<sha256>.md`. Immutable, never edited.
+- **Ingested = that same output.** Every finished run is filed into the wiki
+  as a `sources/<slug>.md` page carrying `thread`/`sha256`/`query_sha256`
+  lineage back to the raw run.
+- **Compiled = LLM-added layers (opt-in).** Concept/entity pages, thesis
+  verdicts, and filed answers distilled from the ingested research.
+- So: *orchestrator does the research; wiki is where it is ingested, deduped,
+  cross-linked, and kept current.* See `docs/MR-LLM-WIKI.md` for the human
+  overview and `knowledge_base/WIKI_SCHEMA.md` for the contract.
+
 ## 0. Everything shipped (this branch, one commit per loop)
 
 | Loop | Delivered | Evidence gate |

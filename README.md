@@ -45,7 +45,10 @@ Every workflow (`research`/`qa`/`summary`/`deep`) is **wiki-first**: before
 any live federated call the compiled wiki at `<store_root>/wiki` is consulted;
 an exact-query hit answers from the wiki with zero live search/scrape/LLM
 calls, and the finished run is compiled back into the wiki (guaranteed source
-page, cross-thread content dedup, index/log/overview). Opt-in per run via
+page, cross-thread content dedup, index/log/overview). In short: **the
+research the agent finds is the content the wiki ingests** — raw runs stay
+immutable under `research_store/<thread>/` + `bodies/`, and the wiki files,
+dedups, and (opt-in) compiles that research. Opt-in per run via
 `RunSettings(wiki_extract=True, wiki_save_answers=True, thesis="...")` for the
 LLM concept/entity compile, filed answers and thesis verdict pages.
 
