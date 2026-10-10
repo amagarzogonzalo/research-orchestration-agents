@@ -45,6 +45,26 @@ case will one day gate directly.
 ruff/ruff-format/mypy(strict)/tach/semgrep/pydoclint green; `pytest tests/`
 green (exit 0); evals 6/6; bench green; new scripts fail-loud/run clean.
 
+## 4b. Live verification against real Supabase (this session)
+
+`.env` is fully populated (SUPABASE_URL/SECRET_KEY/DATABASE_URL + free LLM
+keys); the shell env is empty, so tests that read `os.environ` skip unless the
+engine-style `load_dotenv()` runs first — which is exactly how the runtime
+behaves. Verified against the real bucket:
+
+- `SupabaseWikiStore.from_env()` + real `research()` (search_limit=3):
+  run **status done**, article rendered locally, page found via
+  `store.search_wiki(...)` in Supabase; the same query on run 2 answered via
+  the wiki hit path (no re-search).
+- Live-marked integration test `test_supabase_wiki_store.py` **1 passed**
+  (8.9s) with keys loaded.
+- Provision script: `bucket present : wiki` → activation confirmed.
+- Full opt-in path (live): `wiki_extract` → **3 drafts**, `wiki_save_answers`
+  → **1 queries page**, `thesis` → **1 synthesis page**, plus the source page.
+  This surfaced and fixed a real bug: `SupabaseWikiStore._lint_bucket` did not
+  enumerate the `queries/` prefix (regression test added in
+  `test_supabase_vault_lint.py`).
+
 ## 5. Deliberately still open (human-gated by repo rules)
 
 - Snapshot acceptance for `internal_wiki_demo` (needs a live record + human
