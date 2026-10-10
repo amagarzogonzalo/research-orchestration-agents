@@ -89,10 +89,7 @@ def build(profile: dict, cfg: dict) -> dict:
     models = profile["models"]
     missing = {r: c for r, c in roles.items() if c not in models}
     if missing:
-        raise SystemExit(
-            f"profile {profile['name']!r} has no model for capabilities: "
-            f"{sorted(set(missing.values()))}"
-        )
+        raise SystemExit(f"profile {profile['name']!r} has no model for capabilities: {sorted(set(missing.values()))}")
 
     opts = provider_options(routing)
     model_block = {mid: {"options": opts} for mid in sorted(set(models.values()))}

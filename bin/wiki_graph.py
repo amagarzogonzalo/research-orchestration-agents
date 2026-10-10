@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Dump the wiki knowledge graph (nodes/edges/backlinks/communities) as JSON.
 
-    uv run python bin/wiki_graph.py [ROOT] [out.json]   # default: research_store/wiki
+uv run python bin/wiki_graph.py [ROOT] [out.json]   # default: research_store/wiki
 """
 
 from __future__ import annotations
