@@ -5,7 +5,8 @@ Professional, print-ready diagrams of the four LangGraph workflows in
 
 > **Data flow:** for a cross-cutting diagram of every data source and how the
 > research feeds the wiki, see [`docs/data-sources.md`](../data-sources.md)
-> (`data-flow.svg` in this directory).
+> (`data-flow.svg` in this directory). For what is old vs new in this MR, see
+> [`docs/mr-before-after.md`](../mr-before-after.md) (`mr-before-after.svg`).
 
 | Diagram | Workflow | Path in one line |
 |---|---|---|
