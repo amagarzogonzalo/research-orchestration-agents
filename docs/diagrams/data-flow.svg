@@ -1,188 +1,172 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1380" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1420" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
   <defs>
-    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M0,0 L8,4 L0,8 Z" fill="#555"/>
-    </marker>
-    <marker id="arrowAlt" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M0,0 L8,4 L0,8 Z" fill="#b58900"/>
-    </marker>
-    <marker id="arrowWiki" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
-      <path d="M0,0 L8,4 L0,8 Z" fill="#268bd2"/>
-    </marker>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#444"/></marker>
+    <marker id="aB" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#268bd2"/></marker>
+    <marker id="aG" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2f9e44"/></marker>
   </defs>
-
   <style>
-    .title { font-size: 22; font-weight: bold; fill: #1a1a1a; }
-    .sub   { font-size: 13; fill: #666; }
-    .lane  { font-size: 12; font-weight: bold; fill: #777; letter-spacing: 1px; }
-    .box   { fill: #ffffff; stroke: #333; stroke-width: 1.5; rx: 8; }
-    .ctrl  { fill: #e8e8e8; stroke: #444; stroke-width: 1.5; rx: 8; }
-    .data  { fill: #eef4fb; stroke: #2a6db5; stroke-width: 1.5; rx: 8; }
-    .web   { fill: #eaf7ee; stroke: #2f9e44; stroke-width: 1.5; rx: 8; }
-    .gen   { fill: #fdf3e3; stroke: #b58900; stroke-width: 1.5; rx: 8; }
-    .wiki  { fill: #eef7fb; stroke: #268bd2; stroke-width: 1.5; rx: 8; }
-    .path  { fill: none; stroke: #555; stroke-width: 1.6; marker-end: url(#arrow); }
-    .pathAlt { fill: none; stroke: #b58900; stroke-width: 1.6; stroke-dasharray: 5 3; marker-end: url(#arrowAlt); }
-    .pathWiki { fill: none; stroke: #268bd2; stroke-width: 1.6; stroke-dasharray: 5 3; marker-end: url(#arrowWiki); }
-    .t  { fill: #1a1a1a; font-weight: bold; }
-    .s  { fill: #555; font-size: 11.5; }
-    .w  { fill: #268bd2; }
+    .t  { font-size: 21; font-weight: bold; fill: #111; }
+    .st { font-size: 12; fill: #666; }
+    .lane { font-size: 11; font-weight: bold; fill: #888; letter-spacing: 1.5px; }
+    .n { fill: #fff; stroke: #333; stroke-width: 1.5; rx: 9; }
+    .c { fill: #ececec; stroke: #444; stroke-width: 1.5; rx: 9; }
+    .w { fill: #e8f3fa; stroke: #268bd2; stroke-width: 1.6; rx: 9; }
+    .d { fill: #eef4fb; stroke: #2a6db5; stroke-width: 1.6; rx: 9; }
+    .g { fill: #fdf3e3; stroke: #b58900; stroke-width: 1.6; rx: 9; }
+    .b { font-weight: bold; fill: #111; }
+    .s { fill: #555; font-size: 11.5; }
+    .bl { fill: #268bd2; font-weight: bold; }
+    .num { font-size: 12; font-weight: bold; fill: #fff; text-anchor: middle; }
+    .cir { fill: #7a7a7a; }
+    .p { fill:none; stroke:#444; stroke-width:1.8; marker-end:url(#a); }
+    .pb { fill:none; stroke:#268bd2; stroke-width:1.8; stroke-dasharray:6 3; marker-end:url(#aB); }
+    .pg { fill:none; stroke:#2f9e44; stroke-width:1.8; marker-end:url(#aG); }
   </style>
 
-  <!-- header -->
-  <text x="500" y="30" text-anchor="middle" class="title">Data sources &amp; how everything connects</text>
-  <text x="500" y="50" text-anchor="middle" class="sub">research orchestrator → the research it finds → the LLM wiki it maintains</text>
+  <text x="500" y="28" text-anchor="middle" class="t">Data sources &amp; how everything connects</text>
+  <text x="500" y="48" text-anchor="middle" class="st">the research the agent finds  →  is the content the wiki ingests</text>
 
-  <!-- QUERY + WIKI_QUERY -->
-  <g>
-    <rect x="30" y="70" width="180" height="54" class="ctrl"/>
-    <text x="120" y="92" text-anchor="middle" class="t">Question</text>
-    <text x="120" y="108" text-anchor="middle" class="s">user / repeat query</text>
+  <!-- STEP 1 : question -> wiki_query -->
+  <circle cx="120" cy="90" r="11" class="cir"/><text x="120" y="94" class="num">1</text>
+  <rect x="145" y="72" width="190" height="54" class="c"/>
+  <text x="240" y="94" text-anchor="middle" class="b">Question</text>
+  <text x="240" y="110" text-anchor="middle" class="s">user or repeat query</text>
 
-    <rect x="290" y="70" width="200" height="54" class="wiki"/>
-    <text x="390" y="92" text-anchor="middle" class="t">wiki_query</text>
-    <text x="390" y="108" text-anchor="middle" class="s">index/log + FTS5 sidecar scan</text>
+  <rect x="395" y="72" width="220" height="54" class="w"/>
+  <text x="505" y="94" text-anchor="middle" class="b">wiki_query</text>
+  <text x="505" y="110" text-anchor="middle" class="s">index/log + FTS5 sidecar scan</text>
 
-    <rect x="560" y="70" width="200" height="54" class="ctrl"/>
-    <text x="660" y="92" text-anchor="middle" class="t">Answer</text>
-    <text x="660" y="108" text-anchor="middle" class="s">exact-query hit · ZERO live calls</text>
+  <rect x="690" y="72" width="220" height="54" class="c"/>
+  <text x="800" y="94" text-anchor="middle" class="b">Answer</text>
+  <text x="800" y="110" text-anchor="middle" class="s">hit → ZERO live calls</text>
 
-    <path class="path" d="M210,97 L280,97"/>
-    <path class="pathWiki" d="M490,97 L550,97"/>
-    <text x="520" y="88" text-anchor="middle" class="w" font-size="11">hit →</text>
-    <path class="pathAlt" d="M390,124 L390,150"/>
-    <text x="398" y="145" class="s" font-size="11">miss ↓</text>
-  </g>
+  <path class="p" d="M335,99 L385,99"/>
+  <path class="pb" d="M615,99 L680,99"/>
+  <text x="648" y="88" text-anchor="middle" class="bl" font-size="11">hit →</text>
 
-  <!-- FEDERATED SEARCH -->
-  <g>
-    <rect x="30" y="175" width="940" height="250" class="data"/>
-    <text x="500" y="195" text-anchor="middle" class="lane">FEDERATED SEARCH — demux → per-provider → merge → disk cache (fallback chain)</text>
+  <circle cx="150" cy="150" r="11" class="cir"/><text x="150" y="154" class="num">2</text>
 
-    <rect x="60" y="210" width="420" height="120" class="box"/>
-    <text x="270" y="230" text-anchor="middle" class="t">Scholarly (keyless, DOI/ID-first)</text>
-    <text x="270" y="250" text-anchor="middle" class="s">OpenAlex · PubMed · Europe PMC · Semantic Scholar</text>
-    <text x="270" y="268" text-anchor="middle" class="s">Crossref · arXiv · bioRxiv/medRxiv · HuggingFace Papers</text>
-    <text x="270" y="286" text-anchor="middle" class="s">dblp · DOAJ · OSF Preprints · Unpaywall · Wikipedia</text>
-    <text x="270" y="304" text-anchor="middle" class="s">mailto polite pools · self-throttled 3/s</text>
+  <!-- STEP 2 : federated search -->
+  <path class="pb" d="M505,126 L505,170"/>
+  <text x="514" y="160" class="bl" font-size="11">miss ↓</text>
 
-    <rect x="520" y="210" width="420" height="120" class="web"/>
-    <text x="730" y="230" text-anchor="middle" class="t">General web (fallback chain)</text>
-    <text x="730" y="250" text-anchor="middle" class="s">DuckDuckGo (always on, keyless)</text>
-    <text x="730" y="268" text-anchor="middle" class="s">Tavily · Exa · Serper (free credits, skipped when absent)</text>
-    <text x="730" y="286" text-anchor="middle" class="s">one provider per query · repeat queries hit the disk cache</text>
-    <text x="730" y="304" text-anchor="middle" class="s">monthly quota ledgers, breaker + rate-limit</text>
+  <rect x="30" y="180" width="940" height="235" class="d"/>
+  <text x="500" y="200" text-anchor="middle" class="lane">2 · FEDERATED SEARCH — demux → per-provider → merge → disk cache</text>
 
-    <rect x="300" y="350" width="400" height="58" class="box"/>
-    <text x="500" y="370" text-anchor="middle" class="t">clean — dedup the batch</text>
-    <text x="500" y="388" text-anchor="middle" class="s">exact-id · MinHash/LSH near-dup · containment · superseded_by</text>
-  </g>
+  <rect x="55" y="215" width="440" height="135" class="n"/>
+  <text x="275" y="237" text-anchor="middle" class="b">Scholarly (keyless, DOI-first)</text>
+  <text x="275" y="258" text-anchor="middle" class="s">OpenAlex · PubMed · Europe PMC · Semantic Scholar</text>
+  <text x="275" y="276" text-anchor="middle" class="s">Crossref · arXiv · bioRxiv/medRxiv · HuggingFace Papers</text>
+  <text x="275" y="294" text-anchor="middle" class="s">dblp · DOAJ · OSF Preprints · Unpaywall · Wikipedia</text>
+  <text x="275" y="315" text-anchor="middle" class="s">mailto polite pools · self-throttled · breaker</text>
 
-  <!-- RELEVANCE -->
-  <g>
-    <rect x="300" y="455" width="400" height="54" class="gen"/>
-    <text x="500" y="477" text-anchor="middle" class="t">relevance filter</text>
-    <text x="500" y="493" text-anchor="middle" class="s">one batched LLM call · keeps topical sources</text>
-  </g>
+  <rect x="515" y="215" width="440" height="135" class="n"/>
+  <text x="735" y="237" text-anchor="middle" class="b">General web (fallback chain)</text>
+  <text x="735" y="258" text-anchor="middle" class="s">DuckDuckGo (always on) → Tavily → Exa → Serper</text>
+  <text x="735" y="276" text-anchor="middle" class="s">one provider per query · repeat queries hit cache</text>
+  <text x="735" y="294" text-anchor="middle" class="s">monthly quota ledgers · skipped until refill</text>
 
-  <!-- SCRAPE TIER -->
-  <g>
-    <rect x="30" y="540" width="940" height="175" class="data"/>
-    <text x="500" y="560" text-anchor="middle" class="lane">SCRAPE TIER — bodies → BodyStoragePort → bodies/&lt;sha256(url)&gt;.md</text>
+  <rect x="315" y="365" width="370" height="42" class="n"/>
+  <text x="500" y="382" text-anchor="middle" class="b">merge → clean (dedup)</text>
+  <text x="500" y="398" text-anchor="middle" class="s">exact-id · MinHash/LSH · containment · superseded_by</text>
 
-    <rect x="60" y="575" width="420" height="120" class="box"/>
-    <text x="270" y="595" text-anchor="middle" class="t">Source-specific full text (first)</text>
-    <text x="270" y="615" text-anchor="middle" class="s">arXiv/ar5iv HTML · Europe PMC fullTextXML</text>
-    <text x="270" y="635" text-anchor="middle" class="s">deterministic, structured, free</text>
+  <!-- STEP 3 : relevance -->
+  <path class="p" d="M500,407 L500,440"/>
+  <circle cx="120" cy="450" r="11" class="cir"/><text x="120" y="454" class="num">3</text>
+  <rect x="330" y="440" width="340" height="50" class="g"/>
+  <text x="500" y="461" text-anchor="middle" class="b">relevance filter (one batched LLM call)</text>
+  <text x="500" y="477" text-anchor="middle" class="s">keeps only topical sources</text>
 
-    <rect x="520" y="575" width="420" height="120" class="web"/>
-    <text x="730" y="595" text-anchor="middle" class="t">Generic chain (fallback)</text>
-    <text x="730" y="615" text-anchor="middle" class="s">crawl4ai (playwright) → trafilatura → Jina Reader</text>
-    <text x="730" y="635" text-anchor="middle" class="s">unusable/bot-walled pages degrade to the next</text>
-    <text x="730" y="653" text-anchor="middle" class="s">deterministic hash naming → dedup for free</text>
+  <!-- STEP 4 : scrape tier -->
+  <path class="p" d="M500,490 L500,520"/>
+  <circle cx="120" cy="530" r="11" class="cir"/><text x="120" y="534" class="num">4</text>
+  <rect x="30" y="530" width="940" height="185" class="d"/>
+  <text x="500" y="550" text-anchor="middle" class="lane">4 · SCRAPE TIER — URL → LLM-ready Markdown → bodies/&lt;sha256(url)&gt;.md</text>
 
-    <rect x="700" y="700" width="210" height="0" fill="none"/>
-    <text x="770" y="735" text-anchor="middle" class="s" font-size="11">bodies/ → immutable raw</text>
-  </g>
+  <rect x="55" y="565" width="440" height="135" class="n"/>
+  <text x="275" y="587" text-anchor="middle" class="b">Source-specific full text (first)</text>
+  <text x="275" y="608" text-anchor="middle" class="s">arXiv / ar5iv HTML · Europe PMC fullTextXML</text>
+  <text x="275" y="626" text-anchor="middle" class="s">deterministic, structured, free</text>
 
-  <!-- SYNTHESIZE -->
-  <g>
-    <rect x="300" y="740" width="400" height="54" class="gen"/>
-    <text x="500" y="762" text-anchor="middle" class="t">synthesize — LLM</text>
-    <text x="500" y="778" text-anchor="middle" class="s">Groq · Gemini · Mistral · OpenRouter · Ollama (free tiers)</text>
-  </g>
+  <rect x="515" y="565" width="440" height="135" class="n"/>
+  <text x="735" y="587" text-anchor="middle" class="b">Generic chain (fallback)</text>
+  <text x="735" y="608" text-anchor="middle" class="s">crawl4ai (playwright) → trafilatura → Jina</text>
+  <text x="735" y="626" text-anchor="middle" class="s">unusable/bot-walled → next scraper, never faked</text>
+  <text x="735" y="644" text-anchor="middle" class="s">hash naming → dedup for free</text>
 
-  <!-- JUDGE / REVIEW / RENDER -->
-  <g>
-    <rect x="60" y="815" width="300" height="50" class="gen"/>
-    <text x="210" y="837" text-anchor="middle" class="t">judge (groundedness)</text>
-    <text x="210" y="852" text-anchor="middle" class="s">revise loop · critique</text>
+  <!-- STEP 5 : synthesize -->
+  <path class="p" d="M500,715 L500,750"/>
+  <circle cx="120" cy="760" r="11" class="cir"/><text x="120" y="764" class="num">5</text>
+  <rect x="300" y="750" width="400" height="54" class="g"/>
+  <text x="500" y="772" text-anchor="middle" class="b">synthesize — LLM</text>
+  <text x="500" y="788" text-anchor="middle" class="s">Groq · Gemini · Mistral · OpenRouter · Ollama (free tiers)</text>
 
-    <rect x="420" y="815" width="240" height="50" class="ctrl"/>
-    <text x="540" y="837" text-anchor="middle" class="t">review (HITL)</text>
-    <text x="540" y="852" text-anchor="middle" class="s">auto-approve or interrupt</text>
+  <!-- STEP 6 : judge/review/render -->
+  <path class="p" d="M500,804 L500,830"/>
+  <circle cx="120" cy="840" r="11" class="cir"/><text x="120" y="844" class="num">6</text>
+  <rect x="60" y="830" width="270" height="50" class="g"/>
+  <text x="195" y="851" text-anchor="middle" class="b">judge (groundedness)</text>
+  <text x="195" y="867" text-anchor="middle" class="s">revise loop · critique</text>
 
-    <rect x="700" y="815" width="260" height="50" class="box"/>
-    <text x="830" y="837" text-anchor="middle" class="t">render</text>
-    <text x="830" y="852" text-anchor="middle" class="s">article.md → research_store/&lt;thread&gt;/</text>
-  </g>
+  <rect x="380" y="830" width="250" height="50" class="c"/>
+  <text x="505" y="851" text-anchor="middle" class="b">review (HITL)</text>
+  <text x="505" y="867" text-anchor="middle" class="s">auto-approve or interrupt</text>
 
-  <!-- RAW RESEARCH STORE -->
-  <g>
-    <rect x="30" y="890" width="420" height="105" class="box"/>
-    <text x="240" y="910" text-anchor="middle" class="t">RAW RESEARCH (immutable)</text>
-    <text x="240" y="928" text-anchor="middle" class="s">research_store/&lt;thread&gt;/: article.md · sources.json</text>
-    <text x="240" y="946" text-anchor="middle" class="s">metadata.json · events.jsonl</text>
-    <text x="240" y="964" text-anchor="middle" class="s">+ bodies/&lt;sha256&gt;.md scraped full text</text>
-  </g>
+  <rect x="680" y="830" width="250" height="50" class="n"/>
+  <text x="805" y="851" text-anchor="middle" class="b">render</text>
+  <text x="805" y="867" text-anchor="middle" class="s">article.md · frontmatter + citations</text>
 
-  <!-- WIKI INGEST -->
-  <g>
-    <rect x="500" y="890" width="460" height="105" class="wiki"/>
-    <text x="730" y="910" text-anchor="middle" class="t">wiki_ingest — the research output IS the ingested content</text>
-    <text x="730" y="928" text-anchor="middle" class="s">sources/&lt;slug&gt;.md ← the run's article, with thread/sha lineage</text>
-    <text x="730" y="946" text-anchor="middle" class="s">index.md · log.md · overview.md updated every ingest</text>
-    <text x="730" y="964" text-anchor="middle" class="s">dedup: cross-thread content-sha → link, never duplicate</text>
-  </g>
+  <!-- STEP 7 : raw + ingest -->
+  <circle cx="120" cy="920" r="11" class="cir"/><text x="120" y="924" class="num">7</text>
+  <path class="p" d="M805,880 L805,920"/>
+  <rect x="30" y="920" width="460" height="90" class="n"/>
+  <text x="260" y="942" text-anchor="middle" class="b">RAW RESEARCH (immutable)</text>
+  <text x="260" y="961" text-anchor="middle" class="s">research_store/&lt;thread&gt;/</text>
+  <text x="260" y="978" text-anchor="middle" class="s">article.md · sources.json · metadata.json · events.jsonl</text>
+  <text x="260" y="995" text-anchor="middle" class="s">+ bodies/&lt;sha256&gt;.md</text>
 
-  <!-- WIKI VAULT -->
-  <g>
-    <rect x="30" y="1020" width="940" height="230" class="wiki"/>
-    <text x="500" y="1040" text-anchor="middle" class="lane">LLM WIKI VAULT — &lt;store_root&gt;/wiki (markdown, portable)</text>
+  <path class="p" d="M490,950 L510,950"/>
+  <rect x="510" y="920" width="460" height="90" class="w"/>
+  <text x="740" y="942" text-anchor="middle" class="b">wiki_ingest — the research output IS the ingested content</text>
+  <text x="740" y="961" text-anchor="middle" class="s">files the article as sources/&lt;slug&gt;.md (thread/sha lineage)</text>
+  <text x="740" y="978" text-anchor="middle" class="s">updates index.md · log.md · overview.md</text>
+  <text x="740" y="995" text-anchor="middle" class="s">cross-thread dedup → link, never duplicate</text>
 
-    <rect x="60" y="1055" width="285" height="110" class="box"/>
-    <text x="200" y="1075" text-anchor="middle" class="t">sources/ · concepts/ · entities/</text>
-    <text x="200" y="1093" text-anchor="middle" class="s">ingested research (deterministic)</text>
-    <text x="200" y="1111" text-anchor="middle" class="s">+ LLM-distilled drafts → review →</text>
-    <text x="200" y="1129" text-anchor="middle" class="s">approve (hash guard) / reject (feedback)</text>
-    <text x="200" y="1147" text-anchor="middle" class="s">5-strike auto-block</text>
+  <!-- STEP 8 : wiki vault -->
+  <circle cx="120" cy="1030" r="11" class="cir"/><text x="120" y="1034" class="num">8</text>
+  <path class="p" d="M740,1010 L740,1030"/>
+  <rect x="30" y="1030" width="940" height="260" class="w"/>
+  <text x="500" y="1050" text-anchor="middle" class="lane">8 · LLM WIKI VAULT — &lt;store_root&gt;/wiki (markdown, portable)</text>
 
-    <rect x="365" y="1055" width="265" height="110" class="box"/>
-    <text x="500" y="1075" text-anchor="middle" class="t">synthesis/ · queries/</text>
-    <text x="500" y="1093" text-anchor="middle" class="s">thesis for/against verdict pages</text>
-    <text x="500" y="1111" text-anchor="middle" class="s">filed answers (wiki_save_answers)</text>
-    <text x="500" y="1129" text-anchor="middle" class="s">confidence: EXTRACTED / INFERRED</text>
-    <text x="500" y="1147" text-anchor="middle" class="s">contradictions → DISPUTED</text>
+  <rect x="55" y="1065" width="285" height="130" class="n"/>
+  <text x="200" y="1085" text-anchor="middle" class="b">sources/ · concepts/ · entities/</text>
+  <text x="200" y="1105" text-anchor="middle" class="s">ingested research (deterministic)</text>
+  <text x="200" y="1123" text-anchor="middle" class="s">+ LLM drafts → review:</text>
+  <text x="200" y="1141" text-anchor="middle" class="s">approve (hash guard) / reject (feedback)</text>
+  <text x="200" y="1159" text-anchor="middle" class="s">5-strike auto-block · unblock</text>
+  <text x="200" y="1180" text-anchor="middle" class="s">confidence EXTRACTED / INFERRED</text>
 
-    <rect x="650" y="1055" width="300" height="110" class="box"/>
-    <text x="800" y="1075" text-anchor="middle" class="t">index.md · log.md · overview.md</text>
-    <text x="800" y="1093" text-anchor="middle" class="s">catalog + grep-parseable diary</text>
-    <text x="800" y="1111" text-anchor="middle" class="s">.wiki.db FTS5 sidecar (derived cache)</text>
-    <text x="800" y="1129" text-anchor="middle" class="s">hybrid RRF search · WikiGraph</text>
-    <text x="800" y="1147" text-anchor="middle" class="s">lint / lint-deep / review / graph</text>
+  <rect x="365" y="1065" width="265" height="130" class="n"/>
+  <text x="500" y="1085" text-anchor="middle" class="b">synthesis/ · queries/</text>
+  <text x="500" y="1105" text-anchor="middle" class="s">thesis for/against verdict pages</text>
+  <text x="500" y="1123" text-anchor="middle" class="s">filed answers (wiki_save_answers)</text>
+  <text x="500" y="1141" text-anchor="middle" class="s">contradictions → DISPUTED</text>
+  <text x="500" y="1159" text-anchor="middle" class="s">(close-never-delete)</text>
 
-    <rect x="60" y="1190" width="420" height="45" class="web"/>
-    <text x="270" y="1210" text-anchor="middle" class="t">Supabase mirror (optional)</text>
-    <text x="270" y="1226" text-anchor="middle" class="s">wiki_store_kind="supabase" · verified live</text>
-  </g>
+  <rect x="655" y="1065" width="300" height="130" class="n"/>
+  <text x="805" y="1085" text-anchor="middle" class="b">index.md · log.md · overview.md</text>
+  <text x="805" y="1105" text-anchor="middle" class="s">catalog + grep-parseable diary</text>
+  <text x="805" y="1123" text-anchor="middle" class="s">.wiki.db FTS5 sidecar (derived cache)</text>
+  <text x="805" y="1141" text-anchor="middle" class="s">hybrid RRF search · WikiGraph</text>
+  <text x="805" y="1159" text-anchor="middle" class="s">lint / lint-deep / review / graph</text>
 
-  <!-- connector arrows -->
-  <path class="path" d="M500,705 L500,740"/>
-  <path class="path" d="M500,794 L500,815"/>
-  <path class="path" d="M360,865 L360,890"/>
-  <path class="path" d="M960,840 L960,890 L760,890" marker-end="none"/>
-  <path class="path" d="M500,800 L60,800 L60,890"/>
-  <path class="path" d="M700,840 L700,890 L500,890"/>
-  <path class="path" d="M600,1240 L100,1240 L100,97" marker-end="none"/>
-  <path class="pathWiki" d="M100,1240 L100,150 L160,150 L160,124" marker-end="none"/>
+  <rect x="55" y="1210" width="440" height="46" class="n"/>
+  <text x="275" y="1230" text-anchor="middle" class="b">Supabase mirror (optional)</text>
+  <text x="275" y="1246" text-anchor="middle" class="s">wiki_store_kind="supabase" · verified live</text>
+
+  <!-- STEP 9 : loop -->
+  <circle cx="120" cy="1320" r="11" class="cir"/><text x="120" y="1324" class="num">9</text>
+  <path class="pb" d="M505,1330 L505,1380" marker-end="none"/>
+  <path class="pb" d="M505,1380 L120,1380 L120,1335" marker-end="none"/>
+  <text x="505" y="1395" text-anchor="middle" class="bl">loop → wiki_query on the next question (hit = free)</text>
 </svg>
