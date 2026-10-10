@@ -230,6 +230,52 @@ async def test_file_thesis_or_contradiction(tmp_path: Path) -> None:
     assert "disputed" in log
 
 
+async def test_rejection_auto_block_after_five_strikes(tmp_path: Path) -> None:
+    """5 rejections block the draft; approval refuses until unblocked."""
+    from knowledge_engine.infrastructure.wiki import FileWikiStore
+    from knowledge_engine.schemas.wiki import WikiExtraction
+
+    store = FileWikiStore(root=tmp_path / "wiki")
+    extraction = WikiExtraction(concepts=["Never Approved"], entities=[], summary="x")
+    for i in range(5):
+        await store.compile_extraction("t1", "rag hallucinations", extraction, [])
+        store.reject_draft("never-approved", f"rejection {i}", query="rag hallucinations")
+    assert store.blocked_slugs() == ["never-approved"]
+
+    # Approval of a freshly compiled draft is refused (blocked).
+    await store.compile_extraction("t1", "rag hallucinations", extraction, [])
+    try:
+        store.approve_draft("never-approved")
+        raise AssertionError("blocked draft must refuse approval")
+    except Exception as exc:  # noqa: BLE001 - blocked refusals are KnowledgeEngineError
+        assert "blocked" in str(exc)
+
+    # New compiles skip the blocked concept entirely.
+    drafts = await store.compile_extraction("t2", "rag hallucinations", extraction, [])
+    assert drafts == []
+
+    # Unblock restores re-extraction.
+    store.unblock_draft("never-approved")
+    assert store.blocked_slugs() == []
+    drafts = await store.compile_extraction("t3", "rag hallucinations", extraction, [])
+    assert len(drafts) == 1
+
+
+async def test_rejection_counter_below_block_still_approvable(tmp_path: Path) -> None:
+    """Fewer than 5 rejections never trip the block."""
+    from knowledge_engine.infrastructure.wiki import FileWikiStore
+    from knowledge_engine.schemas.wiki import WikiExtraction
+
+    store = FileWikiStore(root=tmp_path / "wiki")
+    extraction = WikiExtraction(concepts=["Fine Concept"], entities=[], summary="x")
+    for i in range(2):
+        await store.compile_extraction("t1", "rag hallucinations", extraction, [])
+        store.reject_draft("fine-concept", f"rejection {i}", query="rag hallucinations")
+    assert store.blocked_slugs() == []
+    await store.compile_extraction("t1", "rag hallucinations", extraction, [])
+    assert (tmp_path / "wiki" / "drafts" / "fine-concept.md").is_file()
+
+
 async def test_thesis_page_content(tmp_path: Path) -> None:
     """file_thesis writes claim, for/against, verdict, and a log entry."""
     from knowledge_engine.infrastructure.wiki import FileWikiStore

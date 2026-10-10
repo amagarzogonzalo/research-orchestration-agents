@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 
 _RELATED_TERMS = 2
 _RELATED_MAX = 3
+_MAX_REJECTIONS = 5
 
 
 class FileWikiStore(WikiQueryPort, WikiIngestPort):
@@ -92,9 +93,9 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
         if not query_terms:
             return []
         sidecar = WikiSidecar(self.root)
-        if sidecar.db_path.exists() and sidecar.fts_supported():
-            # Loop 4 scale path: BM25 over the FTS5 sidecar when built.
-            rows = sidecar.search(query, limit=limit)
+        if sidecar.db_path.exists():
+            # Loop 4+ scale path: RRF fusion of FTS5 BM25 + scan scoring.
+            rows = sidecar.hybrid_search(query, limit=limit)
             summaries = self._index_summaries()
             side_hits: list[WikiHit] = []
             for _namespaced, path, score in rows:
@@ -109,7 +110,7 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
                         slug=p.stem,
                         title=common.fm_title(fm, p),
                         path=str(p),
-                        score=-float(score),
+                        score=float(score),
                         summary=summaries.get(p.stem, ""),
                         query_sha256=qsha,
                     )
@@ -290,10 +291,14 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
         self._ensure_layout()
         drafts: list[str] = []
         source_slug = common.slugify(query)
-        names = [(name, "concept") for name in extraction.concepts] + [
-            (name, "entity") for name in extraction.entities
-        ]
+        skipped: list[str] = []
+        names = [(name, "concept") for name in extraction.concepts]
+        names += [(name, "entity") for name in extraction.entities]
         for name, kind in names:
+            slug = common.slugify(name)
+            if self._is_blocked(slug):
+                skipped.append(slug)
+                continue
             slug = common.slugify(name)
             body = [f"Distilled from [[{source_slug}]] (query: {common.page_title(query)})."]
             if extraction.summary:
@@ -318,6 +323,8 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             path.write_text(text, encoding="utf-8")
             drafts.append(str(path))
         self._append_log("compile", f"{len(drafts)} drafts | {common.page_title(query)}")
+        if skipped:
+            logger.warning("compile skipped blocked concepts: %s", ", ".join(skipped))
         return drafts
 
     async def file_thesis(self, thread_id: str, thesis: WikiThesis) -> str:
@@ -385,6 +392,11 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             KnowledgeEngineError: When the draft is missing or was hand-edited
                 after filing (hash mismatch — fail-closed, never overwrite).
         """
+        if self._is_blocked(slug):
+            raise KnowledgeEngineError(
+                f"wiki review: draft blocked after {_MAX_REJECTIONS} rejections — "
+                f"unblock first to allow re-extraction: {slug}"
+            )
         draft = self.root / "drafts" / f"{slug}.md"
         if not draft.is_file():
             raise KnowledgeEngineError(f"wiki review: draft missing: {slug}")
@@ -401,6 +413,7 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
         page.parent.mkdir(parents=True, exist_ok=True)
         page.write_text("---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + body, encoding="utf-8")
         draft.unlink()
+        self._clear_block(slug)
         self._upsert_index(slug, str(fm.get("title", slug)), str(fm.get("tldr", "")), subdir=target_dir)
         self._update_overview()
         self._append_log("publish", str(fm.get("title", slug)))
@@ -426,7 +439,63 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             lines.append(feedback)
         records[key] = lines
         common.write_json(self.root / common.FEEDBACK_NAME, records)
+        self._count_rejection(slug)
         self._append_log("reject", f"{slug} | {feedback[:80]}")
+
+    # -- rejection auto-block (kytmanov pattern: 5 strikes blocks the concept) --
+    def _count_rejection(self, slug: str) -> None:
+        """Increment a slug's rejection count; block at the max.
+
+        Args:
+            slug: Draft slug.
+        """
+        blocks = common.load_json(self.root / common.BLOCKED_NAME)
+        count = int(blocks.get(slug, 0)) + 1
+        blocks[slug] = count
+        common.write_json(self.root / common.BLOCKED_NAME, blocks)
+        if count >= _MAX_REJECTIONS:
+            self._append_log("block", slug)
+
+    def _is_blocked(self, slug: str) -> bool:
+        """Return True when a slug reached the rejection ceiling.
+
+        Args:
+            slug: Slug.
+
+        Returns:
+            bool: True when blocked.
+        """
+        blocks = common.load_json(self.root / common.BLOCKED_NAME)
+        return int(blocks.get(slug, 0)) >= _MAX_REJECTIONS
+
+    def _clear_block(self, slug: str) -> None:
+        """Remove a block (approval succeeds).
+
+        Args:
+            slug: Slug.
+        """
+        blocks = common.load_json(self.root / common.BLOCKED_NAME)
+        if slug in blocks:
+            blocks.pop(slug, None)
+            common.write_json(self.root / common.BLOCKED_NAME, blocks)
+
+    def blocked_slugs(self) -> list[str]:
+        """Return slugs blocked after repeated rejections.
+
+        Returns:
+            list[str]: Blocked slugs, sorted.
+        """
+        blocks = common.load_json(self.root / common.BLOCKED_NAME)
+        return sorted(slug for slug, count in blocks.items() if int(count) >= _MAX_REJECTIONS)
+
+    def unblock_draft(self, slug: str) -> None:
+        """Manually unblock a concept so re-extraction and approval resume.
+
+        Args:
+            slug: Slug.
+        """
+        self._clear_block(slug)
+        self._append_log("unblock", slug)
 
     def flag_contradiction(self, slug: str, claim: str) -> str | None:
         """Flag a contradiction on a live page (DISPUTED; close-never-delete).

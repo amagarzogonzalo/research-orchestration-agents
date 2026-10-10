@@ -189,6 +189,46 @@ class WikiSidecar:
         finally:
             conn.close()
 
+    def hybrid_search(self, query: str, *, limit: int = 3, rrf_k: int = 60) -> list[tuple[str, str, float]]:
+        """Reciprocal-rank fusion of FTS5 BM25 + deterministic scan scoring.
+
+        Fuses the two rankers by position (RRF, ``k=60``), never by raw score
+        (BM25 and term-overlap distributions are incomparable). Deterministic:
+        both input lists are sorted before fusion. Pages findable by either
+        signature survive; the union is ranked.
+
+        Args:
+            query: Free-text query.
+            limit: Maximum results.
+            rrf_k: RRF constant.
+
+        Returns:
+            list[tuple[str, str, float]]: (slug, path, fused score), ranked.
+        """
+        if not self.db_path.exists() or not query.strip() or not self.fts_supported():
+            return []
+        fts = self.search(query, limit=limit * 4)
+        scan = _scan_scores(self.root, query)
+        merged: dict[str, float] = {}
+        for rank, (slug, _path, _score) in enumerate(fts, start=1):
+            merged[slug] = merged.get(slug, 0.0) + 1.0 / (rrf_k + rank)
+        for rank, (slug, _score) in enumerate(scan, start=1):
+            merged[slug] = merged.get(slug, 0.0) + 1.0 / (rrf_k + rank)
+        conn = sqlite3.connect(self.db_path)
+        try:
+            rows = conn.execute("SELECT slug, path FROM notes").fetchall()
+            by_stem = {str(slug).rsplit("/", 1)[-1]: str(path) for slug, path in rows}
+        finally:
+            conn.close()
+        ranked = sorted(merged.items(), key=lambda kv: (-kv[1], kv[0]))
+        out: list[tuple[str, str, float]] = []
+        for slug, score in ranked:
+            stem = slug.rsplit("/", 1)[-1]
+            out.append((slug, by_stem.get(stem, slug), score))
+            if len(out) >= limit:
+                break
+        return out
+
     def counts(self) -> dict[str, int]:
         """Row counts per table (test/inspection helper).
 
@@ -205,6 +245,36 @@ class WikiSidecar:
             return out
         finally:
             conn.close()
+
+
+def _scan_scores(root: Path, query: str) -> list[tuple[str, float]]:
+    """Deterministic term-overlap scoring over the vault (scan signature).
+
+    Args:
+        root: Wiki root.
+        query: Query text.
+
+    Returns:
+        list[tuple[str, float]]: (slug, score), best-first.
+    """
+    query_terms = common.terms(query)
+    if not query_terms:
+        return []
+    scored: list[tuple[str, float]] = []
+    if root.is_dir():
+        for name in common.PAGE_DIRS:
+            d = root / name
+            if not d.is_dir():
+                continue
+            for p in sorted(d.glob("*.md")):
+                text = p.read_text(encoding="utf-8")
+                fm, body = common.split_frontmatter(text)
+                title = str(fm.get("title") or p.stem)
+                value = common.score(query_terms, title, body)
+                if value > 0.0:
+                    scored.append((p.stem, value))
+    scored.sort(key=lambda kv: (-kv[1], kv[0]))
+    return scored
 
 
 def _wikilinks(text: str) -> list[str]:

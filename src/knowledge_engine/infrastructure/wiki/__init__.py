@@ -2,6 +2,7 @@
 
 from knowledge_engine.infrastructure.wiki.deep_lint import WikiDeepLinter
 from knowledge_engine.infrastructure.wiki.file_store import FileWikiStore
+from knowledge_engine.infrastructure.wiki.graph import WikiEdge, WikiGraph, WikiNode
 from knowledge_engine.infrastructure.wiki.lint import FileVaultLinter
 from knowledge_engine.infrastructure.wiki.lint_core import lint_pages
 from knowledge_engine.infrastructure.wiki.sidecar import WikiSidecar
@@ -13,6 +14,9 @@ __all__ = [
     "SupabaseVaultLinter",
     "SupabaseWikiStore",
     "WikiDeepLinter",
+    "WikiEdge",
+    "WikiGraph",
+    "WikiNode",
     "WikiSidecar",
     "lint_pages",
 ]

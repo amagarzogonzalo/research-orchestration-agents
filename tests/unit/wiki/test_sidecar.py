@@ -68,6 +68,35 @@ class TestSidecar:
         sidecar.build()
         assert sidecar.counts() == first
 
+    def test_hybrid_fuses_fts_and_scan(self, tmp_path: Path) -> None:
+        """RRF fusion ranks union of FTS + scan signatures deterministically."""
+        from knowledge_engine.infrastructure.wiki.sidecar import _scan_scores
+
+        root = tmp_path / "wiki"
+        _seed_vault(root)
+        sidecar = WikiSidecar(root)
+        sidecar.build()
+        hybrid = sidecar.hybrid_search("retrieval generation", limit=3)
+        assert hybrid, "hybrid search must find the RAG page"
+        # FTS and scan both rank `rag` first for this query.
+        assert hybrid[0][0].endswith("rag")
+
+        # The scan signature alone would also surface it (term overlap).
+        scan = _scan_scores(root, "retrieval generation")
+        assert scan and scan[0][0] == "rag"
+
+    def test_hybrid_is_deterministic(self, tmp_path: Path) -> None:
+        """Two builds produce identical hybrid ranks."""
+        root = tmp_path / "wiki"
+        _seed_vault(root)
+        sidecar = WikiSidecar(root)
+        sidecar.build()
+        first = sidecar.hybrid_search("aqueduct hydraulics", limit=2)
+        sidecar.build()
+        second = sidecar.hybrid_search("aqueduct hydraulics", limit=2)
+        assert [s for s, _p, _sc in first] == [s for s, _p, _sc in second]
+        assert first, "aqueduct page must be findable via fusion"
+
     def test_incremental_insert_page(self, tmp_path: Path) -> None:
         """insert_page updates an existing sidecar without full rebuild."""
         root = tmp_path / "wiki"
