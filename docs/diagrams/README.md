@@ -3,6 +3,10 @@
 Professional, print-ready diagrams of the four LangGraph workflows in
 `src/knowledge_engine/orchestration/graphs.py`. Same nodes, different wiring.
 
+> **Data flow:** for a cross-cutting diagram of every data source and how the
+> research feeds the wiki, see [`docs/data-sources.md`](../data-sources.md)
+> (`data-flow.svg` in this directory).
+
 | Diagram | Workflow | Path in one line |
 |---|---|---|
 | ![research](graph-research.svg) | `research` (default) | `wiki_query?` → `ingest` → `clean` → `relevance` → `bodies` → `fetch_body ×N` → `synthesize` ⇄ `judge` loop → `review` → `render` → `wiki_ingest` |
