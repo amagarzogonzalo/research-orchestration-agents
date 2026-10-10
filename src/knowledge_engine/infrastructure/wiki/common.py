@@ -21,6 +21,7 @@ LOG_NAME = "log.md"
 OVERVIEW_NAME = "overview.md"
 CACHE_NAME = ".cache.json"
 FEEDBACK_NAME = ".feedback.json"
+BLOCKED_NAME = ".blocked.json"
 
 #: Deterministic ingest writes pages under these subdirectories; index/log/
 #: overview live at the wiki root and are exempt from lint's orphan scan.
@@ -202,6 +203,7 @@ def write_json(path: Path, data: dict[str, Any]) -> None:
 
 
 __all__ = [
+    "BLOCKED_NAME",
     "CACHE_NAME",
     "FEEDBACK_NAME",
     "INDEX_NAME",
