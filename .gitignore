@@ -18,3 +18,5 @@ research_store/
 *.pyc
 # NOTE: evals/cassettes/ is intentionally COMMITTED — recorded model outputs
 # are the offline deterministic suite (fresh clones replay without keys).
+
+wiki-graph.json

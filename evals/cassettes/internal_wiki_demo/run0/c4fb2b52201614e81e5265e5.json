@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-10T16:42:21Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How retrieval-augmented generation reduces hallucinations in large language models\nPapers:\nhuggingface_papers:2505.04253 | LLM-Independent Adaptive RAG: Let the Question Speak for Itself\nhuggingface_papers:2509.17671 | Turk-LettuceDetect: A Hallucination Detection Models for Turkish RAG\n  Applications\nhuggingface_papers:2407.01219 | Searching for Best Practices in Retrieval-Augmented Generation\nhuggingface_papers:2509.21875 | LUMINA: Detecting Hallucinations in RAG System with Context-Knowledge\n  Signals\nosf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\nosf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\nosf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\nosf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\nosf:qfkbv_v1 | Semi-Structured Data Parsing and Vectorization Using Retrieval-Augmented Generation\nosf:ns2v3_v1 | Implementing Retrieval-Augmented Generation (RAG) for Large Language Models to Build Confidence in Traditional Chinese Medicine\nosf:pv7r5_v1 | Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\nmedrxiv:10.64898/2026.09.24.26363897 | Perspective independence, more than personas, drives LLM teams - and where they reverse\nmedrxiv:10.64898/2026.08.14.26360474 | Automated language impairment screening in acute stroke using connected speech\nmedrxiv:10.64898/2026.09.24.26363914 | Unifying Vision and Language: Benchmarking End to End Transformer Model Against the ClipCap Framework\nmedrxiv:10.64898/2026.09.21.26363368 | Benchmarking large language models on the Ukrainian Krok 2 licensing examination in physical therapy: accuracy, consistency, and agreement\nmedrxiv:10.64898/2026.07.15.26358188 | A ReAct Agentic AI System for Natural Language Querying and Statistical Analysis of The Cancer Genome Atlas Clinical Data\nmedrxiv:10.64898/2026.09.25.26363056 | Age-dependent associations of sleep duration and insomnia symptoms with cognitive decline across five decades of adult life: a multi-cohort longitudinal study\ndoaj:5c3e3ea8e8b2469e8706f069570090a8 | AI-Powered Standard Operating Procedure Generation and Optimization Using Large Language Models for Chemical Laboratory Applications | IEEE Access\nwikipedia:75229858 | Retrieval-augmented generation\nwikipedia:73248112 | Large language model\nwikipedia:72607666 | Hallucination (artificial intelligence)\nwikipedia:69071767 | Prompt engineering\nwikipedia:73291755 | Generative AI\nwikipedia:1164 | Artificial intelligence\nwikipedia:233488 | Machine learning\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the research topic: \"How retrieval-augmented generation reduces hallucinations in large language models\". We have a list of papers with IDs and titles. We need to filter relevant ones. The instructions: require topical overlap; drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when venue is off-domain (law, medicine, social science for computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover same claim — but keep unique-coverage items.\n\nWe need to output JSON with relevant_ids list.\n\nLet's examine each paper:\n\n1. huggingface_papers:2505.04253 | LLM-Independent Adaptive RAG: Let the Question Speak for Itself\nTitle: \"LLM-Independent Adaptive RAG: Let the Question Speak for Itself\". This is about RAG but not specifically about hallucination reduction. Might be relevant? The topic is how RAG reduces hallucinations. This paper might discuss RAG but not hallucination. Might not be directly relevant. But could be relevant if it addresses hallucination? Title doesn't mention hallucination. So likely not relevant.\n\n2. huggingface_papers:2509.17671 | Turk-LettuceDetect: A Hallucination Detection Models for Turkish RAG Applications\nTitle: \"Turk-LettuceDetect: A Hallucination Detection Models for Turkish RAG Applications\". This is about hallucination detection, not reduction. But still relevant to hallucinations in RAG. The topic is reduction, but detection is related. Might be relevant as it deals with hallucinations in RAG. But the question: \"How retrieval-augmented generation reduces hallucinations in large language models\". Detection is not reduction. But could be considered relevant because it deals with hallucinations in RAG. But maybe not directly about reduction. Might still be relevant as it addresses hallucinations. But we might include it.\n\n3. huggingface_papers:2407.01219 | Searching for Best Practices in Retrieval-Augmented Generation\nTitle: \"Searching for Best Practices in Retrieval-Augmented Generation\". This is about best practices, could include hallucination reduction. Might be relevant.\n\n4. huggingface_papers:2509.21875 | LUMINA: Detecting Hallucinations in RAG System with Context-Knowledge Signals\nTitle: \"LUMINA: Detecting Hallucinations in RAG System with Context-Knowledge Signals\". Similar to #2, detection. Might be relevant.\n\n5. osf:wmc2q_v1 | Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\nTitle: \"Social-RAG: A Retrieval-Augmented Generation Pipeline for Computational Social Science Research on Telegram\". Domain: social science. Off-domain. Might not be relevant. Also not about hallucinations.\n\n6. osf:fghrp_v3 | Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\nTitle: \"Detection of Induced Psychosis-Like Thinking in User–GenAI Interaction: A Retrieval-Augmented Generation (RAG) Approach\". Domain: mental health. Off-domain. Not relevant.\n\n7. osf:34agm_v1 | JusticeNetBD: A Retrieval-Augmented Generation-based Legal AI Assistant for Women in Bangladesh\nLegal domain. Off-domain. Not relevant.\n\n8. osf:b94ng_v1 | Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\nTitle: \"Long Text Language Ensemble Models: Extension of Retrieval-Augmented Generation (RAG)\". Might be about RAG but not hallucination. Might be relevant? But not about hallucination.\n\n9. osf:qfkbv_v1 | Semi-Structured Data Parsing and Vectorization Using Retrieval-Augmented Generation\nNot about hallucination.\n\n10. osf:ns2v3_v1 | Implementing Retrieval-Augmented Generation (RAG) for Large Language Models to Build Confidence in Traditional Chinese Medicine\nDomain: medicine. Off-domain. Not relevant.\n\n11. osf:pv7r5_v1 | Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\nTitle: \"Hallucination Reduction in Large Language Models with Retrieval-Augmented Generation Using Wikipedia Knowledge\". This is directly about hallucination reduction. Very relevant.\n\n12. medrxiv:10.64898/2026.09.24.26363897 | Perspective independence, more than personas, drives LLM teams - and where they reverse\nNot relevant.\n\n13. medrxiv:10.64898/2026.08.14.26360474 | Automated language impairment screening in acute stroke using connected speech\nNot relevant.\n\n14. medrxiv:10.64898/2026.09.24.26363914 | Unifying Vision and Language: Benchmarking End to End Transformer Model Against the ClipCap Framework\nNot relevant.\n\n15. medrxiv:10.64898/2026.09.21.26363368 | Benchmarking large language models on the Ukrainian Krok 2 licensing examination in physical therapy: accuracy, consistency, and agreement\nNot relevant.\n\n16. medrxiv:10.64898/2026.07.15.26358188 | A ReAct Agentic AI System for Natural Language Querying and Statistical Analysis of The Cancer Genome Atlas Clinical Data\nNot relevant.\n\n17. medrxiv:10.64898/2026.09.25.26363056 | Age-dependent associations of sleep duration and insomnia symptoms with cognitive decline across five decades of adult life: a multi-cohort longitudinal study\nNot relevant.\n\n18. doaj:5c3e3ea8e8b2469e8706f069570090a8 | AI-Powered Standard Operating Procedure Generation and Optimization Using Large Language Models for Chemical Laboratory Applications | IEEE Access\nTitle: \"AI-Powered Standard Operating Procedure Generation and Optimization Using Large Language Models for Chemical Laboratory Applications\". Not about hallucination.\n\n19. wikipedia:75229858 | Retrieval-augmented generation\n20. wikipedia:73248112 | Large language model\n21. wikipedia:72607666 | Hallucination (artificial intelligence)\n22. wikipedia:69071767 | Prompt engineering\n23. wikipedia:73291755 | Generative AI\n24. wikipedia:1164 | Artificial intelligence\n25. wikipedia:233488 | Machine learning\n\nWe should include Wikipedia entries? The instruction: For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. Wikipedia is a practitioner source? It's an encyclopedia. Might be considered a practitioner source. But the topic is scholarly: \"How retrieval-augmented generation reduces hallucinations in large language models\". This is a scholarly question. We should prefer peer-reviewed journals and highly-cited primary sources over aggregators. Wikipedia is an aggregator. So we might not include Wikipedia. But maybe we include if unique coverage? But Wikipedia is not unique coverage. So likely exclude.\n\nThus relevant IDs: #11 (",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791650540,
+    "id": "chatcmpl-7da8f382-7ef5-4cc3-ac51-0fd3a83d5e2c",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_84bb35977d",
+    "usage": {
+      "completion_time": 1.6340097139999998,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.059908254,
+      "prompt_tokens": 949,
+      "prompt_tokens_details": null,
+      "queue_time": 0.217965175,
+      "total_time": 1.693917968,
+      "total_tokens": 2449
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4kb39d4e1evpwv4ba3ptrvt",
+      "seed": 1264391342
+    }
+  },
+  "usage": {
+    "completion_time": 1.6340097139999998,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.059908254,
+    "prompt_tokens": 949,
+    "prompt_tokens_details": null,
+    "queue_time": 0.217965175,
+    "total_time": 1.693917968,
+    "total_tokens": 2449
+  },
+  "wall_s": 1.986
+}

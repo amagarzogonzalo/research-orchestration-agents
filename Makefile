@@ -58,6 +58,9 @@ wiki-lint-deep:     ## deterministic + optional LLM cross-page contribution/stal
 wiki-review:        ## draft review loop: list/accept/reject concept+entity drafts
 	uv run python bin/wiki_review.py list
 
+wiki-graph:         ## dump the wiki knowledge graph (nodes/edges/communities) as JSON
+	uv run python bin/wiki_graph.py
+
 check: lint types arch semgrep agents context test evals bench-check   ## everything. This is the gate.
 	@echo green
 

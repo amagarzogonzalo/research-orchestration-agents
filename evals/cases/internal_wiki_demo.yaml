@@ -1,10 +1,9 @@
 # Internal-wiki demo: internal-first answer with dedup + lineage stays sound
-# DRAFT status: this case exercises the NEW wiki-hit path, so replay needs its
-# own recorded cassettes (a first live record) + human `--accept` of the
-# snapshot. Until then it reports signal but never blocks the offline gate
-# (draft cases are exempt from the gate in evals/runner.py).
+# ACTIVE case: recorded live 2026-10-09, replay bit-identical, snapshot
+# accepted (human). The wiki-hit behavior itself is covered offline by
+# tests/e2e/test_wiki_hit_path.py; this case gates the full pipeline on the
+# canonical internal-wiki query.
 id: internal_wiki_demo
-draft: true
 description: >
   Guards the wiki loop: a repeated query hits the compiled wiki first
   (fewer live calls), dedup clusters near-copies instead of double-citing,
