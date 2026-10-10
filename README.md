@@ -39,6 +39,21 @@ cp .env.example .env                             # fill free-tier LLM keys
 
 Runtime floor: **Python 3.11 or 3.12** (`requires-python` enforces this).
 
+## Wiki layer (Karpathy pattern, files-first)
+
+Every workflow (`research`/`qa`/`summary`/`deep`) is **wiki-first**: before
+any live federated call the compiled wiki at `<store_root>/wiki` is consulted;
+an exact-query hit answers from the wiki with zero live search/scrape/LLM
+calls, and the finished run is compiled back into the wiki (guaranteed source
+page, cross-thread content dedup, index/log/overview). Opt-in per run via
+`RunSettings(wiki_extract=True, wiki_save_answers=True, thesis="...")` for the
+LLM concept/entity compile, filed answers and thesis verdict pages.
+
+Tooling: `make wiki-lint` (health gate), `make wiki-lint-deep` (opt-in LLM
+contradictions/stale/gaps), `make wiki-review` (draft loop), `make wiki-graph`
+(knowledge graph JSON), `bin/wiki_supabase_provision.py` (cloud mirror).
+Full delivery report: `docs/plans/0027-0029`, plan: `docs/LLM_WIKI.md`.
+
 ## Run
 
 ```python

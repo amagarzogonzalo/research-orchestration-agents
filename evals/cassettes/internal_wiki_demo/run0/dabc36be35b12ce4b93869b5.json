@@ -1,0 +1,17 @@
+{
+  "name": "scrape",
+  "payload": {
+    "url": "https://doi.org/10.1002/9781394374717.ch03"
+  },
+  "recorded_at": "2026-10-10T16:42:33Z",
+  "response": {
+    "captured_at": "2026-10-10T16:42:33.388049+00:00",
+    "char_count": 543,
+    "crawl_method": "crawl4ai",
+    "markdown": "![Icon for onlinelibrary.wiley.com](https://onlinelibrary.wiley.com/favicon.ico)\n# onlinelibrary.wiley.com\n## Performing security verification\nThis website uses a security service to protect against malicious bots. This page is displayed while the website verifies you are not a bot.\n## Verification successful. Waiting for onlinelibrary.wiley.com to respond\nRay ID: `a48714141d95a419`\nPerformance and Security by [Cloudflare](https://www.cloudflare.com?utm_source=challenge&utm_campaign=m)[Privacy](https://www.cloudflare.com/privacypolicy/)\n",
+    "title": "Just a moment...",
+    "url": "https://doi.org/10.1002/9781394374717.ch03"
+  },
+  "usage": {},
+  "wall_s": 7.389
+}
