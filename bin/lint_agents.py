@@ -24,13 +24,8 @@ def main() -> int:
     body = re.sub(r"<!--.*?-->", "", text, flags=re.DOTALL)
 
     if re.search(r"^\s*```(python|js|ts|go|rust)\b", body, re.MULTILINE):
-        problems.append(
-            "code sample in AGENTS.md — implementations belong in the repo. "
-            "Point at the file instead."
-        )
-    if re.search(
-        r"\b(you are (claude|gpt|gemini|deepseek|qwen)|anthropic|openai)\b", body, re.IGNORECASE
-    ):
+        problems.append("code sample in AGENTS.md — implementations belong in the repo. Point at the file instead.")
+    if re.search(r"\b(you are (claude|gpt|gemini|deepseek|qwen)|anthropic|openai)\b", body, re.IGNORECASE):
         problems.append(
             "model- or vendor-specific language in AGENTS.md. This repo switches "
             "models; see .opencode/rules/models.md."
