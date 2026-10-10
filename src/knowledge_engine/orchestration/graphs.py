@@ -168,15 +168,64 @@ def _register(g: StateGraph[Any, Any, Any, Any], nodes: NodeSet) -> None:
     g.add_node("render", nodes.render)
 
 
+def _wire_wiki_prefix(g: StateGraph[Any, Any, Any, Any], nodes: NodeSet, *, entry: str) -> None:
+    """Wire the START-side wiki lookup when the composition root built it.
+
+    On an exact-query hit the graph routes straight to render (zero live
+    calls); on a miss it proceeds through the workflow's normal entry
+    (ingest for research/qa/summary, intent for deep).
+
+    Args:
+        g: Graph builder.
+        nodes: Node set.
+        entry: The workflow's normal entry node (miss target without wiki).
+    """
+    if nodes.wiki_query is None:
+        g.add_edge(START, entry)
+        return
+    g.add_node(WIKI_QUERY_NODE, nodes.wiki_query)
+    g.add_edge(START, WIKI_QUERY_NODE)
+    # Targets are validated against registered nodes, so only the entry that
+    # exists in THIS graph is declared (wiki_route returns the right one).
+    g.add_conditional_edges(WIKI_QUERY_NODE, wiki_route, {entry: entry, RENDER_NODE: RENDER_NODE})
+
+
+def _wire_clean(g: StateGraph[Any, Any, Any, Any], nodes: NodeSet, *, after: str, before: str) -> None:
+    """Wire the dedup step between ingest and its consumer.
+
+    Args:
+        g: Graph builder.
+        nodes: Node set.
+        after: Ingest node name.
+        before: Consumer node name.
+    """
+    if nodes.clean is None:
+        g.add_edge(after, before)
+        return
+    g.add_node(CLEAN_NODE, nodes.clean)
+    g.add_edge(after, CLEAN_NODE)
+    g.add_edge(CLEAN_NODE, before)
+
+
+def _wire_wiki_suffix(g: StateGraph[Any, Any, Any, Any], nodes: NodeSet) -> None:
+    """Wire ``render -> wiki_ingest -> END`` when the wiki node is present.
+
+    Args:
+        g: Graph builder.
+        nodes: Node set.
+    """
+    if nodes.wiki_ingest is None:
+        g.add_edge(RENDER_NODE, END)
+        return
+    g.add_node(WIKI_INGEST_NODE, nodes.wiki_ingest)
+    g.add_edge(RENDER_NODE, WIKI_INGEST_NODE)
+    g.add_edge(WIKI_INGEST_NODE, END)
+
+
 def _build_research(
     nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None, store: Any | None = None
 ) -> Any:
-    """Build the research workflow graph.
-
-    Wiki layer (ADR wiki-loop0) wires only when the composition root built
-    the wiki nodes: ``START -> wiki_query`` (hit routes straight to render,
-    miss proceeds), an optional ``clean`` step between ingest and relevance,
-    and ``render -> wiki_ingest -> END``. QA/summary/deep stay untouched.
+    """Build the research workflow graph (wiki layer wired, see 0017+).
 
     Args:
         nodes: Node set.
@@ -188,29 +237,14 @@ def _build_research(
     """
     g = _base()
     _register(g, nodes)
-    if nodes.wiki_query is not None:
-        g.add_node(WIKI_QUERY_NODE, nodes.wiki_query)
-        g.add_edge(START, WIKI_QUERY_NODE)
-        g.add_conditional_edges(WIKI_QUERY_NODE, wiki_route, {"ingest": "ingest", RENDER_NODE: RENDER_NODE})
-    else:
-        g.add_edge(START, "ingest")
-    if nodes.clean is not None:
-        g.add_node(CLEAN_NODE, nodes.clean)
-        g.add_edge("ingest", CLEAN_NODE)
-        g.add_edge(CLEAN_NODE, "relevance")
-    else:
-        g.add_edge("ingest", "relevance")
+    _wire_wiki_prefix(g, nodes, entry="ingest")
+    _wire_clean(g, nodes, after="ingest", before="relevance")
     g.add_edge("relevance", "bodies")
     g.add_edge(FETCH_NODE, SYNTHESIZE_NODE)
     g.add_edge(SYNTHESIZE_NODE, "judge")
     g.add_conditional_edges("judge", judge_route, {SYNTHESIZE_NODE: SYNTHESIZE_NODE, REVIEW_NODE: REVIEW_NODE})
     g.add_conditional_edges("review", review_route, {RENDER_NODE: RENDER_NODE, END: END})
-    if nodes.wiki_ingest is not None:
-        g.add_node(WIKI_INGEST_NODE, nodes.wiki_ingest)
-        g.add_edge(RENDER_NODE, WIKI_INGEST_NODE)
-        g.add_edge(WIKI_INGEST_NODE, END)
-    else:
-        g.add_edge(RENDER_NODE, END)
+    _wire_wiki_suffix(g, nodes)
     return g.compile(checkpointer=checkpointer, store=store)
 
 
@@ -218,6 +252,9 @@ def _build_qa(
     nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None, store: Any | None = None
 ) -> Any:
     """Q&A: no body fan-out, no judge loop — answer from abstracts directly.
+
+    The wiki layer applies like research: internal-first lookup, dedup after
+    ingest, compile the finished answer into the wiki.
 
     Args:
         nodes: Node set.
@@ -229,11 +266,11 @@ def _build_qa(
     """
     g = _base()
     _register(g, nodes)
-    g.add_edge(START, "ingest")
-    g.add_edge("ingest", "relevance")
+    _wire_wiki_prefix(g, nodes, entry="ingest")
+    _wire_clean(g, nodes, after="ingest", before="relevance")
     g.add_edge("relevance", SYNTHESIZE_NODE)
     g.add_edge(SYNTHESIZE_NODE, RENDER_NODE)
-    g.add_edge(RENDER_NODE, END)
+    _wire_wiki_suffix(g, nodes)
     return g.compile(checkpointer=checkpointer, store=store)
 
 
@@ -241,6 +278,9 @@ def _build_summary(
     nodes: NodeSet, *, checkpointer: BaseCheckpointSaver[Any] | None = None, store: Any | None = None
 ) -> Any:
     """Summary: ingest + bodies + synthesize (no relevance gate, no judge).
+
+    The wiki layer applies like research (internal-first lookup + dedup +
+    compile into the wiki).
 
     Args:
         nodes: Node set.
@@ -252,11 +292,11 @@ def _build_summary(
     """
     g = _base()
     _register(g, nodes)
-    g.add_edge(START, "ingest")
-    g.add_edge("ingest", "bodies")
+    _wire_wiki_prefix(g, nodes, entry="ingest")
+    _wire_clean(g, nodes, after="ingest", before="bodies")
     g.add_edge(FETCH_NODE, SYNTHESIZE_NODE)
     g.add_edge(SYNTHESIZE_NODE, RENDER_NODE)
-    g.add_edge(RENDER_NODE, END)
+    _wire_wiki_suffix(g, nodes)
     return g.compile(checkpointer=checkpointer, store=store)
 
 
@@ -281,15 +321,20 @@ def _require_deep(nodes: NodeSet) -> NodeSet:
 
 
 def wiki_route(state: WorkflowState) -> str:
-    """Route after wiki_query: a hit renders from the wiki, a miss ingests.
+    """Route after wiki_query: a hit renders from the wiki, a miss proceeds.
+
+    The miss target depends on the workflow's normal entry: deep enters via
+    ``intent``, the single-pass workflows (research/qa/summary) via ``ingest``.
 
     Args:
         state: Current workflow state.
 
     Returns:
-        str: Next node name (render on hit, ingest on miss).
+        str: Next node name (render on hit, intent/ingest on miss).
     """
-    return RENDER_NODE if state.get("wiki_hit") else "ingest"
+    if state.get("wiki_hit"):
+        return RENDER_NODE
+    return "intent" if state.get("workflow") == "deep" else "ingest"
 
 
 def intent_route(state: WorkflowState) -> str:
@@ -374,7 +419,7 @@ def _build_deep(
     g.add_node(BRANCH_NODE, nodes.branch)  # type: ignore[arg-type]
     g.add_node(AGGREGATE_NODE, nodes.aggregate)  # type: ignore[arg-type]
     g.add_node(CRITIC_NODE, nodes.critic)  # type: ignore[arg-type]
-    g.add_edge(START, INTENT_NODE)
+    _wire_wiki_prefix(g, nodes, entry=INTENT_NODE)
     g.add_conditional_edges(INTENT_NODE, intent_route, [DECOMPOSE_NODE, SYNTHESIZE_NODE])
     g.add_conditional_edges(DECOMPOSE_NODE, dispatch, [BRANCH_NODE, JUDGE_NODE])
     g.add_edge(BRANCH_NODE, AGGREGATE_NODE)
@@ -383,6 +428,7 @@ def _build_deep(
     g.add_conditional_edges(JUDGE_NODE, judge_route, [SYNTHESIZE_NODE, REVIEW_NODE])
     g.add_conditional_edges(REVIEW_NODE, review_route, [RENDER_NODE, END])
     g.add_conditional_edges(SYNTHESIZE_NODE, synthesize_route, [JUDGE_NODE, RENDER_NODE])
+    _wire_wiki_suffix(g, nodes)
     g.add_edge(RENDER_NODE, END)
     return g.compile(checkpointer=checkpointer, store=store)
 
