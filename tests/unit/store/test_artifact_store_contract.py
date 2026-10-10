@@ -63,6 +63,25 @@ def test_local_article_bytes_match_legacy_layout(tmp_path) -> None:
     assert text.startswith("---\ntitle: Test\n")
 
 
+def test_local_publishes_clickable_html_twin(tmp_path) -> None:
+    """article.html lands next to article.md: anchors + source links (click-to-read)."""
+    from knowledge_engine.store.artifact_store import LocalArtifactStore
+
+    store = LocalArtifactStore(root=tmp_path)
+    artifact = KnowledgeArtifact(
+        id="t1",
+        title="Test",
+        body_markdown="Claim [^openalex:W1].\n\n[^openalex:W1]: Paper One.",
+        frontmatter_yaml="title: Test\n",
+        provenance=[SourceRecord(id="openalex:W1", title="One", source=SearchSource.OPENALEX, doi="10.1000/x")],
+    )
+    store.put_article("t1", artifact)
+    html = (tmp_path / "t1" / "article.html").read_text(encoding="utf-8")
+    assert html.startswith("<!DOCTYPE html>")
+    assert 'href="#fn-openalex-w1"' in html
+    assert 'href="https://doi.org/10.1000/x"' in html
+
+
 def test_put_sources_then_get_roundtrips(tmp_path) -> None:
     """sources.json bytes persist and reload (contract B)."""
     from knowledge_engine.store.artifact_store import LocalArtifactStore

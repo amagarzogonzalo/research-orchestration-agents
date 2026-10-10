@@ -50,18 +50,25 @@ class LocalArtifactStore(ArtifactStorePort):
         return self.root / thread_id / "sources.json"
 
     def put_article(self, thread_id: str, artifact: KnowledgeArtifact) -> str:
-        """Write the artifact (frontmatter + body) to article.md.
+        """Write the artifact (frontmatter + body) to article.md + article.html.
+
+        The HTML twin is the click-to-read surface: self-contained, footnote
+        markers anchor to definitions, definitions link to real sources.
 
         Args:
             thread_id: Run thread identifier.
             artifact: Final artifact.
 
         Returns:
-            str: Locator (relative path string).
+            str: Locator (relative path string of the markdown article).
         """
+        from knowledge_engine.store.render_html import render_article_html
+
         path = self._article_path(thread_id)
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(f"---\n{artifact.frontmatter_yaml}---\n\n{artifact.body_markdown}\n", encoding="utf-8")
+        html_path = path.with_suffix(".html")
+        html_path.write_text(render_article_html(artifact), encoding="utf-8")
         return str(path)
 
     def put_sources(self, thread_id: str, sources: list[SourceRecord]) -> str:

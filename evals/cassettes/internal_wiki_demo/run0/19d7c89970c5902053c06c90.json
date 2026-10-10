@@ -1,0 +1,73 @@
+{
+  "recorded_at": "2026-10-10T16:42:23Z",
+  "request": {
+    "max_tokens": 1500,
+    "messages": [
+      {
+        "content": "You are a research librarian. Given a research topic and a list of papers, decide which papers are directly relevant to the topic. Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources (documentation, engineering blogs, encyclopedia overviews) as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items. Reply ONLY with JSON: {\"relevant_ids\": [\"id1\", \"id2\", ...]}. No prose.",
+        "name": null,
+        "role": "system"
+      },
+      {
+        "content": "Research topic: How retrieval-augmented generation reduces hallucinations in large language models\nPapers:\nwikipedia:81451909 | Douwe Kiela\nduckduckgo:https://arxiv.org/abs/2404.08189 | Reducing hallucination in structured outputs via Retrieval-Augmented ...\nduckduckgo:https://arxiv.org/html/2609.26229v1 | Reducing Hallucinations in Large Language Models Through Integrated ...\nduckduckgo:https://www.nature.com/articles/s41467-026-71411-1 | Hyper-RAG: combating LLM hallucinations using hypergraph-driven ...\nduckduckgo:https://www.mdpi.com/2227-7390/13/5/856 | Hallucination Mitigation for Retrieval-Augmented Large Language Models ...\nduckduckgo:https://dasroot.net/posts/2026/03/reduce-hallucinations-in-rag-system/ | How to Reduce Hallucinations in a RAG System · Dasroot\nduckduckgo:https://www.researchgate.net/profile/Ahmed-Ragab-Mahmoud/publication/399075968_Mitigating_Hallucinations_in_Large_Language_Models_via_Retrieval-Augmented_Generation_RAG/links/694dbf9c06a9ab54f84ace45/Mitigating-Hallucinations-in-Large-Language-Models-via-Retrieval-Augmented-Generation-RAG.pdf | PDF Mitigating Hallucinations in Large Language - ResearchGate\nduckduckgo:https://ieeexplore.ieee.org/document/10773428 | ReRag: A New Architecture for Reducing the Hallucination by Retrieval ...\nduckduckgo:https://link.springer.com/chapter/10.1007/978-3-031-93681-4_3 | Taming AI Hallucinations: Innovations in Retrieval-Augmented Generation ...\n\nRelevant papers (JSON ids only):",
+        "name": null,
+        "role": "user"
+      }
+    ],
+    "model": "groq/openai/gpt-oss-20b",
+    "temperature": 0.0
+  },
+  "response": {
+    "choices": [
+      {
+        "finish_reason": "length",
+        "index": 0,
+        "message": {
+          "content": "",
+          "function_call": null,
+          "reasoning": "We need to decide which papers are directly relevant to the topic: \"How retrieval-augmented generation reduces hallucinations in large language models\". We have a list of papers with IDs like \"wikipedia:81451909\" etc. We need to output JSON with relevant_ids array.\n\nWe must consider the instructions: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when venue is off-domain (law, medicine, social science for computing/engineering). For practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence — do not demote them for lacking peer review. For scholarly questions, prefer peer-reviewed journals and highly-cited primary sources over aggregators when both cover the same claim — but keep unique-coverage items.\n\nTopic: retrieval-augmented generation reduces hallucinations in LLMs. So we want papers that discuss RAG and hallucination reduction. We have:\n\n1. wikipedia:81451909 | Douwe Kiela. That's a Wikipedia article? Likely about RAG? Might be general. Might be relevant but generic. But Wikipedia is a practitioner source? It's a general overview. Might be considered relevant but maybe not primary research. But the instruction says for practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. This is a general overview, not a how-to. But still could be relevant. But we might include it? The topic is research question, not how-to. So maybe we prefer peer-reviewed. But we can include if unique coverage. But Wikipedia is not peer-reviewed. But maybe we can include if unique coverage. But we have many research papers.\n\n2. duckduckgo:https://arxiv.org/abs/2404.08189 | \"Reducing hallucination in structured outputs via Retrieval-Augmented ...\" This is an arXiv preprint. Title indicates reducing hallucination via RAG. Likely relevant.\n\n3. duckduckgo:https://arxiv.org/html/2609.26229v1 | \"Reducing Hallucinations in Large Language Models Through Integrated ...\" Title indicates reducing hallucinations via integrated? Might be relevant.\n\n4. duckduckgo:https://www.nature.com/articles/s41467-026-71411-1 | \"Hyper-RAG: combating LLM hallucinations using hypergraph-driven ...\" This is a Nature Communications article. Highly reputable. Relevant.\n\n5. duckduckgo:https://www.mdpi.com/2227-7390/13/5/856 | \"Hallucination Mitigation for Retrieval-Augmented Large Language Models ...\" MDPI journal. Relevant.\n\n6. duckduckgo:https://dasroot.net/posts/2026/03/reduce-hallucinations-in-rag-system/ | \"How to Reduce Hallucinations in a RAG System · Dasroot\" This is a blog post. Practitioner source. Relevant.\n\n7. duckduckgo:https://www.researchgate.net/profile/Ahmed-Ragab-Mahmoud/publication/399075968_Mitigating_Hallucinations_in_Large_Language_Models_via_Retrieval-Augmented_Generation_RAG/links/694dbf9c06a9ab54f84ace45/Mitigating-Hallucinations-in-Large-Language-Models-via-Retrieval-Augmented-Generation-RAG.pdf | PDF Mitigating Hallucinations in Large Language - ResearchGate. This is a PDF on ResearchGate. Might be a preprint or conference. Title indicates relevant.\n\n8. duckduckgo:https://ieeexplore.ieee.org/document/10773428 | \"ReRag: A New Architecture for Reducing the Hallucination by Retrieval ...\" IEEE. Relevant.\n\n9. duckduckgo:https://link.springer.com/chapter/10.1007/978-3-031-93681-4_3 | \"Taming AI Hallucinations: Innovations in Retrieval-Augmented Generation ...\" Springer chapter. Relevant.\n\nWe need to decide which to include. The instruction: \"Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query, especially when their venue is off-domain (law, medicine, social science for a computing/engineering topic).\" So we need to check titles. Titles that only share generic words: e.g., \"Hallucination Mitigation for Retrieval-Augmented Large Language Models\" shares \"Hallucination Mitigation\" and \"Retrieval-Augmented Large Language Models\" which is specific. So it's relevant. \"ReRag: A New Architecture for Reducing the Hallucination by Retrieval\" also relevant. \"Taming AI Hallucinations: Innovations in Retrieval-Augmented Generation\" relevant. \"Hyper-RAG: combating LLM hallucinations using hypergraph-driven ...\" relevant. \"Reducing hallucination in structured outputs via Retrieval-Augmented ...\" relevant. \"Reducing Hallucinations in Large Language Models Through Integrated ...\" relevant. The blog post \"How to Reduce Hallucinations in a RAG System\" is a how-to, relevant. The Wikipedia article might be generic but still about RAG. But maybe we can include it as unique coverage. But the instruction says for practical how-to, tooling-comparison, or framework questions, treat practitioner sources as first-class evidence. But the Wikipedia article is not a how-to. It's an overview. But maybe we can include it because it's unique coverage. But we might drop it if we think it's too generic. The question is \"How retrieval-augmented generation reduces hallucinations in large language models\". The Wikipedia article might provide a general overview but not specific research. But it might still be relevant. But we can include it.\n\nAlso the ResearchGate PDF: might be a preprint or conference. Title indicates relevant. So include.\n\nThus likely all except maybe the Wikipedia? But we can include all. But we need to decide. The instruction: \"Require topical overlap: drop items whose title shares only generic words (requirements, development, local, model, analysis, study) with the query\". The Wikipedia article title is \"Retrieval-augmented generation\" maybe? Actually the ID is wikipedia:81451909. That might be the Wikipedia page for \"Retrieval-augmented generation\". That title is \"Retrieval-augmented generation\". That shares generic words \"retrieval-augmented generation\" but not \"hallucination\". So it might not share the specific concept of hallucination. So maybe drop it because it doesn't mention hallucination. The query is about hallucinations. So the Wikipedia article might not mention hallucination. So drop it.\n\nThus relevant ids: all except Wikipedia. So we list the IDs of the others. The IDs are the URLs or the given IDs. The list includes:\n\n- duckduckgo:https://arxiv.org/abs/2404.08189\n- duckduckgo:https://arxiv.org/html/2609.26229v1\n- duckduckgo:https://www.nature.com/articles/s41467-026-71411-1\n- duckduckgo:https://www.mdpi.com/2227-7390/13/5/856\n- duckduckgo:https://dasroot.net/posts/2026/03/re",
+          "role": "assistant",
+          "tool_calls": null
+        }
+      }
+    ],
+    "created": 1791650542,
+    "id": "chatcmpl-1c8a34ed-c709-42cb-9dc6-94cb33e0fd81",
+    "model": "openai/gpt-oss-20b",
+    "object": "chat.completion",
+    "service_tier": "auto",
+    "system_fingerprint": "fp_f102a3179c",
+    "usage": {
+      "completion_time": 1.827440428,
+      "completion_tokens": 1500,
+      "completion_tokens_details": {
+        "reasoning_tokens": 1498
+      },
+      "prompt_time": 0.031644656,
+      "prompt_tokens": 644,
+      "prompt_tokens_details": null,
+      "queue_time": 0.225100501,
+      "total_time": 1.8590850840000002,
+      "total_tokens": 2144
+    },
+    "usage_breakdown": null,
+    "x_groq": {
+      "id": "req_01m4kb3bbcem9btvcwrppbvmmk",
+      "seed": 844243195
+    }
+  },
+  "usage": {
+    "completion_time": 1.827440428,
+    "completion_tokens": 1500,
+    "completion_tokens_details": {
+      "reasoning_tokens": 1498
+    },
+    "prompt_time": 0.031644656,
+    "prompt_tokens": 644,
+    "prompt_tokens_details": null,
+    "queue_time": 0.225100501,
+    "total_time": 1.8590850840000002,
+    "total_tokens": 2144
+  },
+  "wall_s": 2.14
+}
