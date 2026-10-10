@@ -22,6 +22,9 @@ class RunSettings(BaseModel):
         max_iterations: Judge->synthesize optimizer loop cap for this run.
         wiki_extract: Enable LLM concept/entity extraction at wiki ingest
             (two-step: analysis -> generation). Off = deterministic filing.
+        wiki_save_answers: Also file the rendered answer under ``queries/``
+            (Karpathy "good answers shouldn't disappear" — always-on in the
+            wiki pattern; this knob keeps it opt-in per run).
         thesis: When set, file a for/against verdict page for this claim into
             ``wiki/synthesis/`` (requires ``wiki_extract``-capable provider).
         max_wiki_pages: Cap on concept/entity pages written per ingest.
@@ -33,6 +36,7 @@ class RunSettings(BaseModel):
     max_subqueries: int | None = Field(default=None, ge=1)
     max_iterations: int | None = Field(default=None, ge=0)
     wiki_extract: bool | None = None
+    wiki_save_answers: bool | None = None
     thesis: str | None = Field(default=None, max_length=300)
     max_wiki_pages: int | None = Field(default=None, ge=1)
 

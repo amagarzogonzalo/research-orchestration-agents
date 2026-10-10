@@ -235,6 +235,43 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
         common.write_json(self.root / common.CACHE_NAME, cache)
         return IngestResult(verdict=verdict, page_path=str(page), pages_touched=touched, content_sha256=digest)
 
+    async def file_answer(self, thread_id: str, query: str, article_path: str) -> str:
+        """File a rendered answer under ``queries/`` (answers stay recoverable).
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            query: Original research query.
+            article_path: Rendered ``article.md`` path.
+
+        Returns:
+            str: The filed query page locator.
+
+        Raises:
+            KnowledgeEngineError: When the article file is missing.
+        """
+        self._ensure_layout()
+        src = Path(article_path)
+        if not src.is_file():
+            raise KnowledgeEngineError(f"wiki file_answer: article missing: {article_path}")
+        text = src.read_text(encoding="utf-8")
+        title = common.page_title(query)
+        slug = common.slugify(query)
+        page = self.root / "queries" / f"{slug}.md"
+        fm = {
+            "type": "query",
+            "title": title,
+            "thread": thread_id,
+            "date": common.today(),
+            "confidence": "EXTRACTED",
+            "tldr": common.tldr(text),
+        }
+        page.parent.mkdir(parents=True, exist_ok=True)
+        rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + f"## Answer\n\n{text.rstrip()}\n"
+        page.write_text(rendered, encoding="utf-8")
+        self._upsert_synthesis_index(slug, title, fm["tldr"], section="Queries", subdir="queries")
+        self._append_log("query", title)
+        return str(page)
+
     # -- compile (LLM extraction, Loop 1) -------------------------------------
     async def compile_extraction(
         self, thread_id: str, query: str, extraction: WikiExtraction, feedback: list[str]
@@ -391,23 +428,74 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
         common.write_json(self.root / common.FEEDBACK_NAME, records)
         self._append_log("reject", f"{slug} | {feedback[:80]}")
 
-    def _upsert_synthesis_index(self, slug: str, title: str, summary: str) -> None:
-        """Add a synthesis entry under the index's Synthesis section.
+    def flag_contradiction(self, slug: str, claim: str) -> str | None:
+        """Flag a contradiction on a live page (DISPUTED; close-never-delete).
+
+        Appends the claim under a ``## Contradictions`` section and returns
+        the page locator, without ever deleting anything (the earlier claim
+        stays retrievable). Pages report as disputed via
+        :meth:`disputed_slugs`.
 
         Args:
-            slug: Thesis page slug.
+            slug: Live page slug.
+            claim: The contradicting claim to record.
+
+        Returns:
+            str | None: The flagged page locator, or None when the page is
+            missing.
+        """
+        path = self._pages().get(slug)
+        if path is None:
+            return None
+        text = path.read_text(encoding="utf-8")
+        fm, body = common.split_frontmatter(text)
+        if "## Contradictions" not in body:
+            body = body.rstrip() + "\n\n## Contradictions\n"
+        marker = "## Contradictions\n"
+        head, _, tail = body.partition(marker)
+        tail_lines = tail.splitlines()
+        if not any(claim in line for line in tail_lines):
+            tail = "\n".join([f"- {claim}"] + [line for line in tail_lines if line.strip()]) + "\n"
+        fm["status"] = str(WikiVerdict.DISPUTED.value)
+        rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + head + marker + tail
+        path.write_text(rendered, encoding="utf-8")
+        self._append_log("disputed", f"{slug} | {claim[:80]}")
+        return str(path)
+
+    def disputed_slugs(self) -> list[str]:
+        """Return slugs whose pages carry the disputed flag.
+
+        Returns:
+            list[str]: Disputed slugs, sorted.
+        """
+        disputed: list[str] = []
+        for slug, path in self._pages().items():
+            fm, _ = common.split_frontmatter(path.read_text(encoding="utf-8"))
+            if str(fm.get("status") or "") == WikiVerdict.DISPUTED.value:
+                disputed.append(slug)
+        return sorted(disputed)
+
+    def _upsert_synthesis_index(
+        self, slug: str, title: str, summary: str, *, section: str = "Synthesis", subdir: str = "synthesis"
+    ) -> None:
+        """Add an entry under the index's named section (Synthesis/Queries).
+
+        Args:
+            slug: Page slug.
             title: Page title.
             summary: One-line summary.
+            section: Index section heading.
+            subdir: Page subdirectory in the link.
         """
         index = self.root / common.INDEX_NAME
         text = index.read_text(encoding="utf-8")
-        if "## Synthesis" not in text:
-            text = text.rstrip() + "\n\n## Synthesis\n"
-        marker = "## Synthesis\n"
+        marker = f"## {section}\n"
+        if marker not in text:
+            text = text.rstrip() + "\n\n" + marker
         head, _, tail = text.partition(marker)
-        entry = f"- [{title}](synthesis/{slug}.md) — {summary}"
+        entry = f"- [{title}]({subdir}/{slug}.md) — {summary}"
         tail_lines = tail.splitlines()
-        if not any(f"](synthesis/{slug}.md)" in line for line in tail_lines):
+        if not any(f"]({subdir}/{slug}.md)" in line for line in tail_lines):
             tail = "\n".join([entry] + [line for line in tail_lines if line.strip()]) + "\n"
         index.write_text(head + marker + tail, encoding="utf-8")
 

@@ -14,7 +14,7 @@ from fakes import FakeWikiStore  # noqa: E402
 from knowledge_engine.core.exceptions import KnowledgeEngineError  # noqa: E402
 from knowledge_engine.orchestration.nodes.wiki_ingest import WikiIngestNode  # noqa: E402
 from knowledge_engine.schemas.provider import UsageSummary  # noqa: E402
-from knowledge_engine.schemas.wiki import WikiExtraction, WikiThesis  # noqa: E402
+from knowledge_engine.schemas.wiki import WikiExtraction  # noqa: E402
 
 
 class FakeProvider:
@@ -70,6 +70,18 @@ async def test_extraction_off_by_default_no_provider_calls() -> None:
     assert provider.calls == 0
     assert "llm_calls" not in out
     assert store.calls_ingest == 1
+
+
+async def test_save_answers_when_opt_in() -> None:
+    """settings.wiki_save_answers files the rendered answer into queries/."""
+    store = FakeWikiStore()
+    node = WikiIngestNode(store)
+    out = await node.run(
+        {"thread_id": "t1", "query": "rag", "output_path": "x.md", "settings": {"wiki_save_answers": True}}
+    )
+    assert store.calls_answer == 1
+    assert out["wiki_answer"] is not None
+    assert out["wiki_pages"] == [out["wiki_answer"]]
 
 
 async def test_extraction_opt_in_files_drafts() -> None:
@@ -195,11 +207,36 @@ async def test_file_drafts_review_api(tmp_path: Path) -> None:
     assert hits, "approved page must be searchable"
 
 
+async def test_file_thesis_or_contradiction(tmp_path: Path) -> None:
+    """flag_contradiction marks a page disputed and keeps prior content."""
+    from knowledge_engine.infrastructure.wiki import FileWikiStore
+    from knowledge_engine.schemas.wiki import WikiExtraction
+
+    store = FileWikiStore(root=tmp_path / "wiki")
+    await store.compile_extraction(
+        "t1",
+        "rag hallucinations",
+        WikiExtraction(concepts=["Retrieval Augmented Generation"], entities=[], summary="x"),
+        [],
+    )
+    store.approve_draft("retrieval-augmented-generation")
+    loc = store.flag_contradiction("retrieval-augmented-generation", "later work disputes the mechanism")
+    assert loc is not None
+    assert store.disputed_slugs() == ["retrieval-augmented-generation"]
+    text = Path(loc).read_text(encoding="utf-8")
+    assert "later work disputes the mechanism" in text
+    assert "Retrieval Augmented Generation" in text, "prior content must survive (close-never-delete)"
+    log = (tmp_path / "wiki" / "log.md").read_text(encoding="utf-8")
+    assert "disputed" in log
+
+
 async def test_thesis_page_content(tmp_path: Path) -> None:
     """file_thesis writes claim, for/against, verdict, and a log entry."""
     from knowledge_engine.infrastructure.wiki import FileWikiStore
 
     store = FileWikiStore(root=tmp_path / "wiki")
+    from knowledge_engine.schemas.wiki import WikiThesis
+
     page = await store.file_thesis(
         "t1",
         WikiThesis(

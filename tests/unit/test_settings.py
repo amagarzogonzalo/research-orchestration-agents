@@ -37,12 +37,15 @@ def test_bounds_validated() -> None:
 
 def test_model_dump_roundtrip() -> None:
     """The engine writes settings.model_dump() into the channel."""
-    settings = RunSettings(max_subqueries=2, wiki_extract=True, thesis="claim", max_wiki_pages=5)
+    settings = RunSettings(
+        max_subqueries=2, wiki_extract=True, wiki_save_answers=True, thesis="claim", max_wiki_pages=5
+    )
     assert settings.model_dump() == {
         "max_depth": None,
         "max_subqueries": 2,
         "max_iterations": None,
         "wiki_extract": True,
+        "wiki_save_answers": True,
         "thesis": "claim",
         "max_wiki_pages": 5,
     }
