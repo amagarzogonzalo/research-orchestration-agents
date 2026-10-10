@@ -5,12 +5,20 @@ Professional, print-ready diagrams of the four LangGraph workflows in
 
 | Diagram | Workflow | Path in one line |
 |---|---|---|
-| ![research](graph-research.svg) | `research` (default) | `ingest` → `relevance` → `bodies` → `fetch_body ×N` → `synthesize` ⇄ `judge` loop → `review` → `render` |
-| ![qa](graph-qa.svg) | `qa` (fast + cheap) | `ingest` → `relevance` → `synthesize` → `render` — answers from abstracts, no scraping, no judge loop |
-| ![summary](graph-summary.svg) | `summary` | `ingest` → `bodies` → `fetch_body ×N` → `synthesize` → `render` — no relevance gate, no judge |
-| ![deep](graph-deep.svg) | `deep` | `intent` → `decompose` → `branch ×N` (Send fan-out) → `aggregate` → `critic` → `judge` ⇄ `synthesize` → `review` → `render` |
+| ![research](graph-research.svg) | `research` (default) | `wiki_query?` → `ingest` → `clean` → `relevance` → `bodies` → `fetch_body ×N` → `synthesize` ⇄ `judge` loop → `review` → `render` → `wiki_ingest` |
+| ![qa](graph-qa.svg) | `qa` (fast + cheap) | `wiki_query?` → `ingest` → `clean` → `relevance` → `synthesize` → `render` → `wiki_ingest` — answers from abstracts, no scraping, no judge loop |
+| ![summary](graph-summary.svg) | `summary` | `wiki_query?` → `ingest` → `clean` → `bodies` → `fetch_body ×N` → `synthesize` → `render` → `wiki_ingest` — no relevance gate, no judge |
+| ![deep](graph-deep.svg) | `deep` | `wiki_query?` → `intent` → `decompose` → `branch ×N` (Send fan-out) → `aggregate` → `critic` → `judge` ⇄ `synthesize` → `review` → `render` → `wiki_ingest` |
 
 `graph.svg` is a byte-identical alias of `graph-research.svg`, kept for old links.
+
+> **Wiki layer wrapper:** every workflow is wrapped by the wiki layer (ADR
+> wiki-loop0, `docs/LLM_WIKI.md`): `wiki_query` consults the compiled wiki
+> first (an exact-query hit routes straight to `render` with zero live calls;
+> a miss proceeds through the path above), `clean` dedups the batch for the
+> single-ingest workflows, and `wiki_ingest` files the finished run into the
+> wiki. The diagrams keep the search→render evidence spine as the curated
+> layout; the wrapper is documented here and in `docs/plans/0017–0030`.
 
 ## Reading a diagram
 

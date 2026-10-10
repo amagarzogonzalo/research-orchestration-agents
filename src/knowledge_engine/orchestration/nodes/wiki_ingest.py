@@ -7,10 +7,11 @@ compile — analysis -> generation — files concept/entity DRAFTS for human
 review, addressing prior rejection feedback. Optional thesis mode
 (``settings.thesis``) files a for/against verdict page.
 
-Fail-closed: extraction failure raises AFTER the source page is guaranteed
-(a failed run never writes placeholder structure); the thesis step degrades
-to a warning (optional add-on), extraction failure fails the run loudly
-(core to the pattern).
+Degrade-safe enrichment: the deterministic source page is ALWAYS filed first;
+an LLM extraction/thesis failure (transport or validation) records a
+``wiki_extract_error`` note and continues — the research deliverable is never
+sunk by optional enrichment, and the placeholder schema gate ensures nothing
+poisonous is ever written before validation passes.
 """
 
 from __future__ import annotations
@@ -74,9 +75,10 @@ class WikiIngestNode(WorkflowNode):
 
         Returns:
             dict[str, Any]: ``wiki_ingest`` verdict mapping (+``wiki_pages``
-            and ``llm_calls`` deltas when extraction/thesis ran), or empty
-            when the run produced no rendered artifact. LLM extraction
-            failure raises (fail-closed) — see :meth:`_extract`.
+            and ``llm_calls`` deltas when extraction/thesis ran, or a
+            ``wiki_extract_error`` note when enrichment degraded), or empty
+            when the run produced no rendered artifact. Enrichment failure
+            never fails the run — see :meth:`_extract`.
         """
         output_path = state.get("output_path")
         if not output_path:
@@ -96,10 +98,19 @@ class WikiIngestNode(WorkflowNode):
 
         feedback = await self.wiki.feedback_for(state.get("query", ""))
         cap = read_setting(state, "max_wiki_pages", self.max_wiki_pages)
-        extraction = await self._extract(state, feedback)
-        pages = await self.wiki.compile_extraction(
-            state.get("thread_id", ""), state.get("query", ""), extraction, feedback
-        )
+        try:
+            extraction = await self._extract(state, feedback)
+            pages = await self.wiki.compile_extraction(
+                state.get("thread_id", ""), state.get("query", ""), extraction, feedback
+            )
+        except Exception as exc:  # noqa: BLE001 - extraction degrades: source page is already guaranteed
+            # Transport/validation failure on the OPTIONAL enrichment must not
+            # sink the research deliverable. Nothing poisonous is written
+            # (the schema gate rejects placeholders before any draft exists);
+            # the failure is reported on the run for observability.
+            logger.warning("wiki extraction degraded (%s); deterministic source page preserved", exc)
+            out["wiki_extract_error"] = str(exc)
+            return out
         out["wiki_pages"] = (out.get("wiki_pages") or []) + pages[:cap]
         out["llm_calls"] = 1
         if len(pages) > cap:

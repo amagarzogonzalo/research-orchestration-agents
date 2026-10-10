@@ -21,7 +21,16 @@ the `langchain-ai/langgraph` repository).
 | `langchain[mcp]` | `>=1.4,<2` | `MCPAdapter` — discover FastMCP tools on in-process servers |
 | `mcp` | `>=2.1,<3` | MCP server SDK (FastMCP) |
 
-> **Rule:** the only persistence abstraction is our own
+> **Rule:** the only *checkpoint* persistence abstraction is our own
 > `FileCheckpointer` (`store/file_checkpointer.py`) — JSON files under
-> `research_store/checkpoints/`. No SQLite, no Postgres, no Redis, no vector DB.
-> Copy the folder, move the state.
+> `research_store/checkpoints/`. No SQLite, no Postgres, no Redis for
+> checkpoint state. Copy the folder, move the state.
+>
+> **Wiki layer (files-first, ports-only):** the compiled wiki lives under
+> `<store_root>/wiki` as plain markdown (sources/concepts/entities/queries/
+> synthesis + `index.md`/`log.md`). The `.wiki.db` FTS5 sidecar
+> (`infrastructure/wiki/sidecar.py`) is a **derived, deletable cache** (rebuild
+> = identical content), not a checkpoint store. Cloud mirrors
+> (`SupabaseWikiStore`/`SupabaseVaultLinter`) are optional adapters behind
+> `core/ports.py` — the engine never imports them by default. See
+> `docs/LLM_WIKI.md` and `docs/plans/0017–0030`.

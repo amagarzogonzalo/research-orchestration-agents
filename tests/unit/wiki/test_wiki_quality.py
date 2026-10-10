@@ -103,15 +103,22 @@ async def test_extraction_opt_in_files_drafts() -> None:
     assert store.last_compile["extraction"].concepts == ["Retrieval Augmented Generation"]
 
 
-async def test_extraction_fail_closed_after_source_page() -> None:
-    """Malformed provider JSON raises AFTER the source page is filed."""
+async def test_extraction_degrades_after_source_page() -> None:
+    """Extraction failure records an error note; run + source page survive.
+
+    The deterministic source page is guaranteed first; an optional enrichment
+    failure must never sink the research deliverable or write poison.
+    """
     store = FakeWikiStore()
     provider = FakeProvider("not json at all")
     node = WikiIngestNode(store, provider)
-    with pytest.raises(KnowledgeEngineError):
-        await node.run({"thread_id": "t1", "query": "rag", "output_path": "x.md", "settings": {"wiki_extract": True}})
+    out = await node.run(
+        {"thread_id": "t1", "query": "rag", "output_path": "x.md", "settings": {"wiki_extract": True}}
+    )
     assert store.calls_ingest == 1, "source page must be guaranteed before the failure"
-    assert store.calls_compile == 0
+    assert store.calls_compile == 0, "nothing poisonous is filed on failure"
+    assert "wiki_extract_error" in out, "the failure is reported for observability"
+    assert "llm_calls" not in out, "no LLM call counted for a failed enrichment"
 
 
 async def test_placeholder_names_rejected_by_schema_gate() -> None:
