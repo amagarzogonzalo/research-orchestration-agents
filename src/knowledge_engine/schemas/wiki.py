@@ -187,4 +187,44 @@ class WikiThesis(BaseModel):
 _PLACEHOLDERS = {"n/a", "na", "none", "unknown", "unnamed", "placeholder", "todo", "tbd"}
 
 
-__all__ = ["IngestResult", "LintReport", "WikiExtraction", "WikiHit", "WikiThesis", "WikiVerdict"]
+class DeepLintReport(BaseModel):
+    """LLM-assisted lint: contradictions, stale claims and knowledge gaps.
+
+    Complements the deterministic :class:`LintReport` with what only a model
+    can see (tensions between pages, claims newer sources supersede, concepts
+    mentioned but lacking a page). The provider pass is opt-in; when the
+    provider is absent or fails, the lists are empty and the script reports
+    the deterministic report only.
+
+    Attributes:
+        model_config: Forbid extra keys.
+        contradictions: Claims on different pages that tension each other.
+        stale: Claims a newer page has superseded (with page hint).
+        gaps: Concepts mentioned but lacking a dedicated page.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    contradictions: list[str] = Field(default_factory=list)
+    stale: list[str] = Field(default_factory=list)
+    gaps: list[str] = Field(default_factory=list)
+
+    @property
+    def ok(self) -> bool:
+        """Return True when no LLM findings exist.
+
+        Returns:
+            bool: True on success.
+        """
+        return not (self.contradictions or self.stale or self.gaps)
+
+
+__all__ = [
+    "DeepLintReport",
+    "IngestResult",
+    "LintReport",
+    "WikiExtraction",
+    "WikiHit",
+    "WikiThesis",
+    "WikiVerdict",
+]

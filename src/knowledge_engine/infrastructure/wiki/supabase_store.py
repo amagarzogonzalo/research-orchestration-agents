@@ -311,6 +311,41 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         self._append_log(handle, "thesis", fm["title"])
         return f"{self._bucket}/{key}"
 
+    async def file_answer(self, thread_id: str, query: str, article_path: str) -> str:
+        """Upload a rendered answer under the bucket's ``queries/`` area.
+
+        Args:
+            thread_id: Run thread identifier (lineage).
+            query: Original research query.
+            article_path: Rendered ``article.md`` path.
+
+        Returns:
+            str: The filed query object locator.
+
+        Raises:
+            KnowledgeEngineError: When the article file is missing.
+        """
+        src = Path(article_path)
+        if not src.is_file():
+            raise KnowledgeEngineError(f"supabase wiki file_answer: article missing: {article_path}")
+        text = src.read_text(encoding="utf-8")
+        title = common.page_title(query)
+        slug = common.slugify(query)
+        handle = self._from()
+        fm = {
+            "type": "query",
+            "title": title,
+            "thread": thread_id,
+            "date": common.today(),
+            "confidence": "EXTRACTED",
+            "tldr": common.tldr(text),
+        }
+        key = f"queries/{slug}.md"
+        rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + f"## Answer\n\n{text.rstrip()}\n"
+        handle.upload(key, rendered.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
+        self._append_log(handle, "query", title)
+        return f"{self._bucket}/{key}"
+
     async def feedback_for(self, query: str) -> list[str]:
         """Return rejection feedback stored as the bucket ``.feedback.json``.
 

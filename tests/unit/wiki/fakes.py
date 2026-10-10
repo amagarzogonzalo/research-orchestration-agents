@@ -25,10 +25,12 @@ class FakeWikiStore:
         self.calls_ingest = 0
         self.calls_compile = 0
         self.calls_thesis = 0
+        self.calls_answer = 0
         self.pages: dict[str, str] = dict(pages or {})
         self.filed_query_sha: dict[str, str] = {}
         self.last_compile: dict[str, Any] | None = None
         self.last_thesis: dict[str, Any] | None = None
+        self.last_answer: dict[str, Any] | None = None
         self.feedback_store: dict[str, list[str]] = {}
         self._cache: dict[str, str] = {}
 
@@ -137,6 +139,21 @@ class FakeWikiStore:
         self.calls_thesis += 1
         self.last_thesis = {"thread_id": thread_id, "thesis": thesis}
         return f"fake://synthesis/{thesis.claim.lower().replace(' ', '-')[:40]}"
+
+    async def file_answer(self, thread_id: str, query: str, article_path: str) -> str:
+        """Record an answer filing and return a fake locator.
+
+        Args:
+            thread_id: Thread id.
+            query: Query string.
+            article_path: Article path.
+
+        Returns:
+            str: Fake locator.
+        """
+        self.calls_answer += 1
+        self.last_answer = {"thread_id": thread_id, "query": query, "article_path": article_path}
+        return f"fake://queries/{query.lower().replace(' ', '-')[:40]}"
 
     async def feedback_for(self, query: str) -> list[str]:
         """Return recorded feedback lines.

@@ -366,6 +366,24 @@ class WikiIngestPort(abc.ABC):
         ...
 
     @abc.abstractmethod
+    async def file_answer(self, thread_id: str, query: str, article_path: str) -> str:
+        """File a rendered answer under ``queries/`` (answers are first-class).
+
+        Distinct from :meth:`ingest`: the same article may be filed both as a
+        source page (compiled knowledge) and as a filed answer (the Karpathy
+        "good answers shouldn't disappear" rule). Returns the page locator.
+
+        Args:
+            thread_id: Run thread identifier (provenance).
+            query: Original research query.
+            article_path: Rendered ``article.md`` path.
+
+        Returns:
+            str: The filed query page locator.
+        """
+        ...
+
+    @abc.abstractmethod
     async def compile_extraction(
         self, thread_id: str, query: str, extraction: WikiExtraction, feedback: list[str]
     ) -> list[str]:

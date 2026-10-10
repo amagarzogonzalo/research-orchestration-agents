@@ -26,7 +26,7 @@ FEEDBACK_NAME = ".feedback.json"
 #: overview live at the wiki root and are exempt from lint's orphan scan.
 #: ``drafts/`` is deliberately excluded: drafts are a review area, never
 #: live pages (not searched, not linted, not indexed).
-PAGE_DIRS = ("sources", "synthesis", "concepts", "entities")
+PAGE_DIRS = ("sources", "synthesis", "concepts", "entities", "queries")
 
 WORD_RE = re.compile(r"[a-z0-9]+")
 _FM_BLOCK = re.compile(r"(?ms)\A---\s*\n(.*?)\n---\s*\n?")

@@ -52,6 +52,12 @@ bench-check:        ## fail on >10% ram/checkpoint regression vs baseline
 wiki-lint:          ## health gate for the compiled wiki (Loop 5; offline)
 	uv run python bin/wiki_lint.py
 
+wiki-lint-deep:     ## deterministic + optional LLM cross-page contribution/stale/gap lint
+	uv run python bin/wiki_lint_deep.py
+
+wiki-review:        ## draft review loop: list/accept/reject concept+entity drafts
+	uv run python bin/wiki_review.py list
+
 check: lint types arch semgrep agents context test evals bench-check   ## everything. This is the gate.
 	@echo green
 

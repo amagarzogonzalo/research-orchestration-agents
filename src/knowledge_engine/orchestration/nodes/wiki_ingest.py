@@ -85,6 +85,11 @@ class WikiIngestNode(WorkflowNode):
         out: dict[str, Any] = {"wiki_ingest": result.model_dump()}
 
         settings = state.get("settings") or {}
+        if settings.get("wiki_save_answers"):
+            answer_page = await self.wiki.file_answer(state.get("thread_id", ""), state.get("query", ""), output_path)
+            out["wiki_answer"] = answer_page
+            out["wiki_pages"] = [answer_page]
+
         provider = self.provider
         if not (settings.get("wiki_extract") and provider is not None):
             return out
@@ -95,7 +100,7 @@ class WikiIngestNode(WorkflowNode):
         pages = await self.wiki.compile_extraction(
             state.get("thread_id", ""), state.get("query", ""), extraction, feedback
         )
-        out["wiki_pages"] = pages[:cap]
+        out["wiki_pages"] = (out.get("wiki_pages") or []) + pages[:cap]
         out["llm_calls"] = 1
         if len(pages) > cap:
             logger.warning("wiki extraction capped: %d drafts -> %d", len(pages), cap)
