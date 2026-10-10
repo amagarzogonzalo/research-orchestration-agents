@@ -410,7 +410,7 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         """
         handle = self._from()
         pages: dict[str, str] = {}
-        for prefix in ("drafts", "synthesis", "concepts", "entities", "pages"):
+        for prefix in ("drafts", "synthesis", "concepts", "entities", "pages", "queries"):
             try:
                 objects = handle.list(prefix) or []
             except Exception:  # noqa: BLE001 - listing failure skips this area

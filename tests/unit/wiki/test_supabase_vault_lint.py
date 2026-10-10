@@ -63,3 +63,15 @@ async def test_cloud_linter_ok_on_clean_bucket() -> None:
     report = await SupabaseVaultLinter(store).lint()
     assert report.ok
     assert report.pages == 1
+
+
+async def test_cloud_linter_counts_queries_area() -> None:
+    """Filed answers under queries/ are enumerated (regression: live probe)."""
+    answer = "---\ntype: query\ntitle: Answer\ndate: 2026-10-09\n---\n\n" + "compiled answer text " * 40
+    client = fake_supabase_client(
+        {"queries/rag-answer.md": answer, "index.md": "# Index\n- [Answer](queries/rag-answer.md) — fine\n"}
+    )
+    store = SupabaseWikiStore(client, bucket="wiki")
+    report = await SupabaseVaultLinter(store).lint()
+    assert report.pages == 1
+    assert report.ok
