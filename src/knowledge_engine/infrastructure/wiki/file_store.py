@@ -13,6 +13,7 @@ logs only) and cross-references the new page to existing related pages via
 
 from __future__ import annotations
 
+import logging
 import re
 from pathlib import Path
 
@@ -21,7 +22,10 @@ import yaml
 from knowledge_engine.core.exceptions import KnowledgeEngineError
 from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
 from knowledge_engine.infrastructure.wiki import common
+from knowledge_engine.infrastructure.wiki.sidecar import WikiSidecar
 from knowledge_engine.schemas.wiki import IngestResult, WikiExtraction, WikiHit, WikiThesis, WikiVerdict
+
+logger = logging.getLogger(__name__)
 
 _RELATED_TERMS = 2
 _RELATED_MAX = 3
@@ -87,12 +91,36 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
         query_terms = common.terms(query)
         if not query_terms:
             return []
+        sidecar = WikiSidecar(self.root)
+        if sidecar.db_path.exists() and sidecar.fts_supported():
+            # Loop 4 scale path: BM25 over the FTS5 sidecar when built.
+            rows = sidecar.search(query, limit=limit)
+            summaries = self._index_summaries()
+            side_hits: list[WikiHit] = []
+            for _namespaced, path, score in rows:
+                p = Path(path)
+                if not p.is_file():
+                    continue
+                text = p.read_text(encoding="utf-8")
+                fm, _body = common.split_frontmatter(text)
+                qsha = str(fm.get("query_sha256") or "")
+                side_hits.append(
+                    WikiHit(
+                        slug=p.stem,
+                        title=common.fm_title(fm, p),
+                        path=str(p),
+                        score=-float(score),
+                        summary=summaries.get(p.stem, ""),
+                        query_sha256=qsha,
+                    )
+                )
+            return side_hits
         summaries = self._index_summaries()
         hits: list[WikiHit] = []
-        for slug, path in self._pages().items():
-            text = path.read_text(encoding="utf-8")
+        for slug, page_path in self._pages().items():
+            text = page_path.read_text(encoding="utf-8")
             fm, body = common.split_frontmatter(text)
-            title = common.fm_title(fm, path)
+            title = common.fm_title(fm, page_path)
             value = common.score(query_terms, title, body)
             if value <= 0.0:
                 continue
@@ -101,7 +129,7 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
                 WikiHit(
                     slug=slug,
                     title=title,
-                    path=str(path),
+                    path=str(page_path),
                     score=value,
                     summary=summaries.get(slug, ""),
                     query_sha256=qsha,
@@ -188,6 +216,14 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             body.append("\n## Related\n" + "\n".join(f"- [[{r}]]" for r in related))
         rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + "\n\n".join(body) + "\n"
         page.write_text(rendered, encoding="utf-8")
+
+        # Loop 4: keep the FTS5 sidecar in sync when one is maintained here.
+        try:
+            sidecar = WikiSidecar(self.root)
+            if sidecar.db_path.exists():
+                sidecar.insert_page("sources", page)
+        except Exception as exc:  # noqa: BLE001 - sidecar is an accelerator, never a dependency
+            logger.warning("wiki sidecar update failed (%s); continuing", exc)
 
         touched = 1  # the page
         touched += self._upsert_index(slug, title, fm["tldr"])
