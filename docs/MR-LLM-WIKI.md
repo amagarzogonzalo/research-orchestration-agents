@@ -3,6 +3,7 @@
 **Branch:** `feature/llm-wiki-loop0` → `main` (clean fast-forward)
 **Status:** all gates green · live-verified against real Supabase + free-tier LLMs
 **Full plan:** `docs/LLM_WIKI.md` · **Delivery reports:** `docs/plans/0017–0030`
+**Old vs new (plain words + diagram):** `docs/mr-before-after.md`
 
 ---
 
