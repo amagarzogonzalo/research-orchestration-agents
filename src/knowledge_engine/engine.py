@@ -67,7 +67,8 @@ class ResearchEngine:
         artifact_store_kind: ``local`` (default, portable) or ``supabase`` (cloud storage).
         body_store_kind: ``local``/``supabase``; None follows the artifact kind.
         wiki_store_kind: ``local`` (default, portable files under
-            ``<store_root>/wiki``) or ``supabase`` (cloud, no-op-until-configured).
+            ``<store_root>/wiki``), ``supabase`` (cloud, no-op-until-configured)
+            or ``postgres`` (relational, server-side FTS; needs a DSN).
         artifacts: Optional prebuilt ArtifactStorePort override (tests/composition).
         database_url: Supabase session-pooler DSN; falls back to ``DATABASE_URL`` env.
         cleanup_after_run: Delete the thread's checkpoints after a finished run.
@@ -167,7 +168,13 @@ class ResearchEngine:
             from knowledge_engine.infrastructure.wiki.supabase_store import SupabaseWikiStore
 
             return SupabaseWikiStore.from_env()
-        raise ConfigurationError(f"unknown wiki_store_kind: {self.wiki_store_kind!r} (use 'local' or 'supabase')")
+        if self.wiki_store_kind == "postgres":
+            from knowledge_engine.infrastructure.wiki.postgres import PostgresWikiStore
+
+            return PostgresWikiStore.from_env()
+        raise ConfigurationError(
+            f"unknown wiki_store_kind: {self.wiki_store_kind!r} (use 'local', 'supabase' or 'postgres')"
+        )
 
     def _build_research_store(self) -> ResearchStore:
         """Build the files store with the configured artifact persistence (T4).
@@ -420,6 +427,17 @@ class ResearchEngine:
         self._store.write_metadata(tid, result.state.model_dump(mode="json") | {"query": query})
         self._store.write_sources(tid, result.state.sources)
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})
+        # Persist the run's sources into a relational wiki when the configured
+        # store supports it (postgres); the default file/supabase stores skip.
+        wiki = self._build_wiki_store()
+        record_sources = getattr(wiki, "record_sources", None)
+        if record_sources is not None:
+            try:
+                await record_sources(tid, result.state.sources)
+            finally:
+                close = getattr(wiki, "close", None)
+                if close is not None:
+                    await close()
         if self.cleanup_after_run and not result.interrupted:
             await runtime.delete_thread(tid)
         return result

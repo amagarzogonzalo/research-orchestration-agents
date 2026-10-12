@@ -19,6 +19,21 @@ jobs:
       OTEL_TRACES_EXPORTER: ""
       OTEL_METRICS_EXPORTER: "none"
       PYTHONPATH: src
+      WIKI_TEST_PG_DSN: postgresql://wiki:wiki@localhost:5432/wiki
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: wiki
+          POSTGRES_PASSWORD: wiki
+          POSTGRES_DB: wiki
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U wiki -d wiki"
+          --health-interval 2s
+          --health-timeout 3s
+          --health-retries 20
     steps:
       - uses: actions/checkout@v4
 
@@ -29,9 +44,15 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,store]"
 
-      - name: Integration tests (fakes + file checkpointer, no network)
+      - name: Apply wiki migrations (drop v1, apply v2)
+        run: |
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+          psql "$WIKI_TEST_PG_DSN" -v ON_ERROR_STOP=1 -f supabase/migrations/20261012160701_drop_wiki_v1.sql
+          psql "$WIKI_TEST_PG_DSN" -v ON_ERROR_STOP=1 -f supabase/migrations/20261012160700_wiki_v2.sql
+
+      - name: Integration tests (fakes + file checkpointer + real Postgres wiki, no network)
         run: python -m pytest tests/integration -q -p no:cacheprovider
 
       - name: E2E tests (full LangGraph runtime, fakes; live opt-in)
@@ -47,7 +68,7 @@ jobs:
           python-version: "3.12"
       - run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,store]"
           # pydoclint imports DocstringYields from docstring_parser.common, but
           # BOTH docstring-parser and docstring_parser_fork ship that path, so
           # the last-installed wins. The fork (0.0.16) has it, the real
@@ -68,6 +89,6 @@ jobs:
           python-version: "3.12"
       - run: |
           python -m pip install --upgrade pip
-          pip install -e ".[dev]"
+          pip install -e ".[dev,store]"
       - name: Offline eval replay (free, deterministic)
         run: python evals/runner.py

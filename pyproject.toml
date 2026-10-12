@@ -104,6 +104,18 @@ module = [
 ignore_errors = true
 
 [[tool.mypy.overrides]]
+# Supabase vendor-glue adapters: the `supabase` SDK ships no stubs, so mypy
+# cannot resolve `create_client` when only the base/dev extras are installed
+# (the CI typecheck job). Exempt them from the strict gate like the other
+# vendor-glue adapters above; the ports they implement stay strict.
+module = [
+    "knowledge_engine.store.supabase_body_storage",
+    "knowledge_engine.store.supabase_artifact_store",
+    "knowledge_engine.infrastructure.wiki.supabase_store",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
 # Browser automation + LLM-discovery adapters drive untyped vendor SDKs
 # (Playwright/Selenium/raw httpx). Their glue is intentionally loose-typed;
 # the ports/schemas they implement stay strict.
@@ -124,6 +136,7 @@ module = [
     "selenium.*",
     "letta.*",
     "psycopg.*",
+    "supabase",
     "supabase.*",
     "storage3.*",
 

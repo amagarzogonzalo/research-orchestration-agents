@@ -1,4 +1,10 @@
-"""Shared in-memory fakes for wiki contract tests (no disk, no network)."""
+"""Shared in-memory fakes for wiki contract + node tests (no disk, no SQL).
+
+The SQL-backed Postgres adapter is NOT faked — it runs against a real Postgres
+(testcontainers/compose). Only pure-Python fakes live here: the in-memory
+FakeWikiStore (spy for node + contract tests) and the Supabase Storage client
+fake (the ``supabase`` contract adapter).
+"""
 
 from __future__ import annotations
 
@@ -42,7 +48,7 @@ class FakeWikiStore:
             limit: Max hits.
 
         Returns:
-            list[WikiHit]: Ranked hits (query_sha256 included when filed).
+            list[WikiHit]: Ranked hits.
         """
         self.calls_search += 1
         terms = [t for t in query.lower().split() if t]
@@ -75,7 +81,7 @@ class FakeWikiStore:
         return self.pages.get(slug)
 
     async def ingest(self, thread_id: str, query: str, article_path: str) -> IngestResult:
-        """Ingest by hashing the article text into a fake page.
+        """Ingest by hashing the article path into a fake page.
 
         Args:
             thread_id: Thread id.
@@ -83,7 +89,7 @@ class FakeWikiStore:
             article_path: Article path (contents read by the caller fixture).
 
         Returns:
-            IngestResult: Verdict new/update/no_material.
+            IngestResult: Verdict.
         """
         self.calls_ingest += 1
         digest = hashlib.sha256(article_path.encode("utf-8")).hexdigest()
