@@ -1,6 +1,7 @@
 .PHONY: help install test test-fast lint types arch semgrep agents context check dup \
         profile profiles evals evals-deep evals-live evals-accept sessions wiki-lint \
         bench bench-accept bench-check \
+        wiki-db-up wiki-db-down wiki-files-check \
         compress-on compress-off compress-savings compress-help
 
 help:
@@ -60,6 +61,15 @@ wiki-review:        ## draft review loop: list/accept/reject concept+entity draf
 
 wiki-graph:         ## dump the wiki knowledge graph (nodes/edges/communities) as JSON
 	uv run python bin/wiki_graph.py
+
+wiki-db-up:         ## start the scratch Postgres for wiki v2 real-DB tests
+	docker compose up -d wiki-db
+
+wiki-db-down:       ## stop the scratch Postgres
+	docker compose down
+
+wiki-files-check:   ## read-only files health check (unreferenced/missing-body)
+	uv run python bin/wiki_files_check.py
 
 check: lint types arch semgrep agents context test evals bench-check   ## everything. This is the gate.
 	@echo green
