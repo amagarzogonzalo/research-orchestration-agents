@@ -67,7 +67,8 @@ class ResearchEngine:
         artifact_store_kind: ``local`` (default, portable) or ``supabase`` (cloud storage).
         body_store_kind: ``local``/``supabase``; None follows the artifact kind.
         wiki_store_kind: ``local`` (default, portable files under
-            ``<store_root>/wiki``) or ``supabase`` (cloud, no-op-until-configured).
+            ``<store_root>/wiki``), ``supabase`` (cloud, no-op-until-configured)
+            or ``postgres`` (relational, server-side FTS; needs a DSN).
         artifacts: Optional prebuilt ArtifactStorePort override (tests/composition).
         database_url: Supabase session-pooler DSN; falls back to ``DATABASE_URL`` env.
         cleanup_after_run: Delete the thread's checkpoints after a finished run.
@@ -167,7 +168,13 @@ class ResearchEngine:
             from knowledge_engine.infrastructure.wiki.supabase_store import SupabaseWikiStore
 
             return SupabaseWikiStore.from_env()
-        raise ConfigurationError(f"unknown wiki_store_kind: {self.wiki_store_kind!r} (use 'local' or 'supabase')")
+        if self.wiki_store_kind == "postgres":
+            from knowledge_engine.infrastructure.wiki.postgres_store import PostgresWikiStore
+
+            return PostgresWikiStore.from_env()
+        raise ConfigurationError(
+            f"unknown wiki_store_kind: {self.wiki_store_kind!r} (use 'local', 'supabase' or 'postgres')"
+        )
 
     def _build_research_store(self) -> ResearchStore:
         """Build the files store with the configured artifact persistence (T4).
