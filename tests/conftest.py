@@ -6,10 +6,18 @@ against these doubles, preserving ADR 0008's "deterministic nodes run on fakes".
 
 from __future__ import annotations
 
+import asyncio
 import json
+import sys
 from collections.abc import AsyncIterator
 
 import pytest
+
+# psycopg async connections require a SelectorEventLoop; Windows defaults to
+# the ProactorEventLoop. Set the Windows selector policy so async-Postgres
+# tests run here (CI is Linux and is unaffected).
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 from knowledge_engine.core.ports import ProviderPort, ScrapePort, SearchPort
 from knowledge_engine.schemas.artifact import KnowledgeArtifact

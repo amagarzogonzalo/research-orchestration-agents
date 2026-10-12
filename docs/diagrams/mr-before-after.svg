@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1020 1050" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="13">
+  <defs>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#444"/></marker>
+    <marker id="aG" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#2f9e44"/></marker>
+    <marker id="aB" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#268bd2"/></marker>
+  </defs>
+  <style>
+    .t { font-size: 20; font-weight: bold; fill: #111; }
+    .st { font-size: 12; fill: #666; }
+    .panelL { fill: #f2f5f8; stroke: #6a7f94; stroke-width: 2; rx: 14; }
+    .panelR { fill: #eef8f0; stroke: #2f9e44; stroke-width: 2.5; rx: 14; }
+    .plabel { font-size: 13; font-weight: bold; }
+    .pL { fill: #2b4d6f; } .pR { fill: #2f9e44; }
+    .n { fill:#fff; stroke:#444; stroke-width:1.6; rx:8; }
+    .c { fill:#e9e9e9; stroke:#444; stroke-width:1.6; rx:8; }
+    .d { fill:#eef4fb; stroke:#2a6db5; stroke-width:1.6; rx:8; }
+    .g { fill:#fdf3e3; stroke:#b58900; stroke-width:1.6; rx:8; }
+    .w { fill:#e8f3fa; stroke:#268bd2; stroke-width:1.6; rx:8; }
+    .gnew { fill:#e9f7ec; stroke:#2f9e44; stroke-width:1.8; rx:8; }
+    .b { font-weight:bold; fill:#111; }
+    .s { fill:#555; font-size:11.5; }
+    .bl { fill:#268bd2; font-weight:bold; }
+    .gr { fill:#2f9e44; font-weight:bold; }
+    .num { font-size:11.5; font-weight:bold; fill:#fff; text-anchor:middle; }
+    .c1 { fill:#2b4d6f; } .c2 { fill:#2f9e44; }
+    .p { fill:none; stroke:#444; stroke-width:1.7; marker-end:url(#a); }
+    .pg { fill:none; stroke:#2f9e44; stroke-width:1.7; marker-end:url(#aG); }
+    .pb { fill:none; stroke:#268bd2; stroke-width:1.7; stroke-dasharray:6 3; marker-end:url(#aB); }
+    .legend { font-size:11; fill:#555; }
+  </style>
+
+  <text x="510" y="28" text-anchor="middle" class="t">Before vs After this MR</text>
+  <text x="510" y="48" text-anchor="middle" class="st">left = the previous research engine (unchanged) · right = the NEW LLM wiki layer (this MR)</text>
+
+  <!-- legend -->
+  <rect x="620" y="60" width="16" height="16" class="d"/><text x="644" y="73" class="legend">previous engine</text>
+  <rect x="760" y="60" width="16" height="16" class="gnew"/><text x="784" y="73" class="legend">new in this MR</text>
+
+  <!-- ================= OLD PANEL ================= -->
+  <rect x="25" y="70" width="470" height="880" class="panelL"/>
+  <text x="260" y="96" text-anchor="middle" class="plabel pL">PREVIOUS RESEARCH ENGINE (unchanged)</text>
+  <text x="260" y="112" text-anchor="middle" class="s">the pipeline that existed before: it researched, then stopped.</text>
+
+  <!-- step numbers old -->
+  <circle cx="60" cy="150" r="11" class="c1"/><text x="60" y="154" class="num">1</text>
+  <rect x="85" y="130" width="370" height="50" class="c"/>
+  <text x="270" y="151" text-anchor="middle" class="b">Question → research(query)</text>
+  <text x="270" y="167" text-anchor="middle" class="s">live search every time — no memory between runs</text>
+
+  <circle cx="60" cy="220" r="11" class="c1"/><text x="60" y="224" class="num">2</text>
+  <rect x="85" y="200" width="370" height="120" class="d"/>
+  <text x="270" y="222" text-anchor="middle" class="b">Federated search + scrape tier</text>
+  <text x="270" y="242" text-anchor="middle" class="s">OpenAlex · PubMed · Europe PMC · Semantic Scholar · Crossref</text>
+  <text x="270" y="260" text-anchor="middle" class="s">arXiv · dblp · Wikipedia · DuckDuckGo → Tavily → Exa → Serper</text>
+  <text x="270" y="280" text-anchor="middle" class="s">scrape: ar5iv · EuropePMC · crawl4ai · trafilatura · Jina</text>
+  <text x="270" y="300" text-anchor="middle" class="s">→ bodies/&lt;sha256&gt;.md</text>
+
+  <circle cx="60" cy="350" r="11" class="c1"/><text x="60" y="354" class="num">3</text>
+  <rect x="85" y="330" width="370" height="50" class="g"/>
+  <text x="270" y="351" text-anchor="middle" class="b">Relevance → Synthesize (LLM)</text>
+  <text x="270" y="367" text-anchor="middle" class="s">Groq · Gemini · Mistral · OpenRouter · Ollama</text>
+
+  <circle cx="60" cy="420" r="11" class="c1"/><text x="60" y="424" class="num">4</text>
+  <rect x="85" y="400" width="370" height="60" class="n"/>
+  <text x="270" y="421" text-anchor="middle" class="b">Judge → Review (HITL) → Render</text>
+  <text x="270" y="437" text-anchor="middle" class="s">groundedness loop · human gate · article.md</text>
+
+  <circle cx="60" cy="500" r="11" class="c1"/><text x="60" y="504" class="num">5</text>
+  <rect x="85" y="480" width="370" height="110" class="n"/>
+  <text x="270" y="502" text-anchor="middle" class="b">research_store/&lt;thread&gt;/ (durable)</text>
+  <text x="270" y="520" text-anchor="middle" class="s">article.md · sources.json · metadata.json · events.jsonl</text>
+  <text x="270" y="538" text-anchor="middle" class="s">+ bodies/ + checkpoints/ (FileCheckpointer)</text>
+  <text x="270" y="556" text-anchor="middle" class="s">+ optional Supabase artifact buckets (articles/sources)</text>
+  <text x="270" y="575" text-anchor="middle" class="s">the result was a folder; nothing accumulated beyond it.</text>
+
+  <path class="p" d="M270,180 L270,200"/>
+  <path class="p" d="M270,320 L270,330"/>
+  <path class="p" d="M270,380 L270,400"/>
+  <path class="p" d="M270,460 L270,480"/>
+
+  <!-- ================= NEW PANEL ================= -->
+  <rect x="525" y="70" width="470" height="880" class="panelR"/>
+  <text x="760" y="96" text-anchor="middle" class="plabel pR">NEW — THE LLM WIKI LAYER (this MR)</text>
+  <text x="760" y="112" text-anchor="middle" class="s">wraps the old engine: wiki-first, then compiles every run back in.</text>
+
+  <circle cx="560" cy="150" r="11" class="c2"/><text x="560" y="154" class="num">A</text>
+  <rect x="585" y="130" width="370" height="50" class="w"/>
+  <text x="770" y="151" text-anchor="middle" class="b">wiki_query (NEW port + node)</text>
+  <text x="770" y="167" text-anchor="middle" class="s">check the wiki first · exact-query hit → answer, ZERO live calls</text>
+
+  <circle cx="560" cy="220" r="11" class="c2"/><text x="560" y="224" class="num">B</text>
+  <rect x="585" y="200" width="370" height="120" class="gnew"/>
+  <text x="770" y="222" text-anchor="middle" class="b">Cleaner (NEW CleanPort + SourceCleaner)</text>
+  <text x="770" y="242" text-anchor="middle" class="s">dedup the batch: exact-id · MinHash/LSH · containment</text>
+  <text x="770" y="260" text-anchor="middle" class="s">close-never-delete (superseded_by)</text>
+  <text x="770" y="278" text-anchor="middle" class="s">+ cross-thread content dedup at wiki layer</text>
+
+  <circle cx="560" cy="350" r="11" class="c2"/><text x="560" y="354" class="num">C</text>
+  <rect x="585" y="330" width="370" height="120" class="gnew"/>
+  <text x="770" y="352" text-anchor="middle" class="b">wiki_ingest (NEW node + ports)</text>
+  <text x="770" y="372" text-anchor="middle" class="s">files the run's article into the wiki (sources/&lt;slug&gt;.md)</text>
+  <text x="770" y="390" text-anchor="middle" class="s">verdicts NEW/UPDATE/NO_MATERIAL · SHA cache</text>
+  <text x="770" y="408" text-anchor="middle" class="s">updates index.md · log.md · overview.md</text>
+  <text x="770" y="426" text-anchor="middle" class="s">opt-in LLM compile: drafts · thesis · save answers</text>
+
+  <circle cx="560" cy="490" r="11" class="c2"/><text x="560" y="494" class="num">D</text>
+  <rect x="585" y="470" width="370" height="150" class="w"/>
+  <text x="770" y="492" text-anchor="middle" class="b">Wiki vault (NEW FileWikiStore)</text>
+  <text x="770" y="512" text-anchor="middle" class="s">sources/ · concepts/ · entities/ · synthesis/ · queries/</text>
+  <text x="770" y="530" text-anchor="middle" class="s">index.md · log.md · overview.md · WIKI_SCHEMA.md</text>
+  <text x="770" y="548" text-anchor="middle" class="s">review: approve (hash guard) / reject (feedback)</text>
+  <text x="770" y="566" text-anchor="middle" class="s">5-strike auto-block · unblock</text>
+  <text x="770" y="584" text-anchor="middle" class="s">.wiki.db FTS5 sidecar + hybrid RRF · WikiGraph</text>
+  <text x="770" y="602" text-anchor="middle" class="s">lint / lint-deep / Supabase wiki mirror (NEW)</text>
+
+  <path class="pg" d="M770,180 L770,200"/>
+  <path class="pg" d="M770,320 L770,330"/>
+  <path class="pg" d="M770,450 L770,470"/>
+
+  <!-- ==== cross arrows old<->new ==== -->
+  <path class="pb" d="M455,150 L510,150 L510,150" marker-end="none"/>
+  <text x="492" y="142" text-anchor="middle" class="bl" font-size="10.5">question →</text>
+  <path class="pb" d="M497,158 L540,150" marker-end="none"/>
+
+  <path class="p" d="M455,520 L525,520" marker-end="none"/>
+  <path class="p" d="M510,520 L585,520"/>
+  <text x="540" y="512" text-anchor="middle" class="gr" font-size="10.5">raw →</text>
+  <text x="540" y="526" text-anchor="middle" class="gr" font-size="10.5">ingest</text>
+
+  <path class="pb" d="M940,470 L950,470 L950,130 L962,130"/>
+  <text x="952" y="320" text-anchor="middle" class="bl" font-size="10" transform="rotate(90 952 320)">wiki answers the next question</text>
+
+  <!-- bottom strip: what the MR adds beyond nodes -->
+  <rect x="525" y="640" width="470" height="96" class="gnew"/>
+  <text x="760" y="662" text-anchor="middle" class="b">Also new in this MR</text>
+  <text x="760" y="682" text-anchor="middle" class="s">RunSettings wiki knobs (wiki_extract/save_answers/thesis/max_wiki_pages)</text>
+  <text x="760" y="700" text-anchor="middle" class="s">make wiki-lint · wiki-lint-deep · wiki-review · wiki-graph</text>
+  <text x="760" y="718" text-anchor="middle" class="s">engine.wiki_query() facade · internal_wiki_demo eval case</text>
+
+  <text x="260" y="905" text-anchor="middle" class="s" font-size="11">Old behavior: one research run → one folder. That's it.</text>
+  <text x="760" y="905" text-anchor="middle" class="s" font-size="11">New behavior: research → wiki. Every run compounds; repeats are free.</text>
+</svg>
