@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from psycopg import errors as pg_errors
 
 from knowledge_engine.core.exceptions import KnowledgeEngineError
 from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
@@ -203,6 +202,8 @@ class PostgresWikiStore(WikiQueryPort, WikiIngestPort):
         src = Path(article_path)
         if not src.is_file():
             raise KnowledgeEngineError(f"postgres wiki ingest: article missing: {article_path}")
+        from psycopg import errors as pg_errors  # lazy: postgres adapter is opt-in
+
         text = src.read_text(encoding="utf-8")
         digest = sha256_text(text)
         title = common.page_title(query)
