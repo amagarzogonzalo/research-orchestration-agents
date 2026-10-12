@@ -14,17 +14,32 @@ from pathlib import Path
 import pytest
 
 sys.path.insert(0, str(Path(__file__).parent))
-from fakes import FakeWikiStore, fake_supabase_client  # noqa: E402
+from fakes import FakeWikiStore, fake_pg_connection, fake_supabase_client  # noqa: E402
 
-from knowledge_engine.infrastructure.wiki import FileWikiStore, SupabaseWikiStore  # noqa: E402
+from knowledge_engine.infrastructure.wiki import FileWikiStore, PostgresWikiStore, SupabaseWikiStore  # noqa: E402
 from knowledge_engine.schemas.wiki import WikiVerdict  # noqa: E402
 
-Adapter = FakeWikiStore | FileWikiStore | SupabaseWikiStore
+Adapter = FakeWikiStore | FileWikiStore | SupabaseWikiStore | PostgresWikiStore
+
+
+def _postgres_factory(tmp: Path) -> PostgresWikiStore:
+    """Build a Postgres store over a fresh in-memory fake connection.
+
+    Args:
+        tmp: Per-test temp dir (unused; kept for the factory signature).
+
+    Returns:
+        PostgresWikiStore: Store. Each call gets an isolated fake connection.
+    """
+    conn = fake_pg_connection()
+    return PostgresWikiStore(lambda: conn)  # noqa: E731
+
 
 FACTORIES: tuple[tuple[str, Callable[[Path], Adapter]], ...] = (
     ("fake", lambda tmp: FakeWikiStore()),
     ("file", lambda tmp: FileWikiStore(root=tmp / "wiki")),
     ("supabase", lambda tmp: SupabaseWikiStore(fake_supabase_client({}), bucket="wiki")),
+    ("postgres", _postgres_factory),
 )
 
 
