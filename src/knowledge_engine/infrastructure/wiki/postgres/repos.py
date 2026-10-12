@@ -492,6 +492,100 @@ class TagsRepo:
         await cur.execute(self._ATTACH, (page_id, tag_id, origin))
 
 
+class SourcesRepo:
+    """Persist research sources + link them to the producing revision (SRP)."""
+
+    _CURRENT_REV = (
+        "SELECT r.id FROM wiki.revisions r JOIN wiki.pages p ON p.id = r.page_id "
+        "WHERE r.thread_id = %s AND r.state = 'approved' ORDER BY r.created_at DESC LIMIT 1"
+    )
+    _UPSERT = (
+        "INSERT INTO wiki.sources (kind, external_id, title, url, authors, year, abstract, "
+        " citation_count, venue, provider, metadata) "
+        "VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s::jsonb) "
+        "ON CONFLICT (kind, external_id) DO UPDATE SET title = EXCLUDED.title "
+        "RETURNING id"
+    )
+    _LINK = (
+        "INSERT INTO wiki.revision_sources (revision_id, source_id, role) "
+        "VALUES (%s, %s, 'cited') ON CONFLICT DO NOTHING"
+    )
+
+    @staticmethod
+    def _kind(record: Any) -> str:
+        """Derive the wiki.sources ``kind`` from a source record.
+
+        Args:
+            record: A SourceRecord.
+
+        Returns:
+            str: doi/arxiv/pmid/other.
+        """
+        name = str(getattr(record, "source", "")).lower()
+        if "arxiv" in name:
+            return "arxiv"
+        if "pmid" in name or "pubmed" in name:
+            return "pmid"
+        if getattr(record, "doi", None):
+            return "doi"
+        return "other"
+
+    async def current_revision(self, cur: Any, *, thread_id: str) -> str | None:
+        """Return the latest approved revision produced by a thread, if any.
+
+        Args:
+            cur: Active async cursor.
+            thread_id: Run thread identifier.
+
+        Returns:
+            str | None: Revision id or None.
+        """
+        await cur.execute(self._CURRENT_REV, (thread_id,))
+        row = await cur.fetchone()
+        return str(row[0]) if row else None
+
+    async def upsert(self, cur: Any, record: Any) -> str:
+        """Upsert a source by (kind, external_id) and return its id.
+
+        Args:
+            cur: Active async cursor.
+            record: A SourceRecord.
+
+        Returns:
+            str: Source id.
+        """
+        metadata = record.model_dump(mode="json") if hasattr(record, "model_dump") else str(record)
+        await cur.execute(
+            self._UPSERT,
+            (
+                self._kind(record),
+                str(record.id),
+                str(record.title),
+                str(record.pdf_url or ""),
+                list(getattr(record, "authors", []) or []),
+                getattr(record, "year", None),
+                str(getattr(record, "abstract", None) or "") or None,
+                int(getattr(record, "citation_count", 0) or 0),
+                str(getattr(record, "venue", None) or "") or None,
+                str(getattr(record, "source", "")).split(".")[-1],
+                json.dumps(metadata),
+            ),
+        )
+        row = await cur.fetchone()
+        assert row is not None
+        return str(row[0])
+
+    async def link(self, cur: Any, *, revision_id: str, source_id: str) -> None:
+        """Cite a source on a revision (role=cited).
+
+        Args:
+            cur: Active async cursor.
+            revision_id: Revision id.
+            source_id: Source id.
+        """
+        await cur.execute(self._LINK, (revision_id, source_id))
+
+
 class SearchRepo:
     """Server-side filtered search via ``wiki.search_pages_filtered`` (SRP)."""
 
@@ -557,6 +651,7 @@ __all__ = [
     "RevisionsRepo",
     "RunsRepo",
     "SearchRepo",
+    "SourcesRepo",
     "TagsRepo",
     "extract_wikilinks",
     "normalize_query",

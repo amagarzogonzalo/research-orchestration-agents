@@ -427,6 +427,17 @@ class ResearchEngine:
         self._store.write_metadata(tid, result.state.model_dump(mode="json") | {"query": query})
         self._store.write_sources(tid, result.state.sources)
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})
+        # Persist the run's sources into a relational wiki when the configured
+        # store supports it (postgres); the default file/supabase stores skip.
+        wiki = self._build_wiki_store()
+        record_sources = getattr(wiki, "record_sources", None)
+        if record_sources is not None:
+            try:
+                await record_sources(tid, result.state.sources)
+            finally:
+                close = getattr(wiki, "close", None)
+                if close is not None:
+                    await close()
         if self.cleanup_after_run and not result.interrupted:
             await runtime.delete_thread(tid)
         return result
