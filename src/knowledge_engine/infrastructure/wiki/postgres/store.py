@@ -10,6 +10,7 @@ single-purpose repository. No runtime DDL; the migration must already be applied
 
 from __future__ import annotations
 
+import json
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -31,6 +32,7 @@ from knowledge_engine.infrastructure.wiki.postgres.repos import (
     RevisionsRepo,
     RunsRepo,
     SearchRepo,
+    SourcesRepo,
     TagsRepo,
     extract_wikilinks,
     normalize_query,
@@ -73,6 +75,7 @@ class PostgresWikiStore(WikiQueryPort, WikiIngestPort):
         self._events = EventsRepo()
         self._tags = TagsRepo()
         self._search = SearchRepo()
+        self._sources = SourcesRepo()
         self._migrated = False
 
     @classmethod
@@ -490,6 +493,37 @@ class PostgresWikiStore(WikiQueryPort, WikiIngestPort):
         """
         async with self._txn() as cur:
             await self._events.record_feedback(cur, thread_id=slug, line=line)
+
+    async def record_sources(self, thread_id: str, sources: list[Any]) -> int:
+        """Persist a run's resolved sources into ``wiki.sources``/revision_sources.
+
+        Each source is upserted by (kind, external_id) and, when a current
+        approved revision exists for the thread, linked as ``cited``. If a file
+        store is configured, the source list is also stored as a run artifact.
+
+        Args:
+            thread_id: Run thread identifier.
+            sources: Resolved :class:`SourceRecord` list.
+
+        Returns:
+            int: Number of source rows upserted.
+        """
+        if not sources:
+            return 0
+        count = 0
+        async with self._txn() as cur:
+            revision_id = await self._sources.current_revision(cur, thread_id=thread_id)
+            for record in sources:
+                source_id = await self._sources.upsert(cur, record)
+                if revision_id is not None:
+                    await self._sources.link(cur, revision_id=revision_id, source_id=source_id)
+                count += 1
+            if self._file_store is not None:
+                payload = json.dumps([s.model_dump(mode="json") for s in sources], ensure_ascii=False).encode("utf-8")
+                ref = await self._file_store.put(payload, mime="application/json")
+                await self._files.register(cur, ref, payload)
+                await self._files.attach_run_file(cur, thread_id=thread_id, role="sources", file_sha256=ref.sha256)
+        return count
 
     # -- orchestration helpers -------------------------------------------------
     @staticmethod

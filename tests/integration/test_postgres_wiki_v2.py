@@ -253,3 +253,41 @@ async def test_perf_search_uses_tsv_index(pg_conn) -> None:
         )
         plan = " ".join(row[0] for row in cur.fetchall())
         assert "revisions_tsv_idx" in plan, f"expected a GIN scan on revisions_tsv_idx, got: {plan}"
+
+
+async def test_record_sources_links_to_revision(pg_store, pg_conn, tmp_path) -> None:
+    """record_sources upserts wiki.sources and links them to the producing revision."""
+    from knowledge_engine.schemas.source import SearchSource, SourceRecord
+
+    await pg_store.ingest("t-src", "source topic", _article(tmp_path, "source topic body " * 20))
+    sources = [
+        SourceRecord(
+            id="openalex:W1",
+            title="RAG paper",
+            source=SearchSource.OPENALEX,
+            doi="10.1000/rags",
+            authors=["A", "B"],
+            year=2023,
+            venue="ACL",
+        ),
+        SourceRecord(id="arxiv:2301.00001", title="Hybrid retrieval", source=SearchSource.ARXIV, year=2023),
+    ]
+    n = await pg_store.record_sources("t-src", sources)
+    assert n == 2
+    with pg_conn.cursor() as cur:
+        assert _one(cur, "SELECT count(*) FROM wiki.sources") == 2
+        assert _one(cur, "SELECT count(*) FROM wiki.revision_sources") == 2
+        assert _one(cur, "SELECT kind FROM wiki.sources WHERE external_id='openalex:W1'") == "doi"
+
+
+async def test_record_sources_idempotent(pg_store, pg_conn, tmp_path) -> None:
+    """Re-recording the same sources upserts in place (unique kind+external_id)."""
+    from knowledge_engine.schemas.source import SearchSource, SourceRecord
+
+    await pg_store.ingest("t-id", "idem topic", _article(tmp_path, "idem body " * 20))
+    src = SourceRecord(id="openalex:W9", title="One paper", source=SearchSource.OPENALEX, year=2022)
+    await pg_store.record_sources("t-id", [src])
+    await pg_store.record_sources("t-id", [src])
+    with pg_conn.cursor() as cur:
+        assert _one(cur, "SELECT count(*) FROM wiki.sources") == 1
+        assert _one(cur, "SELECT count(*) FROM wiki.revision_sources") == 1
