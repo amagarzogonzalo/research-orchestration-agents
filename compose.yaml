@@ -1,0 +1,19 @@
+# Local scratch Postgres for the wiki v2 real-DB tests (and the contract suite).
+# Usage:
+#   docker compose up -d wiki-db
+#   docker compose exec -T wiki-db psql -U wiki -d wiki -f /dev/stdin < supabase/migrations/*_wiki_v2.sql
+# Then run tests with WIKI_TEST_PG_DSN=postgresql://wiki:wiki@localhost:54329/wiki
+services:
+  wiki-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wiki
+      POSTGRES_PASSWORD: wiki
+      POSTGRES_DB: wiki
+    ports:
+      - "127.0.0.1:54329:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wiki -d wiki"]
+      interval: 2s
+      timeout: 3s
+      retries: 20

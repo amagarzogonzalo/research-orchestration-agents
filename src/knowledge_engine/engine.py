@@ -169,7 +169,7 @@ class ResearchEngine:
 
             return SupabaseWikiStore.from_env()
         if self.wiki_store_kind == "postgres":
-            from knowledge_engine.infrastructure.wiki.postgres_store import PostgresWikiStore
+            from knowledge_engine.infrastructure.wiki.postgres import PostgresWikiStore
 
             return PostgresWikiStore.from_env()
         raise ConfigurationError(
