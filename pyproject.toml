@@ -124,6 +124,7 @@ module = [
     "selenium.*",
     "letta.*",
     "psycopg.*",
+    "supabase",
     "supabase.*",
     "storage3.*",
 
