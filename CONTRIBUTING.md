@@ -1,5 +1,8 @@
 # Contributing
 
+New here? Read [docs/quickstart.md](docs/quickstart.md) first — it gets you from
+a clone to a green offline run in ~2 minutes.
+
 We use **trunk-based development** with short-lived feature branches and pull
 requests (PRs / merge requests) into `main`.
 
@@ -29,9 +32,13 @@ requests (PRs / merge requests) into `main`.
 
 ## Local checks
 
+The single gate is `make check` (lint + types + arch + semgrep + agents + context
++ tests + evals + benchmarks). Quick loop while working:
+
 ```bash
-pytest                       # unit tests
-ruff check src tests         # lint
+make test-fast    # unit tests only
+make lint         # ruff check + format --check
+make check        # everything — required before merging
 ```
 
 > Note: on the free GitHub plan, `main` can't be hard-protected on a private

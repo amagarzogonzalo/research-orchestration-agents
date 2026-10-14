@@ -7,6 +7,8 @@ name = "knowledge-engine"
 version = "0.1.0"
 description = "Portable, zero-cost research library: LangGraph orchestration, file-only persistence, browser automation, free-LLM discovery."
 readme = "README.md"
+authors = [{ name = "amaga", email = "132710511+amagarzogonzalo@users.noreply.github.com" }]
+license = { text = "MIT" }
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "pydantic>=2.7,<3",
@@ -114,6 +116,7 @@ module = [
     "knowledge_engine.store.supabase_body_storage",
     "knowledge_engine.store.supabase_artifact_store",
     "knowledge_engine.infrastructure.wiki.supabase_store",
+    "knowledge_engine.scripts.retention",
 ]
 ignore_errors = true
 
