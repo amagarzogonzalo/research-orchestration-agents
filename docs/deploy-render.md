@@ -11,7 +11,7 @@ Copy the values from your local `.env` (never commit them).
 
 | Variable | Required | Purpose |
 |---|---|---|
-| `DATABASE_URL` | yes (secret) | Supabase session-pooler DSN, `...:5432?sslmode=require` |
+| `DATABASE_URL` | yes (secret) | Supabase **session-pooler** DSN (IPv4), `postgresql://postgres.<ref>:...@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require` |
 | `SUPABASE_URL` | yes (secret) | Supabase project URL |
 | `SUPABASE_SECRET_KEY` | yes (secret) | service_role key (server-side only) |
 | `GROQ_API_KEY`, `GEMINI_API_KEY`, `MISTRAL_API_KEY`, `OPENROUTER_API_KEY` | yes (secret) | free-tier LLM fallback router |
@@ -29,6 +29,22 @@ Copy the values from your local `.env` (never commit them).
 | `LANGGRAPH_STRICT_MSGPACK` | set by blueprint | `true` (serde allow-list exists) |
 
 `PORT` is provided by Render; the CMD binds it (`${PORT:-10000}`).
+
+## Networking (important — cost a failed deploy)
+
+Render Free has **no outbound IPv6**. A Supabase *direct* DSN
+(`db.<ref>.supabase.co:5432`) resolves to IPv6 and fails with
+`Network is unreachable`. **`DATABASE_URL` must be the session pooler**, whose
+host is IPv4:
+
+```
+postgresql://postgres.<ref>:<password>@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require
+```
+
+The username gains the project ref (`postgres.<ref>`). Get the exact string from
+Supabase → **Connect → Session pooler**. Example for an `eu-central-1` project:
+`aws-0-eu-central-1.pooler.supabase.com`. Use session mode (port `5432`), not the
+transaction pooler (`6543`), so prepared statements work for LangGraph.
 
 ## One-time setup
 
