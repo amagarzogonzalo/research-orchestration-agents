@@ -1,6 +1,6 @@
 # Knowledge Engine — Supabase + Render Free Deployment (research + LLM wiki, fully online)
 
-**Status:** v0.2 · **Author:** repo audit + LLM-wiki delivery (plans 0017–0030)
+**Status:** v0.3 · **Author:** repo audit + LLM-wiki delivery (plans 0017–0030)
 **Repos / refs:** `research-orchestration-agents` · migrations verified live (issues #23/#24, plans 0029–0030)
 **Target:** zero-cost production on Render Free + Supabase Free
 **Constraint:** light usage (1–3 runs/day), `make check` green at every step
@@ -13,6 +13,7 @@
 | 1 | Artifacts → Supabase Storage | **SHIPPED** (`article.md`/`sources.json`; buckets `articles`, `sources`) |
 | 2 | Postgres checkpointer + cross-thread store | **SHIPPED** (`checkpoint.py`, `store_factory.py`, `engine.setup()` creates tables) |
 | 2.5 | **LLM wiki cloud persistence** | **SHIPPED** (`SupabaseWikiStore` bucket `wiki`; `wiki_store_kind="supabase"`; cloud cache coherence; `SupabaseVaultLinter`) |
+| 2.6 | **Env cutover switches** | **SHIPPED** — `engine.__post_init__` reads `CHECKPOINTER_KIND`/`STORE_KIND`/`ARTIFACT_STORE_KIND`/`BODY_STORE_KIND`/`WIKI_STORE_KIND` (kwargs still win) |
 | 3 | Render web service (HTTP research + wiki API) | **OPEN** — the rest of this doc |
 | 4 | CI/CD deploy pipeline to Render | **OPEN** |
 | 5 | Observability + runbook | **OPEN** |
@@ -32,11 +33,22 @@ code; Render env vars mirror `.env.example` (1:1). Required vars:
 | `UNPAYWALL_EMAIL` | Unpaywall OA lookup | real address, else skip |
 | `API_TOKEN` **(new, optional)** | HTTP facade auth | protects `/research`, `/wiki/*` on non-localhost |
 
-Cutover switches (all env-driven; code defaults stay `file/memory/local`):
-`CHECKPOINTER_KIND=postgres`, `STORE_KIND=postgres`,
-`ARTIFACT_STORE_KIND=supabase`, `BODY_STORE_KIND=supabase`,
-`WIKI_STORE_KIND=supabase`. Rollback = unset the switches; local files remain
-the cold backup.
+Cutover switches — **wired into `ResearchEngine.__post_init__`**: each reads its
+env var, an explicit constructor kwarg wins (tests stay deterministic), and the
+code defaults stay `file/memory/local`:
+
+| Switch | Values | Effect |
+|---|---|---|
+| `CHECKPOINTER_KIND` | `file` (default) / `postgres` | LangGraph checkpoints → Supabase Postgres |
+| `STORE_KIND` | `memory` (default) / `postgres` | cross-thread store → Postgres |
+| `ARTIFACT_STORE_KIND` | `local` (default) / `supabase` | articles/sources → Storage |
+| `BODY_STORE_KIND` | `local` / `supabase` (unset: follows `ARTIFACT_STORE_KIND`) | bodies → Storage |
+| `WIKI_STORE_KIND` | `local` (default) / `supabase` / `postgres` | wiki → bucket or relational |
+
+`postgres` persistence reads `DATABASE_URL` (the relational wiki also accepts
+`SUPABASE_DB_URL`); the relational wiki store is built once per engine and closed
+by `engine.close()` (`engine._wiki()`). Rollback = unset the switches; local
+files remain the cold backup. `API_TOKEN` (below) is still **not implemented**.
 
 ## 2. Cloud persistence mapping (including the wiki)
 
