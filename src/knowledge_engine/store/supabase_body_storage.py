@@ -63,19 +63,21 @@ class SupabaseBodyStorage(BodyStoragePort):
         return f"{hashlib.sha256(url.encode('utf-8')).hexdigest()[:16]}.md"
 
     def _ensure_bucket(self) -> None:
-        """Create the bodies bucket as PUBLIC; heal a pre-existing private one.
+        """Create the bodies bucket as PRIVATE; heal a pre-existing public one.
 
-        Idempotent: steady state is one list call, zero writes.
+        Raw scraped full text is least-privilege: reads go through the
+        authenticated service, never a public URL. Idempotent: steady state is
+        one list call, zero writes.
         """
         existing = {b.name: b.public for b in self._client.storage.list_buckets()}
         if _BUCKET not in existing:
             try:
-                self._client.storage.create_bucket(_BUCKET, options={"public": True})
+                self._client.storage.create_bucket(_BUCKET, options={"public": False})
             except Exception:  # noqa: BLE001 - duplicate-bucket races are benign
                 pass
-        elif not existing[_BUCKET]:
+        elif existing[_BUCKET]:
             try:
-                self._client.storage.update_bucket(_BUCKET, {"public": True})
+                self._client.storage.update_bucket(_BUCKET, {"public": False})
             except Exception:  # noqa: BLE001 - heal attempt is best-effort
                 pass
 

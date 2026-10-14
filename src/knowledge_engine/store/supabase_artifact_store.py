@@ -2,9 +2,10 @@
 
 Stores ``article.md`` under the ``articles`` bucket and ``sources.json`` under
 ``sources``, keyed by ``<thread_id>/<filename>``; upsert semantics (a re-run
-replaces its thread's objects); readers return the object bytes. Locators are
-public Storage URLs. Requires the ``supabase`` extra (opt-in per AGENTS rule 4)
-and ``SUPABASE_URL`` + ``SUPABASE_SECRET_KEY``.
+replaces its thread's objects); readers return the object bytes. Buckets are
+**private** and locators are storage object keys — reads go through the
+authenticated service, never a public bucket URL. Requires the ``supabase``
+extra (opt-in per AGENTS rule 4) and ``SUPABASE_URL`` + ``SUPABASE_SECRET_KEY``.
 """
 
 from __future__ import annotations
@@ -57,40 +58,39 @@ class SupabaseArtifactStore(ArtifactStorePort):
         return cls(create_client(url, key))
 
     def _ensure_buckets(self) -> None:
-        """Create missing buckets as PUBLIC; heal pre-existing private ones.
+        """Create missing buckets as PRIVATE; heal pre-existing public ones.
 
-        Published artifacts must be browser-viewable at the public URL —
-        the locator is the read surface (no download tooling needed).
-        Idempotent: normal steady state is one list call, zero writes.
+        Least privilege: published artifacts are served through the
+        authenticated service, never a public bucket URL. Idempotent: normal
+        steady state is one list call, zero writes.
         """
         existing = {b.name: b.public for b in self._client.storage.list_buckets()}
         for bucket, mime in (
-            # text/plain (not text/markdown): browsers RENDER text/plain inline;
-            # text/markdown makes Chrome download the file instead of showing it.
+            # text/plain (not text/markdown): authenticated clients render it inline.
             (_ARTICLES_BUCKET, "text/plain; charset=utf-8"),
             (_SOURCES_BUCKET, "application/json"),
         ):
             if bucket not in existing:
                 try:
-                    self._client.storage.create_bucket(bucket, options={"public": True})
+                    self._client.storage.create_bucket(bucket, options={"public": False})
                 except Exception:  # noqa: BLE001 - duplicate-bucket races are benign
                     pass
-            elif not existing[bucket]:
+            elif existing[bucket]:
                 try:
-                    self._client.storage.update_bucket(bucket, {"public": True})
+                    self._client.storage.update_bucket(bucket, {"public": False})
                 except Exception:  # noqa: BLE001 - heal attempt is best-effort
                     pass
             self._mime_types[bucket] = mime
 
     def put_article(self, thread_id: str, artifact: KnowledgeArtifact) -> str:
-        """Upsert the article to Storage; return its public URL.
+        """Upsert the article to Storage; return its storage object key.
 
         Args:
             thread_id: Run thread identifier.
             artifact: Final artifact.
 
         Returns:
-            str: Public URL of the stored article.
+            str: Storage object key of the stored article.
         """
         self._ensure_buckets()
         text = f"---\n{artifact.frontmatter_yaml}---\n\n{artifact.body_markdown}\n"
@@ -100,21 +100,19 @@ class SupabaseArtifactStore(ArtifactStorePort):
             text.encode("utf-8"),  # supabase-py: bytes = content, str = file path
             {"upsert": "true", "content-type": self._mime_types[_ARTICLES_BUCKET]},
         )
-        # NOTE: no article.html twin in the cloud bucket — Supabase serves
-        # text/html from public buckets as text/plain (stored-XSS protection),
-        # which would show raw source. The rendered twin is local-only
-        # (LocalArtifactStore publishes article.html beside article.md).
-        return str(self._client.storage.from_(_ARTICLES_BUCKET).get_public_url(path))
+        # NOTE: no article.html twin in the cloud bucket — the rendered twin is
+        # local-only (LocalArtifactStore publishes article.html beside article.md).
+        return f"{_ARTICLES_BUCKET}/{path}"
 
     def put_sources(self, thread_id: str, sources: list[SourceRecord]) -> str:
-        """Upsert sources.json to Storage; return its public URL.
+        """Upsert sources.json to Storage; return its storage object key.
 
         Args:
             thread_id: Run thread identifier.
             sources: Resolved source records.
 
         Returns:
-            str: Public URL of the stored sources.
+            str: Storage object key of the stored sources.
         """
         self._ensure_buckets()
         payload = json.dumps([s.model_dump(mode="json") for s in sources], indent=2, ensure_ascii=False)
@@ -124,7 +122,7 @@ class SupabaseArtifactStore(ArtifactStorePort):
             payload.encode("utf-8"),  # supabase-py: bytes = content, str = file path
             {"upsert": "true", "content-type": self._mime_types[_SOURCES_BUCKET]},
         )
-        return str(self._client.storage.from_(_SOURCES_BUCKET).get_public_url(path))
+        return f"{_SOURCES_BUCKET}/{path}"
 
     def get_article(self, thread_id: str) -> str | None:
         """Download the article bytes; None when the object is absent.
