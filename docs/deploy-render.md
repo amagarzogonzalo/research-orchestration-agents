@@ -88,6 +88,21 @@ repo secrets `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `DATABASE_URL` for it.
 Supabase project never hits its 7-day idle pause. Set the repo secret
 `API_TOKEN` to enable the run step.
 
+## Backups
+
+Supabase Free has no point-in-time recovery. `.github/workflows/backup.yml` dumps
+the curated `wiki` bucket to a weekly GitHub artifact
+(`knowledge_engine.scripts.backup_wiki --bucket wiki --out wiki-backup`).
+
+## Optional: pgvector semantic tier
+
+Apply `supabase/migrations/20261014120000_wiki_v2_pgvector.sql` to add an
+`embedding vector(1024)` column + `wiki.search_pages_semantic(...)` (cosine
+nearest-neighbour). Vectors come from
+`knowledge_engine.infrastructure.wiki.embedding.embed_text` — a deterministic,
+offline stand-in — or a real embedding provider behind the same signature. Free
+on Supabase; inactive until the migration is applied.
+
 ## One-time setup
 
 1. Apply the wiki schema to the Supabase project (the app only verifies it):
