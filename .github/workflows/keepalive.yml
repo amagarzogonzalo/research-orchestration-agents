@@ -1,0 +1,43 @@
+name: Keepalive
+
+# Daily wake + grow: pings the service (prevents the Supabase 7-day pause and
+# warms Render) and files one cheap qa run so the wiki keeps compounding.
+# Set the repo secret API_TOKEN (the write token) to enable the run step.
+on:
+  schedule:
+    - cron: "0 5 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    name: Wake + daily wiki growth
+    runs-on: ubuntu-latest
+    env:
+      BASE: https://research-orchestration-agents.onrender.com
+      API_TOKEN: ${{ secrets.API_TOKEN }}
+    steps:
+      - name: Wake and check readiness
+        run: |
+          code=000
+          for i in $(seq 1 12); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" "$BASE/health" || true)
+            [ "$code" = "200" ] && break
+            sleep 10
+          done
+          echo "health: $code"
+          curl -s "$BASE/readiness" | tee readiness.json
+          if ! grep -q '"ok":true' readiness.json; then
+            echo "::warning::readiness not ok"
+          fi
+
+      - name: File a daily qa run (grows the wiki)
+        if: env.API_TOKEN != ''
+        run: |
+          curl -s -X POST -H "Authorization: Bearer $API_TOKEN" -H "Content-Type: application/json" \
+            -d '{"query":"recent advances in retrieval augmented generation","workflow":"qa"}' \
+            "$BASE/research" | tee accepted.json
+          task=$(python -c "import json;print(json.load(open('accepted.json')).get('task_id',''))")
+          echo "task_id: $task"

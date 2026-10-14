@@ -29,6 +29,11 @@ services:
       # Per-key sliding-window rate limit on data routes (<= 0 disables).
       - key: RATE_LIMIT_PER_MINUTE
         value: "30"
+      # Abort a run after this long; delete checkpoints after each run (500 MB).
+      - key: JOB_TIMEOUT_SECONDS
+        value: "900"
+      - key: CLEANUP_AFTER_RUN
+        value: "true"
       # --- secrets: set in the dashboard ---
       # DATABASE_URL MUST be the Supabase session pooler (IPv4):
       # postgresql://postgres.<ref>:...@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require
@@ -52,4 +57,6 @@ services:
       - key: CROSSREF_MAILTO
         sync: false
       - key: API_TOKEN
+        sync: false
+      - key: API_TOKEN_READONLY
         sync: false

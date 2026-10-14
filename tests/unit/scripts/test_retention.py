@@ -73,7 +73,8 @@ def test_cli_dry_run_does_not_delete(tmp_path: Path) -> None:
     """Dry-run reports a plan but leaves files in place."""
     _seed(tmp_path)
     report = tmp_path / "report.json"
-    assert retention.main(["--root", str(tmp_path), "--days", "30", "--keep-runs", "0", "--report", str(report)]) == 0
+    args = ["--root", str(tmp_path), "--days", "30", "--keep-runs", "0", "--skip-postgres", "--report", str(report)]
+    assert retention.main(args) == 0
     assert (tmp_path / "bodies" / "old.md").is_file()
     payload = json.loads(report.read_text(encoding="utf-8"))
     assert payload["applied"] is False
@@ -83,9 +84,21 @@ def test_cli_dry_run_does_not_delete(tmp_path: Path) -> None:
 def test_cli_apply_deletes_old(tmp_path: Path) -> None:
     """--apply removes the old object and keeps the recent one (before/after)."""
     _seed(tmp_path)
-    assert retention.main(["--root", str(tmp_path), "--days", "30", "--keep-runs", "0", "--apply"]) == 0
+    assert (
+        retention.main(["--root", str(tmp_path), "--days", "30", "--keep-runs", "0", "--skip-postgres", "--apply"])
+        == 0
+    )
     assert not (tmp_path / "bodies" / "old.md").exists()
     assert (tmp_path / "bodies" / "new.md").is_file()
+
+
+def test_budget_warnings_threshold() -> None:
+    """Warnings fire only above the warn percentage of the free limits."""
+    assert retention.budget_warnings(100.0, 100.0, 80) == []
+    warn = retention.budget_warnings(900.0, 450.0, 80)
+    assert any("storage" in w for w in warn)
+    assert any("postgres" in w for w in warn)
+    assert retention.budget_warnings(900.0, None, 80) == ["storage 900.0/1024 MB (88%)"]
 
 
 def test_parse_ts_unparseable_keeps_object() -> None:
