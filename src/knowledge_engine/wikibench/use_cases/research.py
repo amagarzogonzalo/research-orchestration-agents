@@ -1,50 +1,49 @@
-"""Use case: run research and deep research.
+"""Use case: run research, QA, summary and deep research.
 
-Suite ``workflows`` exercises the two headline engine use cases end to end on
-the deterministic fakes from :mod:`knowledge_engine.scripts.bench` (no network,
-no LLM quota), reporting the deterministic superstep counts plus an
-artifact-produced flag.
+Suite ``workflows`` exercises every workflow the engine exposes — ``research``,
+``qa``, ``summary`` and ``deep`` — end to end on the deterministic fakes from
+:mod:`knowledge_engine.scripts.bench` (no network, no LLM quota), reporting the
+superstep count and an artifact-produced flag per workflow.
 """
 
 from __future__ import annotations
 
-import asyncio
 from pathlib import Path
 
-from knowledge_engine.scripts.bench import collect
+from knowledge_engine.scripts.bench import measure_workflow
 from knowledge_engine.wikibench.schemas import SuiteResult
 
 _USE_CASE = "run-research"
+_WORKFLOWS = ("research", "qa", "summary", "deep")
 
 
 async def workflows(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteResult:
-    """Run the research/deep workflow suite.
+    """Run every workflow suite and report per-workflow metrics.
 
     Args:
-        workspace: Scratch directory (the bench uses its own temp dirs).
+        workspace: Scratch directory (each workflow gets ``workspace/<name>``).
         scale: Corpus size (unused; the suite runs the workflows).
         seed: Corpus seed (unused).
         backend: Backend id.
 
     Returns:
-        SuiteResult: Workflow metrics and threshold findings.
+        SuiteResult: Per-workflow metrics and threshold findings.
     """
-    data = await asyncio.to_thread(collect)
-    research = data.get("research", {})
-    deep = data.get("deep", {})
-    deep_artifact_ok = 1.0 if deep.get("supersteps", 0) > 0 and deep.get("checkpoint_bytes", 0) > 0 else 0.0
-    measured = {
-        "research_supersteps": float(research.get("supersteps", 0)),
-        "deep_supersteps": float(deep.get("supersteps", 0)),
-        "deep_artifact_ok": deep_artifact_ok,
-        "research_wall_s": float(research.get("wall_s", 0.0)),
-        "deep_wall_s": float(deep.get("wall_s", 0.0)),
-    }
+    measured: dict[str, float] = {}
     findings: list[str] = []
-    if measured["research_supersteps"] <= 0.0 or measured["deep_supersteps"] <= 0.0:
-        findings.append("a research/deep workflow did not complete")
-    if deep_artifact_ok < 1.0:
-        findings.append("deep workflow produced no artifact")
+    for workflow in _WORKFLOWS:
+        try:
+            data = await measure_workflow(workflow, workspace / workflow)
+        except Exception as exc:  # noqa: BLE001 - report which workflow failed
+            findings.append(f"{workflow} workflow failed: {type(exc).__name__}: {exc}")
+            continue
+        supersteps = float(data.get("supersteps", 0))
+        checkpoint_bytes = float(data.get("checkpoint_bytes", 0))
+        measured[f"{workflow}_supersteps"] = supersteps
+        measured[f"{workflow}_ok"] = 1.0 if supersteps > 0 and checkpoint_bytes > 0 else 0.0
+        measured[f"{workflow}_wall_s"] = float(data.get("wall_s", 0.0))
+        if measured[f"{workflow}_ok"] < 1.0:
+            findings.append(f"{workflow} workflow produced no artifact/checkpoint")
     return SuiteResult(
         name="workflows",
         use_case=_USE_CASE,

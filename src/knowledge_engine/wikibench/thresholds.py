@@ -25,6 +25,10 @@ THRESHOLDS: dict[str, tuple[str, float]] = {
     "lint.recall": (">=", 1.0),
     "robustness.injection_index_intact": (">=", 1.0),
     "robustness.index_complete": (">=", 1.0),
+    "workflows.research_ok": (">=", 1.0),
+    "workflows.qa_ok": (">=", 1.0),
+    "workflows.summary_ok": (">=", 1.0),
+    "workflows.deep_ok": (">=", 1.0),
 }
 
 #: Deterministic, higher-is-better metrics gated against the baseline.
@@ -37,6 +41,8 @@ REGRESSION_METRICS: tuple[str, ...] = (
     "retrieval.ndcg@5",
     "retrieval.hybrid_recall@3",
     "workflows.research_supersteps",
+    "workflows.qa_supersteps",
+    "workflows.summary_supersteps",
     "workflows.deep_supersteps",
 )
 
