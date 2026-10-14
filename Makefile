@@ -1,6 +1,7 @@
 .PHONY: help install test test-fast lint types arch semgrep agents context check dup \
         profile profiles evals evals-deep evals-live evals-accept sessions wiki-lint \
         bench bench-accept bench-check wikibench wikibench-accept wikibench-check \
+        retention retention-apply \
         wiki-db-up wiki-db-down wiki-files-check \
         compress-on compress-off compress-savings compress-help
 
@@ -58,6 +59,12 @@ wikibench-accept:   ## adopt the current wiki-benchmark metrics as the baseline 
 
 wikibench-check:    ## gate the wiki benchmark vs bench/wikibench/baseline.json
 	uv run python -m knowledge_engine.scripts.wikibench --check
+
+retention:          ## prune old run artifacts (Supabase free tier); dry-run by default
+	uv run python -m knowledge_engine.scripts.retention
+
+retention-apply:    ## apply retention deletions (review the dry-run report first)
+	uv run python -m knowledge_engine.scripts.retention --apply
 
 wiki-lint:          ## health gate for the compiled wiki (Loop 5; offline)
 	uv run python bin/wiki_lint.py

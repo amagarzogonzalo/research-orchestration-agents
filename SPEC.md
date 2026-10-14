@@ -14,9 +14,11 @@
 | 2 | Postgres checkpointer + cross-thread store | **SHIPPED** (`checkpoint.py`, `store_factory.py`, `engine.setup()` creates tables) |
 | 2.5 | **LLM wiki cloud persistence** | **SHIPPED** (`SupabaseWikiStore` bucket `wiki`; `wiki_store_kind="supabase"`; cloud cache coherence; `SupabaseVaultLinter`) |
 | 2.6 | **Env cutover switches** | **SHIPPED** — `engine.__post_init__` reads `CHECKPOINTER_KIND`/`STORE_KIND`/`ARTIFACT_STORE_KIND`/`BODY_STORE_KIND`/`WIKI_STORE_KIND` (kwargs still win) |
-| 3 | Render web service (HTTP research + wiki API) | **OPEN** — the rest of this doc |
-| 4 | CI/CD deploy pipeline to Render | **OPEN** |
-| 5 | Observability + runbook | **OPEN** |
+| 3 | Render web service (HTTP research + wiki API) | **SHIPPED** — `src/knowledge_engine/service/` (health/readiness/research 202+poll/wiki query+ingest+lint), live on Render Free |
+| 4 | CI/CD deploy pipeline to Render | **SHIPPED** — `.github/workflows/deploy.yml` gates then triggers the Render deploy |
+| 5 | Observability + runbook | **SHIPPED** — `/health` + `/readiness`, `docs/deploy-render.md` |
+| 5.5 | Security hardening | **SHIPPED** — private Storage buckets, bearer-gated data routes, per-key rate limit (`RATE_LIMIT_PER_MINUTE`) |
+| 5.6 | Retention (free-tier budget) | **SHIPPED** — `knowledge_engine.scripts.retention` + weekly `.github/workflows/retention.yml` |
 
 ## 1. Environment contract
 

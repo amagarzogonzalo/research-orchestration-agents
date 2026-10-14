@@ -19,7 +19,8 @@ Copy the values from your local `.env` (never commit them).
 | `UNPAYWALL_EMAIL` | optional | OA PDF lookup; blank = skip |
 | `JINA_API_KEY` | optional | raises the Jina scrape tier |
 | `TAVILY_API_KEY`, `EXA_API_KEY`, `SERPER_API_KEY` | optional | general-web fallback chain |
-| `API_TOKEN` | optional (secret) | bearer token for mutating routes |
+| `API_TOKEN` | optional (secret) | bearer token for data routes |
+| `RATE_LIMIT_PER_MINUTE` | optional | per-key sliding-window limit on data routes (default 30; `<= 0` disables) |
 | `CHECKPOINTER_KIND` | set by blueprint | `postgres` |
 | `STORE_KIND` | set by blueprint | `postgres` |
 | `ARTIFACT_STORE_KIND` | set by blueprint | `supabase` |
@@ -56,6 +57,24 @@ transaction pooler (`6543`), so prepared statements work for LangGraph.
   platform probe needs them).
 - `service_role` (`SUPABASE_SECRET_KEY`) is server-side only and never returned
   in responses. TLS is terminated by Render/Cloudflare.
+
+## Retention (the 500 MB budget)
+
+The free tier is finite, so old run artifacts are pruned automatically:
+
+```
+make retention          # dry-run: prints BEFORE, PLANNED, and (with --apply) AFTER
+make retention-apply    # perform the deletions
+```
+
+`knowledge_engine.scripts.retention` deletes Storage objects older than
+`--days` (default 30) while always keeping the `--keep-runs` most recently
+updated runs (default 5). It reports per-bucket object counts and MB before and
+after, plus the Postgres database size, so the effect is measurable. The curated
+`wiki` bucket is **never** pruned unless `--include-wiki` is passed.
+
+A weekly job (`.github/workflows/retention.yml`) runs it automatically; set the
+repo secrets `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `DATABASE_URL` for it.
 
 ## One-time setup
 
