@@ -26,6 +26,17 @@ make evals        # replays recorded cassettes bit-identically
 No API keys required. `make wikibench` writes `bench/wikibench/report.md`;
 `make bench` prints supersteps/RAM for the `research` and `deep` workflows.
 
+> **No `make`?** (Windows without GNU make, etc.) run the underlying commands:
+>
+> ```bash
+> uv sync --extra dev                                     # make install
+> uv run pytest tests/unit -q                             # make test-fast
+> uv run python -m knowledge_engine.scripts.bench         # make bench
+> uv run python -m knowledge_engine.scripts.wikibench     # make wikibench
+> uv run python evals/runner.py                           # make evals
+> uv run python bin/api_run.py                            # make serve
+> ```
+
 The **full gate** (lint, types, arch, semgrep, tests, evals, benchmarks):
 
 ```bash
