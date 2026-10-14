@@ -153,6 +153,15 @@ def test_result_unknown_task_is_404() -> None:
     assert client.get("/result/nope").status_code == 404
 
 
+def test_rate_limiter_returns_429_when_exceeded() -> None:
+    """A second request over a per-minute limit of 1 is refused with 429."""
+    engine = FakeEngine()
+    app = create_app(engine=engine, jobs=InMemoryJobStore(), rate_limit_per_minute=1)
+    client = TestClient(app)
+    assert client.post("/research", json={"query": "a"}).status_code == 202
+    assert client.post("/research", json={"query": "b"}).status_code == 429
+
+
 def test_wiki_query_requires_token() -> None:
     """GET /wiki/query is gated by the bearer token (accumulated knowledge is not public)."""
     client, _ = _client(api_token="secret")

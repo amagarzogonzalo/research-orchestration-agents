@@ -12,9 +12,10 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request
 
 from knowledge_engine.service.jobs import JobStore
+from knowledge_engine.service.rate_limit import RateLimiter
 from knowledge_engine.service.schemas import (
     JobRecord,
     JobStatus,
@@ -74,6 +75,7 @@ def create_app(
     jobs: JobStore,
     api_token: str | None = None,
     readiness_probe: Callable[[], Awaitable[ReadinessReport]] | None = None,
+    rate_limit_per_minute: int = 0,
 ) -> FastAPI:
     """Build the FastAPI app around an engine + job store.
 
@@ -82,6 +84,7 @@ def create_app(
         jobs: Durable job store.
         api_token: When set, mutating routes require ``Authorization: Bearer``.
         readiness_probe: Optional readiness check; defaults to always-ok.
+        rate_limit_per_minute: Per-key sliding-window limit (<= 0 disables).
 
     Returns:
         FastAPI: The configured application.
@@ -111,6 +114,7 @@ def create_app(
     app = FastAPI(title="Knowledge Engine", version="0.1.0", lifespan=lifespan)
     app.state.engine = engine
     app.state.jobs = jobs
+    limiter = RateLimiter(rate_limit_per_minute)
 
     async def require_token(authorization: str | None = Header(default=None)) -> None:
         """Reject mutating calls without the bearer token (when configured).
@@ -125,6 +129,21 @@ def create_app(
             return
         if authorization != f"Bearer {api_token}":
             raise HTTPException(status_code=401, detail="missing or invalid bearer token")
+
+    async def throttle(request: Request) -> None:
+        """Reject requests over the per-key sliding-window rate limit.
+
+        Args:
+            request: The incoming request (keyed on the bearer token or host).
+
+        Raises:
+            HTTPException: 429 when the caller exceeds the limit.
+        """
+        if not limiter.enabled:
+            return
+        key = request.headers.get("authorization") or (request.client.host if request.client else "unknown")
+        if not limiter.allow(key):
+            raise HTTPException(status_code=429, detail="rate limit exceeded")
 
     async def probe() -> ReadinessReport:
         """Return the readiness report (injected probe or always-ok).
@@ -154,7 +173,12 @@ def create_app(
         """
         return await probe()
 
-    @app.post("/research", status_code=202, response_model=ResearchAccepted, dependencies=[Depends(require_token)])
+    @app.post(
+        "/research",
+        status_code=202,
+        response_model=ResearchAccepted,
+        dependencies=[Depends(require_token), Depends(throttle)],
+    )
     async def research(req: ResearchRequest, background: BackgroundTasks) -> ResearchAccepted:
         """Accept a research run and return a job id (202).
 
@@ -195,7 +219,7 @@ def create_app(
             raise HTTPException(status_code=404, detail="unknown task id")
         return record
 
-    @app.get("/wiki/query", dependencies=[Depends(require_token)])
+    @app.get("/wiki/query", dependencies=[Depends(require_token), Depends(throttle)])
     async def wiki_query(q: str = Query(...), limit: int = 3) -> dict[str, Any]:
         """Answer from the compiled wiki with no live call (token-gated).
 
@@ -209,7 +233,7 @@ def create_app(
         hits = await engine.wiki_query(q, limit=limit)
         return {"hits": [hit.model_dump() for hit in hits]}
 
-    @app.post("/wiki/ingest", dependencies=[Depends(require_token)])
+    @app.post("/wiki/ingest", dependencies=[Depends(require_token), Depends(throttle)])
     async def wiki_ingest(req: WikiIngestRequest) -> dict[str, Any]:
         """Re-ingest a raw run into the wiki.
 
@@ -222,7 +246,7 @@ def create_app(
         ingested = await engine.wiki_ingest(req.thread_id, req.query, req.article_path)
         return ingested.model_dump()
 
-    @app.post("/wiki/lint", dependencies=[Depends(require_token)])
+    @app.post("/wiki/lint", dependencies=[Depends(require_token), Depends(throttle)])
     async def wiki_lint() -> dict[str, Any]:
         """Run the deterministic wiki lint.
 

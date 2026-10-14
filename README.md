@@ -58,6 +58,30 @@ contradictions/stale/gaps), `make wiki-review` (draft loop), `make wiki-graph`
 Ask the wiki directly (no live call): `await engine.wiki_query("topic")`.
 Full delivery report: `docs/plans/0027-0030`, plan: `docs/LLM_WIKI.md`.
 
+## Cloud service (Render + Supabase)
+
+The library also ships a zero-cost HTTP facade (`src/knowledge_engine/service/`,
+issue #30) so the research + wiki run fully online:
+
+| Method | Path | Auth | Notes |
+|---|---|---|---|
+| GET | `/health` | none | liveness (platform probe) |
+| GET | `/readiness` | none | DB + Storage checks |
+| POST | `/research` | bearer | 202 → poll `/result/{id}`; `workflow` = research/qa/summary/deep |
+| GET | `/result/{task_id}` | none | durable job status (Postgres `service_jobs`) |
+| GET | `/wiki/query?q=&limit=` | bearer | answer from the compiled wiki, zero live calls |
+| POST | `/wiki/ingest` | bearer | re-ingest a raw run |
+| POST | `/wiki/lint` | bearer | deterministic vault lint |
+
+Config is env-only — the cutover switches (`CHECKPOINTER_KIND`, `STORE_KIND`,
+`ARTIFACT_STORE_KIND`, `BODY_STORE_KIND`, `WIKI_STORE_KIND`) select the Supabase
+cloud stack; `API_TOKEN` gates data routes; `RATE_LIMIT_PER_MINUTE` throttles per
+key. Storage buckets are **private** (reads go through the API). Deploy steps and
+the full env contract live in [`docs/deploy-render.md`](docs/deploy-render.md).
+
+Runbook: `make retention` prunes artifacts older than 30 days (keeping the newest
+5 runs) to stay inside the free 500 MB budget; a weekly workflow runs it.
+
 ## Run
 
 ```python

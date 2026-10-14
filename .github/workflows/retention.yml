@@ -1,0 +1,47 @@
+name: Retention
+
+# Weekly prune of old run artifacts so the Supabase Free tier (500 MB Postgres,
+# 1 GB Storage) holds. Dry-run is available via workflow_dispatch; the schedule
+# applies. Deletes Storage objects older than 30 days, always keeping the 5 most
+# recently updated runs. The curated wiki bucket is never pruned.
+on:
+  schedule:
+    - cron: "0 4 * * 0"
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "apply deletions (true) or dry-run (false)"
+        default: "false"
+
+permissions:
+  contents: read
+
+jobs:
+  prune:
+    name: Prune old artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra dev --extra store --extra supabase
+      - name: Retention
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event.inputs.apply }}" = "true" ]; then
+            uv run python -m knowledge_engine.scripts.retention --apply --days 30 --keep-runs 5 --report retention-report.json
+          else
+            uv run python -m knowledge_engine.scripts.retention --days 30 --keep-runs 5 --report retention-report.json
+          fi
+      - name: Publish report
+        if: always()
+        run: cat retention-report.json >> "$GITHUB_STEP_SUMMARY" || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: retention-report
+          path: retention-report.json
