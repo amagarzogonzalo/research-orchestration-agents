@@ -88,7 +88,10 @@ key. Storage buckets are **private** (reads go through the API). Deploy steps an
 the full env contract live in [`docs/deploy-render.md`](docs/deploy-render.md).
 
 Runbook: `make retention` prunes artifacts older than 30 days (keeping the newest
-5 runs) to stay inside the free 500 MB budget; a weekly workflow runs it.
+5 runs) and old `service_jobs`, warning above 80% of the free limits; a weekly
+workflow runs it. `.github/workflows/keepalive.yml` pings daily (anti-pause) and
+files one `qa` run so the wiki keeps growing. Set `API_TOKEN_READONLY` for safe
+read-only sharing (`/wiki/query` + `/result` without write access).
 
 ## Run
 

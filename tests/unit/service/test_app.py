@@ -184,6 +184,43 @@ def test_wiki_ingest_and_lint_require_token() -> None:
     assert lint.json()["root"] == "wiki"
 
 
+def test_read_only_token_scope() -> None:
+    """A read token can read the wiki but cannot start a run."""
+    engine = FakeEngine()
+    app = create_app(engine=engine, jobs=InMemoryJobStore(), api_token="write", read_token="read")
+    client = TestClient(app)
+    assert client.get("/wiki/query", params={"q": "x"}, headers={"Authorization": "Bearer read"}).status_code == 200
+    assert client.get("/wiki/query", params={"q": "x"}, headers={"Authorization": "Bearer write"}).status_code == 200
+    assert client.post("/research", json={"query": "q"}, headers={"Authorization": "Bearer read"}).status_code == 401
+    assert client.post("/research", json={"query": "q"}, headers={"Authorization": "Bearer write"}).status_code == 202
+
+
+def test_result_requires_read_token_when_configured() -> None:
+    """GET /result is gated by the read token when tokens are set."""
+    app = create_app(engine=FakeEngine(), jobs=InMemoryJobStore(), api_token="write", read_token="read")
+    client = TestClient(app)
+    assert client.get("/result/nope").status_code == 401
+    assert client.get("/result/nope", headers={"Authorization": "Bearer read"}).status_code == 404
+
+
+async def test_job_timeout_marks_error() -> None:
+    """A run exceeding the timeout is marked error, never left running."""
+    import asyncio
+
+    class SlowEngine(FakeEngine):
+        async def research(self, *args: Any, **kwargs: Any) -> Any:
+            await asyncio.sleep(1.0)
+            return await super().research(*args, **kwargs)
+
+    app = create_app(engine=SlowEngine(), jobs=InMemoryJobStore(), job_timeout_seconds=0.05)
+    client = TestClient(app)
+    accepted = client.post("/research", json={"query": "slow"})
+    assert accepted.status_code == 202
+    body = client.get(f"/result/{accepted.json()['task_id']}").json()
+    assert body["status"] == "error"
+    assert "timed out" in (body["error"] or "")
+
+
 def test_lifespan_runs_setup_and_close() -> None:
     """Entering/exiting the app lifespan calls engine.setup()/close()."""
     engine = FakeEngine()

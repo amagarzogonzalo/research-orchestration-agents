@@ -6,6 +6,7 @@ The uvicorn entrypoint (:mod:`knowledge_engine.service.api`) wires the real ones
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
@@ -44,7 +45,13 @@ def _settings(raw: dict[str, Any] | None) -> Any:
     return RunSettings(**raw)
 
 
-async def _run_job(engine: Any, jobs: JobStore, record: JobRecord, settings_raw: dict[str, Any] | None) -> None:
+async def _run_job(
+    engine: Any,
+    jobs: JobStore,
+    record: JobRecord,
+    settings_raw: dict[str, Any] | None,
+    timeout_seconds: float = 0,
+) -> None:
     """Execute one research job and persist its terminal status.
 
     Args:
@@ -52,18 +59,23 @@ async def _run_job(engine: Any, jobs: JobStore, record: JobRecord, settings_raw:
         jobs: Job store to update.
         record: The job to run.
         settings_raw: Raw per-run settings mapping, or None.
+        timeout_seconds: Abort the run after this many seconds (<= 0 disables).
     """
     await jobs.update(record.task_id, status=JobStatus.RUNNING)
     try:
-        result = await engine.research(
+        coro = engine.research(
             record.query, workflow=record.workflow, thread_id=record.thread_id, settings=_settings(settings_raw)
         )
+        result = await (asyncio.wait_for(coro, timeout=timeout_seconds) if timeout_seconds > 0 else coro)
         summary = {
             "status": result.state.status.value,
             "output_path": result.state.output_path,
             "sources": len(result.state.sources),
         }
         await jobs.update(record.task_id, status=JobStatus.DONE, result=summary)
+    except TimeoutError:
+        logger.warning("research job %s timed out after %ss", record.task_id, timeout_seconds)
+        await jobs.update(record.task_id, status=JobStatus.ERROR, error=f"timed out after {timeout_seconds}s")
     except Exception as exc:  # noqa: BLE001 - surface the failure to the poll endpoint
         logger.exception("research job %s failed", record.task_id)
         await jobs.update(record.task_id, status=JobStatus.ERROR, error=f"{type(exc).__name__}: {exc}")
@@ -74,17 +86,21 @@ def create_app(
     engine: Any,
     jobs: JobStore,
     api_token: str | None = None,
+    read_token: str | None = None,
     readiness_probe: Callable[[], Awaitable[ReadinessReport]] | None = None,
     rate_limit_per_minute: int = 0,
+    job_timeout_seconds: float = 0,
 ) -> FastAPI:
     """Build the FastAPI app around an engine + job store.
 
     Args:
         engine: Research engine facade (``ResearchEngine`` or a test double).
         jobs: Durable job store.
-        api_token: When set, mutating routes require ``Authorization: Bearer``.
+        api_token: Write token; when set, mutating routes require it.
+        read_token: Optional read-only token accepted by read routes (sharing).
         readiness_probe: Optional readiness check; defaults to always-ok.
         rate_limit_per_minute: Per-key sliding-window limit (<= 0 disables).
+        job_timeout_seconds: Abort a run after this long (<= 0 disables).
 
     Returns:
         FastAPI: The configured application.
@@ -116,19 +132,35 @@ def create_app(
     app.state.jobs = jobs
     limiter = RateLimiter(rate_limit_per_minute)
 
-    async def require_token(authorization: str | None = Header(default=None)) -> None:
-        """Reject mutating calls without the bearer token (when configured).
+    async def _check(authorization: str | None, allowed: tuple[str | None, ...]) -> None:
+        """Reject a request whose bearer token is not in ``allowed``.
 
         Args:
             authorization: The ``Authorization`` header value.
+            allowed: Accepted tokens (``None`` entries are ignored).
 
         Raises:
             HTTPException: 401 when the token is missing or wrong.
         """
-        if api_token is None:
-            return
-        if authorization != f"Bearer {api_token}":
+        valid = {f"Bearer {token}" for token in allowed if token}
+        if valid and authorization not in valid:
             raise HTTPException(status_code=401, detail="missing or invalid bearer token")
+
+    async def require_token(authorization: str | None = Header(default=None)) -> None:
+        """Require the write token (mutating routes).
+
+        Args:
+            authorization: The ``Authorization`` header value.
+        """
+        await _check(authorization, (api_token,))
+
+    async def require_read_token(authorization: str | None = Header(default=None)) -> None:
+        """Require a read token (the write token or the read-only token).
+
+        Args:
+            authorization: The ``Authorization`` header value.
+        """
+        await _check(authorization, (api_token, read_token))
 
     async def throttle(request: Request) -> None:
         """Reject requests over the per-key sliding-window rate limit.
@@ -198,10 +230,12 @@ def create_app(
             workflow=req.workflow,
         )
         await jobs.create(record)
-        background.add_task(_run_job, engine, jobs, record, req.settings)
+        background.add_task(_run_job, engine, jobs, record, req.settings, job_timeout_seconds)
         return ResearchAccepted(task_id=task_id, status=record.status)
 
-    @app.get("/result/{task_id}", response_model=JobRecord)
+    @app.get(
+        "/result/{task_id}", response_model=JobRecord, dependencies=[Depends(require_read_token), Depends(throttle)]
+    )
     async def result(task_id: str) -> JobRecord:
         """Poll a job's durable status.
 
@@ -219,7 +253,7 @@ def create_app(
             raise HTTPException(status_code=404, detail="unknown task id")
         return record
 
-    @app.get("/wiki/query", dependencies=[Depends(require_token), Depends(throttle)])
+    @app.get("/wiki/query", dependencies=[Depends(require_read_token), Depends(throttle)])
     async def wiki_query(q: str = Query(...), limit: int = 3) -> dict[str, Any]:
         """Answer from the compiled wiki with no live call (token-gated).
 
