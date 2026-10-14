@@ -26,6 +26,9 @@ services:
         value: "1"
       - key: LANGGRAPH_STRICT_MSGPACK
         value: "true"
+      # Per-key sliding-window rate limit on data routes (<= 0 disables).
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "30"
       # --- secrets: set in the dashboard ---
       # DATABASE_URL MUST be the Supabase session pooler (IPv4):
       # postgresql://postgres.<ref>:...@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require

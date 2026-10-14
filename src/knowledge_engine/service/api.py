@@ -80,6 +80,7 @@ def _build_app() -> FastAPI:
         jobs=jobs,
         api_token=os.environ.get("API_TOKEN") or None,
         readiness_probe=_readiness,
+        rate_limit_per_minute=int(os.environ.get("RATE_LIMIT_PER_MINUTE", "30")),
     )
 
 
