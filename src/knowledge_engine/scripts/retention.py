@@ -34,6 +34,9 @@ from typing import Any, Protocol
 DEFAULT_BUCKETS = ("bodies", "articles", "sources")
 _WIKI_BUCKET = "wiki"
 _DELETE_CHUNK = 100
+#: Free-tier limits (Supabase Free): 1 GB Storage, 500 MB Postgres.
+STORAGE_LIMIT_MB = 1024.0
+POSTGRES_LIMIT_MB = 500.0
 
 
 @dataclass(frozen=True)
@@ -294,6 +297,53 @@ def _postgres_size_mb() -> float | None:
         return None
 
 
+def prune_service_jobs(days: int) -> int:
+    """Delete ``service_jobs`` rows older than ``days`` (Postgres retention).
+
+    Args:
+        days: Retention window in days.
+
+    Returns:
+        int: Rows deleted (0 when Postgres is unavailable or the table is absent).
+    """
+    dsn = os.environ.get("DATABASE_URL", "")
+    if not dsn:
+        return 0
+    try:
+        import psycopg
+
+        with psycopg.connect(dsn, connect_timeout=15) as conn:
+            cursor = conn.execute(
+                "delete from service_jobs where updated_at < now() - make_interval(days => %s)", (days,)
+            )
+            deleted = cursor.rowcount
+            conn.commit()
+        return int(deleted)
+    except Exception:  # noqa: BLE001 - missing table / offline is a no-op
+        return 0
+
+
+def budget_warnings(storage_mb: float, postgres_mb: float | None, warn_pct: int) -> list[str]:
+    """Warn when storage or Postgres crosses ``warn_pct`` of the free limits.
+
+    Args:
+        storage_mb: Storage used in MB.
+        postgres_mb: Postgres used in MB (None when unknown).
+        warn_pct: Threshold percentage (e.g. 80).
+
+    Returns:
+        list[str]: Human-readable warnings (empty when under threshold).
+    """
+    out: list[str] = []
+    if storage_mb > STORAGE_LIMIT_MB * warn_pct / 100:
+        out.append(f"storage {storage_mb:.1f}/{STORAGE_LIMIT_MB:.0f} MB ({storage_mb / STORAGE_LIMIT_MB * 100:.0f}%)")
+    if postgres_mb is not None and postgres_mb > POSTGRES_LIMIT_MB * warn_pct / 100:
+        out.append(
+            f"postgres {postgres_mb:.1f}/{POSTGRES_LIMIT_MB:.0f} MB ({postgres_mb / POSTGRES_LIMIT_MB * 100:.0f}%)"
+        )
+    return out
+
+
 def _print_report(title: str, usage: dict[str, dict[str, int]]) -> None:
     """Print a per-bucket usage table.
 
@@ -325,6 +375,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--buckets", default=",".join(DEFAULT_BUCKETS), help="comma-separated buckets")
     parser.add_argument("--include-wiki", action="store_true", help="also prune the wiki bucket (off by default)")
     parser.add_argument("--apply", action="store_true", help="perform deletions (default: dry-run)")
+    parser.add_argument("--skip-postgres", action="store_true", help="do not prune service_jobs")
+    parser.add_argument("--warn-pct", type=int, default=80, help="warn above this %% of the free limits")
     parser.add_argument("--root", default=None, help="local store root instead of Supabase (tests)")
     parser.add_argument("--report", default=None, help="write a JSON before/after report here")
     args = parser.parse_args(argv)
@@ -342,10 +394,11 @@ def main(argv: list[str] | None = None) -> int:
         load_dotenv()
         store = SupabaseObjectStore.from_env()
 
+    pg_before = _postgres_size_mb()
     before = store.list_objects(buckets)
     before_usage = summarize(before)
-    _print_report("BEFORE", before_usage)
-    print(f"  postgres: {_postgres_size_mb()} MB")
+    _print_report("BEFORE (storage)", before_usage)
+    print(f"  postgres: {pg_before} MB")
 
     cutoff = time.time() - args.days * 86400
     to_delete = plan_retention(before, cutoff=cutoff, keep_runs=args.keep_runs)
@@ -353,12 +406,27 @@ def main(argv: list[str] | None = None) -> int:
     _print_report(f"PLANNED DELETION (>{args.days}d, keep {args.keep_runs} runs)", delete_usage)
 
     deleted = 0
+    jobs_pruned = 0
     after_usage: dict[str, dict[str, int]] = before_usage
-    if args.apply and to_delete:
-        deleted = store.delete_objects(to_delete)
-        after_usage = summarize(store.list_objects(buckets))
-        _print_report("AFTER", after_usage)
-    print(f"\n{'applied' if args.apply else 'dry-run'}: {len(to_delete)} objects planned, {deleted} deleted")
+    pg_after = pg_before
+    if args.apply:
+        if to_delete:
+            deleted = store.delete_objects(to_delete)
+            after_usage = summarize(store.list_objects(buckets))
+            _print_report("AFTER (storage)", after_usage)
+        if not args.skip_postgres:
+            jobs_pruned = prune_service_jobs(args.days)
+            pg_after = _postgres_size_mb()
+            print(f"  postgres after: {pg_after} MB ({jobs_pruned} service_jobs pruned)")
+    print(
+        f"\n{'applied' if args.apply else 'dry-run'}: {len(to_delete)} objects planned, "
+        f"{deleted} deleted, {jobs_pruned} jobs pruned"
+    )
+
+    storage_mb = sum(v["bytes"] for v in after_usage.values()) / 1e6
+    warnings = budget_warnings(storage_mb, pg_after, args.warn_pct)
+    for line in warnings:
+        print(f"WARNING: {line}")
 
     if args.report:
         Path(args.report).write_text(
@@ -372,6 +440,10 @@ def main(argv: list[str] | None = None) -> int:
                     "planned": delete_usage,
                     "after": after_usage,
                     "deleted": deleted,
+                    "postgres_mb_before": pg_before,
+                    "postgres_mb_after": pg_after,
+                    "jobs_pruned": jobs_pruned,
+                    "warnings": warnings,
                     "objects": [asdict(o) for o in to_delete],
                 },
                 indent=2,
