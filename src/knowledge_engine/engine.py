@@ -62,13 +62,18 @@ class ResearchEngine:
         store_root: Attribute description.
         search_limit: Attribute description.
         auto_approve_review: Attribute description.
-        checkpointer_kind: ``file`` (default, portable) or ``postgres`` (Supabase).
-        store_kind: ``memory`` (default) or ``postgres`` (Supabase long-term memory).
-        artifact_store_kind: ``local`` (default, portable) or ``supabase`` (cloud storage).
-        body_store_kind: ``local``/``supabase``; None follows the artifact kind.
+        checkpointer_kind: ``file`` (default, portable) or ``postgres``
+            (Supabase); empty reads ``CHECKPOINTER_KIND``.
+        store_kind: ``memory`` (default) or ``postgres`` (long-term memory);
+            empty reads ``STORE_KIND``.
+        artifact_store_kind: ``local`` (default, portable) or ``supabase``
+            (cloud storage); empty reads ``ARTIFACT_STORE_KIND``.
+        body_store_kind: ``local``/``supabase``; None follows the artifact
+            kind, or ``BODY_STORE_KIND`` when that is set.
         wiki_store_kind: ``local`` (default, portable files under
-            ``<store_root>/wiki``), ``supabase`` (cloud, no-op-until-configured)
-            or ``postgres`` (relational, server-side FTS; needs a DSN).
+            ``<store_root>/wiki``), ``supabase`` (cloud) or ``postgres``
+            (relational, server-side FTS; needs a DSN); empty reads
+            ``WIKI_STORE_KIND``.
         artifacts: Optional prebuilt ArtifactStorePort override (tests/composition).
         database_url: Supabase session-pooler DSN; falls back to ``DATABASE_URL`` env.
         cleanup_after_run: Delete the thread's checkpoints after a finished run.
@@ -82,11 +87,14 @@ class ResearchEngine:
     store_root: str = "research_store"
     search_limit: int = 10
     auto_approve_review: bool = True
-    checkpointer_kind: str = "file"
-    store_kind: str = "memory"
-    artifact_store_kind: str = "local"
+    # Kind selectors (SPEC cutover switches). Empty means "read the matching
+    # env var, else the portable default" — an explicit kwarg always wins, so
+    # tests and embedders stay deterministic regardless of the ambient env.
+    checkpointer_kind: str = ""
+    store_kind: str = ""
+    artifact_store_kind: str = ""
     body_store_kind: str | None = None
-    wiki_store_kind: str = "local"
+    wiki_store_kind: str = ""
     artifacts: Any | None = None
     database_url: str | None = None
     cleanup_after_run: bool = False
@@ -101,14 +109,20 @@ class ResearchEngine:
     _memory_store: Any = field(init=False)
     _checkpointer_cm: Any = field(init=False, default=None)
     _memory_store_cm: Any = field(init=False, default=None)
+    _wiki_store: Any = field(init=False, default=None)
     _search: SearchPort = field(init=False)
     _scrape: ScrapePort = field(init=False)
     _provider: Any = field(init=False)
     _discoverer: ModelDiscoverer = field(init=False)
 
     def __post_init__(self) -> None:
-        """Initialize derived components."""
+        """Resolve the env cutover switches, then initialize derived components."""
         load_dotenv()
+        self.checkpointer_kind = self.checkpointer_kind or os.environ.get("CHECKPOINTER_KIND", "file")
+        self.store_kind = self.store_kind or os.environ.get("STORE_KIND", "memory")
+        self.artifact_store_kind = self.artifact_store_kind or os.environ.get("ARTIFACT_STORE_KIND", "local")
+        self.body_store_kind = self.body_store_kind or os.environ.get("BODY_STORE_KIND") or None
+        self.wiki_store_kind = self.wiki_store_kind or os.environ.get("WIKI_STORE_KIND", "local")
         self._store = self._build_research_store()
         self._checkpointer = self._build_checkpointer()
         self._memory_store = self._build_memory_store()
@@ -175,6 +189,21 @@ class ResearchEngine:
         raise ConfigurationError(
             f"unknown wiki_store_kind: {self.wiki_store_kind!r} (use 'local', 'supabase' or 'postgres')"
         )
+
+    def _wiki(self) -> Any:
+        """Return the engine's wiki store, built once and shared.
+
+        The same store backs the graph (query + ingest nodes),
+        :meth:`research` (the ``record_sources`` hook) and :meth:`wiki_query`,
+        so the relational kind opens a single pool instead of one per access.
+        It is closed by :meth:`close`.
+
+        Returns:
+            Any: A wiki store implementing ``WikiQueryPort`` + ``WikiIngestPort``.
+        """
+        if self._wiki_store is None:
+            self._wiki_store = self._build_wiki_store()
+        return self._wiki_store
 
     def _build_research_store(self) -> ResearchStore:
         """Build the files store with the configured artifact persistence (T4).
@@ -262,7 +291,11 @@ class ResearchEngine:
         return self.checkpointer_kind == "postgres" or self.store_kind == "postgres"
 
     async def close(self) -> None:
-        """Exit Supabase resources (postgres kinds only)."""
+        """Exit Supabase resources and close the shared wiki store."""
+        close = getattr(self._wiki_store, "close", None)
+        if close is not None:
+            await close()
+        self._wiki_store = None
         if self._memory_store_cm is not None and self._memory_store is not None:
             await self._memory_store_cm.__aexit__(None, None, None)
             self._memory_store = None
@@ -319,7 +352,7 @@ class ResearchEngine:
         fetch_body = FetchBodyNode(self._scrape, storage=storage)
         synthesize = SynthesizeNode(self._provider, storage=storage)
         render_save = _artifact_saver(self._store)
-        wiki = self._build_wiki_store()
+        wiki = self._wiki()
         from knowledge_engine.infrastructure.clean import SourceCleaner
         from knowledge_engine.orchestration.nodes.clean import CleanNode
         from knowledge_engine.orchestration.nodes.wiki_ingest import WikiIngestNode
@@ -429,15 +462,11 @@ class ResearchEngine:
         self._store.append_event(tid, {"event": "run.completed", "thread_id": tid})
         # Persist the run's sources into a relational wiki when the configured
         # store supports it (postgres); the default file/supabase stores skip.
-        wiki = self._build_wiki_store()
+        # The store is shared with the graph and closed by close(), not here.
+        wiki = self._wiki()
         record_sources = getattr(wiki, "record_sources", None)
         if record_sources is not None:
-            try:
-                await record_sources(tid, result.state.sources)
-            finally:
-                close = getattr(wiki, "close", None)
-                if close is not None:
-                    await close()
+            await record_sources(tid, result.state.sources)
         if self.cleanup_after_run and not result.interrupted:
             await runtime.delete_thread(tid)
         return result
@@ -485,7 +514,7 @@ class ResearchEngine:
         Returns:
             list[WikiHit]: Ranked pages (empty when the wiki has no match).
         """
-        wiki = self._build_wiki_store()
+        wiki = self._wiki()
         hits: list[WikiHit] = await wiki.search_wiki(query, limit=limit)
         return hits
 
