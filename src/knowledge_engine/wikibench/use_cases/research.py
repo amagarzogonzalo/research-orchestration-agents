@@ -1,10 +1,9 @@
-"""Suite W — research and deep-research workflow coverage.
+"""Use case: run research and deep research.
 
-Exercises the two headline use cases end to end on the deterministic fakes
-from :mod:`knowledge_engine.scripts.bench` (no network, no LLM quota): the
-``research`` workflow and the recursive ``deep`` workflow. Reported metrics are
-the deterministic superstep counts plus an artifact-produced flag, so the wiki
-benchmark stays anchored to the use cases it exists to serve.
+Suite ``workflows`` exercises the two headline engine use cases end to end on
+the deterministic fakes from :mod:`knowledge_engine.scripts.bench` (no network,
+no LLM quota), reporting the deterministic superstep counts plus an
+artifact-produced flag.
 """
 
 from __future__ import annotations
@@ -13,15 +12,17 @@ import asyncio
 from pathlib import Path
 
 from knowledge_engine.scripts.bench import collect
-from knowledge_engine.scripts.wikibench.schemas import SuiteResult
+from knowledge_engine.wikibench.schemas import SuiteResult
+
+_USE_CASE = "run-research"
 
 
-async def run(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteResult:
-    """Run suite W and return the research/deep workflow metrics.
+async def workflows(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteResult:
+    """Run the research/deep workflow suite.
 
     Args:
-        workspace: Scratch directory (bench uses its own temp dirs).
-        scale: Corpus size (unused; suite W runs the workflows).
+        workspace: Scratch directory (the bench uses its own temp dirs).
+        scale: Corpus size (unused; the suite runs the workflows).
         seed: Corpus seed (unused).
         backend: Backend id.
 
@@ -45,7 +46,8 @@ async def run(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteR
     if deep_artifact_ok < 1.0:
         findings.append("deep workflow produced no artifact")
     return SuiteResult(
-        name="w_workflows",
+        name="workflows",
+        use_case=_USE_CASE,
         backend=backend,
         tier="0",
         scale=scale,
@@ -55,4 +57,4 @@ async def run(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteR
     )
 
 
-__all__ = ["run"]
+__all__ = ["workflows"]

@@ -51,13 +51,13 @@ bench-check:        ## fail on >10% ram/checkpoint regression vs baseline
 	uv run python -m knowledge_engine.scripts.bench --check
 
 wikibench:          ## LLM wiki benchmark: Tier 0 deterministic suites (offline, no LLM)
-	uv run python -m knowledge_engine.scripts.wikibench.runner --report
+	uv run python -m knowledge_engine.scripts.wikibench --report
 
 wikibench-accept:   ## adopt the current wiki-benchmark metrics as the baseline (review like code)
-	uv run python -m knowledge_engine.scripts.wikibench.runner --accept
+	uv run python -m knowledge_engine.scripts.wikibench --accept
 
 wikibench-check:    ## gate the wiki benchmark vs bench/wikibench/baseline.json
-	uv run python -m knowledge_engine.scripts.wikibench.runner --check
+	uv run python -m knowledge_engine.scripts.wikibench --check
 
 wiki-lint:          ## health gate for the compiled wiki (Loop 5; offline)
 	uv run python bin/wiki_lint.py

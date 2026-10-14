@@ -1,9 +1,8 @@
-"""Suite C — cost compounding: does the wiki get cheaper over time?
+"""Use case: compound knowledge over time.
 
-Replays a 200-query stream (each fact filed once, then repeated) against an
-empty wiki. A repeat that exact-hits spends zero live calls; the rise of the
-zero-live-call rate over the stream is the compounding curve (the headline
-chart). Live calls are simulated by ingest — no network is touched.
+Suite ``cost`` replays a 200-query stream against an empty wiki: each fact is
+filed once, then repeated. Repeats exact-hit and spend zero live calls, so the
+zero-live-call rate rises over the stream — the compounding curve.
 """
 
 from __future__ import annotations
@@ -13,16 +12,17 @@ from pathlib import Path
 
 from knowledge_engine.infrastructure.wiki import common
 from knowledge_engine.infrastructure.wiki.file_store import FileWikiStore
-from knowledge_engine.scripts.wikibench.corpus import build_corpus
-from knowledge_engine.scripts.wikibench.schemas import SuiteResult
-from knowledge_engine.scripts.wikibench.suites._common import write_article
+from knowledge_engine.wikibench.corpus import build_corpus
+from knowledge_engine.wikibench.schemas import SuiteResult
+from knowledge_engine.wikibench.use_cases._common import write_article
 
+_USE_CASE = "compound-knowledge"
 _STREAM_LEN = 200
 _FILLER = "Live research findings for the query. "
 
 
-async def run(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteResult:
-    """Run suite C and return its compounding metrics.
+async def cost(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteResult:
+    """Run the cost-compounding suite.
 
     Args:
         workspace: Scratch directory for the wiki and its live results.
@@ -34,8 +34,8 @@ async def run(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteR
         SuiteResult: Compounding metrics and threshold findings.
     """
     built = build_corpus(scale, seed)
-    store = FileWikiStore(workspace / "c_compounding")
-    articles = workspace / "c_articles"
+    store = FileWikiStore(workspace / "wiki")
+    articles = workspace / "articles"
     pool = [page.title for page in built.pages]
     rng = random.Random(seed)
     stream = [pool[i] if i < len(pool) else pool[rng.randrange(len(pool))] for i in range(_STREAM_LEN)]
@@ -65,7 +65,8 @@ async def run(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteR
     if measured["zero_call_lift"] <= 0.0:
         findings.append("zero-live-call rate did not rise over the stream (no compounding)")
     return SuiteResult(
-        name="c_compounding",
+        name="cost",
+        use_case=_USE_CASE,
         backend=backend,
         tier="0",
         scale=scale,
@@ -75,4 +76,4 @@ async def run(*, workspace: Path, scale: int, seed: int, backend: str) -> SuiteR
     )
 
 
-__all__ = ["run"]
+__all__ = ["cost"]

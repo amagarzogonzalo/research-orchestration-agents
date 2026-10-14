@@ -1,4 +1,4 @@
-"""Shared helpers for WikiBench suites (article writing, retrieval eval)."""
+"""Shared helpers for WikiBench use-case suites (article writing, eval)."""
 
 from __future__ import annotations
 
@@ -6,8 +6,8 @@ import time
 from pathlib import Path
 
 from knowledge_engine.core.ports import WikiQueryPort
-from knowledge_engine.scripts.wikibench.metrics import mean, mrr, ndcg_at_k, recall_at_k
-from knowledge_engine.scripts.wikibench.schemas import QueryCase, QueryKind
+from knowledge_engine.wikibench.metrics import mean, mrr, ndcg_at_k, recall_at_k
+from knowledge_engine.wikibench.schemas import QueryCase, QueryKind
 
 
 def write_article(path: Path, text: str) -> str:

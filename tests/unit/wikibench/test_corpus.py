@@ -4,8 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from knowledge_engine.scripts.wikibench import corpus
-from knowledge_engine.scripts.wikibench.schemas import QueryKind
+from knowledge_engine.wikibench import corpus
+from knowledge_engine.wikibench.schemas import QueryKind
 
 
 def test_build_corpus_is_deterministic() -> None:
