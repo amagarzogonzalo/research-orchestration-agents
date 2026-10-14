@@ -113,14 +113,14 @@ def _body(markdown: str = "# Title\n\nBody text.") -> DocumentBody:
 
 
 async def test_save_uploads_and_returns_cloud_ref() -> None:
-    """save() uploads the bytes and returns a bodies/ ref; bucket is public."""
+    """save() uploads the bytes and returns a bodies/ ref; bucket stays private."""
     client = _Client()
     store = SupabaseBodyStorage(client)
     ref = await store.save(_body())
     assert ref.path.startswith("bodies/") and ref.path.endswith(".md")
     assert ref.url == "https://example.org/a"
     assert client.storage.objects
-    assert client.storage.buckets["bodies"]["public"] is True
+    assert client.storage.buckets["bodies"]["public"] is False
 
 
 async def test_load_round_trips_markdown() -> None:
@@ -144,13 +144,13 @@ async def test_load_missing_object_raises() -> None:
         await store.load(BodyRef(url="u", title="t", path="bodies/deadbeefdeadbeef.md"))
 
 
-async def test_save_heals_a_private_bucket() -> None:
-    """An existing private bucket is healed to public on save."""
+async def test_save_heals_a_public_bucket_to_private() -> None:
+    """An existing public bodies bucket is healed to private on save."""
     client = _Client()
-    client.storage.buckets["bodies"] = {"public": False}
+    client.storage.buckets["bodies"] = {"public": True}
     store = SupabaseBodyStorage(client)
     await store.save(_body())
-    assert client.storage.buckets["bodies"]["public"] is True
+    assert client.storage.buckets["bodies"]["public"] is False
 
 
 def test_key_is_deterministic_and_sixteen_hex() -> None:
