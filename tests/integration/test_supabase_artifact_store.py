@@ -38,15 +38,12 @@ def test_supabase_artifact_roundtrip_real_storage() -> None:
 
     store = SupabaseArtifactStore.from_env()
     locator = store.put_article("migration-probe", _artifact(f"probe {os.urandom(4).hex()}"))
-    assert locator.startswith("http"), "locator is a Storage URL"
+    assert locator == "articles/migration-probe/article.md", "locator is a storage object key"
     stored = store.get_article("migration-probe") or ""
     assert "probe" in stored, "bytes survive the round-trip"
-    public = httpx.get(locator)
-    assert public.status_code == 200, f"published artifact must be viewable without auth ({locator})"
-    assert "probe" in public.text, "public bytes match the artifact"
-    # Supabase serves public objects with XSS protection (html -> text/plain),
-    # so the .md plain-text IS the cloud read surface; the rendered HTML twin
-    # is published locally by LocalArtifactStore.
+    # Buckets are private: an unauthenticated public-URL read must NOT succeed.
+    public_url = f"{os.environ['SUPABASE_URL']}/storage/v1/object/public/articles/migration-probe/article.md"
+    assert httpx.get(public_url, timeout=15).status_code != 200, "private bucket objects must not be public"
 
 
 def test_supabase_sources_roundtrip_real_storage() -> None:
