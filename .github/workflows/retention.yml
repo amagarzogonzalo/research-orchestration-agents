@@ -40,7 +40,7 @@ jobs:
       - name: Publish report
         if: always()
         run: cat retention-report.json >> "$GITHUB_STEP_SUMMARY" || true
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: retention-report

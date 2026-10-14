@@ -86,7 +86,7 @@ jobs:
           python -m pytest -m live tests/e2e/test_live.py -v
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: research-output
           path: |
