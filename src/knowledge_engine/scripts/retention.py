@@ -140,6 +140,8 @@ def plan_retention(objects: list[StoredObject], *, cutoff: float, keep_runs: int
     if keep_runs > 0:
         newest: dict[str, float] = {}
         for obj in objects:
+            if "/" not in obj.name:
+                continue  # flat objects (e.g. content-addressed bodies) are not run-scoped
             prefix = _prefix(obj.name)
             newest[prefix] = max(newest.get(prefix, 0.0), obj.updated_at)
         kept = {prefix for prefix, _ in sorted(newest.items(), key=lambda kv: kv[1], reverse=True)[:keep_runs]}
