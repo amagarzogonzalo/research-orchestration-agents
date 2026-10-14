@@ -36,6 +36,13 @@ def test_plan_keeps_newest_runs_even_if_old() -> None:
     assert [o.name for o in plan] == ["run-a/article.md"]
 
 
+def test_keep_runs_does_not_protect_flat_objects() -> None:
+    """Flat objects (bodies) are not run-scoped, so keep_runs never protects them."""
+    objects = [_obj("bodies", "abc.md", 10, _OLD), _obj("bodies", "def.md", 10, _OLD)]
+    plan = retention.plan_retention(objects, cutoff=_NOW, keep_runs=5)
+    assert {o.name for o in plan} == {"abc.md", "def.md"}
+
+
 def test_summarize_counts_and_bytes() -> None:
     """summarize aggregates counts and bytes per bucket."""
     usage = retention.summarize([_obj("bodies", "a.md", 3, _NOW), _obj("bodies", "b.md", 4, _NOW)])
