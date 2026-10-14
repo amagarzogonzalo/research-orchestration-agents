@@ -165,6 +165,36 @@ def write_report(report: BenchReport) -> tuple[Path, Path]:
     return REPORT_JSON_PATH, REPORT_MD_PATH
 
 
+def self_test() -> bool:
+    """Known-bad control: the gate must reject a degraded report and pass a clean one.
+
+    Returns:
+        bool: True when the gate passes the clean report and fails the degraded one.
+    """
+    from knowledge_engine.wikibench.schemas import BenchReport, SuiteResult
+
+    clean = BenchReport(
+        backend="file",
+        tier="0",
+        scale=1,
+        seed=1,
+        suites=[
+            SuiteResult(
+                name="retrieval",
+                use_case="answer-from-wiki",
+                backend="file",
+                tier="0",
+                scale=1,
+                metrics={"dup_rate": 0.0, "recall@3": 1.0},
+            )
+        ],
+    )
+    degraded = clean.model_copy(deep=True)
+    degraded.suites[0].metrics["recall@3"] = 0.1
+    degraded.suites[0].metrics["dup_rate"] = 0.5
+    return evaluate(clean, None) == [] and evaluate(degraded, None) != []
+
+
 __all__ = [
     "BASELINE_PATH",
     "REPORT_JSON_PATH",
@@ -174,5 +204,6 @@ __all__ = [
     "load_baseline",
     "render_markdown",
     "save_baseline",
+    "self_test",
     "write_report",
 ]

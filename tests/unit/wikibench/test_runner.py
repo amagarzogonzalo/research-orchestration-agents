@@ -90,6 +90,11 @@ def test_evaluate_passes_clean_report() -> None:
     assert runner.evaluate(report, baseline={"retrieval.recall@3": 1.0}) == []
 
 
+def test_self_test_gate_control() -> None:
+    """The known-bad control: the gate passes a clean report and rejects a degraded one."""
+    assert runner.self_test() is True
+
+
 def test_cli_accept_and_check(tmp_path: Path, monkeypatch) -> None:
     """--accept writes a baseline and a matching --check is green."""
     monkeypatch.chdir(tmp_path)

@@ -17,6 +17,7 @@ from knowledge_engine.wikibench.use_cases import (
     compounding,
     ingestion,
     maintenance,
+    provenance,
     research,
 )
 
@@ -30,6 +31,7 @@ SUITES: dict[str, SuiteFn] = {
     "ingest": ingestion.ingest,
     "lint": maintenance.lint,
     "robustness": maintenance.robustness,
+    "provenance": provenance.provenance,
     "workflows": research.workflows,
 }
 
@@ -38,7 +40,7 @@ USE_CASES: dict[str, tuple[str, ...]] = {
     "answer-from-wiki": ("retrieval", "miss"),
     "compound-knowledge": ("cost",),
     "file-research": ("ingest",),
-    "maintain-wiki": ("lint", "robustness"),
+    "maintain-wiki": ("lint", "robustness", "provenance"),
     "run-research": ("workflows",),
 }
 
