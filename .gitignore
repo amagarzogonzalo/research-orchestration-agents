@@ -20,3 +20,8 @@ research_store/
 # are the offline deterministic suite (fresh clones replay without keys).
 
 wiki-graph.json
+
+# WikiBench generated reports (regenerable via `make wikibench`); the committed
+# baseline (bench/wikibench/baseline.json) is the gate, not these.
+bench/wikibench/report.json
+bench/wikibench/report.md
