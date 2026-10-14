@@ -41,7 +41,28 @@ jobs:
             echo "Render secrets not configured; skipping deploy (gate still ran)."
             exit 0
           fi
-          curl -fsS -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            -H "Content-Type: application/json" \
-            -d '{"clearCache": "do_not_clear"}'
+          url="https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys"
+          for attempt in 1 2 3 4 5; do
+            code=$(curl -sS -o body.json -w "%{http_code}" -X POST "$url" \
+              -H "Authorization: Bearer ${RENDER_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d '{"clearCache": "do_not_clear"}') || code=000
+            echo "attempt ${attempt} -> HTTP ${code}"
+            cat body.json 2>/dev/null || true
+            case "$code" in
+              2*)
+                echo "deploy triggered"
+                exit 0
+                ;;
+              4*)
+                echo "::error::Render rejected the deploy (HTTP ${code}) — check RENDER_API_KEY / RENDER_SERVICE_ID"
+                exit 1
+                ;;
+              *)
+                echo "Render API unavailable (HTTP ${code}); retrying in $((attempt * 15))s..."
+                sleep $((attempt * 15))
+                ;;
+            esac
+          done
+          echo "::warning::Render deploy API stayed unavailable; the service keeps running its last good deploy. Re-run this workflow later."
+          exit 0
