@@ -1,0 +1,49 @@
+# Render blueprint for the Knowledge Engine HTTP service (issue #30).
+# Zero-cost: Free plan + Supabase Free. Secrets are marked `sync: false` and set
+# in the Render dashboard (never committed). Rollback = undeploy this service.
+services:
+  - type: web
+    name: knowledge-engine
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: false
+    envVars:
+      # --- cutover switches: select the Supabase cloud stack ---
+      - key: CHECKPOINTER_KIND
+        value: postgres
+      - key: STORE_KIND
+        value: postgres
+      - key: ARTIFACT_STORE_KIND
+        value: supabase
+      - key: BODY_STORE_KIND
+        value: supabase
+      - key: WIKI_STORE_KIND
+        value: supabase
+      # --- Render Free desk math: single worker, strict msgpack ---
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: LANGGRAPH_STRICT_MSGPACK
+        value: "true"
+      # --- secrets: set in the dashboard ---
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENALEX_MAILTO
+        sync: false
+      - key: CROSSREF_MAILTO
+        sync: false
+      - key: API_TOKEN
+        sync: false

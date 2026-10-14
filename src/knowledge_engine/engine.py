@@ -48,7 +48,7 @@ from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.browser import BrowserActionResult
 from knowledge_engine.schemas.settings import RunSettings
 from knowledge_engine.schemas.source import DocumentBody, SourceRecord
-from knowledge_engine.schemas.wiki import WikiHit
+from knowledge_engine.schemas.wiki import IngestResult, LintReport, WikiHit
 from knowledge_engine.store.body_file_store import LocalBodyStorage
 from knowledge_engine.store.file_checkpointer import FileCheckpointer
 from knowledge_engine.store.research_store import ResearchStore
@@ -517,6 +517,49 @@ class ResearchEngine:
         wiki = self._wiki()
         hits: list[WikiHit] = await wiki.search_wiki(query, limit=limit)
         return hits
+
+    async def wiki_ingest(self, thread_id: str, query: str, article_path: str) -> IngestResult:
+        """File one rendered article into the wiki (HTTP service surface).
+
+        Args:
+            thread_id: Run thread identifier (provenance).
+            query: Original research query (page title/slug source).
+            article_path: Path of the rendered ``article.md``.
+
+        Returns:
+            IngestResult: Verdict + write counts.
+        """
+        result: IngestResult = await self._wiki().ingest(thread_id, query, article_path)
+        return result
+
+    def _linter(self) -> Any:
+        """Build the vault linter matching ``wiki_store_kind``.
+
+        Returns:
+            Any: A ``VaultLintPort`` implementation.
+
+        Raises:
+            ConfigurationError: On an unknown wiki kind.
+        """
+        from knowledge_engine.core.exceptions import ConfigurationError
+        from knowledge_engine.infrastructure.wiki import FileVaultLinter, PostgresVaultLinter, SupabaseVaultLinter
+
+        if self.wiki_store_kind == "local":
+            return FileVaultLinter(f"{self.store_root}/wiki")
+        if self.wiki_store_kind == "supabase":
+            return SupabaseVaultLinter(self._wiki())
+        if self.wiki_store_kind == "postgres":
+            return PostgresVaultLinter(self._wiki())
+        raise ConfigurationError(f"unknown wiki_store_kind for lint: {self.wiki_store_kind!r}")
+
+    async def wiki_lint(self) -> LintReport:
+        """Run the deterministic vault lint (HTTP service surface).
+
+        Returns:
+            LintReport: Structural findings; ``ok`` is True when clean.
+        """
+        report: LintReport = await self._linter().lint()
+        return report
 
     async def scrape_run(self, url: str) -> DocumentBody:
         """Fetch a URL to LLM-ready Markdown.

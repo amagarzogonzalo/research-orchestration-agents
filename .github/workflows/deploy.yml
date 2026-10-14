@@ -1,0 +1,47 @@
+name: Deploy (Render)
+
+# SPEC §5: gate on the checks, then trigger a Render deploy. No direct push to
+# main happens here — this only fires the render deploy for the merged commit.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: Gate (lint, types, unit, evals)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra dev
+      - run: uv run ruff check src tests
+      - run: uv run ruff format --check src tests
+      - run: uv run tach check
+      - run: uv run mypy src
+      - run: uv run pytest tests/unit -q
+      - run: uv run python evals/runner.py
+
+  deploy:
+    name: Trigger Render deploy
+    needs: gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via the Render API
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_SERVICE_ID" ]; then
+            echo "Render secrets not configured; skipping deploy (gate still ran)."
+            exit 0
+          fi
+          curl -fsS -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d '{"clearCache": "do_not_clear"}'
