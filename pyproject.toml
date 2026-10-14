@@ -22,6 +22,8 @@ dependencies = [
     "opentelemetry-exporter-otlp-proto-http>=1.44,<2",
     "opentelemetry-instrumentation-logging>=0.44b0",
     "pyyaml>=6.0",
+    "fastapi>=0.115,<1",
+    "uvicorn[standard]>=0.30,<1",
 ]
 
 [project.optional-dependencies]
@@ -126,6 +128,15 @@ module = [
 ignore_errors = true
 
 [[tool.mypy.overrides]]
+# HTTP service edge (issue #30): FastAPI/Starlette decorators and request
+# plumbing are vendor-glue; the engine, ports and schemas it calls stay strict.
+# Mirrors the other documented adapter exemptions above.
+module = [
+    "knowledge_engine.service.*",
+]
+ignore_errors = true
+
+[[tool.mypy.overrides]]
 # Vendor SDKs without complete stubs: treat as Any (Adapter ports hide them).
 module = [
     "litellm",
@@ -136,9 +147,16 @@ module = [
     "selenium.*",
     "letta.*",
     "psycopg.*",
+    "psycopg_pool",
+    "psycopg_pool.*",
     "supabase",
     "supabase.*",
     "storage3.*",
+    "fastapi",
+    "fastapi.*",
+    "starlette.*",
+    "uvicorn",
+    "uvicorn.*",
 
     "google.*",
     "groq.*",
