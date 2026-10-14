@@ -306,3 +306,24 @@ async def test_thesis_page_content(tmp_path: Path) -> None:
     assert "supported with caveats" in text
     log = (tmp_path / "wiki" / "log.md").read_text(encoding="utf-8")
     assert "thesis" in log
+
+
+async def test_overview_links_use_each_page_subdir(tmp_path: Path) -> None:
+    """Overview entries link to the page's own subdir, not always sources/.
+
+    Regression: _update_overview hardcoded the ``sources/`` prefix, so a
+    concept published via approve_draft got an overview link pointing at a
+    path that does not exist.
+    """
+    from knowledge_engine.infrastructure.wiki import FileWikiStore
+    from knowledge_engine.schemas.wiki import WikiExtraction
+
+    store = FileWikiStore(root=tmp_path / "wiki")
+    await store.compile_extraction(
+        "t1", "rag hallucinations", WikiExtraction(concepts=["Vector Databases"], entities=[], summary="x"), []
+    )
+    published = store.approve_draft("vector-databases")
+    assert Path(published).is_file()
+    overview = (tmp_path / "wiki" / "overview.md").read_text(encoding="utf-8")
+    assert "(concepts/vector-databases.md)" in overview
+    assert "(sources/vector-databases.md)" not in overview

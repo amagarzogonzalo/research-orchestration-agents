@@ -1,6 +1,6 @@
 .PHONY: help install test test-fast lint types arch semgrep agents context check dup \
         profile profiles evals evals-deep evals-live evals-accept sessions wiki-lint \
-        bench bench-accept bench-check \
+        bench bench-accept bench-check wikibench wikibench-accept wikibench-check \
         wiki-db-up wiki-db-down wiki-files-check \
         compress-on compress-off compress-savings compress-help
 
@@ -50,6 +50,15 @@ bench-accept:       ## record bench/baseline.json (review the diff like code)
 bench-check:        ## fail on >10% ram/checkpoint regression vs baseline
 	uv run python -m knowledge_engine.scripts.bench --check
 
+wikibench:          ## LLM wiki benchmark: Tier 0 deterministic suites (offline, no LLM)
+	uv run python -m knowledge_engine.scripts.wikibench --report
+
+wikibench-accept:   ## adopt the current wiki-benchmark metrics as the baseline (review like code)
+	uv run python -m knowledge_engine.scripts.wikibench --accept
+
+wikibench-check:    ## gate the wiki benchmark vs bench/wikibench/baseline.json
+	uv run python -m knowledge_engine.scripts.wikibench --check
+
 wiki-lint:          ## health gate for the compiled wiki (Loop 5; offline)
 	uv run python bin/wiki_lint.py
 
@@ -71,7 +80,7 @@ wiki-db-down:       ## stop the scratch Postgres
 wiki-files-check:   ## read-only files health check (unreferenced/missing-body)
 	uv run python bin/wiki_files_check.py
 
-check: lint types arch semgrep agents context test evals bench-check   ## everything. This is the gate.
+check: lint types arch semgrep agents context test evals bench-check wikibench-check   ## everything. This is the gate.
 	@echo green
 
 # ---- models ---------------------------------------------------------------

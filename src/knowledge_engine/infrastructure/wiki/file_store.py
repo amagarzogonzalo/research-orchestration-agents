@@ -644,7 +644,7 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             fm, _ = common.split_frontmatter(path.read_text(encoding="utf-8"))
             title = common.fm_title(fm, path)
             date = str(fm.get("date") or "")
-            entries.append(f"- [{title}](sources/{slug}.md) {date}".rstrip())
+            entries.append(f"- [{title}]({path.parent.name}/{slug}.md) {date}".rstrip())
         overview = self.root / common.OVERVIEW_NAME
         overview.write_text("# Overview\n\n" + "\n".join(entries) + ("\n" if entries else ""), encoding="utf-8")
 
