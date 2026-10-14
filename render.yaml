@@ -27,6 +27,9 @@ services:
       - key: LANGGRAPH_STRICT_MSGPACK
         value: "true"
       # --- secrets: set in the dashboard ---
+      # DATABASE_URL MUST be the Supabase session pooler (IPv4):
+      # postgresql://postgres.<ref>:...@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require
+      # (Render has no outbound IPv6; the direct db.<ref>.supabase.co host is IPv6-only.)
       - key: DATABASE_URL
         sync: false
       - key: SUPABASE_URL
