@@ -97,6 +97,22 @@ class TestSidecar:
         assert [s for s, _p, _sc in first] == [s for s, _p, _sc in second]
         assert first, "aqueduct page must be findable via fusion"
 
+    def test_hybrid_never_returns_duplicate_pages(self, tmp_path: Path) -> None:
+        """FTS (namespaced slugs) + scan (bare stems) fuse per page, not per key.
+
+        Regression: the two rankers key the same page differently
+        (``sources/rag`` vs ``rag``); fusion must normalize before merging so
+        one page never occupies two result slots.
+        """
+        root = tmp_path / "wiki"
+        _seed_vault(root)
+        sidecar = WikiSidecar(root)
+        sidecar.build()
+        rows = sidecar.hybrid_search("retrieval generation", limit=3)
+        assert rows, "hybrid search must find the RAG page"
+        stems = [slug.rsplit("/", 1)[-1] for slug, _path, _score in rows]
+        assert len(stems) == len(set(stems)), f"duplicate page in hybrid results: {rows}"
+
     def test_incremental_insert_page(self, tmp_path: Path) -> None:
         """insert_page updates an existing sidecar without full rebuild."""
         root = tmp_path / "wiki"

@@ -119,37 +119,43 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         handle = self._from()
         summaries = self._index_summaries(handle)
         hits: list[WikiHit] = []
-        try:
-            objects = handle.list(_PAGES_PREFIX) or []
-        except Exception:  # noqa: BLE001 - listing failure degrades to no hits
-            return []
-        for obj in objects:
-            name = getattr(obj, "name", None) or (obj.get("name") if isinstance(obj, dict) else None)
-            if not name or not name.endswith(".md"):
+        for prefix in (_PAGES_PREFIX, "synthesis", "queries", "concepts", "entities"):
+            try:
+                objects = handle.list(prefix) or []
+            except Exception:  # noqa: BLE001 - listing failure degrades to no hits
                 continue
-            slug = name[: -len(".md")]
-            text = self._download(handle, f"{_PAGES_PREFIX}/{name}")
-            if text is None:
-                continue
-            fm, body = common.split_frontmatter(text)
-            title = common.fm_title(fm, Path(name))
-            value = common.score(query_terms, title, body)
-            if value <= 0.0:
-                continue
-            loc = f"{self._bucket}/{_PAGES_PREFIX}/{name}"
-            qsha = str(fm.get("query_sha256") or "")
-            hits.append(
-                WikiHit(
-                    slug=slug,
-                    title=title,
-                    path=loc,
-                    score=value,
-                    summary=summaries.get(slug, ""),
-                    query_sha256=qsha,
+            for obj in objects:
+                name = getattr(obj, "name", None) or (obj.get("name") if isinstance(obj, dict) else None)
+                if not name or not name.endswith(".md"):
+                    continue
+                slug = name[: -len(".md")]
+                text = self._download(handle, f"{prefix}/{name}")
+                if text is None:
+                    continue
+                fm, body = common.split_frontmatter(text)
+                title = common.fm_title(fm, Path(name))
+                value = common.score(query_terms, title, body)
+                if value <= 0.0:
+                    continue
+                loc = f"{self._bucket}/{prefix}/{name}"
+                qsha = str(fm.get("query_sha256") or "")
+                hits.append(
+                    WikiHit(
+                        slug=slug,
+                        title=title,
+                        path=loc,
+                        score=value,
+                        summary=summaries.get(slug, ""),
+                        query_sha256=qsha,
+                    )
                 )
-            )
-        hits.sort(key=lambda h: (-h.score, h.slug))
-        return hits[:limit]
+        deduped: dict[str, WikiHit] = {}
+        for hit in hits:
+            prior = deduped.get(hit.slug)
+            if prior is None or hit.score > prior.score:
+                deduped[hit.slug] = hit
+        ranked = sorted(deduped.values(), key=lambda h: (-h.score, h.slug))
+        return ranked[:limit]
 
     async def read_page(self, slug: str) -> str | None:
         """Read one page's markdown by slug.
@@ -308,6 +314,7 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         key = f"synthesis/{slug}.md"
         rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + "\n".join(lines) + "\n"
         handle.upload(key, rendered.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
+        self._upsert_section_index(handle, slug, fm["title"], fm["tldr"], section="Synthesis", subdir="synthesis")
         self._append_log(handle, "thesis", fm["title"])
         return f"{self._bucket}/{key}"
 
@@ -343,6 +350,7 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
         key = f"queries/{slug}.md"
         rendered = "---\n" + yaml.safe_dump(fm, sort_keys=False) + "---\n\n" + f"## Answer\n\n{text.rstrip()}\n"
         handle.upload(key, rendered.encode("utf-8"), {"content-type": "text/markdown", "upsert": "true"})
+        self._upsert_section_index(handle, slug, title, fm["tldr"], section="Queries", subdir="queries")
         self._append_log(handle, "query", title)
         return f"{self._bucket}/{key}"
 
@@ -485,6 +493,37 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
                 {"content-type": "text/markdown", "upsert": "true"},
             )
         return 1 if changed else 0
+
+    def _upsert_section_index(
+        self, handle: Any, slug: str, title: str, summary: str, *, section: str, subdir: str
+    ) -> None:
+        """Add an entry under the index's named section (Synthesis/Queries).
+
+        Mirrors the file store's section index so thesis and answer pages stay
+        indexed (no index drift) in the cloud wiki.
+
+        Args:
+            handle: Bucket handle.
+            slug: Page slug.
+            title: Page title.
+            summary: One-line summary.
+            section: Index section heading.
+            subdir: Page subdirectory in the link.
+        """
+        text = self._download(handle, common.INDEX_NAME) or "# Knowledge Base Index\n"
+        marker = f"## {section}\n"
+        if marker not in text:
+            text = text.rstrip() + "\n\n" + marker
+        head, _, tail = text.partition(marker)
+        entry = f"- [{title}]({subdir}/{slug}.md) — {summary}"
+        tail_lines = tail.splitlines()
+        if not any(f"]({subdir}/{slug}.md)" in line for line in tail_lines):
+            tail = "\n".join([entry] + [line for line in tail_lines if line.strip()]) + "\n"
+            handle.upload(
+                common.INDEX_NAME,
+                (head + marker + tail).encode("utf-8"),
+                {"content-type": "text/markdown", "upsert": "true"},
+            )
 
     def _append_log(self, handle: Any, op: str, title: str) -> None:
         """Append one entry to the bucket ``log.md``.
