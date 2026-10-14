@@ -46,6 +46,17 @@ Supabase → **Connect → Session pooler**. Example for an `eu-central-1` proje
 `aws-0-eu-central-1.pooler.supabase.com`. Use session mode (port `5432`), not the
 transaction pooler (`6543`), so prepared statements work for LangGraph.
 
+## Security posture
+
+- **Storage buckets are private** (`articles`, `sources`, `bodies`, `wiki`). The
+  adapters create them private and heal any public bucket back to private; reads
+  go through the authenticated service, never a public object URL.
+- **All data routes require the bearer token** — `/research`, `/wiki/query`,
+  `/wiki/ingest`, `/wiki/lint`. Only `/health` and `/readiness` are open (the
+  platform probe needs them).
+- `service_role` (`SUPABASE_SECRET_KEY`) is server-side only and never returned
+  in responses. TLS is terminated by Render/Cloudflare.
+
 ## One-time setup
 
 1. Apply the wiki schema to the Supabase project (the app only verifies it):

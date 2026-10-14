@@ -195,9 +195,9 @@ def create_app(
             raise HTTPException(status_code=404, detail="unknown task id")
         return record
 
-    @app.get("/wiki/query")
+    @app.get("/wiki/query", dependencies=[Depends(require_token)])
     async def wiki_query(q: str = Query(...), limit: int = 3) -> dict[str, Any]:
-        """Answer from the compiled wiki with no live call.
+        """Answer from the compiled wiki with no live call (token-gated).
 
         Args:
             q: Query text.

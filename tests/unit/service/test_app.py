@@ -153,12 +153,13 @@ def test_result_unknown_task_is_404() -> None:
     assert client.get("/result/nope").status_code == 404
 
 
-def test_wiki_query_is_open() -> None:
-    """GET /wiki/query needs no auth and returns hits."""
+def test_wiki_query_requires_token() -> None:
+    """GET /wiki/query is gated by the bearer token (accumulated knowledge is not public)."""
     client, _ = _client(api_token="secret")
-    resp = client.get("/wiki/query", params={"q": "rag"})
-    assert resp.status_code == 200
-    assert resp.json() == {"hits": []}
+    assert client.get("/wiki/query", params={"q": "rag"}).status_code == 401
+    ok = client.get("/wiki/query", params={"q": "rag"}, headers={"Authorization": "Bearer secret"})
+    assert ok.status_code == 200
+    assert ok.json() == {"hits": []}
 
 
 def test_wiki_ingest_and_lint_require_token() -> None:
