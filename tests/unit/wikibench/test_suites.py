@@ -64,12 +64,12 @@ async def test_robustness_survives_hostile_input(tmp_path: Path) -> None:
     assert result.metrics["index_complete"] == 1.0
 
 
-async def test_workflows_run_research_and_deep(tmp_path: Path) -> None:
-    """The workflows suite exercises research and deep research end to end."""
+async def test_workflows_run_all_workflows(tmp_path: Path) -> None:
+    """The workflows suite exercises research, qa, summary and deep end to end."""
     result = await run_suite("workflows", workspace=tmp_path, scale=1, seed=7)
-    assert result.metrics["deep_artifact_ok"] == 1.0
-    assert result.metrics["research_supersteps"] > 0
-    assert result.metrics["deep_supersteps"] > 0
+    for workflow in ("research", "qa", "summary", "deep"):
+        assert result.metrics[f"{workflow}_ok"] == 1.0
+        assert result.metrics[f"{workflow}_supersteps"] > 0
 
 
 async def test_unknown_suite_raises(tmp_path: Path) -> None:

@@ -25,7 +25,7 @@ Suites are grouped by the question a user asks; `--use-case` runs a whole group.
 | `file-research` | `ingest` | Does it avoid duplicates, drift and spurious rewrites? |
 | `maintain-wiki` | `lint` | Does it find its own defects? |
 | `maintain-wiki` | `robustness` | Does it survive hostile input? |
-| `run-research` | `workflows` | Do the `research` and `deep` workflows complete? |
+| `run-research` | `workflows` | Do research, qa, summary and deep complete? |
 
 ## Commands
 
@@ -98,6 +98,8 @@ calls. The rising zero-call rate is the compounding curve.
 | Workflow | Supersteps | Artifact |
 |---|---|---|
 | research | 13 | ok |
+| qa | 9 | ok |
+| summary | 10 | ok |
 | deep | 15 | ok |
 
 These match the committed perf baseline (`bench/baseline.json`) exactly — the

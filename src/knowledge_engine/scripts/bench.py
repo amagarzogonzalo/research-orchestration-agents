@@ -48,7 +48,7 @@ _GATED_KEYS = ("checkpoint_bytes", "supersteps")
 
 
 @dataclass(frozen=True)
-class _BenchSearch(SearchPort):
+class BenchSearch(SearchPort):
     """Deterministic two-record federated search (no network)."""
 
     async def search(self, query: str, *, limit: int = 10) -> list[SourceRecord]:
@@ -80,7 +80,7 @@ class _BenchSearch(SearchPort):
 
 
 @dataclass(frozen=True)
-class _BenchScrape(ScrapePort):
+class BenchScrape(ScrapePort):
     """Deterministic body fetch (no network)."""
 
     async def to_markdown(self, url: str) -> DocumentBody:
@@ -97,7 +97,7 @@ class _BenchScrape(ScrapePort):
 
 
 @dataclass(frozen=True)
-class _BenchProvider(ProviderPort):
+class BenchProvider(ProviderPort):
     """Deterministic provider: canned replies keyed by the calling node's system prompt."""
 
     async def complete(self, req: ChatRequest) -> ChatResult:
@@ -138,7 +138,7 @@ class _BenchProvider(ProviderPort):
         return {}
 
 
-async def _measure(workflow: str, root: Path) -> dict[str, int | float]:
+async def measure_workflow(workflow: str, root: Path) -> dict[str, int | float]:
     """Run one workflow end-to-end and collect its metrics.
 
     Args:
@@ -156,9 +156,9 @@ async def _measure(workflow: str, root: Path) -> dict[str, int | float]:
             store_root=str(root / "store"),
             checkpointer_kind="file",
             store_kind="memory",
-            search=_BenchSearch(),
-            scrape=_BenchScrape(),
-            provider=_BenchProvider(),
+            search=BenchSearch(),
+            scrape=BenchScrape(),
+            provider=BenchProvider(),
         )
         result = await engine.research(
             "state of the art in retrieval augmented generation",
@@ -196,12 +196,12 @@ def collect() -> dict[str, dict[str, int | float]]:
 
     async def _all() -> dict[str, dict[str, int | float]]:
         with tempfile.TemporaryDirectory() as scratch:
-            await _measure(_WORKFLOWS[0], Path(scratch))  # warmup: lazy imports, gc state
+            await measure_workflow(_WORKFLOWS[0], Path(scratch))  # warmup: lazy imports, gc state
         out: dict[str, dict[str, int | float]] = {}
         for workflow in _WORKFLOWS:
             gc.collect()
             with tempfile.TemporaryDirectory() as scratch:
-                out[workflow] = await _measure(workflow, Path(scratch))
+                out[workflow] = await measure_workflow(workflow, Path(scratch))
         return out
 
     gc.collect()
