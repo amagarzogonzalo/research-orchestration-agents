@@ -209,22 +209,29 @@ class WikiSidecar:
             return []
         fts = self.search(query, limit=limit * 4)
         scan = _scan_scores(self.root, query)
-        merged: dict[str, float] = {}
-        for rank, (slug, _path, _score) in enumerate(fts, start=1):
-            merged[slug] = merged.get(slug, 0.0) + 1.0 / (rrf_k + rank)
-        for rank, (slug, _score) in enumerate(scan, start=1):
-            merged[slug] = merged.get(slug, 0.0) + 1.0 / (rrf_k + rank)
         conn = sqlite3.connect(self.db_path)
         try:
             rows = conn.execute("SELECT slug, path FROM notes").fetchall()
-            by_stem = {str(slug).rsplit("/", 1)[-1]: str(path) for slug, path in rows}
+            by_slug: dict[str, str] = {}
+            by_stem: dict[str, list[str]] = {}
+            for slug, path in rows:
+                by_slug[str(slug)] = str(path)
+                by_stem.setdefault(str(slug).rsplit("/", 1)[-1], []).append(str(slug))
         finally:
             conn.close()
+        merged: dict[str, float] = {}
+        for rank, (slug, _path, _score) in enumerate(fts, start=1):
+            merged[slug] = merged.get(slug, 0.0) + 1.0 / (rrf_k + rank)
+        for rank, (stem, _score) in enumerate(scan, start=1):
+            # Scan keys are bare stems while FTS keys are namespaced
+            # (``sources/rag`` vs ``rag``); fuse on the namespaced slug so one
+            # page never occupies two result slots.
+            for slug in by_stem.get(stem, [stem]):
+                merged[slug] = merged.get(slug, 0.0) + 1.0 / (rrf_k + rank)
         ranked = sorted(merged.items(), key=lambda kv: (-kv[1], kv[0]))
         out: list[tuple[str, str, float]] = []
         for slug, score in ranked:
-            stem = slug.rsplit("/", 1)[-1]
-            out.append((slug, by_stem.get(stem, slug), score))
+            out.append((slug, by_slug.get(slug, slug), score))
             if len(out) >= limit:
                 break
         return out
