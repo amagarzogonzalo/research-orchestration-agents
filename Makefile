@@ -1,4 +1,4 @@
-.PHONY: help install test test-fast lint types arch semgrep agents context check dup \
+.PHONY: help install serve test test-fast lint types arch semgrep agents context check dup \
         profile profiles evals evals-deep evals-live evals-accept sessions wiki-lint \
         bench bench-accept bench-check wikibench wikibench-accept wikibench-check \
         retention retention-apply \
@@ -10,6 +10,9 @@ help:
 
 install:            ## install deps into .venv (uv)
 	uv sync --extra dev
+
+serve:              ## run the HTTP service locally (uvicorn; Swagger at /docs)
+	uv run python bin/api_run.py
 
 # ---- the gate -------------------------------------------------------------
 test:               ## unit/integration/e2e (offline; live excluded by default)

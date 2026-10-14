@@ -11,6 +11,10 @@ no broker, no database server.
 
 Design rationale lives in [docs/plans](docs/plans/0000-overview.md) as ADRs.
 
+**New here?** Start with [docs/quickstart.md](docs/quickstart.md) — a no-keys
+offline path in ~2 minutes, plus the deployed service at
+<https://research-orchestration-agents.onrender.com/docs>.
+
 ## Layout
 
 ```
@@ -31,13 +35,15 @@ for the single-user design).
 
 ## Install
 
+Prerequisite: Python **3.11 or 3.12** and [uv](https://docs.astral.sh/uv/).
+
 ```bash
-python -m venv .venv && .venv\Scripts\activate   # win32
-pip install -e ".[dev, providers]"               # + scrape / vector / memory extras as needed
-cp .env.example .env                             # fill free-tier LLM keys
+make install            # uv sync --extra dev
+cp .env.example .env    # fill free-tier LLM keys (optional for offline use)
 ```
 
 Runtime floor: **Python 3.11 or 3.12** (`requires-python` enforces this).
+See [docs/quickstart.md](docs/quickstart.md) for the offline and online paths.
 
 ## Wiki layer (Karpathy pattern, files-first)
 
@@ -59,6 +65,8 @@ Ask the wiki directly (no live call): `await engine.wiki_query("topic")`.
 Full delivery report: `docs/plans/0027-0030`, plan: `docs/LLM_WIKI.md`.
 
 ## Cloud service (Render + Supabase)
+
+Live: <https://research-orchestration-agents.onrender.com> (Swagger at `/docs`).
 
 The library also ships a zero-cost HTTP facade (`src/knowledge_engine/service/`,
 issue #30) so the research + wiki run fully online:
