@@ -90,6 +90,7 @@ def create_app(
     readiness_probe: Callable[[], Awaitable[ReadinessReport]] | None = None,
     rate_limit_per_minute: int = 0,
     job_timeout_seconds: float = 0,
+    enable_docs: bool = True,
 ) -> FastAPI:
     """Build the FastAPI app around an engine + job store.
 
@@ -101,6 +102,7 @@ def create_app(
         readiness_probe: Optional readiness check; defaults to always-ok.
         rate_limit_per_minute: Per-key sliding-window limit (<= 0 disables).
         job_timeout_seconds: Abort a run after this long (<= 0 disables).
+        enable_docs: Serve Swagger/OpenAPI (set False in prod to hide the shape).
 
     Returns:
         FastAPI: The configured application.
@@ -127,7 +129,14 @@ def create_app(
         if close is not None:
             await close()
 
-    app = FastAPI(title="Knowledge Engine", version="0.1.0", lifespan=lifespan)
+    app = FastAPI(
+        title="Knowledge Engine",
+        version="0.1.0",
+        lifespan=lifespan,
+        docs_url="/docs" if enable_docs else None,
+        redoc_url="/redoc" if enable_docs else None,
+        openapi_url="/openapi.json" if enable_docs else None,
+    )
     app.state.engine = engine
     app.state.jobs = jobs
     limiter = RateLimiter(rate_limit_per_minute)

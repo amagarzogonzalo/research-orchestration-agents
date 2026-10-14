@@ -1,0 +1,32 @@
+name: Wiki backup
+
+# Supabase Free has no PITR: dump the curated wiki bucket to a GitHub artifact
+# weekly. Requires the repo secrets SUPABASE_URL + SUPABASE_SECRET_KEY.
+on:
+  schedule:
+    - cron: "0 3 * * 0"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: Back up the wiki bucket
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra dev --extra supabase
+      - name: Dump the wiki bucket
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SECRET_KEY }}
+        run: uv run python -m knowledge_engine.scripts.backup_wiki --bucket wiki --out wiki-backup
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wiki-backup
+          path: wiki-backup/
+          if-no-files-found: warn
