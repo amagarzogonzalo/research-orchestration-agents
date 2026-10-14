@@ -7,9 +7,25 @@ discipline, cost compounding, ingest integrity, lint detection, robustness and
 the research/deep workflows** — so the wiki's behaviour is measured, not
 asserted.
 
-Code lives in `src/knowledge_engine/scripts/wikibench/` (linted, typed, and
-covered by `tests/unit/wikibench/`); the committed baseline and generated
-reports live here.
+The framework is a first-class library at `src/knowledge_engine/wikibench/`
+(contracts, metrics, corpus, gate, per-use-case suites), covered by
+`tests/unit/wikibench/`. Only the printing CLI lives in
+`src/knowledge_engine/scripts/wikibench.py`, so the library stays `print`-free.
+This directory holds the committed baseline and generated reports.
+
+## Use cases
+
+Suites are grouped by the question a user asks; `--use-case` runs a whole group.
+
+| Use case | Suite | Question |
+|---|---|---|
+| `answer-from-wiki` | `retrieval` | Does the right page come back? |
+| `answer-from-wiki` | `miss` | Does it stay quiet, and route exact vs scored safely? |
+| `compound-knowledge` | `cost` | Does it get cheaper over time? |
+| `file-research` | `ingest` | Does it avoid duplicates, drift and spurious rewrites? |
+| `maintain-wiki` | `lint` | Does it find its own defects? |
+| `maintain-wiki` | `robustness` | Does it survive hostile input? |
+| `run-research` | `workflows` | Do the `research` and `deep` workflows complete? |
 
 ## Commands
 
@@ -19,11 +35,12 @@ make wikibench-check   # gate vs bench/wikibench/baseline.json (in `make check`)
 make wikibench-accept  # adopt the current metrics as the baseline (review like code)
 ```
 
-The raw CLI supports `--suite`, `--scale`, `--seed`, `--backend`, `--tier`,
-`--json`, `--report`:
+Raw CLI (supports `--suite`, `--use-case`, `--scale`, `--seed`, `--backend`,
+`--tier`, `--json`, `--report`):
 
 ```
-uv run python -m knowledge_engine.scripts.wikibench.runner --suite a_retrieval --scale 300
+uv run python -m knowledge_engine.scripts.wikibench --use-case answer-from-wiki
+uv run python -m knowledge_engine.scripts.wikibench --suite retrieval --scale 300
 ```
 
 ## Design
@@ -35,14 +52,13 @@ uv run python -m knowledge_engine.scripts.wikibench.runner --suite a_retrieval -
   report; the timing-free suites replay bit-identically (asserted in tests).
 - **Same suite on every backend.** Tier 0 runs the `file` backend today; the
   Supabase-fake, Postgres and staging backends are the next tiers (below).
-- **No composite score.** Per-suite results only; a perfect hit rate with an
-  unsupported claim rate would not average out to "good".
-- **Compared against baselines.** Suite A scores the scan ranker and the hybrid
-  (FTS5 BM25 + scan RRF) ranker on the same corpus.
+- **No composite score.** Per-suite results only.
+- **Compared against baselines.** The retrieval suite scores the scan ranker and
+  the hybrid (FTS5 BM25 + scan RRF) ranker on the same corpus.
 
 ## One-page report (scale 10, seed 7, `file` backend)
 
-### Retrieval (suite A)
+### `answer-from-wiki` — retrieval quality
 
 | Ranker | Recall@1 | Recall@3 | Recall@5 | Dup rate |
 |---|---|---|---|---|
@@ -52,7 +68,7 @@ uv run python -m knowledge_engine.scripts.wikibench.runner --suite a_retrieval -
 MRR 1.00, nDCG@5 1.00. Hybrid is never below scan; one page never occupies two
 slots (the duplicate-page regression the audit fixed stays fixed).
 
-### Cost compounding (suite C) — 200-query stream
+### `compound-knowledge` — cost compounding (200-query stream)
 
 | Metric | Value |
 |---|---|
@@ -64,20 +80,20 @@ slots (the duplicate-page regression the audit fixed stays fixed).
 Each fact is filed once, then repeated; repeats exact-hit and spend zero live
 calls. The rising zero-call rate is the compounding curve.
 
-### Trust & integrity (suites B, D, I, J)
+### Trust & integrity
 
-| Suite | Metric | Value |
+| Use case | Metric | Value |
 |---|---|---|
-| B miss | false-positive rate | 0.00 |
-| B miss | exact/scored classification accuracy | 1.00 |
-| D ingest | verdict accuracy (NEW/NO_MATERIAL/UPDATE) | 1.00 |
-| D ingest | idempotent-replay byte equality | 1.00 |
-| D ingest | index drift / duplicate-page rate | 0.00 / 0.00 |
-| I lint | clean-vault ok | 1.00 |
-| I lint | per-class recall / precision | 1.00 / 1.00 |
-| J robustness | injection / huge / unicode / index-complete | 1 / 1 / 1 / 1 |
+| answer-from-wiki (`miss`) | false-positive rate | 0.00 |
+| answer-from-wiki (`miss`) | exact/scored classification accuracy | 1.00 |
+| file-research (`ingest`) | verdict accuracy (NEW/NO_MATERIAL/UPDATE) | 1.00 |
+| file-research (`ingest`) | idempotent-replay byte equality | 1.00 |
+| file-research (`ingest`) | index drift / duplicate-page rate | 0.00 / 0.00 |
+| maintain-wiki (`lint`) | clean-vault ok | 1.00 |
+| maintain-wiki (`lint`) | per-class recall / precision | 1.00 / 1.00 |
+| maintain-wiki (`robustness`) | injection / huge / unicode / index-complete | 1 / 1 / 1 / 1 |
 
-### Workflow coverage (suite W)
+### `run-research` — workflow coverage
 
 | Workflow | Supersteps | Artifact |
 |---|---|---|
@@ -105,10 +121,10 @@ ranker would move wiki behaviour that the audit's regression tests pin.
 
 ## Execution tiers (roadmap)
 
-- **Tier 0 (implemented)** — suites A, B, C, D, I, J, W on the `file` backend.
-  No LLM; sits in `make check`.
-- **Tier 1** — suites E (provenance/faithfulness), F (contradiction), G
-  (temporal), H (synthesis/multi-hop) with a scripted fake provider.
+- **Tier 0 (implemented)** — retrieval, miss, cost, ingest, lint, robustness,
+  workflows on the `file` backend. No LLM; sits in `make check`.
+- **Tier 1** — provenance/faithfulness, contradiction, temporal and
+  synthesis/multi-hop suites with a scripted fake provider.
 - **Tier 2** — the same suites with live free models; trend only, never a gate.
 - **Tier 3** — backend parity across Supabase-fake/Postgres and the staging
   deployment (issues #30/#31), including concurrent-write coherence.

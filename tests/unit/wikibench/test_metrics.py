@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import pytest
 
-from knowledge_engine.scripts.wikibench import metrics
+from knowledge_engine.wikibench import metrics
 
 
 def test_recall_at_k_counts_gold_in_top_k() -> None:

@@ -15,7 +15,7 @@ import yaml
 
 from knowledge_engine.infrastructure.wiki import common
 from knowledge_engine.infrastructure.wiki.sidecar import WikiSidecar
-from knowledge_engine.scripts.wikibench.schemas import CorpusPage, QueryCase, QueryKind
+from knowledge_engine.wikibench.schemas import CorpusPage, QueryCase, QueryKind
 
 _ADJ = (
     "Vorlund",
@@ -140,7 +140,7 @@ def _build_queries(pages: list[CorpusPage]) -> list[QueryCase]:
         queries.append(
             QueryCase(
                 id=f"exact-{i:04d}",
-                suite="a_retrieval",
+                suite="retrieval",
                 kind=QueryKind.EXACT,
                 query=page.title,
                 gold_slugs=[page.slug],
@@ -149,7 +149,7 @@ def _build_queries(pages: list[CorpusPage]) -> list[QueryCase]:
         queries.append(
             QueryCase(
                 id=f"para-{i:04d}",
-                suite="a_retrieval",
+                suite="retrieval",
                 kind=QueryKind.PARAPHRASE,
                 query=f"{page.marker} {noun} {adj}",
                 gold_slugs=[page.slug],
@@ -158,7 +158,7 @@ def _build_queries(pages: list[CorpusPage]) -> list[QueryCase]:
         queries.append(
             QueryCase(
                 id=f"alias-{i:04d}",
-                suite="a_retrieval",
+                suite="retrieval",
                 kind=QueryKind.ALIAS,
                 query=page.marker,
                 gold_slugs=[page.slug],
@@ -169,14 +169,14 @@ def _build_queries(pages: list[CorpusPage]) -> list[QueryCase]:
         queries.append(
             QueryCase(
                 id=f"multi-{i:04d}",
-                suite="a_retrieval",
+                suite="retrieval",
                 kind=QueryKind.MULTI_PAGE,
                 query=f"{first.marker} {second.marker}",
                 gold_slugs=[first.slug, second.slug],
             )
         )
     for j, text in enumerate(_UNANSWERABLE):
-        queries.append(QueryCase(id=f"miss-{j}", suite="b_miss", kind=QueryKind.UNANSWERABLE, query=text))
+        queries.append(QueryCase(id=f"miss-{j}", suite="miss", kind=QueryKind.UNANSWERABLE, query=text))
     return queries
 
 
@@ -184,8 +184,8 @@ def seed_vault(root: Path, corpus: Corpus, *, sidecar: bool = False) -> None:
     """Write the corpus as a markdown vault (index + pages), no ingest cost.
 
     Seeding bypasses the store's ingest pipeline on purpose: suites that
-    isolate retrieval quality (A) or lint (I) must not pay ingest's O(N)
-    index/overview rewrites.
+    isolate retrieval quality or lint must not pay ingest's O(N) index/overview
+    rewrites.
 
     Args:
         root: Vault root (created on demand).

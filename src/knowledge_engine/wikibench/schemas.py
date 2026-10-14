@@ -75,7 +75,8 @@ class SuiteResult(BaseModel):
 
     Attributes:
         model_config: Forbid extra keys.
-        name: Suite name (e.g. ``a_retrieval``).
+        name: Suite name (e.g. ``retrieval``).
+        use_case: Use case the suite belongs to (e.g. ``answer-from-wiki``).
         backend: Backend id (``file``).
         tier: Execution tier (``0``).
         scale: Corpus size used.
@@ -87,6 +88,7 @@ class SuiteResult(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     name: str
+    use_case: str
     backend: str
     tier: str
     scale: int
