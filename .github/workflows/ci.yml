@@ -55,9 +55,14 @@ jobs:
   wikibench:
     name: WikiBench gate (deterministic, offline)
     runs-on: ubuntu-latest
+    env:
+      OTEL_TRACES_EXPORTER: ""
+      OTEL_METRICS_EXPORTER: "none"
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
       - name: Install deps
         run: uv sync --extra dev
       - name: WikiBench gate vs bench/wikibench/baseline.json
@@ -65,3 +70,9 @@ jobs:
       - name: Publish report to the run summary
         if: always()
         run: cat bench/wikibench/report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Upload report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wikibench-report
+          path: bench/wikibench/report.json
