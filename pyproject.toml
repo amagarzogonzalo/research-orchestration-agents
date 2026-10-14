@@ -117,6 +117,7 @@ module = [
     "knowledge_engine.store.supabase_artifact_store",
     "knowledge_engine.infrastructure.wiki.supabase_store",
     "knowledge_engine.scripts.retention",
+    "knowledge_engine.scripts.backup_wiki",
 ]
 ignore_errors = true
 
