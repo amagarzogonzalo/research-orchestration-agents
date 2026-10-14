@@ -99,6 +99,7 @@ def _build_app() -> FastAPI:
         readiness_probe=_readiness,
         rate_limit_per_minute=int(os.environ.get("RATE_LIMIT_PER_MINUTE", "30")),
         job_timeout_seconds=int(os.environ.get("JOB_TIMEOUT_SECONDS", "900")),
+        enable_docs=_env_flag("ENABLE_DOCS", True),
     )
 
 

@@ -72,6 +72,16 @@ async def test_workflows_run_all_workflows(tmp_path: Path) -> None:
         assert result.metrics[f"{workflow}_supersteps"] > 0
 
 
+async def test_provenance_links_resolve(tmp_path: Path) -> None:
+    """The provenance suite finds no broken links and full frontmatter."""
+    result = await run_suite("provenance", workspace=tmp_path, scale=5, seed=7)
+    assert result.passed
+    assert result.use_case == "maintain-wiki"
+    assert result.metrics["ok"] == 1.0
+    assert result.metrics["broken_links"] == 0.0
+    assert result.metrics["pages"] >= 3.0
+
+
 async def test_unknown_suite_raises(tmp_path: Path) -> None:
     """An unknown suite name raises a KeyError."""
     with pytest.raises(KeyError):

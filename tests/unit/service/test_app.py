@@ -221,6 +221,15 @@ async def test_job_timeout_marks_error() -> None:
     assert "timed out" in (body["error"] or "")
 
 
+def test_docs_can_be_disabled() -> None:
+    """enable_docs=False removes Swagger/OpenAPI from the app."""
+    app = create_app(engine=FakeEngine(), jobs=InMemoryJobStore(), enable_docs=False)
+    client = TestClient(app)
+    assert client.get("/docs").status_code == 404
+    assert client.get("/openapi.json").status_code == 404
+    assert client.get("/health").status_code == 200
+
+
 def test_lifespan_runs_setup_and_close() -> None:
     """Entering/exiting the app lifespan calls engine.setup()/close()."""
     engine = FakeEngine()
