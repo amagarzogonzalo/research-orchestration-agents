@@ -31,7 +31,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install pydantic tenacity httpx opentelemetry-sdk \
             opentelemetry-exporter-otlp-proto-http pytest pytest-asyncio \
-            langgraph pyyaml hypothesis
+            langgraph pyyaml hypothesis fastapi
 
       - name: Unit tests (pure logic, offline)
         run: python -m pytest tests/unit -q -p no:cacheprovider
