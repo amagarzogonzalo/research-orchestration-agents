@@ -25,3 +25,6 @@ wiki-graph.json
 # baseline (bench/wikibench/baseline.json) is the gate, not these.
 bench/wikibench/report.json
 bench/wikibench/report.md
+
+# Local, non-committed share docs (may contain the live API token — never commit)
+share/
