@@ -19,8 +19,11 @@ Copy the values from your local `.env` (never commit them).
 | `UNPAYWALL_EMAIL` | optional | OA PDF lookup; blank = skip |
 | `JINA_API_KEY` | optional | raises the Jina scrape tier |
 | `TAVILY_API_KEY`, `EXA_API_KEY`, `SERPER_API_KEY` | optional | general-web fallback chain |
-| `API_TOKEN` | optional (secret) | bearer token for data routes |
+| `API_TOKEN` | optional (secret) | write token for `/research` + wiki mutations |
+| `API_TOKEN_READONLY` | optional (secret) | read-only token for `/wiki/query` + `/result` (safe sharing) |
 | `RATE_LIMIT_PER_MINUTE` | optional | per-key sliding-window limit on data routes (default 30; `<= 0` disables) |
+| `JOB_TIMEOUT_SECONDS` | optional | abort a run after this long (default 900; `<= 0` disables) |
+| `CLEANUP_AFTER_RUN` | optional | delete a thread's checkpoints after each run (default true; protects 500 MB) |
 | `CHECKPOINTER_KIND` | set by blueprint | `postgres` |
 | `STORE_KIND` | set by blueprint | `postgres` |
 | `ARTIFACT_STORE_KIND` | set by blueprint | `supabase` |
@@ -69,12 +72,21 @@ make retention-apply    # perform the deletions
 
 `knowledge_engine.scripts.retention` deletes Storage objects older than
 `--days` (default 30) while always keeping the `--keep-runs` most recently
-updated runs (default 5). It reports per-bucket object counts and MB before and
-after, plus the Postgres database size, so the effect is measurable. The curated
-`wiki` bucket is **never** pruned unless `--include-wiki` is passed.
+updated runs (default 5). It also prunes `service_jobs` older than `--days` and
+reports per-bucket MB, the Postgres database size, and warnings above
+`--warn-pct` (default 80%) of the free limits — before **and** after. The
+curated `wiki` bucket is **never** pruned unless `--include-wiki` is passed.
+Checkpoint growth is bounded separately by `CLEANUP_AFTER_RUN=true`.
 
 A weekly job (`.github/workflows/retention.yml`) runs it automatically; set the
 repo secrets `SUPABASE_URL`, `SUPABASE_SECRET_KEY`, `DATABASE_URL` for it.
+
+## Keepalive (anti-pause + growth)
+
+`.github/workflows/keepalive.yml` runs daily: it wakes the service, checks
+`/readiness`, and files one cheap `qa` run so the wiki keeps compounding and the
+Supabase project never hits its 7-day idle pause. Set the repo secret
+`API_TOKEN` to enable the run step.
 
 ## One-time setup
 

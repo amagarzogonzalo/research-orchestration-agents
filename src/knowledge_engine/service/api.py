@@ -67,20 +67,38 @@ async def _readiness() -> ReadinessReport:
     return ReadinessReport(ok=all(checks.values()), checks=checks)
 
 
+def _env_flag(name: str, default: bool) -> bool:
+    """Read a boolean environment flag.
+
+    Args:
+        name: Environment variable name.
+        default: Value when the variable is unset.
+
+    Returns:
+        bool: The parsed flag.
+    """
+    raw = os.environ.get(name)
+    if raw is None:
+        return default
+    return raw.strip().lower() in ("1", "true", "yes", "on")
+
+
 def _build_app() -> FastAPI:
     """Compose the app: env-driven engine + Postgres jobs + readiness probe.
 
     Returns:
         FastAPI: The service application.
     """
-    engine = ResearchEngine()
+    engine = ResearchEngine(cleanup_after_run=_env_flag("CLEANUP_AFTER_RUN", True))
     jobs = PostgresJobStore(os.environ.get("DATABASE_URL", ""))
     return create_app(
         engine=engine,
         jobs=jobs,
         api_token=os.environ.get("API_TOKEN") or None,
+        read_token=os.environ.get("API_TOKEN_READONLY") or None,
         readiness_probe=_readiness,
         rate_limit_per_minute=int(os.environ.get("RATE_LIMIT_PER_MINUTE", "30")),
+        job_timeout_seconds=int(os.environ.get("JOB_TIMEOUT_SECONDS", "900")),
     )
 
 
