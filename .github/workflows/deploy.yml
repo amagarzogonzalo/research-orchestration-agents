@@ -1,15 +1,19 @@
 name: Deploy (Render)
 
 # Push-to-main deploys are handled by Render's own Git integration
-# (autoDeploy: yes, trigger: commit) — no workflow needed for the common path.
-# This workflow is a MANUAL re-deploy fallback (Actions -> Run workflow) that
-# gates on the checks first. Keeping it off `push` avoids two racing deploys per
-# commit (an auto `new_commit` deploy plus an `api` one).
+# (autoDeploy owns push deploys) — no workflow needed for the common path.
+# This workflow is the MANUAL re-deploy fallback (Actions -> Run workflow): it
+# gates on the checks, triggers a Render deploy, waits for it to go live, runs a
+# post-deploy smoke, and rolls back automatically if the smoke fails.
 on:
   workflow_dispatch:
 
 permissions:
   contents: read
+
+env:
+  # Override with a repository variable; defaults to the known prod URL.
+  SERVICE_URL: ${{ vars.SERVICE_URL || 'https://research-orchestration-agents.onrender.com' }}
 
 jobs:
   gate:
@@ -20,7 +24,8 @@ jobs:
       - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           python-version: "3.12"
-      - run: uv sync --extra dev
+          enable-cache: true
+      - run: uv sync --frozen --extra dev
       - run: uv run ruff check src tests
       - run: uv run ruff format --check src tests
       - run: uv run tach check
@@ -29,17 +34,19 @@ jobs:
       - run: uv run python evals/runner.py
 
   deploy:
-    name: Trigger Render deploy
+    name: Deploy, smoke, rollback on failure
     needs: gate
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy via the Render API
+      - name: Trigger the Render deploy
+        id: trigger
         env:
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
           if [ -z "$RENDER_API_KEY" ] || [ -z "$RENDER_SERVICE_ID" ]; then
             echo "Render secrets not configured; skipping deploy (gate still ran)."
+            echo "skipped=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           url="https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys"
@@ -49,10 +56,11 @@ jobs:
               -H "Content-Type: application/json" \
               -d '{"clearCache": "do_not_clear"}') || code=000
             echo "attempt ${attempt} -> HTTP ${code}"
-            cat body.json 2>/dev/null || true
             case "$code" in
               2*)
-                echo "deploy triggered"
+                deploy_id=$(python -c "import json;print(json.load(open('body.json')).get('id',''))")
+                echo "deploy_id=$deploy_id"
+                echo "deploy_id=$deploy_id" >> "$GITHUB_OUTPUT"
                 exit 0
                 ;;
               4*)
@@ -65,5 +73,79 @@ jobs:
                 ;;
             esac
           done
-          echo "::warning::Render deploy API stayed unavailable; the service keeps running its last good deploy. Re-run this workflow later."
-          exit 0
+          echo "::warning::Render deploy API stayed unavailable; the service keeps its last good deploy."
+          echo "skipped=true" >> "$GITHUB_OUTPUT"
+
+      - name: Wait for the deploy to go live
+        if: steps.trigger.outputs.skipped != 'true' && steps.trigger.outputs.deploy_id != ''
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          DEPLOY_ID: ${{ steps.trigger.outputs.deploy_id }}
+        run: |
+          url="https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${DEPLOY_ID}"
+          for i in $(seq 1 60); do
+            status=$(curl -sS -H "Authorization: Bearer ${RENDER_API_KEY}" "$url" \
+              | python -c "import json,sys;print(json.load(sys.stdin).get('status',''))")
+            echo "deploy status: $status"
+            case "$status" in
+              live) exit 0 ;;
+              build_failed|update_failed|canceled|deactivated) echo "::error::deploy ${status}"; exit 1 ;;
+            esac
+            sleep 15
+          done
+          echo "::error::timed out waiting for the deploy to go live"
+          exit 1
+
+      - name: Post-deploy smoke (health + readiness + a qa run)
+        if: steps.trigger.outputs.skipped != 'true'
+        env:
+          API_TOKEN: ${{ secrets.API_TOKEN }}
+        run: |
+          echo "waiting for ${SERVICE_URL} ..."
+          for i in $(seq 1 30); do
+            curl -fsS "$SERVICE_URL/health" >/dev/null 2>&1 && break
+            sleep 10
+          done
+          curl -fsS "$SERVICE_URL/health" | tee health.json
+          curl -fsS "$SERVICE_URL/readiness" | tee readiness.json
+          grep -Eq '"ok":[[:space:]]*true' readiness.json || { echo "::error::readiness not ok"; exit 1; }
+          if [ -z "$API_TOKEN" ]; then
+            echo "::warning::API_TOKEN unset; skipping the live qa-run smoke"
+            exit 0
+          fi
+          tid=$(curl -fsS -X POST -H "Authorization: Bearer $API_TOKEN" -H "Content-Type: application/json" \
+            -d '{"query":"post-deploy smoke: what is retrieval augmented generation","workflow":"qa"}' \
+            "$SERVICE_URL/research" | python -c "import json,sys;print(json.load(sys.stdin).get('task_id',''))")
+          echo "smoke task: $tid"
+          for i in $(seq 1 60); do
+            s=$(curl -fsS -H "Authorization: Bearer $API_TOKEN" "$SERVICE_URL/result/$tid" \
+              | python -c "import json,sys;print(json.load(sys.stdin).get('status',''))")
+            echo "task status: $s"
+            [ "$s" = "done" ] && exit 0
+            [ "$s" = "error" ] && { echo "::error::smoke run errored"; exit 1; }
+            sleep 10
+          done
+          echo "::error::smoke run timed out"
+          exit 1
+
+      # Roll back to the previous deploy when the smoke fails. Verify the
+      # endpoint shape against the Render API docs before relying on it in anger.
+      - name: Roll back on failure
+        if: failure() && steps.trigger.outputs.skipped != 'true'
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: |
+          echo "::warning::smoke failed — rolling back to the previous deploy"
+          prev=$(curl -sS -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys?limit=2" \
+            | python -c "import json,sys;d=json.load(sys.stdin);print(d[1]['deploy']['id'] if len(d) > 1 else '')")
+          if [ -z "$prev" ]; then
+            echo "::error::no previous deploy found for rollback"
+            exit 1
+          fi
+          curl -fsS -X POST -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"deployId\": \"$prev\"}" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/rollback"

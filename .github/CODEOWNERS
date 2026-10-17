@@ -1,0 +1,15 @@
+# Default owner for the whole repository.
+* @amagarzogonzalo
+
+# Security- and supply-chain-sensitive surfaces require the maintainer's review.
+# Pair this with a repository Ruleset that requires CODEOWNERS review for
+# .github/workflows/** so a compromised commit cannot rewrite CI to exfiltrate
+# secrets.
+/.github/ @amagarzogonzalo
+/.github/workflows/ @amagarzogonzalo
+/Dockerfile @amagarzogonzalo
+/render.yaml @amagarzogonzalo
+/SECURITY.md @amagarzogonzalo
+/pyproject.toml @amagarzogonzalo
+/uv.lock @amagarzogonzalo
+/src/knowledge_engine/service/ @amagarzogonzalo
