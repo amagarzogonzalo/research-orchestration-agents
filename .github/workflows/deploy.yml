@@ -1,10 +1,11 @@
 name: Deploy (Render)
 
-# SPEC §5: gate on the checks, then trigger a Render deploy. No direct push to
-# main happens here — this only fires the render deploy for the merged commit.
+# Push-to-main deploys are handled by Render's own Git integration
+# (autoDeploy: yes, trigger: commit) — no workflow needed for the common path.
+# This workflow is a MANUAL re-deploy fallback (Actions -> Run workflow) that
+# gates on the checks first. Keeping it off `push` avoids two racing deploys per
+# commit (an auto `new_commit` deploy plus an `api` one).
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
