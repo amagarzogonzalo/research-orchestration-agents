@@ -73,6 +73,15 @@ filterwarnings = [
 source = ["knowledge_engine"]
 branch = true
 
+[tool.coverage.report]
+# Ratchet floor, not a target: raised as the offline suite grows. Do not lower
+# it to make a change pass. Measured 80.4% on the dev+store offline suite; the
+# floor sits below it so platform (Linux CI vs Windows local) branch-coverage
+# variance never makes an unrelated change fail.
+fail_under = 78
+skip_covered = true
+show_missing = true
+
 [tool.ruff]
 line-length = 119
 target-version = "py311"

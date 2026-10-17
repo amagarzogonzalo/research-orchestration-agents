@@ -1,4 +1,4 @@
-.PHONY: help install serve test test-fast lint types arch semgrep agents context check dup \
+.PHONY: help install serve test test-fast coverage lint types arch semgrep secrets agents context check dup \
         profile profiles evals evals-deep evals-live evals-accept sessions wiki-lint \
         bench bench-accept bench-check wikibench wikibench-accept wikibench-check \
         retention retention-apply \
@@ -24,6 +24,9 @@ test-fast:          ## unit tests only (quick; runs on every push)
 test-full:          ## unit+integration+e2e offline (long; main + MR only)
 	uv run pytest tests/unit tests/integration tests/e2e -q -m "not live"
 
+coverage:           ## offline suite + coverage gate (floor lives in pyproject.toml)
+	uv run pytest tests/ -q -m "not live" --cov=knowledge_engine --cov-report=term-missing
+
 lint:               ## formatting + style (project surface only)
 	uv run ruff check src tests && uv run ruff format --check src tests
 
@@ -35,6 +38,9 @@ arch:               ## module boundaries (tach; hexagonal layering enforced)
 
 semgrep:            ## custom security/correctness rules (isolated via uvx)
 	uvx semgrep --config .semgrep/rules/ --metrics=off --error src tests
+
+secrets:            ## fail on any unaudited secret (detect-secrets; offline)
+	uv run pre-commit run detect-secrets --all-files
 
 agents:             ## structural checks on AGENTS.md
 	uv run python bin/lint_agents.py
@@ -90,7 +96,7 @@ wiki-db-down:       ## stop the scratch Postgres
 wiki-files-check:   ## read-only files health check (unreferenced/missing-body)
 	uv run python bin/wiki_files_check.py
 
-check: lint types arch semgrep agents context test evals bench-check wikibench-check   ## everything. This is the gate.
+check: lint types arch semgrep secrets agents context coverage evals bench-check wikibench-check   ## everything. This is the gate.
 	@echo green
 
 # ---- models ---------------------------------------------------------------

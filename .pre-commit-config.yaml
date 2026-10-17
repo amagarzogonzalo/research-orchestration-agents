@@ -8,6 +8,16 @@ repos:
       - id: ruff-format
         files: ^(src|tests)/
 
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      # Fails on any secret-shaped string not already audited in .secrets.baseline.
+      # Recorded eval fixtures are excluded here (unavoidable high-entropy data);
+      # CI's gitleaks job scans them with a path allowlist instead.
+      - id: detect-secrets
+        args: [--baseline, .secrets.baseline]
+        exclude: ^evals/
+
   - repo: local
     hooks:
       - id: mypy

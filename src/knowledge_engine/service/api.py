@@ -57,13 +57,32 @@ async def _storage_ok() -> bool:
         return False
 
 
+_PROVIDER_KEYS = ("GROQ_API_KEY", "GEMINI_API_KEY", "MISTRAL_API_KEY", "OPENROUTER_API_KEY")
+
+
+def _providers_ok() -> bool:
+    """Check that at least one LLM provider key is configured.
+
+    Readiness must mean "can serve a run", not just "can reach the database": a
+    service with no provider key will 500 every ``/research`` call.
+
+    Returns:
+        bool: True when at least one provider key is present.
+    """
+    return any(os.environ.get(name) for name in _PROVIDER_KEYS)
+
+
 async def _readiness() -> ReadinessReport:
-    """Check the database and Storage buckets (server-side dependencies only).
+    """Check the database, Storage buckets, and provider configuration.
 
     Returns:
         ReadinessReport: Named checks; ``ok`` only when all pass.
     """
-    checks = {"database": await _db_ok(), "storage": await _storage_ok()}
+    checks = {
+        "database": await _db_ok(),
+        "storage": await _storage_ok(),
+        "providers": _providers_ok(),
+    }
     return ReadinessReport(ok=all(checks.values()), checks=checks)
 
 
