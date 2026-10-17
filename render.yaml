@@ -1,14 +1,79 @@
 # Render blueprint for the Knowledge Engine HTTP service (issue #30).
 # Zero-cost: Free plan + Supabase Free. Secrets are marked `sync: false` and set
-# in the Render dashboard (never committed). Rollback = undeploy this service.
+# in the Render dashboard (never committed). Rollback = redeploy the previous
+# build (Render keeps the artifact; .github/workflows/deploy.yml automates it).
+#
+# NOTE: the prod service keeps its env vars inline ON PURPOSE — moving them into
+# an envVarGroup would force re-entry of the dashboard secrets on the next
+# blueprint sync. staging gets its own group; point it at a SEPARATE Supabase
+# project (never the prod one).
+
+envVarGroups:
+  - name: ke-staging-shared
+    envVars:
+      # --- cutover switches: select the Supabase cloud stack ---
+      - key: CHECKPOINTER_KIND
+        value: postgres
+      - key: STORE_KIND
+        value: postgres
+      - key: ARTIFACT_STORE_KIND
+        value: supabase
+      - key: BODY_STORE_KIND
+        value: supabase
+      - key: WIKI_STORE_KIND
+        value: supabase
+      # --- Render Free desk math: single worker, strict msgpack ---
+      - key: WEB_CONCURRENCY
+        value: "1"
+      - key: LANGGRAPH_STRICT_MSGPACK
+        value: "true"
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "30"
+      - key: JOB_TIMEOUT_SECONDS
+        value: "900"
+      - key: CLEANUP_AFTER_RUN
+        value: "true"
+      - key: ENABLE_DOCS
+        value: "true"
+      # --- secrets: set per-environment in the dashboard (sync: false) ---
+      # DATABASE_URL MUST be the Supabase session pooler (IPv4).
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: MISTRAL_API_KEY
+        sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENALEX_MAILTO
+        sync: false
+      - key: CROSSREF_MAILTO
+        sync: false
+      - key: API_TOKEN
+        sync: false
+      - key: API_TOKEN_READONLY
+        sync: false
+
 services:
+  # --- production (semantics unchanged; staging added below) ---
   - type: web
     name: knowledge-engine
     runtime: docker
     plan: free
+    branch: main
     dockerfilePath: ./Dockerfile
     healthCheckPath: /health
     autoDeploy: false
+    maxShutdownDelaySeconds: 60
+    # Migrations are idempotent and ledger-guarded (knowledge_engine.scripts.
+    # apply_migrations). On a plan that supports pre-deploy commands, uncomment:
+    # preDeployCommand: "python -m knowledge_engine.scripts.apply_migrations"
     envVars:
       # --- cutover switches: select the Supabase cloud stack ---
       - key: CHECKPOINTER_KIND
@@ -62,3 +127,17 @@ services:
         sync: false
       - key: API_TOKEN_READONLY
         sync: false
+
+  # --- staging: same image, its own branch + Supabase project ---
+  - type: web
+    name: knowledge-engine-staging
+    runtime: docker
+    plan: free
+    branch: staging
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    autoDeploy: false
+    maxShutdownDelaySeconds: 60
+    # preDeployCommand: "python -m knowledge_engine.scripts.apply_migrations"
+    envVarGroups:
+      - name: ke-staging-shared
