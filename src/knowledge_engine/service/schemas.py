@@ -89,7 +89,7 @@ class ReadinessReport(BaseModel):
     Attributes:
         model_config: Forbid extra keys.
         ok: True only when every check passed.
-        checks: Named boolean checks (database, storage).
+        checks: Named boolean checks (database, storage, providers).
     """
 
     model_config = ConfigDict(extra="forbid")
