@@ -32,12 +32,13 @@ requests (PRs / merge requests) into `main`.
 
 ## Local checks
 
-The single gate is `make check` (lint + types + arch + semgrep + agents + context
-+ tests + evals + benchmarks). Quick loop while working:
+The single gate is `make check` (lint + types + arch + semgrep + secrets + agents
++ context + tests + evals + benchmarks). Quick loop while working:
 
 ```bash
 make test-fast    # unit tests only
 make lint         # ruff check + format --check
+make secrets      # detect-secrets vs .secrets.baseline
 make check        # everything — required before merging
 ```
 

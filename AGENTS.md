@@ -22,7 +22,7 @@ make test        # pytest tests/ -q
 make lint        # ruff check+format src tests
 make types       # mypy src  (strict; adapter glue exempt)
 make context     # what the always-on prompt costs
-make check       # lint + types + arch + semgrep + agents + context + test + evals   <- the gate
+make check       # lint + types + arch + semgrep + secrets + agents + context + test + evals   <- the gate
 ```
 
 ## Hard rules
