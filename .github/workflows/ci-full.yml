@@ -1,12 +1,19 @@
 name: CI-full
 
 # Long gate: runs ONLY on main pushes and merge requests (pull_request).
-# Integration + e2e + types + evals are slower/heavier; the fast gate
-# (ci.yml: unit + lint + arch) already ran on every push.
+# Integration + e2e + types + evals + coverage; the fast gate (ci.yml: unit +
+# lint + arch + secrets) already ran on every push.
 on:
   push:
     branches: [main]
   pull_request:
+
+concurrency:
+  group: ci-full-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   integration:
@@ -35,16 +42,18 @@ jobs:
           --health-timeout 3s
           --health-retries 20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           python-version: ${{ matrix.python-version }}
+          enable-cache: true
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,store]"
+      - name: Lockfile is in sync
+        run: uv lock --check
+
+      - name: Install the locked environment
+        run: uv sync --frozen --extra dev --extra store
 
       - name: Apply wiki migrations (drop v1, apply v2)
         run: |
@@ -53,42 +62,53 @@ jobs:
           psql "$WIKI_TEST_PG_DSN" -v ON_ERROR_STOP=1 -f supabase/migrations/20261012160700_wiki_v2.sql
 
       - name: Integration tests (fakes + file checkpointer + real Postgres wiki, no network)
-        run: python -m pytest tests/integration -q -p no:cacheprovider
+        run: uv run pytest tests/integration -q -p no:cacheprovider -m "not live"
 
       - name: E2E tests (full LangGraph runtime, fakes; live opt-in)
-        run: python -m pytest tests/e2e -q -p no:cacheprovider
+        run: uv run pytest tests/e2e -q -p no:cacheprovider -m "not live"
 
   typecheck:
     name: Typecheck (mypy strict)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           python-version: "3.12"
-      - run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,store]"
-          # pydoclint imports DocstringYields from docstring_parser.common, but
-          # BOTH docstring-parser and docstring_parser_fork ship that path, so
-          # the last-installed wins. The fork (0.0.16) has it, the real
-          # package (0.18.0) does not — force the fork last for determinism.
-          pip install --force-reinstall --no-deps "docstring_parser_fork==0.0.16"
+          enable-cache: true
+      - run: uv sync --frozen --extra dev --extra store
       - name: mypy (strict on new architecture; adapter glue exempt)
-        run: mypy src --no-error-summary
+        run: uv run mypy src --no-error-summary
       - name: pydoclint (Google docstrings required)
-        run: pydoclint --style google --arg-type-hints-in-docstring 0 --skip-checking-raises 1 --allow-init-docstring 1 src/knowledge_engine
+        run: uv run pydoclint --style google --arg-type-hints-in-docstring 0 --skip-checking-raises 1 --allow-init-docstring 1 src/knowledge_engine
+
+  coverage:
+    name: Offline suite + coverage gate
+    runs-on: ubuntu-latest
+    env:
+      OTEL_TRACES_EXPORTER: ""
+      OTEL_METRICS_EXPORTER: "none"
+      PYTHONPATH: src
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
+        with:
+          python-version: "3.12"
+          enable-cache: true
+      - run: uv sync --frozen --extra dev --extra store
+      # The floor is [tool.coverage.report] fail_under in pyproject.toml.
+      - name: Offline suite + coverage
+        run: uv run pytest tests/ -q -m "not live" --cov=knowledge_engine --cov-report=term-missing
 
   evals:
     name: Behavioral evals (offline replay)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5
         with:
           python-version: "3.12"
-      - run: |
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,store]"
+          enable-cache: true
+      - run: uv sync --frozen --extra dev --extra store
       - name: Offline eval replay (free, deterministic)
-        run: python evals/runner.py
+        run: uv run python evals/runner.py

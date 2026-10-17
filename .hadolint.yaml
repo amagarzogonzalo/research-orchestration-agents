@@ -1,0 +1,8 @@
+# hadolint configuration for the service image.
+# Docs: https://github.com/hadolint/hadolint#configure
+failure-threshold: error
+ignored:
+  # apt/pip package pins: reproducibility comes from the digest-pinned base
+  # image and uv.lock, not from version-pinning each apt/pip line.
+  - DL3008
+  - DL3013
