@@ -1,0 +1,29 @@
+# Gitleaks configuration — extends the built-in rule set.
+# Docs: https://github.com/gitleaks/gitleaks#configuration
+#
+# Allowlists document *known-benign* high-signal strings that the default rules
+# would otherwise flag. Anything not matched here still fails the scan, so this
+# stays a real gate. Keep every entry justified by a comment.
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Recorded, offline eval fixtures (model outputs + snapshots) — data, never credentials"
+paths = [
+  '''evals/cassettes/.*''',
+  '''evals/snapshots/.*''',
+]
+
+[[allowlists]]
+description = "Placeholder DSNs used in docs, CI and compose (wiki:wiki, CHANGE_ME, <password>)"
+regexes = [
+  '''postgres(ql)?://[^:@/]+:(wiki|CHANGE_ME|postgres|user|password)[^@]*@''',
+]
+
+[[allowlists]]
+description = "Anonymised DOAJ/bioRxiv article identifiers in unit tests"
+paths = [
+  '''tests/unit/test_doaj\.py''',
+  '''tests/unit/test_biorxiv\.py''',
+]

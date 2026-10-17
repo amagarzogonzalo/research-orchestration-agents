@@ -11,12 +11,29 @@
   ],
   "permission": {
     "*": "allow",
-    "bash": "allow",
+    "bash": {
+      "*": "allow",
+      "env": "deny",
+      "printenv": "deny",
+      "cat .env*": "deny",
+      "cat */.env*": "deny",
+      "rm -rf *": "deny",
+      "git push --force*": "deny",
+      "python *": "ask",
+      "python3 *": "ask",
+      "node *": "ask",
+      "npx *": "ask",
+      "uv run *": "ask",
+      "uvx *": "ask",
+      "make *": "ask",
+      "docker *": "ask"
+    },
     "edit": "allow",
     "read": {
       "*": "allow",
-      "*.env": "allow",
-      "*.env.*": "allow",
+      "*.env": "deny",
+      ".env": "deny",
+      "*.env.*": "deny",
       "*.env.example": "allow"
     },
     "glob": "allow",
