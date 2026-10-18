@@ -22,8 +22,15 @@ regexes = [
 ]
 
 [[allowlists]]
-description = "Anonymised DOAJ/bioRxiv article identifiers in unit tests"
+description = "Anonymised DOAJ/bioRxiv/DBLP identifiers in unit tests"
 paths = [
   '''tests/unit/test_doaj\.py''',
   '''tests/unit/test_biorxiv\.py''',
+  '''tests/unit/test_dblp\.py''',
+]
+
+[[allowlists]]
+description = "detect-secrets baseline: stores only SHA1 hashes of findings, never raw secrets"
+paths = [
+  '''\.secrets\.baseline''',
 ]
