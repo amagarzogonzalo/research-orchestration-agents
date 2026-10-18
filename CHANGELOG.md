@@ -22,6 +22,10 @@ All notable changes to this project are documented here. The format follows
   (retrieval, miss, cost, ingest, lint, robustness, workflows), CI-gated against
   a committed baseline.
 - **Docs**: `docs/quickstart.md`, `CONTRIBUTING.md` pointers, `LICENSE` (MIT).
+- **Community & project hygiene**: `CODE_OF_CONDUCT.md` (Contributor Covenant
+  2.1), GitHub issue + pull-request templates, Dependabot coverage for Docker,
+  and README badges/TOC; `render.yaml` service names aligned with the live
+  Render service.
 - **Env cutover switches** wired into `ResearchEngine` (`CHECKPOINTER_KIND`,
   `STORE_KIND`, `ARTIFACT_STORE_KIND`, `BODY_STORE_KIND`, `WIKI_STORE_KIND`).
 
@@ -39,6 +43,15 @@ All notable changes to this project are documented here. The format follows
 - `SupabaseBodyStorage` covered by tests (previously untested).
 - Hybrid wiki search no longer returns duplicate pages; overview links use each
   page's own subdirectory; filed theses/answers are indexed.
+
+### Security
+
+- Reviewed the Dependabot finding **GHSA-8mgp-746c-j5xp** (`nltk` ≤ 3.10.3, a
+  transitive dependency of the optional `scrape` extra via crawl4ai). No patched
+  release exists yet; the package is not installed in the production image
+  (`Dockerfile` uses `--no-dev --extra store,providers,supabase`) and the
+  affected model-artifact APIs are unused. Dismissed as a tolerated risk with a
+  documented reason, to be revisited when upstream ships a fix.
 
 ## [0.1.0]
 
