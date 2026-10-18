@@ -1,0 +1,60 @@
+name: Feature request
+description: Propose a new capability or an improvement.
+title: "[feature]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This project holds a strict **zero-cost** discipline: free-tier models and
+        APIs only, plain files as the durable substrate. Please keep proposals
+        within that constraint (see the README's "Zero-cost discipline" section).
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the need, not the implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+    validations:
+      required: false
+  - type: textarea
+    id: cost
+    attributes:
+      label: Cost / dependency impact
+      description: Any new dependency, paid tier, or MCP server must be justified — it adds prompt weight and/or money.
+      placeholder: "None / free-tier only"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - core (ports, schemas)
+        - orchestration (LangGraph)
+        - infrastructure (search, scrape, providers)
+        - store (persistence)
+        - service (HTTP API)
+        - wiki layer
+        - observability
+        - docs / CI
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and discussions for a duplicate
+          required: true

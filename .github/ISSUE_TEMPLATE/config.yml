@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a security vulnerability (private)
+    url: https://github.com/amagarzogonzalo/research-orchestration-agents/security/advisories/new
+    about: Do not open a public issue for security problems — see SECURITY.md.
+  - name: Read the quickstart
+    url: https://github.com/amagarzogonzalo/research-orchestration-agents/blob/main/docs/quickstart.md
+    about: Get from clone to a green offline run in ~2 minutes.
+  - name: Deploy your own instance
+    url: https://github.com/amagarzogonzalo/research-orchestration-agents/blob/main/docs/deploy-render.md
+    about: Render Free + Supabase Free deployment guide.

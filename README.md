@@ -2,6 +2,11 @@
 
 [![CI](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci.yml/badge.svg)](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci.yml)
 [![CI-full](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci-full.yml/badge.svg)](https://github.com/amagarzogonzalo/research-orchestration-agents/actions/workflows/ci-full.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.11 | 3.12](https://img.shields.io/badge/python-3.11%20%7C%203.12-blue.svg)](pyproject.toml)
+[![Linting: Ruff](https://img.shields.io/badge/linting-ruff-261230.svg)](https://github.com/astral-sh/ruff)
+[![Types: mypy strict](https://img.shields.io/badge/types-mypy%20strict-2a6db2.svg)](https://mypy-lang.org/)
+[![Zero-cost](https://img.shields.io/badge/cost-free--tier%20only-brightgreen.svg)](#zero-cost-discipline)
 
 Autonomous, **zero-cost** single-user research-curation library: a Hexagonal core
 orchestrated by LangGraph with files-only persistence under `research_store/`.
@@ -14,6 +19,13 @@ Design rationale lives in [docs/plans](docs/plans/0000-overview.md) as ADRs.
 **New here?** Start with [docs/quickstart.md](docs/quickstart.md) — a no-keys
 offline path in ~2 minutes, plus the deployed service at
 <https://research-orchestration-agents.onrender.com/docs>.
+
+## Contents
+
+- [Layout](#layout) · [Install](#install) · [Wiki layer](#wiki-layer-karpathy-pattern-files-first)
+- [Cloud service (Render + Supabase)](#cloud-service-render--supabase) · [Run](#run) · [Test](#test) · [Evals](#evals)
+- [Troubleshooting](#troubleshooting) · [Zero-cost discipline](#zero-cost-discipline) · [Federated search sources](#federated-search-sources)
+- [Documentation map](#documentation-map) · [Contributing & community](#contributing--community) · [License](#license)
 
 ## Layout
 
@@ -192,3 +204,26 @@ Deliberately not wired: ORCID (researcher profiles, not papers), OpenCitations
 (no verifiable live endpoint: v1 410, v2 paths 404/400), OpenAIRE (OAF schema
 too nested to map robustly; same records arrive via OpenAlex), key-gated APIs
 (CORE, BASE, Lens, ADS), Google Scholar (no API; scraping violates ToS).
+
+## Documentation map
+
+| I want to… | Read |
+|---|---|
+| Get running in ~2 minutes | [`docs/quickstart.md`](docs/quickstart.md) |
+| Understand the architecture | [`docs/plans/`](docs/plans/0000-overview.md), [`SPEC.md`](SPEC.md) |
+| Deploy my own instance | [`docs/deploy-render.md`](docs/deploy-render.md) |
+| Understand the wiki layer | [`docs/LLM_WIKI.md`](docs/LLM_WIKI.md) |
+| See the workflow diagrams | [`docs/diagrams/`](docs/diagrams/README.md) |
+| See the benchmark | [`bench/wikibench/README.md`](bench/wikibench/README.md) |
+| Review the release history | [`CHANGELOG.md`](CHANGELOG.md) |
+
+## Contributing & community
+
+- **[Contributing guide](CONTRIBUTING.md)** — trunk-based flow; `make check` is the gate.
+- **[Code of Conduct](CODE_OF_CONDUCT.md)** — Contributor Covenant 2.1.
+- **[Security policy](SECURITY.md)** — report vulnerabilities privately (never a public issue).
+- **[Changelog](CHANGELOG.md)** — [Keep a Changelog](https://keepachangelog.com/) + [SemVer](https://semver.org/).
+
+## License
+
+Released under the [MIT License](LICENSE).

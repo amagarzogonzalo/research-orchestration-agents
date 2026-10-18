@@ -1,0 +1,86 @@
+name: Bug report
+description: Report a reproducible defect in the Knowledge Engine.
+title: "[bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file a report.
+
+        **Security issues:** do **not** use this form. See [SECURITY.md](../blob/main/SECURITY.md)
+        and report privately via the repository's Security tab.
+
+        **Never paste secrets, API keys, or credentials** — redact them.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear and concise description of the bug.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Exact commands, inputs, or workflow.
+      placeholder: |
+        1. `make install`
+        2. `curl ...`
+        3. observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs, traceback, or screenshots
+      description: Redact any secrets. Paste tracebacks verbatim.
+      render: shell
+    validations:
+      required: false
+  - type: input
+    id: version
+    attributes:
+      label: Commit / version
+      description: Output of `git rev-parse --short HEAD`.
+      placeholder: e.g. aa745df
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - core (ports, schemas)
+        - orchestration (LangGraph)
+        - infrastructure (search, scrape, providers)
+        - store (persistence)
+        - service (HTTP API)
+        - wiki layer
+        - observability
+        - docs / CI
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, Python version, install method.
+      placeholder: e.g. Windows 11, Python 3.12, uv; or Render Free + Supabase Free
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before submitting
+      options:
+        - label: I searched existing issues and this is not a duplicate
+          required: true
+        - label: This report contains no secrets or credentials
+          required: true
