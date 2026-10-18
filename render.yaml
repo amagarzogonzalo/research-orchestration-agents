@@ -61,9 +61,12 @@ envVarGroups:
         sync: false
 
 services:
-  # --- production (semantics unchanged; staging added below) ---
+  # --- production: matches the live Render service (created via the dashboard) ---
+  # The blueprint is a portable description of the deployed stack; it is not
+  # currently synced against the live service, so keep the name in lockstep with
+  # the dashboard so a future sync adopts rather than duplicates it.
   - type: web
-    name: knowledge-engine
+    name: research-orchestration-agents
     runtime: docker
     plan: free
     branch: main
@@ -129,8 +132,11 @@ services:
         sync: false
 
   # --- staging: same image, its own branch + Supabase project ---
+  # NOTE: not provisioned. There is no `staging` branch or staging service yet;
+  # create the branch and point ke-staging-shared at a SEPARATE Supabase project
+  # (never prod) before connecting this blueprint.
   - type: web
-    name: knowledge-engine-staging
+    name: research-orchestration-agents-staging
     runtime: docker
     plan: free
     branch: staging
