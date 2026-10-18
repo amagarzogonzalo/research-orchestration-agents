@@ -36,7 +36,7 @@ evals = ["deepeval>=4.2,<5"]  # DeepEval metrics (opt-in; default eval path stay
 providers = ["groq>=1.7,<2", "openai>=2.20,<3", "google-genai"]
 dev = [
     "pytest>=8",
-    "pytest-asyncio>=0.24",
+    "pytest-asyncio>=1.4.0",
     "pytest-cov>=5",
     "hypothesis>=6.100,<7",
     "ruff>=0.6",
