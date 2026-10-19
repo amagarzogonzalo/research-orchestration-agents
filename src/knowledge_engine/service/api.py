@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import sys
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -17,11 +18,16 @@ from knowledge_engine.config import load_dotenv
 from knowledge_engine.engine import ResearchEngine
 from knowledge_engine.scripts.apply_migrations import apply
 from knowledge_engine.service.app import create_app
-from knowledge_engine.service.jobs import PostgresJobStore
+from knowledge_engine.service.jobs import build_job_store
 from knowledge_engine.service.rate_limit import PostgresRateLimiter, RateLimiter
 from knowledge_engine.service.schemas import ReadinessReport
 
 logger = logging.getLogger(__name__)
+
+# psycopg's async connections require the selector loop; Windows defaults to
+# Proactor, which breaks job/readiness DB calls at startup.
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 load_dotenv()
 
@@ -207,7 +213,8 @@ def _build_app() -> FastAPI:
     """
     dsn = os.environ.get("DATABASE_URL", "")
     engine = ResearchEngine(cleanup_after_run=_env_flag("CLEANUP_AFTER_RUN", True))
-    jobs = PostgresJobStore(dsn)
+    jobs_kind = os.environ.get("JOBS_KIND", "").strip().lower() or ("postgres" if dsn else "memory")
+    jobs = build_job_store(jobs_kind, dsn)
     rate_per_minute = _env_int("RATE_LIMIT_PER_MINUTE", 30)
     limiter = (
         PostgresRateLimiter(dsn, rate_per_minute) if dsn and rate_per_minute > 0 else RateLimiter(rate_per_minute)

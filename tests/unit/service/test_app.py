@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import time
+from pathlib import Path
 from types import SimpleNamespace
 from typing import Any
 
@@ -19,6 +20,7 @@ from knowledge_engine.schemas.wiki import IngestResult, LintReport, WikiVerdict
 from knowledge_engine.service.app import create_app
 from knowledge_engine.service.jobs import InMemoryJobStore
 from knowledge_engine.service.schemas import JobRecord, JobStatus, ReadinessReport
+from knowledge_engine.store.research_store import ResearchStore
 
 
 class FakeEngine:
@@ -29,6 +31,7 @@ class FakeEngine:
         self.closed = False
         self.ran: list[tuple[str, str]] = []
         self.settings_seen: list[Any] = []
+        self.ingested_paths: list[str] = []
 
     async def setup(self) -> None:
         """Mark startup."""
@@ -87,7 +90,19 @@ class FakeEngine:
         Returns:
             IngestResult: Canned result.
         """
+        self.ingested_paths.append(article_path)
         return IngestResult(verdict=WikiVerdict.NEW, page_path="sources/x.md", pages_touched=1)
+
+    async def wiki_page(self, slug: str) -> str | None:
+        """Return a canned wiki page.
+
+        Args:
+            slug: Page slug.
+
+        Returns:
+            str | None: Page markdown, or None for ``missing``.
+        """
+        return None if slug == "missing" else f"# {slug}"
 
     async def wiki_lint(self) -> LintReport:
         """Return a clean report.
@@ -487,3 +502,102 @@ def test_wiki_ingest_missing_article_is_404() -> None:
     resp = client.post("/wiki/ingest", json=body)
     assert resp.status_code == 404
     assert "article missing" in resp.json()["detail"]
+
+
+async def _seed_done_job(jobs: InMemoryJobStore, task_id: str, thread_id: str) -> None:
+    """Insert a completed job for artifact-endpoint tests.
+
+    Args:
+        jobs: In-memory store.
+        task_id: Job id.
+        thread_id: Thread id.
+    """
+    await jobs.create(JobRecord(task_id=task_id, status=JobStatus.DONE, thread_id=thread_id, query="q", workflow="qa"))
+
+
+def _artifact_client(tmp_path: Path) -> tuple[TestClient, FakeEngine, InMemoryJobStore]:
+    """Build an app whose engine exposes a local artifact store.
+
+    Args:
+        tmp_path: Pytest temp directory.
+
+    Returns:
+        tuple[TestClient, FakeEngine, InMemoryJobStore]: Client, engine, jobs.
+    """
+    engine = FakeEngine()
+    engine.store = ResearchStore(tmp_path)  # type: ignore[attr-defined]
+    engine.store_root = str(tmp_path)  # type: ignore[attr-defined]
+    jobs = InMemoryJobStore()
+    app = create_app(engine=engine, jobs=jobs, allow_anonymous=True, job_poll_seconds=0.01)
+    return TestClient(app), engine, jobs
+
+
+def test_artifact_markdown_and_json(tmp_path: Path) -> None:
+    """A completed job serves its article as Markdown or JSON."""
+    client, engine, jobs = _artifact_client(tmp_path)
+    asyncio.run(_seed_done_job(jobs, "a1", "t1"))
+    engine.store.article_path("t1").write_text("# hello\n", encoding="utf-8")
+    engine.store.sources_path("t1").write_text("[]", encoding="utf-8")
+
+    markdown = client.get("/result/a1/artifact")
+    assert markdown.status_code == 200
+    assert markdown.headers["content-type"].startswith("text/markdown")
+    assert markdown.text == "# hello\n"
+
+    payload = client.get("/result/a1/artifact", params={"format": "json"}).json()
+    assert payload["task_id"] == "a1"
+    assert payload["article"] == "# hello\n"
+    assert payload["sources"] == []
+
+
+def test_artifact_endpoint_errors(tmp_path: Path) -> None:
+    """Unknown, unfinished, and missing-artifact cases are explicit."""
+    client, _engine, jobs = _artifact_client(tmp_path)
+    assert client.get("/result/nope/artifact").status_code == 404
+    asyncio.run(
+        jobs.create(JobRecord(task_id="q1", status=JobStatus.QUEUED, thread_id="t1", query="q", workflow="qa"))
+    )
+    assert client.get("/result/q1/artifact").status_code == 409
+    asyncio.run(_seed_done_job(jobs, "d1", "no-artifact"))
+    assert client.get("/result/d1/artifact").status_code == 404
+
+
+def test_sources_endpoint(tmp_path: Path) -> None:
+    """Persisted sources are available without the article payload."""
+    client, engine, jobs = _artifact_client(tmp_path)
+    asyncio.run(_seed_done_job(jobs, "a1", "t1"))
+    engine.store.sources_path("t1").write_text("[]", encoding="utf-8")
+    body = client.get("/result/a1/sources").json()
+    assert body == {"task_id": "a1", "thread_id": "t1", "sources": []}
+
+
+def test_wiki_page_read_and_validation() -> None:
+    """Wiki page reads are Markdown; bad slugs and misses are handled."""
+    client, _ = _client()
+    ok = client.get("/wiki/page/retrieval-augmented-generation")
+    assert ok.status_code == 200
+    assert ok.text == "# retrieval-augmented-generation"
+    assert client.get("/wiki/page/missing").status_code == 404
+    assert client.get("/wiki/page/Bad_Slug").status_code == 422
+
+
+def test_wiki_ingest_resolves_artifact_by_thread(tmp_path: Path) -> None:
+    """Remote ingest loads the artifact and cleans up its temp file."""
+    client, engine, _jobs = _artifact_client(tmp_path)
+    engine.store.article_path("t1").write_text("# ingest me\n", encoding="utf-8")
+    resp = client.post("/wiki/ingest", json={"thread_id": "t1", "query": "q"})
+    assert resp.status_code == 200
+    path = engine.ingested_paths[-1]
+    assert "_api_ingest" in path
+    assert not Path(path).exists()
+    assert client.post("/wiki/ingest", json={"thread_id": "missing", "query": "q"}).status_code == 404
+
+
+def test_request_bounds_and_thread_safety() -> None:
+    """Unsafe ids and budget-busting settings are rejected at submit time."""
+    client, _ = _client()
+    assert client.post("/research", json={"query": "q", "thread_id": "../x"}).status_code == 422
+    assert client.post("/research", json={"query": "q", "settings": {"max_subqueries": 8}}).status_code == 422
+    assert client.get("/wiki/query", params={"q": "x", "limit": 0}).status_code == 422
+    assert client.get("/wiki/query", params={"q": "x" * 2001}).status_code == 422
+    assert client.post("/wiki/ingest", json={"thread_id": "../x", "query": "q"}).status_code == 422

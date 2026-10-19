@@ -45,7 +45,10 @@ make check
 
 ## 2. Online — the deployed service
 
-- Interactive API docs (Swagger): <https://research-orchestration-agents.onrender.com/docs>
+- Base URL: <https://research-orchestration-agents.onrender.com>
+- Swagger is **disabled** in production (`/docs` returns 404). The full endpoint
+  guide and copy-paste commands are in [`docs/api.md`](api.md); the committed
+  OpenAPI snapshot is [`docs/openapi.json`](openapi.json).
 - Open, no token: `GET /health`, `GET /readiness`.
 - Data routes need a bearer token (ask the owner):
 
@@ -64,19 +67,32 @@ make check
 
 ## 3. Run the service locally
 
+No database and no keys (memory job store, anonymous local access):
+
 ```bash
-cp .env.example .env   # optional: fill free-tier LLM keys for live research
-make serve             # http://127.0.0.1:8000  (Swagger at /docs)
+DATABASE_URL= JOBS_KIND=memory AUTO_MIGRATE=false \
+  ALLOW_ANONYMOUS=true ENABLE_DOCS=true \
+  uv run python bin/api_run.py
+# http://127.0.0.1:8000  (Swagger at /docs because ENABLE_DOCS=true)
 ```
 
-Without keys it boots with local `file/memory/local` persistence: `/health`
-returns 200, `/readiness` reports the cloud checks as `false`, and `/research`
-needs LLM keys (use the offline fakes via `make bench` instead).
+With Postgres and a token:
+
+```bash
+cp .env.example .env   # fill DATABASE_URL + free-tier LLM keys
+API_TOKEN=dev ENABLE_DOCS=true uv run python bin/api_run.py
+```
+
+`/health` returns 200 either way. Without cloud storage/providers,
+`/readiness` reports those checks as `false`. Real research needs LLM keys; use
+the offline fakes via `make bench` for zero-cost workflow checks. Full HTTP
+commands: [`docs/api.md`](api.md).
 
 ## Where to go next
 
 | I want to… | Read |
 |---|---|
+| Use the HTTP API from curl/Python | [`docs/api.md`](api.md) |
 | Understand the architecture | `docs/plans/*`, `SPEC.md` |
 | Deploy my own instance | `docs/deploy-render.md` |
 | Contribute | `CONTRIBUTING.md` |

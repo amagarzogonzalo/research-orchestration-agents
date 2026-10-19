@@ -1,0 +1,884 @@
+{
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "JobRecord": {
+        "additionalProperties": false,
+        "description": "Durable job state read by ``GET /result/{task_id}``.\n\nAttributes:\n    model_config: Forbid extra keys.\n    task_id: Server-generated id.\n    status: Job lifecycle status.\n    thread_id: LangGraph thread the job runs on.\n    query: Original query.\n    workflow: Workflow name.\n    result: Completed-run summary (status/output_path/sources).\n    error: Failure detail when ``status`` is ``error``.\n    settings: Validated per-run overrides, persisted for crash recovery.\n    caller: Hashed caller key used for per-caller queue quotas.\n    attempts: Number of times the worker has claimed this job.\n    claimed_at: When the current attempt was claimed.",
+        "properties": {
+          "error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error"
+          },
+          "query": {
+            "title": "Query",
+            "type": "string"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Settings"
+          },
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          },
+          "thread_id": {
+            "title": "Thread Id",
+            "type": "string"
+          },
+          "workflow": {
+            "title": "Workflow",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "status",
+          "thread_id",
+          "query",
+          "workflow"
+        ],
+        "title": "JobRecord",
+        "type": "object"
+      },
+      "JobStatus": {
+        "description": "Lifecycle of a submitted research job.\n\nAttributes:\n    QUEUED: Accepted, not started.\n    RUNNING: The workflow is executing.\n    DONE: Completed; ``result`` holds a summary.\n    ERROR: Failed; ``error`` holds the reason.",
+        "enum": [
+          "queued",
+          "running",
+          "done",
+          "error"
+        ],
+        "title": "JobStatus",
+        "type": "string"
+      },
+      "ReadinessReport": {
+        "additionalProperties": false,
+        "description": "Result of ``GET /readiness``.\n\nAttributes:\n    model_config: Forbid extra keys.\n    ok: True only when every check passed.\n    checks: Named boolean checks (database, storage, providers).",
+        "properties": {
+          "checks": {
+            "additionalProperties": {
+              "type": "boolean"
+            },
+            "title": "Checks",
+            "type": "object"
+          },
+          "ok": {
+            "title": "Ok",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "ok"
+        ],
+        "title": "ReadinessReport",
+        "type": "object"
+      },
+      "ResearchAccepted": {
+        "additionalProperties": false,
+        "description": "202 response to ``POST /research``.\n\nAttributes:\n    model_config: Forbid extra keys.\n    task_id: Id to poll via ``GET /result/{task_id}``.\n    status: Initial job status (``queued``).",
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/JobStatus"
+          },
+          "task_id": {
+            "title": "Task Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "task_id",
+          "status"
+        ],
+        "title": "ResearchAccepted",
+        "type": "object"
+      },
+      "ResearchRequest": {
+        "additionalProperties": false,
+        "description": "Body of ``POST /research``.\n\nAttributes:\n    model_config: Forbid extra keys.\n    query: Research question (must not be blank).\n    workflow: One of ``research``/``qa``/``summary``/``deep``.\n    thread_id: Optional stable thread id (derived when omitted).\n    settings: Optional per-run overrides, validated at submit time.",
+        "properties": {
+          "query": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "settings": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RunSettings"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "thread_id": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thread Id"
+          },
+          "workflow": {
+            "default": "research",
+            "enum": [
+              "research",
+              "qa",
+              "summary",
+              "deep"
+            ],
+            "title": "Workflow",
+            "type": "string"
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "title": "ResearchRequest",
+        "type": "object"
+      },
+      "RunSettings": {
+        "additionalProperties": false,
+        "description": "Per-run override knobs (everything optional = use the constants).\n\nAttributes:\n    model_config: Attribute description.\n    max_depth: Deepest decompose depth for this run.\n    max_subqueries: Fan-out cap per planning round for this run.\n    max_iterations: Judge->synthesize optimizer loop cap for this run.\n    wiki_extract: Enable LLM concept/entity extraction at wiki ingest\n        (two-step: analysis -> generation). Off = deterministic filing.\n    wiki_save_answers: Also file the rendered answer under ``queries/``\n        (Karpathy \"good answers shouldn't disappear\" — always-on in the\n        wiki pattern; this knob keeps it opt-in per run).\n    thesis: When set, file a for/against verdict page for this claim into\n        ``wiki/synthesis/`` (requires ``wiki_extract``-capable provider).\n    max_wiki_pages: Cap on concept/entity pages written per ingest.",
+        "properties": {
+          "max_depth": {
+            "anyOf": [
+              {
+                "maximum": 3.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Depth"
+          },
+          "max_iterations": {
+            "anyOf": [
+              {
+                "maximum": 2.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Iterations"
+          },
+          "max_subqueries": {
+            "anyOf": [
+              {
+                "maximum": 7.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Subqueries"
+          },
+          "max_wiki_pages": {
+            "anyOf": [
+              {
+                "maximum": 20.0,
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Wiki Pages"
+          },
+          "thesis": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Thesis"
+          },
+          "wiki_extract": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiki Extract"
+          },
+          "wiki_save_answers": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Wiki Save Answers"
+          }
+        },
+        "title": "RunSettings",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "ctx": {
+            "title": "Context",
+            "type": "object"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      },
+      "WikiIngestRequest": {
+        "additionalProperties": false,
+        "description": "Body of ``POST /wiki/ingest``.\n\nAttributes:\n    model_config: Forbid extra keys.\n    thread_id: Run thread identifier (provenance).\n    query: Original research query.\n    article_path: Optional server-local ``article.md``. Omit it to let the\n        service resolve the rendered artifact from the artifact store.",
+        "properties": {
+          "article_path": {
+            "anyOf": [
+              {
+                "maxLength": 512,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Article Path"
+          },
+          "query": {
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Query",
+            "type": "string"
+          },
+          "thread_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "title": "Thread Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "thread_id",
+          "query"
+        ],
+        "title": "WikiIngestRequest",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Knowledge Engine",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/health": {
+      "get": {
+        "description": "Liveness: the process is up.\n\nReturns:\n    dict[str, str]: Static ok payload.",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Health Health Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Health"
+      }
+    },
+    "/readiness": {
+      "get": {
+        "description": "Readiness: DB, auth, migrations, storage, and providers.\n\nReturns:\n    ReadinessReport: The readiness result.",
+        "operationId": "readiness_readiness_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessReport"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readiness"
+      }
+    },
+    "/research": {
+      "post": {
+        "description": "Queue a research run and return a job id (202).\n\nArgs:\n    request: Incoming request (caller identity for quotas).\n    req: The research request.\n\nReturns:\n    ResearchAccepted: The accepted job id + status.\n\nRaises:\n    HTTPException: 429 when the queue or the caller's active-job cap is full.",
+        "operationId": "research_research_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResearchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResearchAccepted"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Research"
+      }
+    },
+    "/result/{task_id}": {
+      "get": {
+        "description": "Poll a job's durable status.\n\nArgs:\n    task_id: Job id.\n\nReturns:\n    JobRecord: The current job state.\n\nRaises:\n    HTTPException: 404 when the id is unknown.",
+        "operationId": "result_result__task_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobRecord"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Result"
+      }
+    },
+    "/result/{task_id}/artifact": {
+      "get": {
+        "description": "Return a completed job's rendered artifact.\n\nArgs:\n    task_id: Job id.\n    format: ``markdown`` (default) or ``json`` (article + sources).\n\nReturns:\n    Any: A Markdown response or a JSON mapping.\n\nRaises:\n    HTTPException: 404 for an unknown task/missing artifact, 409 when\n        the job has not completed.",
+        "operationId": "result_artifact_result__task_id__artifact_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "format",
+            "required": false,
+            "schema": {
+              "default": "markdown",
+              "enum": [
+                "markdown",
+                "json"
+              ],
+              "title": "Format",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Result Artifact Result  Task Id  Artifact Get"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Result Artifact"
+      }
+    },
+    "/result/{task_id}/sources": {
+      "get": {
+        "description": "Return a completed job's persisted sources.\n\nArgs:\n    task_id: Job id.\n\nReturns:\n    dict[str, Any]: ``{\"task_id\", \"thread_id\", \"sources\"}``.\n\nRaises:\n    HTTPException: 404 for an unknown task, 409 when not done.",
+        "operationId": "result_sources_result__task_id__sources_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "task_id",
+            "required": true,
+            "schema": {
+              "title": "Task Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Result Sources Result  Task Id  Sources Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Result Sources"
+      }
+    },
+    "/wiki/ingest": {
+      "post": {
+        "description": "Re-ingest a raw run into the wiki.\n\nArgs:\n    req: The ingest request.\n\nReturns:\n    dict[str, Any]: The ingest result.\n\nRaises:\n    HTTPException: 404 when the referenced article does not exist.",
+        "operationId": "wiki_ingest_wiki_ingest_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WikiIngestRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Wiki Ingest Wiki Ingest Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Wiki Ingest"
+      }
+    },
+    "/wiki/lint": {
+      "post": {
+        "description": "Run the deterministic wiki lint.\n\nReturns:\n    dict[str, Any]: The lint report.",
+        "operationId": "wiki_lint_wiki_lint_post",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Wiki Lint Wiki Lint Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Wiki Lint"
+      }
+    },
+    "/wiki/page/{slug}": {
+      "get": {
+        "description": "Read one compiled wiki page as Markdown.\n\nArgs:\n    slug: Kebab-case page slug.\n\nReturns:\n    PlainTextResponse: The page Markdown.\n\nRaises:\n    HTTPException: 404 when the page does not exist, 422 for a bad slug.",
+        "operationId": "wiki_page_wiki_page__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Wiki Page"
+      }
+    },
+    "/wiki/query": {
+      "get": {
+        "description": "Answer from the compiled wiki with no live call (token-gated).\n\nArgs:\n    q: Query text.\n    limit: Maximum hits.\n\nReturns:\n    dict[str, Any]: ``{\"hits\": [...]}`` without server-local paths.",
+        "operationId": "wiki_query_wiki_query_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "q",
+            "required": true,
+            "schema": {
+              "maxLength": 2000,
+              "minLength": 1,
+              "title": "Q",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 3,
+              "maximum": 20,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "header",
+            "name": "authorization",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Authorization"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "title": "Response Wiki Query Wiki Query Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Wiki Query"
+      }
+    }
+  }
+}

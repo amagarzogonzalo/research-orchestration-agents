@@ -24,6 +24,7 @@ Copy the values from your local `.env` (never commit them).
 | `ALLOW_ANONYMOUS` | optional | local development only; never `true` in production |
 | `RATE_LIMIT_PER_MINUTE` | optional | per-hashed-caller limit on data routes (default 30; `<= 0` disables). Shared Postgres limiter when `DATABASE_URL` is set |
 | `JOB_TIMEOUT_SECONDS` | optional | abort a run after this long (default 900; `<= 0` disables) |
+| `JOBS_KIND` | set by blueprint | `postgres` (default when `DATABASE_URL` is set) or `memory` (local/dev only) |
 | `MAX_CONCURRENT_JOBS` | set by blueprint | jobs executed at once (default 1; Render Free RAM) |
 | `MAX_QUEUED_JOBS` | set by blueprint | queue depth cap; over → 429 (default 16; `<= 0` disables) |
 | `MAX_ACTIVE_JOBS_PER_CALLER` | set by blueprint | per-caller queued+running cap; over → 429 (default 4; `<= 0` disables) |
@@ -65,11 +66,17 @@ transaction pooler (`6543`), so prepared statements work for LangGraph.
   adapters create them private and heal any public bucket back to private; reads
   go through the authenticated service, never a public object URL.
 - **All data routes require the bearer token** — `/research`, `/result`,
-  `/wiki/query`, `/wiki/ingest`, `/wiki/lint`. Settings fail closed: with no
-  `API_TOKEN` and `ALLOW_ANONYMOUS=false`, data routes return 503 and
-  `/readiness` reports `auth=false`. Only `/health` and `/readiness` are open
-  (the platform probe needs them). Bearer tokens are hashed before they are
-  used as rate-limit or quota keys, so raw tokens never reach the database.
+  `/result/.../artifact`, `/result/.../sources`, `/wiki/query`, `/wiki/page`,
+  `/wiki/ingest`, `/wiki/lint`. Settings fail closed: with no `API_TOKEN` and
+  `ALLOW_ANONYMOUS=false`, data routes return 503 and `/readiness` reports
+  `auth=false`. Only `/health` and `/readiness` are open (the platform probe
+  needs them). Bearer tokens are hashed before they are used as rate-limit or
+  quota keys, so raw tokens never reach the database.
+- **Artifacts are never public.** The API serves them from the private
+  `articles` bucket (or the local store) through the authenticated `/artifact`
+  endpoint; `output_path` remains a server-local compatibility field.
+- **Thread ids are validated** (`^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$`) before
+  they can become store/checkpoint directory names.
 - `service_role` (`SUPABASE_SECRET_KEY`) is server-side only and never returned
   in responses. TLS is terminated by Render/Cloudflare.
 
@@ -149,8 +156,11 @@ Render deploy via the API. Add repo secrets `RENDER_API_KEY` and
 | GET | `/readiness` | none | DB + Storage + auth + migrations + providers |
 | POST | `/research` | bearer | 202 → poll `/result/{id}` (queued durably, worker-claimed) |
 | GET | `/result/{task_id}` | bearer | durable job status (Postgres) |
+| GET | `/result/{task_id}/artifact` | bearer | rendered Markdown / JSON artifact |
+| GET | `/result/{task_id}/sources` | bearer | persisted sources |
 | GET | `/wiki/query?q=&limit=` | bearer | answer from the wiki, no live call |
-| POST | `/wiki/ingest` | bearer | re-ingest a raw run (path must stay under the store root) |
+| GET | `/wiki/page/{slug}` | bearer | read one compiled wiki page |
+| POST | `/wiki/ingest` | bearer | re-ingest by `thread_id` (or a confined path) |
 | POST | `/wiki/lint` | bearer | deterministic vault lint |
 
 ## Rollback

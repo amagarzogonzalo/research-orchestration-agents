@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from knowledge_engine.schemas.ids import validate_thread_id
 from knowledge_engine.schemas.settings import RunSettings
 
 
@@ -40,9 +41,9 @@ class ResearchRequest(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    query: str = Field(min_length=1)
+    query: str = Field(min_length=1, max_length=4000)
     workflow: Literal["research", "qa", "summary", "deep"] = "research"
-    thread_id: str | None = None
+    thread_id: str | None = Field(default=None, max_length=128)
     settings: RunSettings | None = None
 
     @field_validator("query")
@@ -63,6 +64,19 @@ class ResearchRequest(BaseModel):
         if not text:
             raise ValueError("query must not be blank")
         return text
+
+    @field_validator("thread_id")
+    @classmethod
+    def _thread_id_safe(cls, value: str | None) -> str | None:
+        """Reject thread ids that could escape the store/checkpoint root.
+
+        Args:
+            value: Optional caller-supplied thread id.
+
+        Returns:
+            str | None: The validated id, or None when omitted.
+        """
+        return validate_thread_id(value) if value else value
 
 
 class JobRecord(BaseModel):
@@ -135,14 +149,28 @@ class WikiIngestRequest(BaseModel):
         model_config: Forbid extra keys.
         thread_id: Run thread identifier (provenance).
         query: Original research query.
-        article_path: Path of the rendered ``article.md``.
+        article_path: Optional server-local ``article.md``. Omit it to let the
+            service resolve the rendered artifact from the artifact store.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    thread_id: str
-    query: str
-    article_path: str
+    thread_id: str = Field(min_length=1, max_length=128)
+    query: str = Field(min_length=1, max_length=4000)
+    article_path: str | None = Field(default=None, max_length=512)
+
+    @field_validator("thread_id")
+    @classmethod
+    def _thread_id_safe(cls, value: str) -> str:
+        """Reject thread ids that could escape the store/checkpoint root.
+
+        Args:
+            value: Caller-supplied thread id.
+
+        Returns:
+            str: The validated id.
+        """
+        return validate_thread_id(value)
 
 
 __all__ = [
