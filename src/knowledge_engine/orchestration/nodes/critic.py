@@ -15,7 +15,7 @@ from typing import Any
 
 from knowledge_engine.core.ports import ProviderPort
 from knowledge_engine.orchestration.guardrails import rubric_assess
-from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState
+from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState, merge_sources
 from knowledge_engine.schemas.decomposition import CriticReport, CriticVerdict
 from knowledge_engine.schemas.provider import Affinity, ChatRequest
 
@@ -99,7 +99,11 @@ def _fallback_report(state: WorkflowState) -> CriticReport:
     Returns:
         CriticReport: Fallback report.
     """
-    score, gaps = rubric_assess(state.get("sources", []), state.get("bodies", []), state.get("branch_notes", []))
+    score, gaps = rubric_assess(
+        merge_sources(state.get("sources", []), state.get("branch_sources", [])),
+        state.get("bodies", []),
+        state.get("branch_notes", []),
+    )
     verdict = CriticVerdict.SUFFICIENT if score >= 0.7 else CriticVerdict.REPLAN
     return CriticReport(
         verdict=verdict,

@@ -18,7 +18,7 @@ from typing import Any
 
 import yaml
 
-from knowledge_engine.core.exceptions import ConfigurationError, KnowledgeEngineError
+from knowledge_engine.core.exceptions import ConfigurationError, KnowledgeEngineError, WikiArticleMissing
 from knowledge_engine.core.ports import VaultLintPort, WikiIngestPort, WikiQueryPort
 from knowledge_engine.infrastructure.wiki import common
 from knowledge_engine.infrastructure.wiki.lint_core import lint_pages
@@ -180,11 +180,11 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
             IngestResult: Verdict (new/update/no_material) + write counts.
 
         Raises:
-            KnowledgeEngineError: When the article file is missing.
+            WikiArticleMissing: When the article file is missing.
         """
         src = Path(article_path)
         if not src.is_file():
-            raise KnowledgeEngineError(f"supabase wiki ingest: article missing: {article_path}")
+            raise WikiArticleMissing(f"supabase wiki ingest: article missing: {article_path}")
         text = src.read_text(encoding="utf-8")
         digest = common.sha256_text(text)
         title = common.page_title(query)
@@ -330,11 +330,11 @@ class SupabaseWikiStore(WikiQueryPort, WikiIngestPort):
             str: The filed query object locator.
 
         Raises:
-            KnowledgeEngineError: When the article file is missing.
+            WikiArticleMissing: When the article file is missing.
         """
         src = Path(article_path)
         if not src.is_file():
-            raise KnowledgeEngineError(f"supabase wiki file_answer: article missing: {article_path}")
+            raise WikiArticleMissing(f"supabase wiki file_answer: article missing: {article_path}")
         text = src.read_text(encoding="utf-8")
         title = common.page_title(query)
         slug = common.slugify(query)

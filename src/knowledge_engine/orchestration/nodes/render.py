@@ -53,19 +53,22 @@ class RenderNode(WorkflowNode):
         # their actually-used sources through the add-reducer channel.
         base = state.get("filtered") or state.get("sources", [])
         provenance = merge_sources(base, state.get("branch_sources", []))
-        notes = _normalize_citations(
-            "\n\n".join(state.get("notes", [])),
-            provenance,
-        )
+        # Judge-loop iterations append to ``notes``; publish only the final
+        # synthesis (joining them re-published earlier drafts in the artifact).
+        drafts = [note for note in state.get("notes", []) if note and note.strip()]
+        notes = _normalize_citations(drafts[-1] if drafts else "", provenance)
         title = _title_from(state.get("query", ""))
+        tldr = _tldr(notes)
+        cited = set(_cited_ids(notes, provenance))
+        citations = [s.doi or s.id for s in provenance if s.id in cited]
         artifact = KnowledgeArtifact(
             id=f"{state['thread_id']}",
             title=title,
             provenance=provenance,
             body_markdown=notes,
-            citations=[s.doi or s.id for s in provenance],
-            tldr_llm=_tldr(notes),
-            frontmatter_yaml=_frontmatter(state, title, provenance),
+            citations=citations,
+            tldr_llm=tldr,
+            frontmatter_yaml=_frontmatter(state, title, provenance, citations, tldr),
             generated_at=datetime.now(UTC).isoformat(),
         )
         if self._save is not None:
@@ -75,13 +78,17 @@ class RenderNode(WorkflowNode):
         return {"output_path": output_path, "status": GraphStatus.DONE.value}
 
 
-def _frontmatter(state: WorkflowState, title: str, provenance: list[SourceRecord]) -> str:
+def _frontmatter(
+    state: WorkflowState, title: str, provenance: list[SourceRecord], citations: list[str], tldr: str
+) -> str:
     """Frontmatter.
 
     Args:
         state: Current workflow state.
         title: Title text.
         provenance: Provenance records.
+        citations: Cited source locators (DOI or id).
+        tldr: Summary text.
 
     Returns:
         str: Result text.
@@ -92,92 +99,252 @@ def _frontmatter(state: WorkflowState, title: str, provenance: list[SourceRecord
         "type": "KnowledgeBaseArticle",
         "title": title,
         "provenance": [{"id": s.id, "doi": s.doi, "title": s.title, "venue": s.venue} for s in provenance],
-        "citations": [s.doi or s.id for s in provenance],
-        "tldr_llm": _tldr("\n\n".join(state.get("notes", []))),
+        "citations": citations,
+        "tldr_llm": tldr,
     }
     dumped = yaml.safe_dump(meta, sort_keys=False)
     return dumped or ""
 
 
 def _tldr(notes: str) -> str:
-    """Tldr.
+    """First prose of the article, without headings and cut at a word boundary.
 
     Args:
-        notes: Review notes.
+        notes: Normalized article markdown.
 
     Returns:
-        str: Result text.
-
+        str: Summary text.
     """
-    return (notes.replace("\n", " ").strip() or "")[:200]
+    lines: list[str] = []
+    for line in notes.splitlines():
+        text = line.strip()
+        if not text or text.startswith(("#", "---", "```", "[^")):
+            continue
+        lines.append(text)
+        if len(" ".join(lines)) >= 240:
+            break
+    collapsed = re.sub(r"\s+", " ", " ".join(lines)).strip()
+    if len(collapsed) <= 200:
+        return collapsed
+    cut = collapsed[:200]
+    space = cut.rfind(" ")
+    if space > 0:
+        cut = cut[:space]
+    return cut.rstrip(" ,;:")
 
 
-_FOOTNOTE_REF = re.compile(r"\[\^([A-Za-z0-9_.:/-]+)\]")
-_FOOTNOTE_DEF = re.compile(r"(?m)^\[\^([A-Za-z0-9_.:/-]+)\]:")
+_MARKER_TEXT = r"[^\[\]\n]+"
+_FOOTNOTE_REF = re.compile(r"\[\^(" + _MARKER_TEXT + r")\]")
+_FOOTNOTE_DEF_BLOCK = re.compile(r"(?m)^\[\^[^\[\]\n]+\]:[^\n]*(?:\n[ \t]+\S[^\n]*)*\n?")
+_BARE_CITE = re.compile(r"(?<![!\^])\[([^\[\]\n]+)\](?![\(:])")
+_DOUBLED_PREFIX = re.compile(r"((?:[a-z_]+):https?://)(?:\1)+")
+_DOUBLED_SCHEME = re.compile(r"(https?://)(?:\1)+")
 
 
 def _normalize_citations(notes: str, provenance: list[SourceRecord]) -> str:
-    """Rewrite plain [known-id] citations to footnote markers, then complete defs.
+    """Rewrite citations to canonical markers and rebuild the bibliography.
 
-    Models alternate between ``[^id]`` and bare ``[id]`` styles run to run;
-    normalizing first makes the published reference format deterministic.
+    The model alternates between ``[^id]`` and bare ``[id]`` styles, doubles
+    URL prefixes, comma-joins markers, truncates definitions mid-line, and
+    leaves definitions for sources it never cites. This normalizes every
+    marker to a resolvable ``[^source-id]`` form, drops markers for sources
+    that were never retrieved, and regenerates the bibliography from
+    provenance for exactly the cited ids.
 
     Args:
         notes: Synthesized notes.
         provenance: Provenance records.
 
     Returns:
-        str: Notes with footnote markers and complete definitions.
+        str: Notes with canonical footnote markers and complete definitions.
+    """
+    titles = {s.id: (s.title or s.id) for s in provenance}
+    known = _known_ids(provenance)
+    body = _collapse_doubled_prefixes(notes)
+    body = _rewrite_bare_citations(body, known, titles)
+    body = _rewrite_multi_refs(body, known, titles)
+    body = _rewrite_refs(body, known, titles)
+    body = re.sub(r"(?<=\S)[ \t]{2,}", " ", body)
+    body = re.sub(r"[ \t]+([.,;:)])", r"\1", body)
+    return _rebuild_bibliography(body, provenance, titles)
+
+
+def _known_ids(provenance: list[SourceRecord]) -> dict[str, str]:
+    """Build the accepted-marker map (canonical ids plus DOIs).
+
+    Args:
+        provenance: Provenance records.
+
+    Returns:
+        dict[str, str]: Marker text to canonical source id.
     """
     known: dict[str, str] = {}
     for record in provenance:
         known[record.id] = record.id
         if record.doi:
             known[record.doi] = record.id
-
-    def _rewrite(match: re.Match[str]) -> str:
-        sid = known.get(match.group(1))
-        return f"[^{sid}]" if sid is not None else match.group(0)
-
-    notes = re.sub(r"(?<!\^)\[([A-Za-z0-9_.:/-]+)\]", _rewrite, notes)
-    # Split multi-cite brackets ([^a, b] and [^a, ^b] -> [^a] [^b]) so every
-    # marker is individually resolvable by the footnote completion below.
-    notes = re.sub(
-        r"\[\^([A-Za-z0-9_.:/-]+(?:\s*,\s*\^?[A-Za-z0-9_.:/-]+)+)\]",
-        lambda m: " ".join(f"[^{part.strip().lstrip('^')}]" for part in m.group(1).split(",")),
-        notes,
-    )
-    return _complete_footnotes(notes, provenance)
+    return known
 
 
-def _complete_footnotes(notes: str, provenance: list[SourceRecord]) -> str:
-    """Append missing footnote definitions from provenance.
-
-    Models cite [^<source-id>] but forget some definitions; every dangling
-    marker is completed from the source title so references always resolve.
-    Markers for unknown IDs are left untouched.
+def _collapse_doubled_prefixes(text: str) -> str:
+    """Collapse mechanically doubled provider prefixes and URL schemes.
 
     Args:
-        notes: Synthesized notes.
+        text: Article text.
+
+    Returns:
+        str: Text with doubled ``tavily:https://tavily:https://`` and
+            ``https://https://`` runs collapsed to one copy.
+    """
+    text = _DOUBLED_PREFIX.sub(r"\1", text)
+    return _DOUBLED_SCHEME.sub(r"\1", text)
+
+
+def _canonical_marker(marker: str, known: dict[str, str], titles: dict[str, str]) -> str | None:
+    """Resolve one marker text to a provenance source id.
+
+    Args:
+        marker: Marker text (a leading caret is ignored).
+        known: Marker-to-id map from :func:`_known_ids`.
+        titles: Source id to title mapping.
+
+    Returns:
+        str | None: Canonical source id, or None when unresolvable.
+    """
+    text = marker.strip().lstrip("^").strip()
+    if not text:
+        return None
+    if text in known:
+        return known[text]
+    return _resolve_marker(text, titles)
+
+
+def _rewrite_bare_citations(text: str, known: dict[str, str], titles: dict[str, str]) -> str:
+    """Convert bare ``[id]`` / ``[id1, id2]`` citations to footnote markers.
+
+    A bracket is only rewritten when every comma-separated part resolves, so
+    bracketed prose that merely resembles an id is never mangled.
+
+    Args:
+        text: Article text.
+        known: Marker-to-id map.
+        titles: Source id to title mapping.
+
+    Returns:
+        str: Text with resolvable bare citations rewritten.
+    """
+
+    def _sub(match: re.Match[str]) -> str:
+        parts = [part.strip() for part in match.group(1).split(",")]
+        resolved = [_canonical_marker(part, known, titles) for part in parts]
+        if not all(resolved):
+            return match.group(0)
+        return " ".join(f"[^{sid}]" for sid in resolved)
+
+    return _BARE_CITE.sub(_sub, text)
+
+
+def _rewrite_multi_refs(text: str, known: dict[str, str], titles: dict[str, str]) -> str:
+    """Split comma-joined footnote markers into individual markers.
+
+    Resolvable parts are kept even when a sibling part is unknown, so one
+    bad id never discards the good citations beside it.
+
+    Args:
+        text: Article text.
+        known: Marker-to-id map.
+        titles: Source id to title mapping.
+
+    Returns:
+        str: Text with multi-cite markers split into single markers.
+    """
+
+    def _sub(match: re.Match[str]) -> str:
+        inner = match.group(1)
+        if "," not in inner:
+            return match.group(0)
+        parts = [part.strip().lstrip("^").strip() for part in inner.split(",")]
+        kept = [sid for sid in (_canonical_marker(part, known, titles) for part in parts) if sid is not None]
+        if not kept:
+            return match.group(0)
+        return " ".join(f"[^{sid}]" for sid in kept)
+
+    return _FOOTNOTE_REF.sub(_sub, text)
+
+
+def _rewrite_refs(text: str, known: dict[str, str], titles: dict[str, str]) -> str:
+    """Canonicalize every footnote marker and drop unresolvable ones.
+
+    Args:
+        text: Article text.
+        known: Marker-to-id map.
+        titles: Source id to title mapping.
+
+    Returns:
+        str: Text where every remaining marker points at a provenance id.
+    """
+
+    def _sub(match: re.Match[str]) -> str:
+        sid = _canonical_marker(match.group(1), known, titles)
+        return f"[^{sid}]" if sid is not None else ""
+
+    return _FOOTNOTE_REF.sub(_sub, text)
+
+
+def _rebuild_bibliography(body: str, provenance: list[SourceRecord], titles: dict[str, str]) -> str:
+    """Replace model-authored definitions with a provenance-backed bibliography.
+
+    Model definitions are removed first, so truncated, doubled, or unreferenced
+    lines never reach the artifact; definitions are then regenerated for every
+    marker that survived normalization.
+
+    Args:
+        body: Article text (markers already canonical).
+        provenance: Provenance records.
+        titles: Source id to title mapping.
+
+    Returns:
+        str: Article with a complete, deterministic bibliography.
+    """
+    body = _FOOTNOTE_DEF_BLOCK.sub("", body).rstrip()
+    body = re.sub(r"\n{3,}", "\n\n", body)
+    cited = _referenced_ids(body, titles)
+    if not cited:
+        return body
+    lines = [f"[^{sid}]: {_full_citation(provenance, sid)}" for sid in cited]
+    return body + "\n\n" + "\n".join(lines) + "\n"
+
+
+def _referenced_ids(body: str, titles: dict[str, str]) -> list[str]:
+    """Ordered source ids referenced by footnote markers in ``body``.
+
+    Args:
+        body: Article text.
+        titles: Source id to title mapping.
+
+    Returns:
+        list[str]: Source ids in first-use order, deduplicated.
+    """
+    seen: list[str] = []
+    for marker in _FOOTNOTE_REF.findall(body):
+        sid = _resolve_marker(marker, titles)
+        if sid is not None and sid not in seen:
+            seen.append(sid)
+    return seen
+
+
+def _cited_ids(notes: str, provenance: list[SourceRecord]) -> list[str]:
+    """Source ids cited by the normalized notes, in first-use order.
+
+    Args:
+        notes: Normalized article text.
         provenance: Provenance records.
 
     Returns:
-        str: Notes with complete footnote definitions.
+        list[str]: Cited source ids.
     """
     titles = {s.id: (s.title or s.id) for s in provenance}
-    missing = sorted(set(_FOOTNOTE_REF.findall(notes)) - set(_FOOTNOTE_DEF.findall(notes)))
-    additions = []
-    for marker in missing:
-        sid = _resolve_marker(marker, titles)
-        if sid is not None:
-            if sid != marker:
-                # Canonicalize merged-away duplicate IDs to the surviving
-                # provenance ID so every marker matches its definition.
-                notes = re.sub(r"\[\^" + re.escape(marker) + r"\]", f"[^{sid}]", notes)
-            additions.append(f"[^{sid}]: {_full_citation(provenance, sid)}")
-    if not additions:
-        return notes
-    return notes.rstrip() + "\n\n" + "\n".join(dict.fromkeys(additions)) + "\n"
+    return _referenced_ids(notes, titles)
 
 
 def _full_citation(provenance: list[SourceRecord], sid: str) -> str:
@@ -290,7 +457,7 @@ def _title_from(query: str) -> str:
     Returns:
         str: Result text.
     """
-    return query.strip().strip("?")[:80] or "Research Notes"
+    return query.strip()[:80].strip() or "Research Notes"
 
 
 async def _default_save(root: str, artifact: KnowledgeArtifact) -> str:

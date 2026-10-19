@@ -55,6 +55,27 @@ def test_deep_workflow_builds(tmp_path) -> None:
     assert set(graph.get_graph().nodes) >= {"intent", "decompose", "branch", "aggregate"}
 
 
+def test_deep_route_requires_evidence_floor(tmp_path) -> None:
+    """A rubric pass with too few merged sources still replans (audit defect)."""
+    from knowledge_engine.orchestration.graphs import deep_route
+    from knowledge_engine.schemas.source import SearchSource, SourceRecord
+
+    def rec(n: int) -> SourceRecord:
+        return SourceRecord(id=f"openalex:W{n}", title=f"P{n}", source=SearchSource.OPENALEX)
+
+    thin = {
+        "rubric_score": 0.9,
+        "gaps": [],
+        "depth": 1,
+        "rounds": 1,
+        "llm_calls": 4,
+        "branch_sources": [rec(i) for i in range(4)],
+    }
+    assert deep_route(thin) == "decompose"
+    rich = dict(thin, branch_sources=[rec(i) for i in range(8)])
+    assert deep_route(rich) == "critic"
+
+
 async def test_deep_run_fans_out_and_terminates(tmp_path) -> None:
     runtime = GraphRuntime(nodes=_deep_nodes(tmp_path), checkpointer=InMemorySaver())
     result = await runtime.run("deep", "t-deep", "compare LLM memory architectures, evaluation, and limitations")

@@ -4,7 +4,6 @@
     "crossref:10.1007/978-1-0716-0687-2_15",
     "crossref:10.1007/978-1-0716-0822-7_6",
     "crossref:10.1016/j.omtm.2025.101498",
-    "crossref:10.1038/nmeth.3301",
     "crossref:10.1101/741322",
     "crossref:10.17504/protocols.io.wikfccw"
   ],
@@ -23,7 +22,7 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "83f09decd6960780",
+  "hash": "c068d6ef3a8257f9",
   "headings": [
     "2:overview-of-crispr-off-target-detection-frameworks",
     "2:in-vitro-and-integration-based-methods",

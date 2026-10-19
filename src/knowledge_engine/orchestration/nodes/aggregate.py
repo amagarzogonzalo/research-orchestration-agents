@@ -13,7 +13,7 @@ from typing import Any
 
 from knowledge_engine.core.ports import ProviderPort
 from knowledge_engine.orchestration.guardrails import rubric_assess
-from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState
+from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState, merge_sources
 from knowledge_engine.schemas.provider import Affinity, ChatRequest
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,11 @@ class AggregateNode(WorkflowNode):
                 max_tokens=2500,
             )
         )
-        score, gaps = rubric_assess(state.get("sources", []), state.get("bodies", []), branch_notes)
+        score, gaps = rubric_assess(
+            merge_sources(state.get("sources", []), state.get("branch_sources", [])),
+            state.get("bodies", []),
+            branch_notes,
+        )
         return {"notes": [res.message.content], "rubric_score": score, "gaps": gaps, "llm_calls": 1}
 
 

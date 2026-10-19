@@ -26,6 +26,7 @@ class FakeEngine:
         self.setup_called = False
         self.closed = False
         self.ran: list[tuple[str, str]] = []
+        self.settings_seen: list[Any] = []
 
     async def setup(self) -> None:
         """Mark startup."""
@@ -35,19 +36,29 @@ class FakeEngine:
         """Mark shutdown."""
         self.closed = True
 
-    async def research(self, query: str, *, workflow: str = "research", thread_id: str | None = None, **_: Any) -> Any:
+    async def research(
+        self,
+        query: str,
+        *,
+        workflow: str = "research",
+        thread_id: str | None = None,
+        settings: Any = None,
+        **_: Any,
+    ) -> Any:
         """Return a done result summarizing the run.
 
         Args:
             query: Query text.
             workflow: Workflow name.
             thread_id: Thread id.
-            **_: Ignored extra kwargs (settings).
+            settings: Validated per-run settings (recorded).
+            **_: Ignored extra kwargs.
 
         Returns:
             Any: A RunResult-like object.
         """
         self.ran.append((query, workflow))
+        self.settings_seen.append(settings)
         state = SimpleNamespace(status=SimpleNamespace(value="done"), output_path="/tmp/a.md", sources=[1, 2, 3])
         return SimpleNamespace(state=state)
 
@@ -182,6 +193,7 @@ def test_wiki_ingest_and_lint_require_token() -> None:
     lint = client.post("/wiki/lint", headers={"Authorization": "Bearer secret"})
     assert lint.status_code == 200
     assert lint.json()["root"] == "wiki"
+    assert lint.json()["ok"] is True
 
 
 def test_read_only_token_scope() -> None:
@@ -246,3 +258,65 @@ def test_research_accepts_every_workflow(workflow: str) -> None:
     resp = client.post("/research", json={"query": "q", "workflow": workflow})
     assert resp.status_code == 202
     assert engine.ran[-1] == ("q", workflow)
+
+
+def test_research_rejects_unknown_workflow_with_422() -> None:
+    """An unknown workflow is a validation error at submit, not a dead job."""
+    client, engine = _client()
+    resp = client.post("/research", json={"query": "q", "workflow": "bogus"})
+    assert resp.status_code == 422
+    assert engine.ran == []
+
+
+@pytest.mark.parametrize("query", ["", "   "])
+def test_research_rejects_blank_query_with_422(query: str) -> None:
+    """Blank and whitespace-only queries are rejected before a job exists."""
+    client, engine = _client()
+    resp = client.post("/research", json={"query": query})
+    assert resp.status_code == 422
+    assert engine.ran == []
+
+
+@pytest.mark.parametrize("settings", [{"max_depth": -1}, {"max_total_tokens": "many"}, {"unknown_knob": 1}])
+def test_research_rejects_invalid_settings_with_422(settings: dict[str, Any]) -> None:
+    """Invalid per-run settings fail at submit with 422, not inside the job."""
+    client, engine = _client()
+    resp = client.post("/research", json={"query": "q", "settings": settings})
+    assert resp.status_code == 422
+    assert engine.ran == []
+
+
+def test_research_passes_validated_settings_to_engine() -> None:
+    """Valid settings reach the engine as a validated RunSettings instance."""
+    from knowledge_engine.schemas.settings import RunSettings
+
+    client, engine = _client()
+    resp = client.post("/research", json={"query": "q", "settings": {"max_subqueries": 3}})
+    assert resp.status_code == 202
+    assert engine.settings_seen[-1] == RunSettings(max_subqueries=3)
+
+
+def test_rate_limited_response_carries_retry_after() -> None:
+    """A 429 advertises when the caller may retry (audit defect: no header)."""
+    app = create_app(engine=FakeEngine(), jobs=InMemoryJobStore(), rate_limit_per_minute=1)
+    client = TestClient(app)
+    assert client.post("/research", json={"query": "a"}).status_code == 202
+    refused = client.post("/research", json={"query": "b"})
+    assert refused.status_code == 429
+    assert int(refused.headers["Retry-After"]) >= 1
+
+
+def test_wiki_ingest_missing_article_is_404() -> None:
+    """A missing article path is a client error, not a 500 (audit defect)."""
+    from knowledge_engine.core.exceptions import WikiArticleMissing
+
+    class MissingArticleEngine(FakeEngine):
+        async def wiki_ingest(self, thread_id: str, query: str, article_path: str) -> IngestResult:
+            raise WikiArticleMissing(f"supabase wiki ingest: article missing: {article_path}")
+
+    app = create_app(engine=MissingArticleEngine(), jobs=InMemoryJobStore())
+    client = TestClient(app)
+    body = {"thread_id": "t", "query": "q", "article_path": "nowhere.md"}
+    resp = client.post("/wiki/ingest", json=body)
+    assert resp.status_code == 404
+    assert "article missing" in resp.json()["detail"]

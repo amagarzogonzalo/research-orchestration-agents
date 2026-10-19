@@ -66,7 +66,7 @@ def _require(artifact: str, expected: list[str], **_: Any) -> list[str]:
 
 # A footnote definition plus its wrapped continuation lines: models wrap long
 # reference lines, and the continuations (years, URLs) must not scan as claims.
-_FOOTNOTE_DEF_BLOCK = re.compile(r"(?m)^\[\^[A-Za-z0-9_.:/-]+\]:.*(?:\n(?!\s*(?:$|#{1,6}\s+|[-*+]\s+|\[\^)).*)*")
+_FOOTNOTE_DEF_BLOCK = re.compile(r"(?m)^\[\^[^\[\]\n]+\]:.*(?:\n(?!\s*(?:$|#{1,6}\s+|[-*+]\s+|\[\^)).*)*")
 
 
 @check("no_uncited_claims")
@@ -94,8 +94,8 @@ def _uncited(artifact: str, expected: bool = True, **_: Any) -> list[str]:
 def _links(artifact: str, expected: bool = True, sources: Any = None, **_: Any) -> list[str]:
     if not expected:
         return []
-    refs = set(re.findall(r"\[\^([A-Za-z0-9_.:/-]+)\]", artifact))
-    defs = set(re.findall(r"^\[\^([A-Za-z0-9_.:/-]+)\]:", artifact, re.MULTILINE))
+    refs = set(re.findall(r"\[\^([^\[\]\n]+)\]", artifact))
+    defs = set(re.findall(r"^\[\^([^\[\]\n]+)\]:", artifact, re.MULTILINE))
     known = set(dg.citations("", sources))
     return [f"dangling footnote: [^{r}]" for r in sorted(refs - defs - known)]
 

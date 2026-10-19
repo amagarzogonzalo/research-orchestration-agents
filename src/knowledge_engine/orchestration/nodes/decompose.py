@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import logging
+import re
 from typing import Any
 
 from knowledge_engine.core.ports import ProviderPort
@@ -90,6 +91,10 @@ class DecomposeNode(WorkflowNode):
 def _parse_plan(raw: str, query: str, depth: int) -> list[SubQuery]:
     """Parse the provider's JSON plan, failing closed to one branch.
 
+    Tolerates markdown code fences and surrounding prose, which models add
+    despite the JSON-only instruction (a fenced reply used to fall back to a
+    single branch, starving deep runs of evidence).
+
     Args:
         raw: Raw provider output.
         query: Original query (fallback branch).
@@ -99,8 +104,8 @@ def _parse_plan(raw: str, query: str, depth: int) -> list[SubQuery]:
         list[SubQuery]: Planned branches (at least one).
     """
     try:
-        payload = json.loads(raw)
-        entries = payload.get("sub_queries", [])
+        payload = json.loads(_extract_json(raw))
+        entries = payload if isinstance(payload, list) else payload.get("sub_queries", [])
         items = [
             SubQuery(
                 query=str(e.get("query", "")), source=_source_of(e), rationale=str(e.get("rationale", "")), depth=depth
@@ -111,6 +116,26 @@ def _parse_plan(raw: str, query: str, depth: int) -> list[SubQuery]:
         return items or [_fallback(query, depth)]
     except (ValueError, AttributeError, TypeError):
         return [_fallback(query, depth)]
+
+
+def _extract_json(raw: str) -> str:
+    """Strip markdown fences and prose so only the JSON object remains.
+
+    Args:
+        raw: Raw provider output.
+
+    Returns:
+        str: Candidate JSON text (possibly unchanged when nothing matches).
+    """
+    text = raw.strip()
+    fenced = re.search(r"```[A-Za-z0-9_-]*\s*([\s\S]*?)\s*```", text)
+    if fenced:
+        text = fenced.group(1).strip()
+    if not text.startswith(("{", "[")):
+        brace = re.search(r"[\[{][\s\S]*[\]}]", text)
+        if brace:
+            text = brace.group(0)
+    return text
 
 
 def _source_of(entry: dict[str, Any]) -> SourceKind:

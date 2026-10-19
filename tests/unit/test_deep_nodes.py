@@ -28,6 +28,27 @@ class GarbageProvider(FakeProvider):
         )
 
 
+class FencedProvider(FakeProvider):
+    """Wraps every reply in markdown fences + prose (audit defect: fenced plans)."""
+
+    async def complete(self, req: ChatRequest) -> ChatResult:
+        raw = await super().complete(req)
+        return ChatResult.from_response(
+            f"Here is the plan:\n```json\n{raw.message.content}\n```\nDone.",
+            provider="fake",
+            model="fake",
+            usage=raw.usage,
+        )
+
+
+class SourceLike:
+    """Record double: ``merge_sources`` needs ``.id``, the rubric needs ``.domain``."""
+
+    def __init__(self, sid: str, domain: str) -> None:
+        self.id = sid
+        self.domain = domain
+
+
 class ExplodingProvider(ProviderPort):
     """Always fails (fail-open tests)."""
 
@@ -98,6 +119,14 @@ async def test_decompose_node_fail_closed_on_garbage() -> None:
     assert out["sub_queries"][0]["query"] == "original question"
 
 
+async def test_decompose_node_parses_fenced_json_plan() -> None:
+    """A fenced/prose-wrapped plan still fans out (audit defect: deep fell to one branch)."""
+    node = DecomposeNode(provider=FencedProvider(), max_subqueries=5, max_depth=2)
+    out = await node.run({"query": "compare memory systems", "depth": 0, "rounds": 0, "llm_calls": 0})
+    assert len(out["sub_queries"]) == 2
+    assert out["sub_queries"][0]["query"] == "sub query one"
+
+
 async def test_branch_node_runs_leaf_pipeline_reducer_keys_only() -> None:
     branch = await _nodeset_branch()
     out = await branch.run({"sub_query": {"query": "memory systems", "source": "search", "depth": 1}, "llm_calls": 0})
@@ -141,6 +170,20 @@ async def test_aggregate_node_merges_branch_notes() -> None:
     assert (await node.run({"query": "q", "branch_notes": []}))["notes"] == []
 
 
+async def test_aggregate_rubric_sees_branch_sources() -> None:
+    """Deep rubric diversity reads branch_sources (audit defect: empty sources channel)."""
+    node = AggregateNode(provider=FakeProvider())
+    out = await node.run(
+        {
+            "query": "q",
+            "branch_notes": ["note A", "note B"],
+            "branch_sources": [SourceLike("s1", "a.org"), SourceLike("s2", "b.org")],
+        }
+    )
+    assert out["rubric_score"] >= 0.6
+    assert not any(gap.startswith("diversity:") for gap in out["gaps"])
+
+
 async def test_critic_node_structured_feedback_extends_gaps() -> None:
     node = CriticNode(provider=FakeProvider())
     out = await node.run({"query": "q", "notes": ["finding"], "gaps": ["coverage: only 0 bodies (need 3)"]})
@@ -156,3 +199,17 @@ async def test_critic_node_falls_back_deterministically() -> None:
         assert out["critic_report"]["verdict"] == "replan"
         assert out["gaps"]
         assert out["llm_calls"] == 1
+
+
+async def test_critic_fallback_sees_branch_sources() -> None:
+    """Deterministic critic fallback reads branch_sources for diversity."""
+    node = CriticNode(provider=ExplodingProvider())
+    out = await node.run(
+        {
+            "query": "q",
+            "branch_notes": ["note A", "note B"],
+            "branch_sources": [SourceLike("s1", "a.org"), SourceLike("s2", "b.org")],
+            "gaps": [],
+        }
+    )
+    assert not any("no source domains" in gap for gap in out["gaps"])

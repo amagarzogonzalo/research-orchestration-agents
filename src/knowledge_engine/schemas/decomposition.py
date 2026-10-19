@@ -27,6 +27,9 @@ MAX_BRANCH_LLM_CALLS = 12
 RUBRIC_THRESHOLD = 0.7
 """Evidence-sufficiency score at which the rubric gate stops researching."""
 
+MIN_DEEP_SOURCES = 8
+"""Merged source count the deep rubric must reach before an early stop is allowed."""
+
 
 class SourceKind(StrEnum):
     """Retrieval route for one sub-query.
@@ -141,6 +144,7 @@ __all__ = [
     "MAX_DECOMPOSE_DEPTH",
     "MAX_DEEP_ROUNDS",
     "MAX_SUBQUERIES",
+    "MIN_DEEP_SOURCES",
     "RUBRIC_THRESHOLD",
     "ResearchPlan",
     "SourceKind",

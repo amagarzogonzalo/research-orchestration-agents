@@ -110,9 +110,11 @@ def should_stop(
     depth: int,
     rounds: int,
     llm_calls: int,
+    sources: int = 0,
+    min_sources: int = 0,
     threshold: float = RUBRIC_THRESHOLD,
 ) -> bool:
-    """Decide stop vs. replan: rubric pass, or any shared budget exhausted.
+    """Decide stop vs. replan: rubric pass with enough evidence, or budget spent.
 
     Args:
         score: Rubric score from :func:`rubric_assess`.
@@ -120,18 +122,20 @@ def should_stop(
         depth: Current plan depth.
         rounds: Replan rounds spent.
         llm_calls: LLM calls spent.
+        sources: Merged evidence-source count across branches.
+        min_sources: Evidence floor required for a rubric pass (0 disables).
         threshold: Sufficiency threshold.
 
     Returns:
         bool: True when the deep loop must stop (go to judge).
     """
-    if score >= threshold or not gaps:
-        return True
     if rounds >= MAX_DEEP_ROUNDS:
         return True
     if not budget_left(llm_calls):
         return True
-    return depth > MAX_DECOMPOSE_DEPTH
+    if depth > MAX_DECOMPOSE_DEPTH:
+        return True
+    return (score >= threshold or not gaps) and sources >= min_sources
 
 
 def _domain_of(item: object) -> str:

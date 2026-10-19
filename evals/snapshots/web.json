@@ -1,7 +1,6 @@
 {
   "citations": [
     "crossref:10.1109/icomet69771.2026.11591943",
-    "crossref:10.18653/v1/2025.findings-emnlp.218",
     "crossref:10.21203/rs.3.rs-10186581/v1",
     "crossref:10.31979/etd.hn7u-hp8x",
     "crossref:10.38124/ijisrt/26may1714"
@@ -21,7 +20,7 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "b17371e93d7021e2",
+  "hash": "a53dc52b21286a93",
   "headings": [
     "2:mechanisms-of-retrieval-augmented-generation-rag",
     "2:how-rag-reduces-hallucinations",

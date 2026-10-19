@@ -18,7 +18,7 @@ from typing import Any
 
 import yaml
 
-from knowledge_engine.core.exceptions import KnowledgeEngineError
+from knowledge_engine.core.exceptions import KnowledgeEngineError, WikiArticleMissing
 from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
 from knowledge_engine.infrastructure.wiki import common
 from knowledge_engine.infrastructure.wiki.postgres.connection import AsyncPgConnectionFactory
@@ -200,11 +200,11 @@ class PostgresWikiStore(WikiQueryPort, WikiIngestPort):
             IngestResult: Verdict + write counts.
 
         Raises:
-            KnowledgeEngineError: When the article file is missing.
+            WikiArticleMissing: When the article file is missing.
         """
         src = Path(article_path)
         if not src.is_file():
-            raise KnowledgeEngineError(f"postgres wiki ingest: article missing: {article_path}")
+            raise WikiArticleMissing(f"postgres wiki ingest: article missing: {article_path}")
         from psycopg import errors as pg_errors  # lazy: postgres adapter is opt-in
 
         text = src.read_text(encoding="utf-8")
@@ -290,11 +290,11 @@ class PostgresWikiStore(WikiQueryPort, WikiIngestPort):
             str: The filed query page locator.
 
         Raises:
-            KnowledgeEngineError: When the article file is missing.
+            WikiArticleMissing: When the article file is missing.
         """
         src = Path(article_path)
         if not src.is_file():
-            raise KnowledgeEngineError(f"postgres wiki file_answer: article missing: {article_path}")
+            raise WikiArticleMissing(f"postgres wiki file_answer: article missing: {article_path}")
         text = src.read_text(encoding="utf-8")
         digest = sha256_text(text)
         title = common.page_title(query)

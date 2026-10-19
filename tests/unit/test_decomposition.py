@@ -17,6 +17,7 @@ from knowledge_engine.schemas.decomposition import (
     MAX_DECOMPOSE_DEPTH,
     MAX_DEEP_ROUNDS,
     MAX_SUBQUERIES,
+    MIN_DEEP_SOURCES,
     ResearchPlan,
     SubQuery,
 )
@@ -94,3 +95,9 @@ def test_should_stop_on_score_rounds_or_budget() -> None:
     assert should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=0, llm_calls=12)
     assert not should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=2, llm_calls=1)
     assert not should_stop(score=0.2, gaps=["coverage"], depth=0, rounds=0, llm_calls=1)
+
+
+def test_should_stop_requires_evidence_floor_for_rubric_pass() -> None:
+    """A rubric pass under the evidence floor keeps planning (audit defect)."""
+    assert not should_stop(score=0.9, gaps=[], depth=0, rounds=0, llm_calls=3, sources=4, min_sources=MIN_DEEP_SOURCES)
+    assert should_stop(score=0.9, gaps=[], depth=0, rounds=0, llm_calls=3, sources=8, min_sources=MIN_DEEP_SOURCES)

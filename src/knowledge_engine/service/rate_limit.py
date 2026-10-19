@@ -53,5 +53,27 @@ class RateLimiter:
         window.append(moment)
         return True
 
+    def retry_after(self, key: str, *, now: float | None = None) -> float:
+        """Seconds until the next hit for ``key`` would be allowed.
+
+        Args:
+            key: Client key (token or host).
+            now: Optional monotonic timestamp (tests); defaults to ``time.monotonic``.
+
+        Returns:
+            float: Seconds to wait (0.0 when a hit would be allowed now).
+        """
+        if not self.enabled:
+            return 0.0
+        moment = time.monotonic() if now is None else now
+        window = self._hits.get(key)
+        if not window:
+            return 0.0
+        while window and moment - window[0] >= _WINDOW_SECONDS:
+            window.popleft()
+        if len(window) < self._per_minute:
+            return 0.0
+        return max(0.0, _WINDOW_SECONDS - (moment - window[0]))
+
 
 __all__ = ["RateLimiter"]

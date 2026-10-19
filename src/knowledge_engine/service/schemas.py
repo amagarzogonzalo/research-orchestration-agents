@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+
+from knowledge_engine.schemas.settings import RunSettings
 
 
 class JobStatus(StrEnum):
@@ -29,18 +31,37 @@ class ResearchRequest(BaseModel):
 
     Attributes:
         model_config: Forbid extra keys.
-        query: Research question.
+        query: Research question (must not be blank).
         workflow: One of ``research``/``qa``/``summary``/``deep``.
         thread_id: Optional stable thread id (derived when omitted).
-        settings: Optional per-run overrides (``RunSettings`` fields).
+        settings: Optional per-run overrides, validated at submit time.
     """
 
     model_config = ConfigDict(extra="forbid")
 
-    query: str
-    workflow: str = "research"
+    query: str = Field(min_length=1)
+    workflow: Literal["research", "qa", "summary", "deep"] = "research"
     thread_id: str | None = None
-    settings: dict[str, Any] | None = None
+    settings: RunSettings | None = None
+
+    @field_validator("query")
+    @classmethod
+    def _query_not_blank(cls, value: str) -> str:
+        """Reject whitespace-only queries at submit time.
+
+        Args:
+            value: Raw query string.
+
+        Returns:
+            str: The stripped query.
+
+        Raises:
+            ValueError: When the query is blank.
+        """
+        text = value.strip()
+        if not text:
+            raise ValueError("query must not be blank")
+        return text
 
 
 class JobRecord(BaseModel):

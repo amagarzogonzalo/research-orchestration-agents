@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import math
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
@@ -15,6 +16,8 @@ from typing import Any
 
 from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request
 
+from knowledge_engine.core.exceptions import WikiArticleMissing
+from knowledge_engine.schemas.settings import RunSettings
 from knowledge_engine.service.jobs import JobStore
 from knowledge_engine.service.rate_limit import RateLimiter
 from knowledge_engine.service.schemas import (
@@ -29,27 +32,11 @@ from knowledge_engine.service.schemas import (
 logger = logging.getLogger(__name__)
 
 
-def _settings(raw: dict[str, Any] | None) -> Any:
-    """Build ``RunSettings`` from a raw mapping (None stays None).
-
-    Args:
-        raw: Settings mapping or None.
-
-    Returns:
-        Any: A ``RunSettings`` instance or None.
-    """
-    if raw is None:
-        return None
-    from knowledge_engine.schemas.settings import RunSettings
-
-    return RunSettings(**raw)
-
-
 async def _run_job(
     engine: Any,
     jobs: JobStore,
     record: JobRecord,
-    settings_raw: dict[str, Any] | None,
+    settings: RunSettings | None,
     timeout_seconds: float = 0,
 ) -> None:
     """Execute one research job and persist its terminal status.
@@ -58,14 +45,12 @@ async def _run_job(
         engine: The research engine facade.
         jobs: Job store to update.
         record: The job to run.
-        settings_raw: Raw per-run settings mapping, or None.
+        settings: Validated per-run settings, or None.
         timeout_seconds: Abort the run after this many seconds (<= 0 disables).
     """
     await jobs.update(record.task_id, status=JobStatus.RUNNING)
     try:
-        coro = engine.research(
-            record.query, workflow=record.workflow, thread_id=record.thread_id, settings=_settings(settings_raw)
-        )
+        coro = engine.research(record.query, workflow=record.workflow, thread_id=record.thread_id, settings=settings)
         result = await (asyncio.wait_for(coro, timeout=timeout_seconds) if timeout_seconds > 0 else coro)
         summary = {
             "status": result.state.status.value,
@@ -184,7 +169,12 @@ def create_app(
             return
         key = request.headers.get("authorization") or (request.client.host if request.client else "unknown")
         if not limiter.allow(key):
-            raise HTTPException(status_code=429, detail="rate limit exceeded")
+            retry_after = str(max(1, math.ceil(limiter.retry_after(key))))
+            raise HTTPException(
+                status_code=429,
+                detail="rate limit exceeded",
+                headers={"Retry-After": retry_after},
+            )
 
     async def probe() -> ReadinessReport:
         """Return the readiness report (injected probe or always-ok).
@@ -285,8 +275,14 @@ def create_app(
 
         Returns:
             dict[str, Any]: The ingest result.
+
+        Raises:
+            HTTPException: 404 when the referenced article does not exist.
         """
-        ingested = await engine.wiki_ingest(req.thread_id, req.query, req.article_path)
+        try:
+            ingested = await engine.wiki_ingest(req.thread_id, req.query, req.article_path)
+        except WikiArticleMissing as exc:
+            raise HTTPException(status_code=404, detail=str(exc)) from exc
         return ingested.model_dump()
 
     @app.post("/wiki/lint", dependencies=[Depends(require_token), Depends(throttle)])

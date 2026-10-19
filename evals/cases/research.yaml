@@ -18,7 +18,9 @@ pass_at_k: 1
 invariants:
   frontmatter_keys: ["@id", type, title, provenance, citations, tldr_llm]
   min_sections: 2
-  min_citations: 5
+  # 4, not 5: the old bar passed on orphan-def inflation. Render now prunes
+  # unreferenced defs, so this counts real in-body citations (audit fix).
+  min_citations: 4
   must_cite: []
   no_uncited_claims: true
   valid_links: true

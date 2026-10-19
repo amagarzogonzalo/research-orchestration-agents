@@ -44,8 +44,8 @@ from knowledge_engine.orchestration.nodes.relevance import RelevanceNode
 from knowledge_engine.orchestration.nodes.render import RenderNode
 from knowledge_engine.orchestration.nodes.review import ReviewNode
 from knowledge_engine.orchestration.nodes.synthesize import SynthesizeNode
-from knowledge_engine.orchestration.state import WorkflowState
-from knowledge_engine.schemas.decomposition import IntentKind
+from knowledge_engine.orchestration.state import WorkflowState, merge_sources
+from knowledge_engine.schemas.decomposition import MIN_DEEP_SOURCES, IntentKind
 
 logger = getLogger(__name__)
 
@@ -379,6 +379,8 @@ def deep_route(state: WorkflowState) -> str:
         depth=state.get("depth", 0),
         rounds=state.get("rounds", 0),
         llm_calls=state.get("llm_calls", 0),
+        sources=len(merge_sources(state.get("sources", []), state.get("branch_sources", []))),
+        min_sources=MIN_DEEP_SOURCES,
     ):
         return CRITIC_NODE
     return DECOMPOSE_NODE
@@ -429,7 +431,6 @@ def _build_deep(
     g.add_conditional_edges(REVIEW_NODE, review_route, [RENDER_NODE, END])
     g.add_conditional_edges(SYNTHESIZE_NODE, synthesize_route, [JUDGE_NODE, RENDER_NODE])
     _wire_wiki_suffix(g, nodes)
-    g.add_edge(RENDER_NODE, END)
     return g.compile(checkpointer=checkpointer, store=store)
 
 

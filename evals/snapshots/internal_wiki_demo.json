@@ -1,11 +1,6 @@
 {
   "citations": [
-    "crossref:10.1002/9781394374717.ch03",
-    "crossref:10.1002/9781394374717.fmatter",
-    "crossref:10.1115/detc2025-169730",
-    "crossref:10.2139/ssrn.7357178",
     "crossref:10.59350/pp2bd-w3k04",
-    "europe_pmc:MED:42382850",
     "europe_pmc:MED:42682590",
     "europe_pmc:PMC:PMC13600821",
     "wikipedia:69071767",
@@ -28,7 +23,7 @@
     "tldr_llm": "str",
     "type": "str"
   },
-  "hash": "fe0697103afaa186",
+  "hash": "d24d49b392f870e3",
   "headings": [
     "2:mechanisms-of-hallucination-reduction-in-rag",
     "2:comparison-of-knowledge-integration-approaches",

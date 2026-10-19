@@ -41,6 +41,13 @@ class QuotaExhausted(SearchError):
     """
 
 
+class WikiArticleMissing(KnowledgeEngineError):
+    """A wiki operation referenced an article path that does not exist.
+
+    Raised by the wiki stores so HTTP callers can answer 404 instead of 500.
+    """
+
+
 class ScrapeError(KnowledgeEngineError):
     """Web scraping/extraction failed.
 

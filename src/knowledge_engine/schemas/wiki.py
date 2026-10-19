@@ -11,7 +11,7 @@ from __future__ import annotations
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, computed_field, field_validator
 
 
 class WikiVerdict(StrEnum):
@@ -101,6 +101,7 @@ class LintReport(BaseModel):
     thin_pages: list[str] = Field(default_factory=list)
     index_drift: list[str] = Field(default_factory=list)
 
+    @computed_field  # type: ignore[prop-decorator]  # pydantic computed_field; mypy lacks the plugin
     @property
     def ok(self) -> bool:
         """Return True when the report has no findings.
@@ -209,6 +210,7 @@ class DeepLintReport(BaseModel):
     stale: list[str] = Field(default_factory=list)
     gaps: list[str] = Field(default_factory=list)
 
+    @computed_field  # type: ignore[prop-decorator]  # pydantic computed_field; mypy lacks the plugin
     @property
     def ok(self) -> bool:
         """Return True when no LLM findings exist.

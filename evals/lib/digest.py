@@ -16,8 +16,8 @@ _FM = re.compile(r"\A---\n(.*?)\n---\n", re.DOTALL)
 _HEADING = re.compile(r"^(#{1,6})\s+(.+?)\s*$", re.MULTILINE)
 _FENCE = re.compile(r"^```([A-Za-z0-9_+-]*)", re.MULTILINE)
 _LINK = re.compile(r"\[[^\]]*\]\((https?://[^)\s]+)\)")
-_FOOTNOTE = re.compile(r"\[\^([A-Za-z0-9_.:/-]+)\]")
-_INLINE_CITE = re.compile(r"\((?:src|source|cite):([A-Za-z0-9_.:/-]+)\)")
+_FOOTNOTE = re.compile(r"\[\^([^\[\]\n]+)\]")
+_INLINE_CITE = re.compile(r"\((?:src|source|cite):([^)\s]+)\)")
 _NUM = re.compile(r"\d[\d,._]*")
 
 

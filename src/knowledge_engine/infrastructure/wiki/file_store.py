@@ -19,7 +19,7 @@ from pathlib import Path
 
 import yaml
 
-from knowledge_engine.core.exceptions import KnowledgeEngineError
+from knowledge_engine.core.exceptions import KnowledgeEngineError, WikiArticleMissing
 from knowledge_engine.core.ports import WikiIngestPort, WikiQueryPort
 from knowledge_engine.infrastructure.wiki import common
 from knowledge_engine.infrastructure.wiki.sidecar import WikiSidecar
@@ -164,12 +164,12 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             IngestResult: Verdict (new/update/no_material) + write counts.
 
         Raises:
-            KnowledgeEngineError: When the article file is missing.
+            WikiArticleMissing: When the article file is missing.
         """
         self._ensure_layout()
         src = Path(article_path)
         if not src.is_file():
-            raise KnowledgeEngineError(f"wiki ingest: article missing: {article_path}")
+            raise WikiArticleMissing(f"wiki ingest: article missing: {article_path}")
         text = src.read_text(encoding="utf-8")
         digest = common.sha256_text(text)
         title = common.page_title(query)
@@ -248,12 +248,12 @@ class FileWikiStore(WikiQueryPort, WikiIngestPort):
             str: The filed query page locator.
 
         Raises:
-            KnowledgeEngineError: When the article file is missing.
+            WikiArticleMissing: When the article file is missing.
         """
         self._ensure_layout()
         src = Path(article_path)
         if not src.is_file():
-            raise KnowledgeEngineError(f"wiki file_answer: article missing: {article_path}")
+            raise WikiArticleMissing(f"wiki file_answer: article missing: {article_path}")
         text = src.read_text(encoding="utf-8")
         title = common.page_title(query)
         slug = common.slugify(query)
