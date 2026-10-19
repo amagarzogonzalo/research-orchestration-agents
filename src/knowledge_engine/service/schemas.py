@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from enum import StrEnum
 from typing import Any, Literal
 
@@ -76,6 +77,10 @@ class JobRecord(BaseModel):
         workflow: Workflow name.
         result: Completed-run summary (status/output_path/sources).
         error: Failure detail when ``status`` is ``error``.
+        settings: Validated per-run overrides, persisted for crash recovery.
+        caller: Hashed caller key used for per-caller queue quotas.
+        attempts: Number of times the worker has claimed this job.
+        claimed_at: When the current attempt was claimed.
     """
 
     model_config = ConfigDict(extra="forbid")
@@ -87,6 +92,10 @@ class JobRecord(BaseModel):
     workflow: str
     result: dict[str, Any] | None = None
     error: str | None = None
+    settings: dict[str, Any] | None = None
+    caller: str | None = Field(default=None, exclude=True)
+    attempts: int = Field(default=0, exclude=True)
+    claimed_at: datetime | None = Field(default=None, exclude=True)
 
 
 class ResearchAccepted(BaseModel):

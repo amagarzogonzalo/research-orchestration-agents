@@ -20,9 +20,11 @@ import hashlib
 import os
 import uuid
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from knowledge_engine.config import load_dotenv
+from knowledge_engine.core.exceptions import WikiArticleMissing
 from knowledge_engine.core.ports import BrowserActionPort, ScrapePort, SearchPort
 from knowledge_engine.infrastructure.discovery.service import ModelDiscoverer
 from knowledge_engine.infrastructure.scrape.scrape_router import ScrapeRouter
@@ -524,12 +526,15 @@ class ResearchEngine:
         Args:
             thread_id: Run thread identifier (provenance).
             query: Original research query (page title/slug source).
-            article_path: Path of the rendered ``article.md``.
+            article_path: Path of the rendered ``article.md``; must resolve
+                inside ``store_root``.
 
         Returns:
-            IngestResult: Verdict + write counts.
+            IngestResult: Verdict + write counts. Paths that resolve outside
+                ``store_root`` are rejected by the store as missing.
         """
-        result: IngestResult = await self._wiki().ingest(thread_id, query, article_path)
+        article = _resolve_article_path(self.store_root, article_path)
+        result: IngestResult = await self._wiki().ingest(thread_id, query, str(article))
         return result
 
     def _linter(self) -> Any:
@@ -601,6 +606,26 @@ class ResearchEngine:
                     str: The model id of the first free model that passed a cheap health check.
         """
         return await self._discoverer.select(preferred=preferred)
+
+
+def _resolve_article_path(root: str | Path, article_path: str) -> Path:
+    """Resolve an article path, refusing escapes from the store root.
+
+    Args:
+        root: Store root directory.
+        article_path: Caller-supplied article path.
+
+    Returns:
+        Path: Resolved path inside the store root.
+
+    Raises:
+        WikiArticleMissing: When the path resolves outside the store root.
+    """
+    base = Path(root).resolve()
+    candidate = Path(article_path).resolve()
+    if not candidate.is_relative_to(base):
+        raise WikiArticleMissing(f"article path is outside the store root: {article_path}")
+    return candidate
 
 
 def _artifact_saver(store: ResearchStore) -> Any:

@@ -33,6 +33,23 @@ envVarGroups:
         value: "900"
       - key: CLEANUP_AFTER_RUN
         value: "true"
+      # Durable queue: one in-process worker, bounded depth, per-caller cap.
+      - key: MAX_CONCURRENT_JOBS
+        value: "1"
+      - key: MAX_QUEUED_JOBS
+        value: "16"
+      - key: MAX_ACTIVE_JOBS_PER_CALLER
+        value: "4"
+      - key: JOB_STALE_SECONDS
+        value: "960"
+      - key: JOB_MAX_ATTEMPTS
+        value: "3"
+      - key: JOB_POLL_MS
+        value: "500"
+      # Apply pending SQL migrations at boot (idempotent, ledger-guarded).
+      - key: AUTO_MIGRATE
+        value: "true"
+      # Keep Swagger visible on staging for debugging.
       - key: ENABLE_DOCS
         value: "true"
       # --- secrets: set per-environment in the dashboard (sync: false) ---
@@ -74,8 +91,8 @@ services:
     healthCheckPath: /health
     autoDeploy: false
     maxShutdownDelaySeconds: 60
-    # Migrations are idempotent and ledger-guarded (knowledge_engine.scripts.
-    # apply_migrations). On a plan that supports pre-deploy commands, uncomment:
+    # Migrations run at boot via AUTO_MIGRATE (idempotent, ledger-guarded). On a
+    # plan that supports pre-deploy commands you can run them before boot instead:
     # preDeployCommand: "python -m knowledge_engine.scripts.apply_migrations"
     envVars:
       # --- cutover switches: select the Supabase cloud stack ---
@@ -94,7 +111,7 @@ services:
         value: "1"
       - key: LANGGRAPH_STRICT_MSGPACK
         value: "true"
-      # Per-key sliding-window rate limit on data routes (<= 0 disables).
+      # Per-caller rate limit on data routes (shared Postgres window; <= 0 disables).
       - key: RATE_LIMIT_PER_MINUTE
         value: "30"
       # Abort a run after this long; delete checkpoints after each run (500 MB).
@@ -102,8 +119,25 @@ services:
         value: "900"
       - key: CLEANUP_AFTER_RUN
         value: "true"
-      - key: ENABLE_DOCS
+      # Durable queue: one in-process worker, bounded depth, per-caller cap.
+      - key: MAX_CONCURRENT_JOBS
+        value: "1"
+      - key: MAX_QUEUED_JOBS
+        value: "16"
+      - key: MAX_ACTIVE_JOBS_PER_CALLER
+        value: "4"
+      - key: JOB_STALE_SECONDS
+        value: "960"
+      - key: JOB_MAX_ATTEMPTS
+        value: "3"
+      - key: JOB_POLL_MS
+        value: "500"
+      # Apply pending SQL migrations at boot (idempotent, ledger-guarded).
+      - key: AUTO_MIGRATE
         value: "true"
+      # Hide Swagger/OpenAPI in production.
+      - key: ENABLE_DOCS
+        value: "false"
       # --- secrets: set in the dashboard ---
       # DATABASE_URL MUST be the Supabase session pooler (IPv4):
       # postgresql://postgres.<ref>:...@aws-0-<region>.pooler.supabase.com:5432/postgres?sslmode=require
