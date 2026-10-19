@@ -128,3 +128,37 @@ def test_tldr_skips_headings_and_cuts_on_word_boundary() -> None:
     assert not out.startswith("##")
     assert len(out) <= 200
     assert not out.endswith("wor")
+
+
+def test_bare_multi_cite_partial_resolution_keeps_known() -> None:
+    """A bogus locator beside real ones is dropped, not the whole bracket (audit defect)."""
+    rec = SourceRecord(id="tavily:https://a.io/x", title="A", source=SearchSource.TAVILY)
+    notes = "Claim [tavily:https://a.io/x, tavily:https://tavily.com/...]."
+    out = _normalize_citations(notes, [rec])
+    assert "[^tavily:https://a.io/x]" in out
+    assert "tavily.com/..." not in out
+
+
+def test_bare_bracket_all_prose_is_untouched() -> None:
+    """Bracketed prose that merely resembles a citation list is never mangled."""
+    rec = _src("arxiv:1", "One")
+    notes = "As shown [Figure 1, Table 2], results improve."
+    out = _normalize_citations(notes, [rec])
+    assert "[Figure 1, Table 2]" in out
+
+
+def test_unknown_single_locator_bracket_is_kept() -> None:
+    """A lone unresolved bracket has no sibling proving it is a citation list."""
+    rec = _src("arxiv:1", "One")
+    notes = "See [tavily:https://nope.io/x]."
+    out = _normalize_citations(notes, [rec])
+    assert "[tavily:https://nope.io/x]" in out
+
+
+def test_truncated_marker_fragment_is_removed() -> None:
+    """An unclosed ``[^`` fragment from truncated output never reaches the artifact."""
+    rec = _src("arxiv:2309.00071", "YaRN")
+    notes = "Claim [^arxiv:2309.00071].\n\n[^crossref:10.21203/rs.3.rs\n\n[^arxiv:2309.00071]: old def"
+    out = _normalize_citations(notes, [rec])
+    assert "rs.3.rs" not in out
+    assert "[^arxiv:2309.00071]: YaRN" in out

@@ -19,7 +19,7 @@ import yaml
 from knowledge_engine.orchestration.state import WorkflowNode, WorkflowState, merge_sources
 from knowledge_engine.schemas.artifact import KnowledgeArtifact
 from knowledge_engine.schemas.extraction import GraphStatus
-from knowledge_engine.schemas.source import SourceRecord
+from knowledge_engine.schemas.source import SearchSource, SourceRecord
 
 logger = logging.getLogger(__name__)
 
@@ -139,6 +139,9 @@ _FOOTNOTE_DEF_BLOCK = re.compile(r"(?m)^\[\^[^\[\]\n]+\]:[^\n]*(?:\n[ \t]+\S[^\n
 _BARE_CITE = re.compile(r"(?<![!\^])\[([^\[\]\n]+)\](?![\(:])")
 _DOUBLED_PREFIX = re.compile(r"((?:[a-z_]+):https?://)(?:\1)+")
 _DOUBLED_SCHEME = re.compile(r"(https?://)(?:\1)+")
+_BROKEN_FRAGMENT = re.compile(r"(?m)^\[\^[^\]\n]*(?=\n|$)\n?")
+_CITATION_SCHEMES = frozenset(source.value for source in SearchSource) | {"doi", "osf", "pmc"}
+_ID_DOI = re.compile(r"^(?:doi:)?10\.\d{4,9}/")
 
 
 def _normalize_citations(notes: str, provenance: list[SourceRecord]) -> str:
@@ -160,7 +163,8 @@ def _normalize_citations(notes: str, provenance: list[SourceRecord]) -> str:
     """
     titles = {s.id: (s.title or s.id) for s in provenance}
     known = _known_ids(provenance)
-    body = _collapse_doubled_prefixes(notes)
+    body = _drop_broken_marker_fragments(notes)
+    body = _collapse_doubled_prefixes(body)
     body = _rewrite_bare_citations(body, known, titles)
     body = _rewrite_multi_refs(body, known, titles)
     body = _rewrite_refs(body, known, titles)
@@ -200,6 +204,44 @@ def _collapse_doubled_prefixes(text: str) -> str:
     return _DOUBLED_SCHEME.sub(r"\1", text)
 
 
+def _drop_broken_marker_fragments(text: str) -> str:
+    """Remove unclosed footnote fragments left by truncated model output.
+
+    The model sometimes emits a marker whose closing bracket never arrives
+    (``[^crossref:10.21203/rs.3.rs`` alone on a line). Footnote repair needs a
+    closed form to act on, so these fragments are dropped here.
+
+    Args:
+        text: Article text.
+
+    Returns:
+        str: Text without unterminated ``[^`` fragments that occupy a line.
+    """
+    return _BROKEN_FRAGMENT.sub("", text)
+
+
+def _looks_like_locator(text: str) -> bool:
+    """Whether marker text is shaped like a source locator, not prose.
+
+    Args:
+        text: Candidate bracket part (a leading caret is ignored).
+
+    Returns:
+        bool: True for URLs, DOIs, and ``scheme:rest`` provider ids.
+    """
+    low = text.strip().lstrip("^").strip().lower()
+    if not low:
+        return False
+    if low.startswith(("http://", "https://")) or _ID_DOI.match(low):
+        return True
+    scheme, sep, rest = low.partition(":")
+    if not sep:
+        return False
+    if scheme in _CITATION_SCHEMES:
+        return True
+    return "/" in rest and any(char.isdigit() for char in rest)
+
+
 def _canonical_marker(marker: str, known: dict[str, str], titles: dict[str, str]) -> str | None:
     """Resolve one marker text to a provenance source id.
 
@@ -222,8 +264,10 @@ def _canonical_marker(marker: str, known: dict[str, str], titles: dict[str, str]
 def _rewrite_bare_citations(text: str, known: dict[str, str], titles: dict[str, str]) -> str:
     """Convert bare ``[id]`` / ``[id1, id2]`` citations to footnote markers.
 
-    A bracket is only rewritten when every comma-separated part resolves, so
-    bracketed prose that merely resembles an id is never mangled.
+    Multi-part brackets are split per source: resolvable parts become markers,
+    unresolvable parts shaped like locators (URLs, DOIs, provider ids) are
+    dropped, and prose parts are kept as text. Brackets whose parts are all
+    unresolvable prose are left untouched so bracketed text is never mangled.
 
     Args:
         text: Article text.
@@ -235,11 +279,26 @@ def _rewrite_bare_citations(text: str, known: dict[str, str], titles: dict[str, 
     """
 
     def _sub(match: re.Match[str]) -> str:
-        parts = [part.strip() for part in match.group(1).split(",")]
+        parts = [part.strip().lstrip("^").strip() for part in match.group(1).split(",")]
         resolved = [_canonical_marker(part, known, titles) for part in parts]
-        if not all(resolved):
+        if "," not in match.group(1):
+            sid = resolved[0]
+            if sid is not None:
+                return f"[^{sid}]"
             return match.group(0)
-        return " ".join(f"[^{sid}]" for sid in resolved)
+        pieces: list[str] = []
+        changed = False
+        for part, sid in zip(parts, resolved, strict=True):
+            if sid is not None:
+                pieces.append(f"[^{sid}]")
+                changed = True
+            elif _looks_like_locator(part):
+                changed = True
+            else:
+                pieces.append(part)
+        if not changed:
+            return match.group(0)
+        return " ".join(pieces)
 
     return _BARE_CITE.sub(_sub, text)
 
