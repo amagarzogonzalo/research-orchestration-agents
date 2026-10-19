@@ -43,6 +43,9 @@ All notable changes to this project are documented here. The format follows
 - `SupabaseBodyStorage` covered by tests (previously untested).
 - Hybrid wiki search no longer returns duplicate pages; overview links use each
   page's own subdirectory; filed theses/answers are indexed.
+- The Postgres wiki v2 integration suite now skips cleanly when the optional
+  `store` extra is absent, so `make check` is green on a fresh clone using the
+  documented `make install` (dev-only) environment.
 
 ### Security
 

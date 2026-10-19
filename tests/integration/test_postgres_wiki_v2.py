@@ -11,13 +11,14 @@ import asyncio
 from pathlib import Path
 from typing import Any
 
-import psycopg.errors
 import pytest
 
 from knowledge_engine.infrastructure.wiki import PostgresWikiStore
 from knowledge_engine.infrastructure.wiki.postgres.connection import AsyncPgConnectionFactory
 from knowledge_engine.infrastructure.wiki.postgres.files import LocalFileStore
 from knowledge_engine.schemas.wiki import WikiExtraction, WikiVerdict
+
+psycopg_errors = pytest.importorskip("psycopg.errors")
 
 
 def _article(tmp_path: Path, text: str) -> str:
@@ -108,7 +109,7 @@ async def test_current_revision_must_belong_to_page(pg_store, pg_conn, tmp_path)
             "SELECT r.id FROM wiki.revisions r JOIN wiki.pages p ON p.id=r.page_id WHERE p.kind='source' LIMIT 1",
         )
         pb = _one(cur, "SELECT id FROM wiki.pages WHERE kind='query' LIMIT 1")
-        with pytest.raises(psycopg.errors.ForeignKeyViolation):
+        with pytest.raises(psycopg_errors.ForeignKeyViolation):
             cur.execute("UPDATE wiki.pages SET current_revision_id = %s WHERE id = %s", (ra, pb))
 
 
@@ -217,7 +218,7 @@ async def test_source_bodies_one_current(pg_conn) -> None:
             "VALUES (%s, %s, 'manual', true)",
             (sid, "1" * 64),
         )
-        with pytest.raises(psycopg.errors.UniqueViolation):
+        with pytest.raises(psycopg_errors.UniqueViolation):
             cur.execute(
                 "INSERT INTO wiki.source_bodies (source_id, file_sha256, tier, is_current) "
                 "VALUES (%s, %s, 'manual', true)",
