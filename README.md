@@ -18,7 +18,8 @@ Design rationale lives in [docs/plans](docs/plans/0000-overview.md) as ADRs.
 
 **New here?** Start with [docs/quickstart.md](docs/quickstart.md) — a no-keys
 offline path in ~2 minutes, plus the deployed service at
-<https://research-orchestration-agents.onrender.com/docs>.
+<https://research-orchestration-agents.onrender.com> (Swagger at `/docs` only
+when `ENABLE_DOCS=true`; production serves it disabled).
 
 ## Contents
 
@@ -86,18 +87,26 @@ issue #30) so the research + wiki run fully online:
 | Method | Path | Auth | Notes |
 |---|---|---|---|
 | GET | `/health` | none | liveness (platform probe) |
-| GET | `/readiness` | none | DB + Storage checks |
+| GET | `/readiness` | none | DB + Storage + auth + migrations + provider checks |
 | POST | `/research` | bearer | 202 → poll `/result/{id}`; `workflow` = research/qa/summary/deep |
-| GET | `/result/{task_id}` | none | durable job status (Postgres `service_jobs`) |
+| GET | `/result/{task_id}` | bearer | durable job status (Postgres `service_jobs`) |
 | GET | `/wiki/query?q=&limit=` | bearer | answer from the compiled wiki, zero live calls |
-| POST | `/wiki/ingest` | bearer | re-ingest a raw run |
+| POST | `/wiki/ingest` | bearer | re-ingest a raw run (path must be under the store root) |
 | POST | `/wiki/lint` | bearer | deterministic vault lint |
 
 Config is env-only — the cutover switches (`CHECKPOINTER_KIND`, `STORE_KIND`,
 `ARTIFACT_STORE_KIND`, `BODY_STORE_KIND`, `WIKI_STORE_KIND`) select the Supabase
-cloud stack; `API_TOKEN` gates data routes; `RATE_LIMIT_PER_MINUTE` throttles per
-key. Storage buckets are **private** (reads go through the API). Deploy steps and
-the full env contract live in [`docs/deploy-render.md`](docs/deploy-render.md).
+cloud stack; `API_TOKEN` gates every data route and auth **fails closed** when it
+is unset (503), with `ALLOW_ANONYMOUS=true` reserved for local development.
+`RATE_LIMIT_PER_MINUTE` throttles per hashed caller (shared Postgres limiter when
+`DATABASE_URL` is set). Jobs are persisted before execution and claimed by an
+in-process worker: a restart requeues queued/abandoned jobs instead of leaving
+them stuck, with bounded queue depth (`MAX_QUEUED_JOBS`), per-caller caps
+(`MAX_ACTIVE_JOBS_PER_CALLER`), and retry caps (`JOB_MAX_ATTEMPTS`).
+`AUTO_MIGRATE=true` applies pending `supabase/migrations` idempotently at boot;
+`ENABLE_DOCS` defaults to false in the service. Storage buckets are **private**
+(reads go through the API). Deploy steps and the full env contract live in
+[`docs/deploy-render.md`](docs/deploy-render.md).
 
 Runbook: `make retention` prunes artifacts older than 30 days (keeping the newest
 5 runs) and old `service_jobs`, warning above 80% of the free limits; a weekly

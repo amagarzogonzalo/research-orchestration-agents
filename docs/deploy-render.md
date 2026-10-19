@@ -19,11 +19,20 @@ Copy the values from your local `.env` (never commit them).
 | `UNPAYWALL_EMAIL` | optional | OA PDF lookup; blank = skip |
 | `JINA_API_KEY` | optional | raises the Jina scrape tier |
 | `TAVILY_API_KEY`, `EXA_API_KEY`, `SERPER_API_KEY` | optional | general-web fallback chain |
-| `API_TOKEN` | optional (secret) | write token for `/research` + wiki mutations |
+| `API_TOKEN` | yes (secret) | write token for every data route; unset + `ALLOW_ANONYMOUS=false` → 503 and `auth=false` on `/readiness` |
 | `API_TOKEN_READONLY` | optional (secret) | read-only token for `/wiki/query` + `/result` (safe sharing) |
-| `RATE_LIMIT_PER_MINUTE` | optional | per-key sliding-window limit on data routes (default 30; `<= 0` disables) |
+| `ALLOW_ANONYMOUS` | optional | local development only; never `true` in production |
+| `RATE_LIMIT_PER_MINUTE` | optional | per-hashed-caller limit on data routes (default 30; `<= 0` disables). Shared Postgres limiter when `DATABASE_URL` is set |
 | `JOB_TIMEOUT_SECONDS` | optional | abort a run after this long (default 900; `<= 0` disables) |
+| `MAX_CONCURRENT_JOBS` | set by blueprint | jobs executed at once (default 1; Render Free RAM) |
+| `MAX_QUEUED_JOBS` | set by blueprint | queue depth cap; over → 429 (default 16; `<= 0` disables) |
+| `MAX_ACTIVE_JOBS_PER_CALLER` | set by blueprint | per-caller queued+running cap; over → 429 (default 4; `<= 0` disables) |
+| `JOB_STALE_SECONDS` | set by blueprint | a running claim older than this is requeued (default timeout + 60) |
+| `JOB_MAX_ATTEMPTS` | set by blueprint | attempts after which a recovered job fails instead of retrying (default 3) |
+| `JOB_POLL_MS` | set by blueprint | worker idle poll interval (default 500 ms) |
+| `AUTO_MIGRATE` | set by blueprint | apply pending `supabase/migrations` at boot (default true) |
 | `CLEANUP_AFTER_RUN` | optional | delete a thread's checkpoints after each run (default true; protects 500 MB) |
+| `ENABLE_DOCS` | set by blueprint | serve Swagger/OpenAPI (prod `false`; staging `true`) |
 | `CHECKPOINTER_KIND` | set by blueprint | `postgres` |
 | `STORE_KIND` | set by blueprint | `postgres` |
 | `ARTIFACT_STORE_KIND` | set by blueprint | `supabase` |
@@ -55,9 +64,12 @@ transaction pooler (`6543`), so prepared statements work for LangGraph.
 - **Storage buckets are private** (`articles`, `sources`, `bodies`, `wiki`). The
   adapters create them private and heal any public bucket back to private; reads
   go through the authenticated service, never a public object URL.
-- **All data routes require the bearer token** — `/research`, `/wiki/query`,
-  `/wiki/ingest`, `/wiki/lint`. Only `/health` and `/readiness` are open (the
-  platform probe needs them).
+- **All data routes require the bearer token** — `/research`, `/result`,
+  `/wiki/query`, `/wiki/ingest`, `/wiki/lint`. Settings fail closed: with no
+  `API_TOKEN` and `ALLOW_ANONYMOUS=false`, data routes return 503 and
+  `/readiness` reports `auth=false`. Only `/health` and `/readiness` are open
+  (the platform probe needs them). Bearer tokens are hashed before they are
+  used as rate-limit or quota keys, so raw tokens never reach the database.
 - `service_role` (`SUPABASE_SECRET_KEY`) is server-side only and never returned
   in responses. TLS is terminated by Render/Cloudflare.
 
@@ -103,11 +115,22 @@ nearest-neighbour). Vectors come from
 offline stand-in — or a real embedding provider behind the same signature. Free
 on Supabase; inactive until the migration is applied.
 
+## Migrations
+
+The image ships `supabase/migrations` and applies pending SQL at boot when
+`AUTO_MIGRATE=true` (idempotent, tracked in `schema_migrations`). `/readiness`
+also verifies no migration is pending, so a half-migrated schema never reports
+ready. The manual equivalents remain available:
+
+```
+python -m knowledge_engine.scripts.apply_migrations            # apply
+python -m knowledge_engine.scripts.apply_migrations --dry-run  # list pending
+```
+
 ## One-time setup
 
-1. Apply the wiki schema to the Supabase project (the app only verifies it):
-   `supabase db push` or `psql "$DATABASE_URL" -f supabase/migrations/20261012160700_wiki_v2.sql`
-   then `... -f supabase/migrations/20261012160701_drop_wiki_v1.sql`.
+1. Confirm the cutover env vars and secrets are set (the wiki schema applies at
+   boot via `AUTO_MIGRATE`).
 2. In Render: **New → Blueprint** → point at this repo (`render.yaml`).
 3. Fill the `sync: false` secrets from your `.env`.
 4. Confirm `GET /readiness` is green after the first boot.
@@ -123,11 +146,11 @@ Render deploy via the API. Add repo secrets `RENDER_API_KEY` and
 | Method | Path | Auth | Notes |
 |---|---|---|---|
 | GET | `/health` | none | liveness (platform probe) |
-| GET | `/readiness` | none | DB + Storage checks |
-| POST | `/research` | bearer | 202 → poll `/result/{id}` |
-| GET | `/result/{task_id}` | none | durable job status (Postgres) |
-| GET | `/wiki/query?q=&limit=` | none | answer from the wiki, no live call |
-| POST | `/wiki/ingest` | bearer | re-ingest a raw run |
+| GET | `/readiness` | none | DB + Storage + auth + migrations + providers |
+| POST | `/research` | bearer | 202 → poll `/result/{id}` (queued durably, worker-claimed) |
+| GET | `/result/{task_id}` | bearer | durable job status (Postgres) |
+| GET | `/wiki/query?q=&limit=` | bearer | answer from the wiki, no live call |
+| POST | `/wiki/ingest` | bearer | re-ingest a raw run (path must stay under the store root) |
 | POST | `/wiki/lint` | bearer | deterministic vault lint |
 
 ## Rollback

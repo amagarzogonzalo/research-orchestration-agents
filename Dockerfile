@@ -16,6 +16,7 @@ COPY --from=ghcr.io/astral-sh/uv:0.12.7@sha256:95f2aa1fe59274951cfe9b0cbc7972e87
 WORKDIR /app
 COPY pyproject.toml uv.lock README.md ./
 COPY src ./src
+COPY supabase ./supabase
 RUN uv sync --frozen --no-dev --extra store,providers,supabase
 
 # ---- runtime: minimal, non-root, no toolchain -----------------------------
@@ -28,6 +29,7 @@ RUN groupadd --gid 10001 app \
     && useradd --uid 10001 --gid 10001 --no-create-home --shell /usr/sbin/nologin app
 COPY --from=build --chown=10001:10001 /app/.venv /app/.venv
 COPY --from=build --chown=10001:10001 /app/src /app/src
+COPY --from=build --chown=10001:10001 /app/supabase /app/supabase
 COPY --from=build --chown=10001:10001 /app/pyproject.toml /app/uv.lock /app/README.md ./
 # The service writes local run artifacts under the working directory; the
 # non-root user must own /app to create research_store/ at runtime.

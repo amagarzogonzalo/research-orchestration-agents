@@ -4,7 +4,13 @@ Tracks applied files in a ``schema_migrations`` table so re-running is a no-op
 for anything already applied. Each file runs inside its own transaction: a
 failure rolls that file back and stops the run, leaving prior files applied.
 
-Intended as a Render pre-deploy command (or manual via the Render Shell):
+Existing databases were set up before the ledger existed (the deploy guide used
+to run the SQL manually), so each historical migration carries a *sentinel*
+query: when the sentinel reports the migration's effect is already present, the
+file is recorded as applied (baselined) instead of executed. New migrations
+without a sentinel run normally.
+
+Intended as a boot-time hook (``AUTO_MIGRATE``) and a manual operator command:
 
     python -m knowledge_engine.scripts.apply_migrations [--dry-run] [--dir DIR]
 
@@ -16,6 +22,7 @@ from __future__ import annotations
 import argparse
 import sys
 from pathlib import Path
+from typing import Any
 
 _DEFAULT_DIR = Path("supabase/migrations")
 
@@ -25,6 +32,23 @@ _LEDGER_DDL = (
     "  applied_at timestamptz NOT NULL DEFAULT now()"
     ")"
 )
+
+# filename -> SQL returning one row when the migration's effect is already in
+# place. Used only to adopt databases that predate the schema_migrations ledger.
+_SENTINELS: dict[str, str] = {
+    "20261012160700_wiki_v2.sql": (
+        "SELECT 1 FROM information_schema.tables WHERE table_schema = 'wiki' AND table_name = 'pages'"
+    ),
+    "20261012160701_drop_wiki_v1.sql": (
+        "SELECT 1 WHERE NOT EXISTS ("
+        "SELECT 1 FROM information_schema.tables WHERE table_schema = 'public' AND table_name = 'wiki_pages'"
+        ")"
+    ),
+    "20261014120000_wiki_v2_pgvector.sql": (
+        "SELECT 1 FROM information_schema.columns"
+        " WHERE table_schema = 'wiki' AND table_name = 'pages' AND column_name = 'embedding'"
+    ),
+}
 
 
 def _discover(migrations_dir: Path) -> list[Path]:
@@ -39,6 +63,24 @@ def _discover(migrations_dir: Path) -> list[Path]:
     if not migrations_dir.is_dir():
         return []
     return sorted(migrations_dir.glob("*.sql"))
+
+
+def _already_in_place(conn: Any, filename: str) -> bool:
+    """Report whether a migration's effect is already present (sentinel hit).
+
+    Args:
+        conn: Open psycopg connection.
+        filename: Migration file name.
+
+    Returns:
+        bool: True when the migration has a sentinel and it reports a hit.
+    """
+    sentinel = _SENTINELS.get(filename)
+    if sentinel is None:
+        return False
+    with conn.cursor() as cur:
+        cur.execute(sentinel)
+        return cur.fetchone() is not None
 
 
 def _dsn() -> str:
@@ -67,7 +109,7 @@ def apply(dsn: str, migrations_dir: Path, *, dry_run: bool = False) -> list[str]
         dry_run: When True, report pending files without applying them.
 
     Returns:
-        list[str]: Filenames that were (or would be) applied.
+        list[str]: Filenames that were (or would be) applied or baselined.
 
     Raises:
         SystemExit: When the migrations directory does not exist.
@@ -85,10 +127,15 @@ def apply(dsn: str, migrations_dir: Path, *, dry_run: bool = False) -> list[str]
 
         pending = [path for path in _discover(migrations_dir) if path.name not in applied]
         if dry_run:
-            return [path.name for path in pending]
+            return [path.name for path in pending if not _already_in_place(conn, path.name)]
 
         done: list[str] = []
         for path in pending:
+            if _already_in_place(conn, path.name):
+                with conn.cursor() as cur:
+                    cur.execute("INSERT INTO schema_migrations (filename) VALUES (%s)", (path.name,))
+                done.append(path.name)
+                continue
             sql = path.read_text(encoding="utf-8")
             with conn.transaction():
                 with conn.cursor() as cur:

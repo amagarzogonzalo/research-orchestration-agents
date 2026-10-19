@@ -2,11 +2,25 @@
 
 Framework-free core: this module takes an engine + job store and returns an app.
 The uvicorn entrypoint (:mod:`knowledge_engine.service.api`) wires the real ones.
+
+Production behavior baked in here:
+
+* auth fails closed when no token is configured (``allow_anonymous`` is for
+  local development only);
+* jobs are persisted first and executed by an in-process worker that claims
+  atomically from the store, so a restart resumes queued jobs instead of
+  leaving them stuck;
+* queue depth and per-caller active jobs are capped, and the rate limiter can
+  be swapped for the shared Postgres implementation;
+* bearer tokens are hashed before they are used as limiter/quota keys.
 """
 
 from __future__ import annotations
 
 import asyncio
+import contextlib
+import hashlib
+import hmac
 import logging
 import math
 import uuid
@@ -14,7 +28,7 @@ from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from typing import Any
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 
 from knowledge_engine.core.exceptions import WikiArticleMissing
 from knowledge_engine.schemas.settings import RunSettings
@@ -31,25 +45,71 @@ from knowledge_engine.service.schemas import (
 
 logger = logging.getLogger(__name__)
 
+_RECOVERY_INTERVAL_SECONDS = 60.0
+_POLL_FLOOR_SECONDS = 0.05
 
-async def _run_job(
+
+def _digest(value: str) -> str:
+    """Hash a bearer token or host before using it as a limiter/quota key.
+
+    Args:
+        value: Raw key material.
+
+    Returns:
+        str: Truncated SHA-256 digest.
+    """
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()[:24]
+
+
+def _caller_id(request: Request) -> str:
+    """Derive a stable caller key without persisting the raw token.
+
+    Args:
+        request: Incoming request.
+
+    Returns:
+        str: Hashed authorization header, or hashed client host.
+    """
+    authorization = request.headers.get("authorization")
+    if authorization:
+        return _digest(authorization)
+    host = request.client.host if request.client else "unknown"
+    return _digest(f"ip:{host}")
+
+
+async def _safe_update(jobs: JobStore, task_id: str, **fields: Any) -> None:
+    """Update a job, logging instead of crashing the worker on a store outage.
+
+    Args:
+        jobs: Job store.
+        task_id: Job id.
+        **fields: Fields forwarded to :meth:`JobStore.update`.
+    """
+    try:
+        await jobs.update(task_id, **fields)
+    except Exception:  # noqa: BLE001 - a store outage must not kill the worker
+        logger.exception("failed to update job %s", task_id)
+
+
+async def _execute_job(
     engine: Any,
     jobs: JobStore,
     record: JobRecord,
-    settings: RunSettings | None,
     timeout_seconds: float = 0,
 ) -> None:
-    """Execute one research job and persist its terminal status.
+    """Execute one claimed job and persist its terminal status.
 
     Args:
         engine: The research engine facade.
         jobs: Job store to update.
-        record: The job to run.
-        settings: Validated per-run settings, or None.
+        record: The claimed job (already ``running``).
         timeout_seconds: Abort the run after this many seconds (<= 0 disables).
+
+    Raises:
+        asyncio.CancelledError: On worker shutdown; the job is requeued first.
     """
-    await jobs.update(record.task_id, status=JobStatus.RUNNING)
     try:
+        settings = RunSettings.model_validate(record.settings) if record.settings else None
         coro = engine.research(record.query, workflow=record.workflow, thread_id=record.thread_id, settings=settings)
         result = await (asyncio.wait_for(coro, timeout=timeout_seconds) if timeout_seconds > 0 else coro)
         summary = {
@@ -57,13 +117,78 @@ async def _run_job(
             "output_path": result.state.output_path,
             "sources": len(result.state.sources),
         }
-        await jobs.update(record.task_id, status=JobStatus.DONE, result=summary)
+        await _safe_update(jobs, record.task_id, status=JobStatus.DONE, result=summary)
+    except asyncio.CancelledError:
+        with contextlib.suppress(Exception):
+            await jobs.requeue(record.task_id)
+        raise
     except TimeoutError:
         logger.warning("research job %s timed out after %ss", record.task_id, timeout_seconds)
-        await jobs.update(record.task_id, status=JobStatus.ERROR, error=f"timed out after {timeout_seconds}s")
+        await _safe_update(jobs, record.task_id, status=JobStatus.ERROR, error=f"timed out after {timeout_seconds}s")
     except Exception as exc:  # noqa: BLE001 - surface the failure to the poll endpoint
         logger.exception("research job %s failed", record.task_id)
-        await jobs.update(record.task_id, status=JobStatus.ERROR, error=f"{type(exc).__name__}: {exc}")
+        await _safe_update(jobs, record.task_id, status=JobStatus.ERROR, error=f"{type(exc).__name__}: {exc}")
+
+
+async def _worker_loop(
+    engine: Any,
+    jobs: JobStore,
+    *,
+    max_concurrent: int,
+    timeout_seconds: float,
+    poll_seconds: float,
+    stale_seconds: float,
+    max_attempts: int,
+    stop: asyncio.Event,
+) -> None:
+    """Claim and execute jobs until shutdown, recovering abandoned ones.
+
+    Args:
+        engine: The research engine facade.
+        jobs: Durable job store.
+        max_concurrent: Maximum jobs executed at once.
+        timeout_seconds: Per-job timeout (<= 0 disables).
+        poll_seconds: Idle poll interval.
+        stale_seconds: Age after which a running claim is considered abandoned.
+        max_attempts: Attempts after which a recovered job is failed.
+        stop: Event set by the lifespan on shutdown.
+    """
+    running: set[asyncio.Task[None]] = set()
+    loop = asyncio.get_running_loop()
+    last_recovery = loop.time()
+    try:
+        while not stop.is_set():
+            now = loop.time()
+            if now - last_recovery >= _RECOVERY_INTERVAL_SECONDS:
+                try:
+                    recovered = await jobs.recover_stale(
+                        stale_after_seconds=stale_seconds,
+                        max_attempts=max_attempts,
+                    )
+                    if recovered:
+                        logger.warning("recovered %d stale job(s)", recovered)
+                except Exception:  # noqa: BLE001 - recovery retries next interval
+                    logger.exception("stale job recovery failed")
+                last_recovery = now
+            while len(running) < max_concurrent and not stop.is_set():
+                try:
+                    record = await jobs.claim_next()
+                except Exception:  # noqa: BLE001 - claim retries next poll
+                    logger.exception("job claim failed")
+                    break
+                if record is None:
+                    break
+                task = asyncio.create_task(
+                    _execute_job(engine, jobs, record, timeout_seconds),
+                    name=f"job-{record.task_id}",
+                )
+                running.add(task)
+                task.add_done_callback(running.discard)
+            await asyncio.sleep(poll_seconds)
+    finally:
+        for task in list(running):
+            task.cancel()
+        await asyncio.gather(*running, return_exceptions=True)
 
 
 def create_app(
@@ -74,20 +199,40 @@ def create_app(
     read_token: str | None = None,
     readiness_probe: Callable[[], Awaitable[ReadinessReport]] | None = None,
     rate_limit_per_minute: int = 0,
+    rate_limiter: Any | None = None,
     job_timeout_seconds: float = 0,
-    enable_docs: bool = True,
+    job_stale_seconds: float = 960,
+    job_poll_seconds: float = 0.5,
+    job_max_attempts: int = 3,
+    max_concurrent_jobs: int = 1,
+    max_queued_jobs: int = 16,
+    max_active_jobs_per_caller: int = 4,
+    allow_anonymous: bool = False,
+    startup_hook: Callable[[], Awaitable[None]] | None = None,
+    enable_docs: bool = False,
 ) -> FastAPI:
     """Build the FastAPI app around an engine + job store.
 
     Args:
         engine: Research engine facade (``ResearchEngine`` or a test double).
         jobs: Durable job store.
-        api_token: Write token; when set, mutating routes require it.
+        api_token: Write token; data routes fail closed when it is unset.
         read_token: Optional read-only token accepted by read routes (sharing).
         readiness_probe: Optional readiness check; defaults to always-ok.
-        rate_limit_per_minute: Per-key sliding-window limit (<= 0 disables).
+        rate_limit_per_minute: Per-key limit for the default in-process limiter.
+        rate_limiter: Optional limiter override (e.g. ``PostgresRateLimiter``).
         job_timeout_seconds: Abort a run after this long (<= 0 disables).
-        enable_docs: Serve Swagger/OpenAPI (set False in prod to hide the shape).
+        job_stale_seconds: Age after which a running claim is considered abandoned.
+        job_poll_seconds: Worker idle poll interval.
+        job_max_attempts: Attempts after which a recovered job is failed.
+        max_concurrent_jobs: Maximum jobs executed at once.
+        max_queued_jobs: Maximum queued jobs (<= 0 disables the cap).
+        max_active_jobs_per_caller: Maximum queued+running jobs per caller
+            (<= 0 disables the cap).
+        allow_anonymous: Permit data routes when no token is configured. Local
+            development only; production keeps this false.
+        startup_hook: Optional async hook run before the engine starts.
+        enable_docs: Serve Swagger/OpenAPI (set False in production).
 
     Returns:
         FastAPI: The configured application.
@@ -95,7 +240,7 @@ def create_app(
 
     @asynccontextmanager
     async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-        """Enter engine resources and ensure the job schema.
+        """Enter engine resources, recover jobs, and run the queue worker.
 
         Args:
             app: The application.
@@ -103,16 +248,50 @@ def create_app(
         Yields:
             None: Control while the app is serving.
         """
+        if startup_hook is not None:
+            await startup_hook()
         setup = getattr(engine, "setup", None)
         if setup is not None:
             await setup()
         ensure = getattr(jobs, "ensure_schema", None)
         if ensure is not None:
             await ensure()
-        yield
-        close = getattr(engine, "close", None)
-        if close is not None:
-            await close()
+        ensure_limiter = getattr(limiter, "ensure_schema", None)
+        if ensure_limiter is not None:
+            try:
+                await asyncio.to_thread(ensure_limiter)
+            except Exception:  # noqa: BLE001 - the shared limiter fails open at request time
+                logger.exception("rate limiter schema setup failed")
+        try:
+            recovered = await jobs.recover_stale(stale_after_seconds=job_stale_seconds, max_attempts=job_max_attempts)
+            if recovered:
+                logger.warning("recovered %d stale job(s) on startup", recovered)
+        except Exception:  # noqa: BLE001 - readiness will surface a broken store
+            logger.exception("startup job recovery failed")
+        stop = asyncio.Event()
+        worker = asyncio.create_task(
+            _worker_loop(
+                engine,
+                jobs,
+                max_concurrent=max(1, max_concurrent_jobs),
+                timeout_seconds=job_timeout_seconds,
+                poll_seconds=max(_POLL_FLOOR_SECONDS, job_poll_seconds),
+                stale_seconds=job_stale_seconds,
+                max_attempts=job_max_attempts,
+                stop=stop,
+            ),
+            name="service-worker",
+        )
+        try:
+            yield
+        finally:
+            stop.set()
+            worker.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await worker
+            close = getattr(engine, "close", None)
+            if close is not None:
+                await close()
 
     app = FastAPI(
         title="Knowledge Engine",
@@ -124,7 +303,7 @@ def create_app(
     )
     app.state.engine = engine
     app.state.jobs = jobs
-    limiter = RateLimiter(rate_limit_per_minute)
+    limiter = rate_limiter if rate_limiter is not None else RateLimiter(rate_limit_per_minute)
 
     async def _check(authorization: str | None, allowed: tuple[str | None, ...]) -> None:
         """Reject a request whose bearer token is not in ``allowed``.
@@ -134,11 +313,20 @@ def create_app(
             allowed: Accepted tokens (``None`` entries are ignored).
 
         Raises:
-            HTTPException: 401 when the token is missing or wrong.
+            HTTPException: 401 when the token is missing or wrong, 503 when the
+                server has no auth configured and anonymous access is disabled.
         """
-        valid = {f"Bearer {token}" for token in allowed if token}
-        if valid and authorization not in valid:
+        valid = [token for token in allowed if token]
+        if not valid:
+            if allow_anonymous:
+                return
+            raise HTTPException(status_code=503, detail="authentication is not configured")
+        if authorization is None:
             raise HTTPException(status_code=401, detail="missing or invalid bearer token")
+        provided = authorization.encode("utf-8")
+        if any(hmac.compare_digest(provided, f"Bearer {token}".encode()) for token in valid):
+            return
+        raise HTTPException(status_code=401, detail="missing or invalid bearer token")
 
     async def require_token(authorization: str | None = Header(default=None)) -> None:
         """Require the write token (mutating routes).
@@ -157,19 +345,28 @@ def create_app(
         await _check(authorization, (api_token, read_token))
 
     async def throttle(request: Request) -> None:
-        """Reject requests over the per-key sliding-window rate limit.
+        """Reject requests over the per-key rate limit.
 
         Args:
-            request: The incoming request (keyed on the bearer token or host).
+            request: The incoming request (keyed on the hashed bearer token or host).
 
         Raises:
             HTTPException: 429 when the caller exceeds the limit.
         """
         if not limiter.enabled:
             return
-        key = request.headers.get("authorization") or (request.client.host if request.client else "unknown")
-        if not limiter.allow(key):
-            retry_after = str(max(1, math.ceil(limiter.retry_after(key))))
+        key = _caller_id(request)
+        try:
+            allowed = await asyncio.to_thread(limiter.allow, key)
+        except Exception:  # noqa: BLE001 - a limiter outage must not block work
+            logger.exception("rate limiter failed open")
+            return
+        if not allowed:
+            try:
+                retry = await asyncio.to_thread(limiter.retry_after, key)
+            except Exception:  # noqa: BLE001 - Retry-After is advisory
+                retry = 60.0
+            retry_after = str(max(1, math.ceil(retry)))
             raise HTTPException(
                 status_code=429,
                 detail="rate limit exceeded",
@@ -197,7 +394,7 @@ def create_app(
 
     @app.get("/readiness", response_model=ReadinessReport)
     async def readiness() -> ReadinessReport:
-        """Readiness: Supabase buckets + DB reachable.
+        """Readiness: DB, auth, migrations, storage, and providers.
 
         Returns:
             ReadinessReport: The readiness result.
@@ -210,16 +407,32 @@ def create_app(
         response_model=ResearchAccepted,
         dependencies=[Depends(require_token), Depends(throttle)],
     )
-    async def research(req: ResearchRequest, background: BackgroundTasks) -> ResearchAccepted:
-        """Accept a research run and return a job id (202).
+    async def research(request: Request, req: ResearchRequest) -> ResearchAccepted:
+        """Queue a research run and return a job id (202).
 
         Args:
+            request: Incoming request (caller identity for quotas).
             req: The research request.
-            background: FastAPI background task queue.
 
         Returns:
             ResearchAccepted: The accepted job id + status.
+
+        Raises:
+            HTTPException: 429 when the queue or the caller's active-job cap is full.
         """
+        caller = _caller_id(request)
+        if max_queued_jobs > 0 and await jobs.count_queued() >= max_queued_jobs:
+            raise HTTPException(
+                status_code=429,
+                detail="job queue is full",
+                headers={"Retry-After": "30"},
+            )
+        if max_active_jobs_per_caller > 0 and await jobs.count_active(caller=caller) >= max_active_jobs_per_caller:
+            raise HTTPException(
+                status_code=429,
+                detail="caller job limit reached",
+                headers={"Retry-After": "30"},
+            )
         task_id = uuid.uuid4().hex
         record = JobRecord(
             task_id=task_id,
@@ -227,9 +440,10 @@ def create_app(
             thread_id=req.thread_id or task_id,
             query=req.query,
             workflow=req.workflow,
+            settings=req.settings.model_dump(mode="json", exclude_none=True) if req.settings else None,
+            caller=caller,
         )
         await jobs.create(record)
-        background.add_task(_run_job, engine, jobs, record, req.settings, job_timeout_seconds)
         return ResearchAccepted(task_id=task_id, status=record.status)
 
     @app.get(

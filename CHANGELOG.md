@@ -28,6 +28,16 @@ All notable changes to this project are documented here. The format follows
   Render service.
 - **Env cutover switches** wired into `ResearchEngine` (`CHECKPOINTER_KIND`,
   `STORE_KIND`, `ARTIFACT_STORE_KIND`, `BODY_STORE_KIND`, `WIKI_STORE_KIND`).
+- **Durable job queue**: `/research` persists `settings`/`caller` and an
+  in-process worker claims jobs atomically (`FOR UPDATE SKIP LOCKED`), recovers
+  abandoned claims on startup and every 60 s, and requeues in-flight jobs on
+  graceful shutdown. Bounded by `MAX_CONCURRENT_JOBS`, `MAX_QUEUED_JOBS`,
+  `MAX_ACTIVE_JOBS_PER_CALLER`, and `JOB_MAX_ATTEMPTS`.
+- **Shared rate limiter**: `PostgresRateLimiter` (fixed window, database clock)
+  replaces the process-local slider when `DATABASE_URL` is set; the in-process
+  limiter now prunes expired keys and caps tracked keys.
+- **Automatic migrations**: `AUTO_MIGRATE=true` applies `supabase/migrations` at
+  boot; `/readiness` reports pending migrations and missing auth/providers.
 
 ### Changed
 
@@ -36,6 +46,8 @@ All notable changes to this project are documented here. The format follows
 - `/wiki/query` and `/result` require a (read) token; `/research` and wiki
   mutations require the write token.
 - The wiki store is built once per engine and closed on `engine.close()`.
+- `README.md` and `docs/deploy-render.md` now match the code: `/result` and
+  `/wiki/query` require a (read) token, and production serves `/docs` disabled.
 
 ### Fixed
 
@@ -55,6 +67,17 @@ All notable changes to this project are documented here. The format follows
 
 ### Security
 
+- **Auth fails closed**: with no `API_TOKEN` (and no explicit local-only
+  `ALLOW_ANONYMOUS=true`), data routes return 503 instead of silently allowing
+  anonymous callers; token checks use `hmac.compare_digest`. `/readiness`
+  reports `auth=false`.
+- **No raw tokens as keys**: bearer tokens are SHA-256 hashed before use as
+  rate-limit/quota keys, so the Postgres limiter table and job rows never store
+  credentials.
+- **`/wiki/ingest` path containment**: article paths must resolve inside
+  `store_root`; traversal/absolute escapes are rejected with 404.
+- Swagger/OpenAPI now defaults to disabled in the service (`ENABLE_DOCS=false`)
+  and is explicitly disabled in the production blueprint.
 - Reviewed the Dependabot finding **GHSA-8mgp-746c-j5xp** (`nltk` ≤ 3.10.3, a
   transitive dependency of the optional `scrape` extra via crawl4ai). No patched
   release exists yet; the package is not installed in the production image
