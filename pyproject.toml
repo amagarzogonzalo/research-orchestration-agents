@@ -42,11 +42,16 @@ dev = [
     "ruff>=0.6",
     "mypy>=1.11",
     "pre-commit>=3.7",
-    "pydoclint>=0.3,<1",
     "tach>=0.30",
-    # NOTE: semgrep is intentionally NOT a venv dependency (it pins
-    # conflicting opentelemetry/mcp versions). It runs isolated via
-    # `uvx semgrep`, the pre-commit hook, and CI (pipx). See Makefile `semgrep`.
+    # NOTE: pydoclint and semgrep are intentionally NOT venv dependencies.
+    # -- pydoclint's dep `docstring-parser-fork` ships the same
+    #    `docstring_parser` module as instructor's `docstring-parser`; with
+    #    both installed, install order decides whether `DocstringYields`
+    #    imports (CI lost the race and the typecheck crashed). It runs
+    #    isolated via `uvx --from pydoclint==0.11.0` (pre-commit + CI).
+    # -- semgrep pins conflicting opentelemetry/mcp versions. It runs
+    #    isolated via `uvx semgrep`, the pre-commit hook, and CI (pipx).
+    #    See Makefile `semgrep`.
     "langgraph-checkpoint-conformance>=0.0.2",
 ]
 supabase = [

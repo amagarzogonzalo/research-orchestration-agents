@@ -4,10 +4,8 @@ name: Security
 # review, container lint/build/scan (hadolint + Trivy), and OpenSSF Scorecard.
 # Secret scanning lives in ci.yml (runs on every push/PR).
 #
-# NOTE (private repo): CodeQL and Scorecard require a public repository (or
-# GitHub Advanced Security). Until this repo is public they run with
-# `continue-on-error` so they never block a PR, but findings still upload as
-# SARIF. Remove those `continue-on-error` lines when the repo is made public.
+# The repo is public: CodeQL, Scorecard, and dependency review run for real
+# (no `continue-on-error` escape hatches).
 on:
   pull_request:
   push:
@@ -22,7 +20,6 @@ jobs:
   codeql:
     name: CodeQL (SAST)
     runs-on: ubuntu-latest
-    continue-on-error: true # see file header: needs a public repo / GHAS
     permissions:
       contents: read
       actions: read
@@ -47,7 +44,9 @@ jobs:
         run: uv lock --check
       - name: Audit the locked runtime dependency set
         run: |
-          uv export --frozen --no-dev --format requirements-txt > requirements.audit.txt
+          # --no-emit-project: pip-audit cannot install the editable project
+          # line ("no single file to hash"); audit the third-party set only.
+          uv export --frozen --no-dev --no-emit-project --format requirements-txt > requirements.audit.txt
           uvx pip-audit -r requirements.audit.txt --desc
           # Only ever add `--ignore-vuln <ID>` with a justification comment for
           # an audited false positive; never to silence a reachable CVE.
@@ -75,15 +74,17 @@ jobs:
         with:
           dockerfile: Dockerfile
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
-      - name: Build the image (SBOM + provenance)
+      - name: Build the image (load for local scan)
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           push: false
+          # load=true is required for the Trivy scan below, but the docker
+          # exporter cannot export the manifest list that SBOM/provenance
+          # attestations produce. Attested builds belong on a registry/OCI
+          # output (see the Dockerfile header for the command).
           load: true
           tags: knowledge-engine:${{ github.sha }}
-          sbom: true
-          provenance: true
       - name: Scan the image (fail on fixed HIGH/CRITICAL)
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
@@ -97,7 +98,6 @@ jobs:
     name: OpenSSF Scorecard
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    continue-on-error: true # see file header: publishing needs a public repo
     permissions:
       contents: read
       actions: read

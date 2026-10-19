@@ -48,7 +48,7 @@ allowed); keep lines <= 119 cols; never touch `# type: ignore[...]` / `# noqa:`.
 
 ## Loop
 
-1. `./.venv/Scripts/pydoclint.exe --style google --arg-type-hints-in-docstring 0 --skip-checking-raises 0 --skip-checking-short-docstrings 0 --skip-checking-private-functions 0 --allow-init-docstring 1 --check-arg-order 1 --check-return-types 1 --check-class-attributes 1 src/knowledge_engine`
+1. `uvx --from pydoclint==0.11.0 pydoclint --style google --arg-type-hints-in-docstring 0 --skip-checking-raises 0 --skip-checking-short-docstrings 0 --skip-checking-private-functions 0 --allow-init-docstring 1 --check-arg-order 1 --check-return-types 1 --check-class-attributes 1 src/knowledge_engine`
 2. Fix the reported batch (docs only, no logic).
 3. Repeat until `No violations`.
 4. `make lint && make types` — docstring lines must still pass ruff + mypy.

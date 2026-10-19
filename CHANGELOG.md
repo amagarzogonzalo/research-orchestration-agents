@@ -46,6 +46,12 @@ All notable changes to this project are documented here. The format follows
 - The Postgres wiki v2 integration suite now skips cleanly when the optional
   `store` extra is absent, so `make check` is green on a fresh clone using the
   documented `make install` (dev-only) environment.
+- CI on the now-public repo: `pydoclint` runs isolated via `uvx` (the dev venv
+  no longer carries two distributions of the `docstring_parser` module, a
+  nondeterministic import clash); the container job no longer requests
+  SBOM/provenance attestations the docker exporter cannot load; the dependency
+  audit excludes the editable project line; CodeQL and Scorecard lose their
+  `continue-on-error` escape hatches.
 
 ### Security
 
