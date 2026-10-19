@@ -26,11 +26,14 @@ import math
 import uuid
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
-from typing import Any
+from pathlib import Path
+from typing import Any, Literal
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+from fastapi.responses import PlainTextResponse
 
 from knowledge_engine.core.exceptions import WikiArticleMissing
+from knowledge_engine.schemas.ids import validate_wiki_slug
 from knowledge_engine.schemas.settings import RunSettings
 from knowledge_engine.service.jobs import JobStore
 from knowledge_engine.service.rate_limit import RateLimiter
@@ -75,6 +78,19 @@ def _caller_id(request: Request) -> str:
         return _digest(authorization)
     host = request.client.host if request.client else "unknown"
     return _digest(f"ip:{host}")
+
+
+def _artifact_store(engine: Any) -> Any | None:
+    """Return the engine's artifact store when one is configured.
+
+    Args:
+        engine: The research engine facade (or a test double).
+
+    Returns:
+        Any | None: An ``ArtifactStorePort``-like object, or None.
+    """
+    store = getattr(engine, "store", None)
+    return getattr(store, "artifacts", None)
 
 
 async def _safe_update(jobs: JobStore, task_id: str, **fields: Any) -> None:
@@ -466,8 +482,86 @@ def create_app(
             raise HTTPException(status_code=404, detail="unknown task id")
         return record
 
+    @app.get(
+        "/result/{task_id}/artifact",
+        dependencies=[Depends(require_read_token), Depends(throttle)],
+    )
+    async def result_artifact(
+        task_id: str,
+        format: Literal["markdown", "json"] = Query(default="markdown"),
+    ) -> Any:
+        """Return a completed job's rendered artifact.
+
+        Args:
+            task_id: Job id.
+            format: ``markdown`` (default) or ``json`` (article + sources).
+
+        Returns:
+            Any: A Markdown response or a JSON mapping.
+
+        Raises:
+            HTTPException: 404 for an unknown task/missing artifact, 409 when
+                the job has not completed.
+        """
+        record = await jobs.get(task_id)
+        if record is None:
+            raise HTTPException(status_code=404, detail="unknown task id")
+        if record.status != JobStatus.DONE:
+            raise HTTPException(status_code=409, detail=f"job is {record.status.value}, not done")
+        artifacts = _artifact_store(engine)
+        if artifacts is None:
+            raise HTTPException(status_code=404, detail="artifact store is not available")
+        article = await asyncio.to_thread(artifacts.get_article, record.thread_id)
+        if article is None:
+            raise HTTPException(status_code=404, detail="artifact not found")
+        if format == "markdown":
+            return PlainTextResponse(article, media_type="text/markdown")
+        sources = await asyncio.to_thread(artifacts.get_sources, record.thread_id)
+        output_path = (record.result or {}).get("output_path")
+        return {
+            "task_id": record.task_id,
+            "thread_id": record.thread_id,
+            "article": article,
+            "sources": [source.model_dump(mode="json") for source in sources],
+            "output_path": output_path,
+        }
+
+    @app.get(
+        "/result/{task_id}/sources",
+        dependencies=[Depends(require_read_token), Depends(throttle)],
+    )
+    async def result_sources(task_id: str) -> dict[str, Any]:
+        """Return a completed job's persisted sources.
+
+        Args:
+            task_id: Job id.
+
+        Returns:
+            dict[str, Any]: ``{"task_id", "thread_id", "sources"}``.
+
+        Raises:
+            HTTPException: 404 for an unknown task, 409 when not done.
+        """
+        record = await jobs.get(task_id)
+        if record is None:
+            raise HTTPException(status_code=404, detail="unknown task id")
+        if record.status != JobStatus.DONE:
+            raise HTTPException(status_code=409, detail=f"job is {record.status.value}, not done")
+        artifacts = _artifact_store(engine)
+        if artifacts is None:
+            raise HTTPException(status_code=404, detail="artifact store is not available")
+        sources = await asyncio.to_thread(artifacts.get_sources, record.thread_id)
+        return {
+            "task_id": record.task_id,
+            "thread_id": record.thread_id,
+            "sources": [source.model_dump(mode="json") for source in sources],
+        }
+
     @app.get("/wiki/query", dependencies=[Depends(require_read_token), Depends(throttle)])
-    async def wiki_query(q: str = Query(...), limit: int = 3) -> dict[str, Any]:
+    async def wiki_query(
+        q: str = Query(..., min_length=1, max_length=2000),
+        limit: int = Query(default=3, ge=1, le=20),
+    ) -> dict[str, Any]:
         """Answer from the compiled wiki with no live call (token-gated).
 
         Args:
@@ -475,10 +569,32 @@ def create_app(
             limit: Maximum hits.
 
         Returns:
-            dict[str, Any]: ``{"hits": [...]}``.
+            dict[str, Any]: ``{"hits": [...]}`` without server-local paths.
         """
         hits = await engine.wiki_query(q, limit=limit)
-        return {"hits": [hit.model_dump() for hit in hits]}
+        return {"hits": [hit.model_dump(exclude={"path"}) for hit in hits]}
+
+    @app.get("/wiki/page/{slug}", dependencies=[Depends(require_read_token), Depends(throttle)])
+    async def wiki_page(slug: str) -> PlainTextResponse:
+        """Read one compiled wiki page as Markdown.
+
+        Args:
+            slug: Kebab-case page slug.
+
+        Returns:
+            PlainTextResponse: The page Markdown.
+
+        Raises:
+            HTTPException: 404 when the page does not exist, 422 for a bad slug.
+        """
+        try:
+            validate_wiki_slug(slug)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        text = await engine.wiki_page(slug)
+        if text is None:
+            raise HTTPException(status_code=404, detail="wiki page not found")
+        return PlainTextResponse(text, media_type="text/markdown")
 
     @app.post("/wiki/ingest", dependencies=[Depends(require_token), Depends(throttle)])
     async def wiki_ingest(req: WikiIngestRequest) -> dict[str, Any]:
@@ -493,10 +609,28 @@ def create_app(
         Raises:
             HTTPException: 404 when the referenced article does not exist.
         """
+        article_path = req.article_path
+        temp_path: Path | None = None
+        if article_path is None:
+            artifacts = _artifact_store(engine)
+            if artifacts is None:
+                raise HTTPException(status_code=404, detail="artifact store is not available")
+            article = await asyncio.to_thread(artifacts.get_article, req.thread_id)
+            if article is None:
+                raise HTTPException(status_code=404, detail="artifact for this thread was not found")
+            root = Path(getattr(engine, "store_root", "research_store"))
+            ingest_dir = root / "_api_ingest"
+            ingest_dir.mkdir(parents=True, exist_ok=True)
+            temp_path = ingest_dir / f"{uuid.uuid4().hex}.md"
+            temp_path.write_text(article, encoding="utf-8")
+            article_path = str(temp_path)
         try:
-            ingested = await engine.wiki_ingest(req.thread_id, req.query, req.article_path)
+            ingested = await engine.wiki_ingest(req.thread_id, req.query, article_path)
         except WikiArticleMissing as exc:
             raise HTTPException(status_code=404, detail=str(exc)) from exc
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
         return ingested.model_dump()
 
     @app.post("/wiki/lint", dependencies=[Depends(require_token), Depends(throttle)])

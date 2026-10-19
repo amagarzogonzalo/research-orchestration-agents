@@ -21,10 +21,12 @@ the `langchain-ai/langgraph` repository).
 | `langchain[mcp]` | `>=1.4,<2` | `MCPAdapter` — discover FastMCP tools on in-process servers |
 | `mcp` | `>=2.1,<3` | MCP server SDK (FastMCP) |
 
-> **Rule:** the only *checkpoint* persistence abstraction is our own
-> `FileCheckpointer` (`store/file_checkpointer.py`) — JSON files under
-> `research_store/checkpoints/`. No SQLite, no Postgres, no Redis for
-> checkpoint state. Copy the folder, move the state.
+> **Checkpoint persistence:** `memory` (tests), `file`
+> (`FileCheckpointer`, `store/file_checkpointer.py` — JSON under
+> `research_store/checkpoints/`), or `postgres`
+> (`AsyncPostgresSaver`, opt-in; production uses it via `DATABASE_URL`).
+> No SQLite and no Redis. The file kind stays the portable default; the cloud
+> kind is selected by `CHECKPOINTER_KIND=postgres`.
 >
 > **Wiki layer (files-first, ports-only):** the compiled wiki lives under
 > `<store_root>/wiki` as plain markdown (sources/concepts/entities/queries/

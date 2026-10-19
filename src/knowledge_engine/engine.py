@@ -520,6 +520,18 @@ class ResearchEngine:
         hits: list[WikiHit] = await wiki.search_wiki(query, limit=limit)
         return hits
 
+    async def wiki_page(self, slug: str) -> str | None:
+        """Read one compiled wiki page as Markdown.
+
+        Args:
+            slug: Kebab-case page slug.
+
+        Returns:
+            str | None: Page text, or None when the page does not exist.
+        """
+        text: str | None = await self._wiki().read_page(slug)
+        return text
+
     async def wiki_ingest(self, thread_id: str, query: str, article_path: str) -> IngestResult:
         """File one rendered article into the wiki (HTTP service surface).
 

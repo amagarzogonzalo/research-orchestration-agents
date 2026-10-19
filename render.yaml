@@ -31,6 +31,8 @@ envVarGroups:
         value: "30"
       - key: JOB_TIMEOUT_SECONDS
         value: "900"
+      - key: JOBS_KIND
+        value: postgres
       - key: CLEANUP_AFTER_RUN
         value: "true"
       # Durable queue: one in-process worker, bounded depth, per-caller cap.
@@ -117,6 +119,8 @@ services:
       # Abort a run after this long; delete checkpoints after each run (500 MB).
       - key: JOB_TIMEOUT_SECONDS
         value: "900"
+      - key: JOBS_KIND
+        value: postgres
       - key: CLEANUP_AFTER_RUN
         value: "true"
       # Durable queue: one in-process worker, bounded depth, per-caller cap.

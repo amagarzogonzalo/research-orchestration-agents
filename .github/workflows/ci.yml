@@ -60,6 +60,8 @@ jobs:
       - run: uv run ruff format --check src tests
       - name: Module boundaries
         run: uv run tach check
+      - name: OpenAPI snapshot is current
+        run: uv run python bin/export_openapi.py --check
       - name: Custom security/correctness rules
         run: uvx semgrep --config .semgrep/rules/ --metrics=off --error src tests
 

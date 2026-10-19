@@ -28,6 +28,7 @@ from typing import Any
 
 from knowledge_engine.core.ports import ArtifactStorePort
 from knowledge_engine.schemas.artifact import KnowledgeArtifact
+from knowledge_engine.schemas.ids import validate_thread_id
 from knowledge_engine.schemas.source import SourceRecord
 
 logger = logging.getLogger(__name__)
@@ -59,13 +60,14 @@ class ResearchStore:
         """Return the directory for a run, creating parents if needed.
 
         Args:
-            thread_id: Run thread identifier.
+            thread_id: Run thread identifier (validated against the safe id
+                pattern before it becomes a directory name).
 
         Returns:
             Path: Resolved path.
-
         """
-        path = self.root / thread_id
+        safe_id = validate_thread_id(thread_id)
+        path = self.root / safe_id
         path.mkdir(parents=True, exist_ok=True)
         return path
 

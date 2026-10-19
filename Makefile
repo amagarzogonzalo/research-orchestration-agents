@@ -3,6 +3,7 @@
         bench bench-accept bench-check wikibench wikibench-accept wikibench-check \
         retention retention-apply \
         wiki-db-up wiki-db-down wiki-files-check \
+        openapi openapi-check \
         compress-on compress-off compress-savings compress-help
 
 help:
@@ -11,7 +12,7 @@ help:
 install:            ## install deps into .venv (uv)
 	uv sync --extra dev
 
-serve:              ## run the HTTP service locally (uvicorn; Swagger at /docs)
+serve:              ## run the HTTP service locally (uvicorn; ENABLE_DOCS=true for /docs)
 	uv run python bin/api_run.py
 
 # ---- the gate -------------------------------------------------------------
@@ -50,6 +51,12 @@ dup:                ## copy/paste detection (jscpd, advisory; needs npx network)
 
 context:            ## what the always-on prompt costs, enforced
 	uv run python bin/context_budget.py
+
+openapi:            ## regenerate docs/openapi.json (no server/DB)
+	uv run python bin/export_openapi.py
+
+openapi-check:      ## fail when the committed OpenAPI snapshot is stale
+	uv run python bin/export_openapi.py --check
 
 bench:              ## offline perf baseline: ram/checkpoint/supersteps (fakes, no network)
 	uv run python -m knowledge_engine.scripts.bench
@@ -96,7 +103,7 @@ wiki-db-down:       ## stop the scratch Postgres
 wiki-files-check:   ## read-only files health check (unreferenced/missing-body)
 	uv run python bin/wiki_files_check.py
 
-check: lint types arch semgrep secrets agents context coverage evals bench-check wikibench-check   ## everything. This is the gate.
+check: lint types arch semgrep secrets agents context openapi-check coverage evals bench-check wikibench-check   ## everything. This is the gate.
 	@echo green
 
 # ---- models ---------------------------------------------------------------

@@ -31,6 +31,7 @@ from langgraph.checkpoint.base import (
 )
 from langgraph.checkpoint.serde.jsonplus import JsonPlusSerializer
 
+from knowledge_engine.schemas.ids import validate_thread_id
 from knowledge_engine.schemas.source import BodyRef, DocumentBody, FetchMethod, SearchSource, SourceRecord
 from knowledge_engine.schemas.wiki import WikiVerdict
 
@@ -144,13 +145,14 @@ class FileCheckpointer(BaseCheckpointSaver[Any]):
         """Return the thread directory.
 
         Args:
-            thread_id: Run thread identifier.
+            thread_id: Run thread identifier (validated against the safe id
+                pattern before it becomes a directory name).
 
         Returns:
             Path: Resolved path.
-
         """
-        path = self.root / thread_id
+        safe_id = validate_thread_id(thread_id)
+        path = self.root / safe_id
         path.mkdir(parents=True, exist_ok=True)
         return path
 

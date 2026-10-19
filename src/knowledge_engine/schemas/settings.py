@@ -11,6 +11,12 @@ from __future__ import annotations
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from knowledge_engine.schemas.decomposition import MAX_DECOMPOSE_DEPTH, MAX_SUBQUERIES
+from knowledge_engine.schemas.extraction import MAX_SYNTHESIS_ITERATIONS
+
+MAX_WIKI_PAGES_PER_INGEST = 20
+"""Upper bound on concept/entity pages written by one wiki ingest."""
+
 
 class RunSettings(BaseModel):
     """Per-run override knobs (everything optional = use the constants).
@@ -32,13 +38,13 @@ class RunSettings(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
-    max_depth: int | None = Field(default=None, ge=0)
-    max_subqueries: int | None = Field(default=None, ge=1)
-    max_iterations: int | None = Field(default=None, ge=0)
+    max_depth: int | None = Field(default=None, ge=0, le=MAX_DECOMPOSE_DEPTH)
+    max_subqueries: int | None = Field(default=None, ge=1, le=MAX_SUBQUERIES)
+    max_iterations: int | None = Field(default=None, ge=0, le=MAX_SYNTHESIS_ITERATIONS)
     wiki_extract: bool | None = None
     wiki_save_answers: bool | None = None
     thesis: str | None = Field(default=None, max_length=300)
-    max_wiki_pages: int | None = Field(default=None, ge=1)
+    max_wiki_pages: int | None = Field(default=None, ge=1, le=MAX_WIKI_PAGES_PER_INGEST)
 
 
-__all__ = ["RunSettings"]
+__all__ = ["MAX_WIKI_PAGES_PER_INGEST", "RunSettings"]

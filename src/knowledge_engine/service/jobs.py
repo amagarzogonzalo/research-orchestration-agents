@@ -540,4 +540,27 @@ class PostgresJobStore(JobStore):
         return int(row[0]) if row is not None else 0
 
 
-__all__ = ["InMemoryJobStore", "JobStore", "PostgresJobStore"]
+def build_job_store(kind: str, conn_string: str) -> JobStore:
+    """Build the job store for an explicit kind.
+
+    Args:
+        kind: ``memory`` or ``postgres``.
+        conn_string: Postgres DSN (required for ``postgres``).
+
+    Returns:
+        JobStore: The configured store.
+
+    Raises:
+        ValueError: For an unknown kind or a missing Postgres DSN.
+    """
+    normalized = kind.strip().lower()
+    if normalized == "memory":
+        return InMemoryJobStore()
+    if normalized == "postgres":
+        if not conn_string:
+            raise ValueError("JOBS_KIND=postgres requires DATABASE_URL")
+        return PostgresJobStore(conn_string)
+    raise ValueError(f"unknown JOBS_KIND: {kind!r} (use 'memory' or 'postgres')")
+
+
+__all__ = ["InMemoryJobStore", "JobStore", "PostgresJobStore", "build_job_store"]

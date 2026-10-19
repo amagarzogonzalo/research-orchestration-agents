@@ -65,8 +65,27 @@ All notable changes to this project are documented here. The format follows
   audit excludes the editable project line; CodeQL and Scorecard lose their
   `continue-on-error` escape hatches.
 
+### Added
+
+- **External API surface**: `/result/{task_id}/artifact` (Markdown or JSON),
+  `/result/{task_id}/sources`, and `/wiki/page/{slug}`; `/wiki/ingest` can now
+  resolve a run's artifact from its `thread_id` instead of requiring a
+  server-local path.
+- **`docs/api.md`** with curl/Python cookbook, auth, limits, errors, and local /
+  Docker / Render commands; committed `docs/openapi.json` + `make openapi`
+  (checked in `make check`).
+- **`JOBS_KIND=memory|postgres`** for an explicit local API (no database) while
+  keeping Postgres as the production default.
+- **Offline API benchmark**: `uv run python bin/api_bench.py`.
+
 ### Security
 
+- **Thread-id validation**: `thread_id` must match
+  `^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$` at the API boundary and in
+  `ResearchStore`/`FileCheckpointer`, preventing directory traversal.
+- **Budget caps**: `RunSettings` now enforces upper bounds matching
+  `MAX_DECOMPOSE_DEPTH`, `MAX_SUBQUERIES`, `MAX_SYNTHESIS_ITERATIONS`, and
+  `MAX_WIKI_PAGES_PER_INGEST`; request/query/wiki lengths are capped.
 - **Auth fails closed**: with no `API_TOKEN` (and no explicit local-only
   `ALLOW_ANONYMOUS=true`), data routes return 503 instead of silently allowing
   anonymous callers; token checks use `hmac.compare_digest`. `/readiness`

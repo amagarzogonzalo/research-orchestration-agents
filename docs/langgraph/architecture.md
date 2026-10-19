@@ -254,7 +254,7 @@ orchestration/
 │   └── render.py       RenderNode(store)             # output artifact
 ├── graphs.py        WorkflowRegistry: research/qa/summary graphs
 │                   StateGraph + set_node_defaults + retry/timeout/error_handler
-├── checkpoint.py    build_checkpointer("memory"|"sqlite"|"postgres")  # ONLY persistence abstraction
+├── checkpoint.py    build_checkpointer("memory"|"file"|"postgres")   # ONLY persistence abstraction
 └── runtime.py       GraphRuntime.run(workflow, thread_id, query) -> GraphState
                     (single external surface; drives astream_events internally)
 ```

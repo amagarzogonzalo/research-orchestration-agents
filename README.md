@@ -79,7 +79,9 @@ Full delivery report: `docs/plans/0027-0030`, plan: `docs/LLM_WIKI.md`.
 
 ## Cloud service (Render + Supabase)
 
-Live: <https://research-orchestration-agents.onrender.com> (Swagger at `/docs`).
+Live: <https://research-orchestration-agents.onrender.com>. Swagger is disabled in
+production; use the [HTTP API guide](docs/api.md) or the committed
+[OpenAPI snapshot](docs/openapi.json).
 
 The library also ships a zero-cost HTTP facade (`src/knowledge_engine/service/`,
 issue #30) so the research + wiki run fully online:
@@ -90,8 +92,11 @@ issue #30) so the research + wiki run fully online:
 | GET | `/readiness` | none | DB + Storage + auth + migrations + provider checks |
 | POST | `/research` | bearer | 202 → poll `/result/{id}`; `workflow` = research/qa/summary/deep |
 | GET | `/result/{task_id}` | bearer | durable job status (Postgres `service_jobs`) |
+| GET | `/result/{task_id}/artifact` | bearer | rendered Markdown or JSON (`?format=json`) |
+| GET | `/result/{task_id}/sources` | bearer | persisted source records |
 | GET | `/wiki/query?q=&limit=` | bearer | answer from the compiled wiki, zero live calls |
-| POST | `/wiki/ingest` | bearer | re-ingest a raw run (path must be under the store root) |
+| GET | `/wiki/page/{slug}` | bearer | read one compiled wiki page |
+| POST | `/wiki/ingest` | bearer | re-ingest a run by `thread_id` (or a confined path) |
 | POST | `/wiki/lint` | bearer | deterministic vault lint |
 
 Config is env-only — the cutover switches (`CHECKPOINTER_KIND`, `STORE_KIND`,
@@ -219,6 +224,7 @@ too nested to map robustly; same records arrive via OpenAlex), key-gated APIs
 | I want to… | Read |
 |---|---|
 | Get running in ~2 minutes | [`docs/quickstart.md`](docs/quickstart.md) |
+| Use the HTTP API (curl/Python) | [`docs/api.md`](docs/api.md) |
 | Understand the architecture | [`docs/plans/`](docs/plans/0000-overview.md), [`SPEC.md`](SPEC.md) |
 | Deploy my own instance | [`docs/deploy-render.md`](docs/deploy-render.md) |
 | Understand the wiki layer | [`docs/LLM_WIKI.md`](docs/LLM_WIKI.md) |

@@ -35,6 +35,18 @@ def test_bounds_validated() -> None:
         RunSettings(max_subqueries=0)
 
 
+def test_upper_bounds_prevent_budget_bypass() -> None:
+    """A caller cannot raise a cap above the shared budget constants."""
+    with pytest.raises(ValidationError):
+        RunSettings(max_depth=4)
+    with pytest.raises(ValidationError):
+        RunSettings(max_subqueries=8)
+    with pytest.raises(ValidationError):
+        RunSettings(max_iterations=3)
+    with pytest.raises(ValidationError):
+        RunSettings(max_wiki_pages=21)
+
+
 def test_model_dump_roundtrip() -> None:
     """The engine writes settings.model_dump() into the channel."""
     settings = RunSettings(
