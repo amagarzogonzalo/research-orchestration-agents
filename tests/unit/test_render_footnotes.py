@@ -162,3 +162,30 @@ def test_truncated_marker_fragment_is_removed() -> None:
     out = _normalize_citations(notes, [rec])
     assert "rs.3.rs" not in out
     assert "[^arxiv:2309.00071]: YaRN" in out
+
+
+def test_doubled_marker_brackets_are_unwrapped() -> None:
+    """Wikilink-wrapped marker groups collapse to plain markers (audit defect)."""
+    recs = [_src("arxiv:2504.06214", "One"), _src("arxiv:2509.00001", "Two")]
+    notes = "Claim [[^arxiv:2504.06214] [^arxiv:2509.00001]]."
+    out = _normalize_citations(notes, recs)
+    assert "[[" not in out
+    assert "[^arxiv:2504.06214] [^arxiv:2509.00001]" in out
+    assert "[^arxiv:2504.06214]: One" in out
+
+
+def test_single_doubled_marker_is_unwrapped() -> None:
+    """A lone marker wrapped in double brackets still normalizes (audit defect)."""
+    rec = _src("arxiv:2504.06214", "One")
+    notes = "Claim [[^arxiv:2504.06214]]."
+    out = _normalize_citations(notes, [rec])
+    assert "[[" not in out
+    assert "[^arxiv:2504.06214]: One" in out
+
+
+def test_prose_wikilink_is_not_unwrapped() -> None:
+    """Genuine wikilinks in prose are left untouched."""
+    rec = _src("arxiv:1", "One")
+    notes = "See [[Comparison of retrieval methods]] for context."
+    out = _normalize_citations(notes, [rec])
+    assert "[[Comparison of retrieval methods]]" in out

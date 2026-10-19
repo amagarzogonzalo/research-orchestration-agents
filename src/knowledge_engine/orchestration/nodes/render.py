@@ -140,6 +140,7 @@ _BARE_CITE = re.compile(r"(?<![!\^])\[([^\[\]\n]+)\](?![\(:])")
 _DOUBLED_PREFIX = re.compile(r"((?:[a-z_]+):https?://)(?:\1)+")
 _DOUBLED_SCHEME = re.compile(r"(https?://)(?:\1)+")
 _BROKEN_FRAGMENT = re.compile(r"(?m)^\[\^[^\]\n]*(?=\n|$)\n?")
+_DOUBLED_MARKER_WRAP = re.compile(r"\[(\s*(?:\[\^[^\[\]\n]+\]\s*)+)\]")
 _CITATION_SCHEMES = frozenset(source.value for source in SearchSource) | {"doi", "osf", "pmc"}
 _ID_DOI = re.compile(r"^(?:doi:)?10\.\d{4,9}/")
 
@@ -164,6 +165,7 @@ def _normalize_citations(notes: str, provenance: list[SourceRecord]) -> str:
     titles = {s.id: (s.title or s.id) for s in provenance}
     known = _known_ids(provenance)
     body = _drop_broken_marker_fragments(notes)
+    body = _unwrap_doubled_marker_brackets(body)
     body = _collapse_doubled_prefixes(body)
     body = _rewrite_bare_citations(body, known, titles)
     body = _rewrite_multi_refs(body, known, titles)
@@ -218,6 +220,23 @@ def _drop_broken_marker_fragments(text: str) -> str:
         str: Text without unterminated ``[^`` fragments that occupy a line.
     """
     return _BROKEN_FRAGMENT.sub("", text)
+
+
+def _unwrap_doubled_marker_brackets(text: str) -> str:
+    """Unwrap ``[[...]]`` pairs that wrap one or more footnote markers.
+
+    The model sometimes wraps footnote markers in a wikilink-style double
+    bracket (``[[^a] [^b]]``), which renders as a broken wikilink plus raw
+    markers. Only brackets whose content is exclusively markers are unwrapped,
+    so genuine wikilinks in prose are left alone.
+
+    Args:
+        text: Article text.
+
+    Returns:
+        str: Text with marker-only double brackets collapsed to markers.
+    """
+    return _DOUBLED_MARKER_WRAP.sub(r"\1", text)
 
 
 def _looks_like_locator(text: str) -> bool:
