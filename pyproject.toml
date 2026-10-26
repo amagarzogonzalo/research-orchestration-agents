@@ -55,7 +55,7 @@ dev = [
     "langgraph-checkpoint-conformance>=0.0.2",
 ]
 supabase = [
-    "supabase>=2.32.0",
+    "supabase>=2.33.0",
 ]
 
 [project.hatch.build.targets.wheel]
